@@ -19,7 +19,7 @@ interface ChatSession {
 }
 
 const ChatsAdmin: React.FC = () => {
-  const API_BASE = import.meta.env.VITE_AWS_API_URL || "https://backend.gharsansar.store/api";
+  const API_BASE = import.meta.env.VITE_AWS_API_URL || "https://backend.gharsansar.website/api";
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");

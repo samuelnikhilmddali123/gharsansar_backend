@@ -8,20 +8,37 @@ const multer = require("multer");
 const app = express();
 const PORT = process.env.PORT || 5001;
 
+app.set("trust proxy", 1);
+
 app.use(cors({
-  origin: [
-    "http://localhost:3000",
-    "http://localhost:5173",
-    "https://gharsansar-ecommerce.vercel.app",
-    "https://www.gharsansar.store",
-    "https://gharsansar.store",
-    "https://gharsansar-3c8e3.web.app"
-  ],
+  origin: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   credentials: true
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// --- BACKEND STATUS & HEALTH ENDPOINTS ---
+app.get(["/", "/api", "/api/"], (req, res) => {
+  res.json({
+    status: "online",
+    service: "Ghar Sansar Backend API",
+    message: "Ghar Sansar Backend is running successfully on Cloudflare Tunnel",
+    endpoints: {
+      products: "/api/products",
+      categories: "/api/cms/categories",
+      homepage_layout: "/api/cms/homepage_layout",
+      collections: "/api/cms/collections",
+      storage_interior: "/api/storage/upload/interior",
+      storage_blog: "/api/storage/upload/blog"
+    },
+    timestamp: new Date().toISOString()
+  });
+});
+
+app.get("/api/health", (req, res) => {
+  res.json({ status: "healthy", uptime: process.uptime() });
+});
 
 // --- CMS ENDPOINTS ---
 app.get("/api/cms/homepage_layout", (req, res) => {
@@ -319,7 +336,7 @@ const enrichProductData = (item, idx) => {
 };
 
 // 1. Get Products (serves rewritten data with backend image URLs and realistic prices)
-app.get("/api/products", (req, res) => {
+app.get(["/api/products", "/products"], (req, res) => {
   try {
     // Read the primary categorized products.json first
     let productsPath = path.join(__dirname, "public", "products.json");
@@ -351,11 +368,10 @@ app.get("/api/products", (req, res) => {
         const items = sub[itemKey] || [];
 
         const updatedItems = items.map((item, idx) => {
-          // If image path is local relative, make it absolute to our backend
+          // Keep image path relative so it loads seamlessly across dev, tunnel, and production
           let imageUrl = item.image;
           if (imageUrl && imageUrl.startsWith("/")) {
-            const host = req.get('host') || `192.168.0.106:${PORT}`;
-            imageUrl = `${req.protocol}://${host}/products${imageUrl.replace(/^\/products/, "")}`;
+            imageUrl = `/products${imageUrl.replace(/^\/products/, "")}`;
           }
 
           // Enrich dynamically
@@ -600,8 +616,7 @@ app.get("/api/storage/upload/products", (req, res) => {
           
           let imageUrl = item.image || "";
           if (imageUrl && imageUrl.startsWith("/")) {
-            const host = req.get('host') || `192.168.0.106:${PORT}`;
-            imageUrl = `${req.protocol}://${host}/products${imageUrl.replace(/^\/products/, "")}`;
+            imageUrl = `/products${imageUrl.replace(/^\/products/, "")}`;
           }
 
           // Enrich dynamically

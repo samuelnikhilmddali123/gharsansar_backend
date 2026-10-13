@@ -29,7 +29,7 @@ const fixImageUrl = (url: string | File) => {
   if (!url) return "";
   if (url instanceof File) return URL.createObjectURL(url);
   let fixed = url.replace(/^https?:\/\/https?:\/\//, "https://").replace(/\s/g, "%20").replace(/([^:]\/)\/+/g, "$1");
-  if (fixed.startsWith("http://backend.gharsansar.store") || fixed.startsWith("http://lx70r6zsef")) {
+  if (fixed.startsWith("http://backend.gharsansar.website") || fixed.startsWith("http://lx70r6zsef")) {
     fixed = fixed.replace(/^http:/, "https:");
   }
   return fixed;
@@ -38,7 +38,7 @@ const fixImageUrl = (url: string | File) => {
 const ProductsAdmin: React.FC = () => {
   const API_BASE =
     import.meta.env.VITE_AWS_API_URL ||
-    "https://backend.gharsansar.store/api";
+    "https://backend.gharsansar.website/api";
 
   const [products, setProducts] = useState<Product[]>([]);
   const [categoriesData, setCategoriesData] = useState<Category[]>([]);

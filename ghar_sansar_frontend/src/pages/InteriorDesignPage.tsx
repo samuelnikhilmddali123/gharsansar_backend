@@ -7,7 +7,7 @@ import categoriesData from "../data/categories.json";
 
 const itemsPerPage = 12;
 const placeholderImage = "/images/placeholder.jpg";
-const API_BASE = import.meta.env.VITE_AWS_API_URL || "https://backend.gharsansar.store/api";
+const API_BASE = import.meta.env.VITE_AWS_API_URL || "https://backend.gharsansar.website/api";
 const BACKEND_STATIC_URL = API_BASE.replace(/\/api$/, "");
 
 const sanitizeImageUrl = (path?: string) => {

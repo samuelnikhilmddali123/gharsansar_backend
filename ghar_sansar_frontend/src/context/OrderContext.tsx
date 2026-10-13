@@ -68,7 +68,7 @@ export const useOrders = () => {
   return context;
 };
 
-const BACKEND_URL = import.meta.env.VITE_AWS_API_URL || "https://backend.gharsansar.store/api";
+const BACKEND_URL = import.meta.env.VITE_AWS_API_URL || "https://backend.gharsansar.website/api";
 
 export const OrderProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [orders, setOrders] = useState<Order[]>([]);

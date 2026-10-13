@@ -9,7 +9,7 @@ const fixImageUrl = (url: string | undefined) => {
     .replace(/^https?:\/\/https?:\/\//, "https://")
     .replace(/\s/g, "%20")
     .replace(/([^:]\/)\/+/g, "$1");
-  if (fixed.startsWith("http://backend.gharsansar.store") || fixed.startsWith("http://lx70r6zsef")) {
+  if (fixed.startsWith("http://backend.gharsansar.website") || fixed.startsWith("http://lx70r6zsef")) {
     fixed = fixed.replace(/^http:/, "https:");
   }
   return fixed;

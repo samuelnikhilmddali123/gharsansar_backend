@@ -8,6 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
+    "tunnel": "\"C:\\Program Files (x86)\\cloudflared\\cloudflared.exe\" tunnel --url http://localhost:5173",
     "cap:build": "npm run build && npx cap sync android",
     "cap:open": "npx cap open android"
   },

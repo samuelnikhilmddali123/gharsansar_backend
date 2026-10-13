@@ -22,7 +22,7 @@ const Home: React.FC = () => {
     const fetchInteriorCategories = async () => {
       try {
         let data = categoriesData;
-        const API_BASE = import.meta.env.VITE_AWS_API_URL || "https://backend.gharsansar.store/api";
+        const API_BASE = import.meta.env.VITE_AWS_API_URL || "https://backend.gharsansar.website/api";
         try {
           const res = await axios.get(`${API_BASE}/storage/upload/interior`);
           if (res.data && res.data.success && res.data.data) {

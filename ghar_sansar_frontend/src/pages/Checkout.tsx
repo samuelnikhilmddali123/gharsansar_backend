@@ -18,7 +18,7 @@ const Checkout: React.FC = () => {
 
   const API_BASE =
     import.meta.env.VITE_AWS_API_URL ||
-    "https://backend.gharsansar.store/api";
+    "https://backend.gharsansar.website/api";
   
   // Dummy Gateway States
   const [showDummyGateway, setShowDummyGateway] = useState(false);

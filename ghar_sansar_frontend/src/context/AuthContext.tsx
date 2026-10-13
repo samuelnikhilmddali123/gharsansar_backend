@@ -24,7 +24,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const BACKEND_URL = import.meta.env.VITE_AWS_API_URL || "https://backend.gharsansar.store/api";
+const BACKEND_URL = import.meta.env.VITE_AWS_API_URL || "https://backend.gharsansar.website/api";
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);

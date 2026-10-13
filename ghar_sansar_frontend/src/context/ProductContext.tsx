@@ -39,8 +39,11 @@ const fixImageUrl = (url: string) => {
     .replace(/\s/g, "%20")
     .replace(/([^:]\/)\/+/g, "$1");
   
+  // Strip localhost / 127.0.0.1 / private IPs from image URLs so they load as relative paths through the current domain / tunnel proxy
+  fixed = fixed.replace(/^https?:\/\/(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+)(:\d+)?/, "");
+
   // Enforce HTTPS for known live backend domains to prevent Mixed Content errors
-  if (fixed.startsWith("http://backend.gharsansar.store") || fixed.startsWith("http://lx70r6zsef")) {
+  if (fixed.startsWith("http://backend.gharsansar.website") || fixed.startsWith("http://lx70r6zsef")) {
     fixed = fixed.replace(/^http:/, "https:");
   }
 
@@ -58,7 +61,7 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const BACKEND_URL = import.meta.env.VITE_AWS_API_URL || "https://backend.gharsansar.store/api";
+  const BACKEND_URL = import.meta.env.VITE_AWS_API_URL || "https://backend.gharsansar.website/api";
   const API_BASE = import.meta.env.VITE_AWS_API_URL || "https://lx70r6zsef.execute-api.ap-south-1.amazonaws.com/prod/api";
 
   // Fetch all products from backend

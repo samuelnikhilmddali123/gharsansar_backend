@@ -115,15 +115,15 @@ export const useMobileApp = () => {
   return context;
 };
 
-const BACKEND_URL = 'https://backend.gharsansar.store';
+const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'https://backend.gharsansar.website';
 
 const forceHttps = (url: string) => {
-  if (url.startsWith('http://backend.gharsansar.store')) {
-    return url.replace('http://backend.gharsansar.store', 'https://backend.gharsansar.store');
+  if (url.startsWith('http://backend.gharsansar.website')) {
+    return url.replace('http://backend.gharsansar.website', 'https://backend.gharsansar.website');
   }
   // Also handle local IPs in case the backend hardcoded them in its output
-  if (url.startsWith('http://192.168.0.')) {
-    return url.replace(/http:\/\/192\.168\.0\.\d+:\d+/, 'https://backend.gharsansar.store');
+  if (url.startsWith('http://192.168.0.') || url.startsWith('http://localhost:5001')) {
+    return url.replace(/http:\/\/(192\.168\.0\.\d+|localhost):\d+/, BACKEND_URL);
   }
   return url;
 };
