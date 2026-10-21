@@ -185,7 +185,7 @@ const Cart: React.FC = () => {
             <div className="space-y-4">
               <button
                 onClick={handleCheckoutClick}
-                className="w-full bg-luxury-charcoal hover:bg-luxury-gold text-white py-3.5 px-6 rounded-full font-bold uppercase tracking-widest text-xs transition duration-300 text-center block"
+                className="w-full bg-[#004e38] hover:bg-[#003828] text-white py-4 px-6 rounded-full font-bold uppercase tracking-widest text-xs shadow-md transition duration-300 text-center block active:scale-98"
               >
                 Proceed to Checkout
               </button>

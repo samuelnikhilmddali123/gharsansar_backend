@@ -57,9 +57,9 @@ export default function App() {
                   <OrderProvider>
                     <BrowserRouter>
                       <ScrollToTop />
-                      <div className="min-h-screen bg-gray-50">
+                      <div className="min-h-screen bg-[#F7F6F0]">
                         <Header />
-                        <main className="pt-20">
+                        <main className="pt-20 sm:pt-24">
                           <Routes>
                         {/* ---------- Public routes ---------- */}
                         <Route path="/" element={<Home />} />
@@ -124,7 +124,6 @@ export default function App() {
                       </Routes>
                     </main>
                     <Footer />
-                    <ChatBot />
                   </div>
                 </BrowserRouter>
                   </OrderProvider>

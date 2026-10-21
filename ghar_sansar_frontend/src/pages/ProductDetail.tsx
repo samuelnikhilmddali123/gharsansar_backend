@@ -1,5 +1,5 @@
 // src/pages/ProductDetail.tsx
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { 
   Phone, 
@@ -18,12 +18,32 @@ import {
   CreditCard,
   Heart,
   Info,
-  Share2
+  Share2,
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+  ChevronUp,
+  MapPin,
+  RotateCcw,
+  Lock,
+  Flame,
+  Droplets,
+  Shield,
+  Coffee,
+  Maximize2,
+  RotateCw,
+  Play,
+  FileText,
+  Scan,
+  Check,
+  ExternalLink
 } from "lucide-react";
-import { useProducts } from "../context/ProductContext";
+import { useProducts, Product } from "../context/ProductContext";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { useOrders } from "../context/OrderContext";
+import ProductCard from "../components/ProductCard";
+import StudioImage from "../components/StudioImage";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -42,43 +62,128 @@ const ProductDetail: React.FC = () => {
   const { addToCart } = useCart();
   const { isAuthenticated, user } = useAuth();
   const { orders } = useOrders();
-  const { products } = useProducts();
+  const { products, loading } = useProducts();
 
   // Decode product id from path
   const { pathname, state } = location;
   const id = decodeURIComponent(pathname.split("/").pop() || "");
 
-  // Fetch target product
-  const product = state || useMemo(() =>
-    products.find((p) => p.id === id), [id, products]
-  );
+  // Fetch target product with robust fallback matching
+  const product = state || useMemo(() => {
+    if (!id || !products || products.length === 0) return null;
+    return (
+      products.find((p) => String(p.id) === String(id)) ||
+      products.find((p: any) => String(p._id) === String(id)) ||
+      products.find((p) => encodeURIComponent(String(p.id)) === encodeURIComponent(String(id))) ||
+      products.find((p) => p.title?.toLowerCase() === id.toLowerCase() || p.title?.toLowerCase() === decodeURIComponent(id).toLowerCase())
+    );
+  }, [id, products]);
 
-  // States
+  // Gallery States
   const [activeImageIndex, setActiveImageIndex] = useState(0);
-  const [quantity, setQuantity] = useState(state?.isReturnGift ? 50 : 1);
-  const [activeTab, setActiveTab] = useState("description");
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [isVideoActive, setIsVideoActive] = useState(false);
+  const [is360Active, setIs360Active] = useState(false);
+  const [verticalThumbOffset, setVerticalThumbOffset] = useState(0);
   const [zoomPos, setZoomPos] = useState({ x: 0, y: 0 });
   const [isZooming, setIsZooming] = useState(false);
   const [activeLightboxImage, setActiveLightboxImage] = useState<string | null>(null);
-  const [pincode, setPincode] = useState(localStorage.getItem("user_pincode") || "");
-  const [savedArea, setSavedArea] = useState(localStorage.getItem("user_area") || "");
-  const [deliveryFee, setDeliveryFee] = useState<number | null>(
-    localStorage.getItem("user_pincode") 
-      ? /^5[0-3]/.test(localStorage.getItem("user_pincode") || "") ? 99 : 149
-      : null
-  );
+
+  // Commerce States
+  const [quantity, setQuantity] = useState(state?.isReturnGift ? 50 : 1);
+  const [activeTab, setActiveTab] = useState("description");
+  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+
+  // Related products carousel ref
+  const relatedScrollRef = useRef<HTMLDivElement>(null);
+
+  // Helper to read initial pincode from account addresses or stored pincode
+  const getInitialPincode = () => {
+    const local = localStorage.getItem("user_pincode");
+    if (local && /^\d{6}$/.test(local)) return local;
+    try {
+      const stored = localStorage.getItem("user_shipping_address");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        const zip = parsed.zipCode || parsed.pincode;
+        if (zip && /^\d{6}$/.test(String(zip).trim())) return String(zip).trim();
+      }
+    } catch {}
+    return "520008"; // Default to Vijayawada as seen in design
+  };
+
+  const getInitialArea = () => {
+    const localArea = localStorage.getItem("user_area");
+    if (localArea) return localArea;
+    try {
+      const stored = localStorage.getItem("user_shipping_address");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        const area = [parsed.city, parsed.state].filter(Boolean).join(", ") || parsed.city;
+        if (area) return area;
+      }
+    } catch {}
+    return "Vijayawada, Andhra Pradesh";
+  };
+
+  const [pincode, setPincode] = useState<string>(getInitialPincode);
+  const [savedArea, setSavedArea] = useState<string>(getInitialArea);
+  const [deliveryFee, setDeliveryFee] = useState<number | null>(99);
   const [isCheckingPincode, setIsCheckingPincode] = useState(false);
+  const [isEditingPincode, setIsEditingPincode] = useState(false);
+  const [pincodeInput, setPincodeInput] = useState(pincode);
+
+  // Automatically sync pincode and area from user's account shipping address
+  useEffect(() => {
+    let activeAddr: any = null;
+
+    if (user?.addresses && user.addresses.length > 0) {
+      activeAddr = user.addresses.find((a: any) => a.isDefault) || user.addresses[0];
+    }
+
+    if (!activeAddr && user?.email) {
+      try {
+        const stored = localStorage.getItem(`shipping_address_${user.email}`);
+        if (stored) activeAddr = JSON.parse(stored);
+      } catch {}
+    }
+
+    if (!activeAddr) {
+      try {
+        const storedGlobal = localStorage.getItem("user_shipping_address");
+        if (storedGlobal) activeAddr = JSON.parse(storedGlobal);
+      } catch {}
+    }
+
+    if (activeAddr) {
+      const zip = activeAddr.zipCode || activeAddr.pincode;
+      if (zip) {
+        const code = String(zip).trim();
+        if (/^\d{6}$/.test(code)) {
+          const area = [activeAddr.city, activeAddr.state].filter(Boolean).join(", ") || activeAddr.city || "India";
+          const fee = /^5[0-3]/.test(code) ? 99 : 149;
+
+          setPincode(code);
+          setSavedArea(area);
+          setDeliveryFee(fee);
+          setPincodeInput(code);
+
+          localStorage.setItem("user_pincode", code);
+          localStorage.setItem("user_area", area);
+        }
+      }
+    }
+  }, [user]);
 
   const checkPincode = async () => {
-    if (pincode.length !== 6 || !/^\d+$/.test(pincode)) {
+    if (pincodeInput.length !== 6 || !/^\d+$/.test(pincodeInput)) {
       toast.error("Please enter a valid 6-digit pincode");
       return;
     }
     
     setIsCheckingPincode(true);
     try {
-      const res = await fetch(`https://api.postalpincode.in/pincode/${pincode}`);
+      const res = await fetch(`https://api.postalpincode.in/pincode/${pincodeInput}`);
       const data = await res.json();
       
       let areaName = "India";
@@ -87,33 +192,28 @@ const ProductDetail: React.FC = () => {
         areaName = `${postOffice.District}, ${postOffice.State}`;
       }
       
-      const fee = /^5[0-3]/.test(pincode) ? 99 : 149;
+      const fee = /^5[0-3]/.test(pincodeInput) ? 99 : 149;
       setDeliveryFee(fee);
       setSavedArea(areaName);
+      setPincode(pincodeInput);
+      setIsEditingPincode(false);
       
-      localStorage.setItem("user_pincode", pincode);
+      localStorage.setItem("user_pincode", pincodeInput);
       localStorage.setItem("user_area", areaName);
       
       toast.success(`Delivery to ${areaName} (₹${fee})`);
     } catch (err) {
-      // Fallback
-      const fee = /^5[0-3]/.test(pincode) ? 99 : 149;
+      const fee = /^5[0-3]/.test(pincodeInput) ? 99 : 149;
       setDeliveryFee(fee);
       setSavedArea("India");
-      localStorage.setItem("user_pincode", pincode);
+      setPincode(pincodeInput);
+      setIsEditingPincode(false);
+      localStorage.setItem("user_pincode", pincodeInput);
       localStorage.setItem("user_area", "India");
       toast.success(`Delivery available! (₹${fee})`);
     } finally {
       setIsCheckingPincode(false);
     }
-  };
-
-  const handleChangePincode = () => {
-    localStorage.removeItem("user_pincode");
-    localStorage.removeItem("user_area");
-    setDeliveryFee(null);
-    setSavedArea("");
-    setPincode("");
   };
 
   const handleDecreaseQuantity = () => {
@@ -134,7 +234,7 @@ const ProductDetail: React.FC = () => {
 
   const deliveryDateString = useMemo(() => {
     const date = new Date();
-    date.setDate(date.getDate() + 5);
+    date.setDate(date.getDate() + 4);
     return date.toLocaleDateString("en-US", {
       weekday: "long",
       month: "long",
@@ -159,6 +259,59 @@ const ProductDetail: React.FC = () => {
     }
   };
 
+  // Base list of mockup/alternative images for premium gallery feel matching screenshot
+  const productImages = useMemo(() => {
+    if (!product) return [];
+    const baseImg = product.image || "/products/waterbottles_and_jars/asian_diamond_insulated_inner_stainless_steel_flask_1_pc.webp";
+    return [
+      { url: baseImg, label: "Front View", isVideo: false },
+      { url: "/images/diamond_collection_banner.jpg", label: "Product & Lid", isVideo: false },
+      { url: baseImg, label: "Side Angle", transformClass: "scale-x-[-1]", isVideo: false },
+      { url: "/images/flask_lifestyle_banner.jpg", label: "Lifestyle View", isVideo: false },
+      { url: baseImg, label: "Detail View", transformClass: "scale-[1.35]", isVideo: false },
+      { url: "/images/flask_lifestyle_banner.jpg", label: "Product Video", isVideo: true }
+    ];
+  }, [product]);
+
+  // Gallery Navigation
+  const handlePrevImage = () => {
+    setIsVideoActive(false);
+    setActiveImageIndex((prev) => (prev > 0 ? prev - 1 : productImages.length - 1));
+  };
+
+  const handleNextImage = () => {
+    setIsVideoActive(false);
+    setActiveImageIndex((prev) => (prev < productImages.length - 1 ? prev + 1 : 0));
+  };
+
+  const handleSelectThumbnail = (idx: number) => {
+    if (productImages[idx]?.isVideo) {
+      setIsVideoActive(true);
+      setActiveImageIndex(idx);
+    } else {
+      setIsVideoActive(false);
+      setActiveImageIndex(idx);
+    }
+  };
+
+  // Dynamic Product Specifications
+  const productSpecs = useMemo(() => {
+    const title = product?.title || product?.name || "";
+    const isBottle = /bottle|flask|mug|sipper|water/i.test(title + " " + (product?.category || ""));
+    const capacityMatch = title.match(/(\d+\s*(?:ml|l|ltr|gm|kg))/i);
+    const capacity = capacityMatch ? capacityMatch[1] : (isBottle ? "500 ml" : "Standard Size");
+
+    return [
+      { label: "Product Name", value: product?.title || product?.name || "Asian Diamond Insulated Inner Stainless Steel Flask" },
+      { label: "Capacity", value: capacity },
+      { label: "Material", value: isBottle ? "304 Stainless Steel (Food Grade)" : "Premium High-Grade Material" },
+      { label: "Color", value: "Silver / White (Diamond Design)" },
+      { label: "Insulation", value: isBottle ? "Double Wall Vacuum Insulation" : "Multi-layer Durable Coating" },
+      { label: "Usage", value: isBottle ? "Hot & Cold Beverages" : "Indoor & Everyday Living" },
+      { label: "Package Contents", value: isBottle ? "1 Flask with Lid (Cup)" : "1 Unit in Protective Box" },
+    ];
+  }, [product]);
+
   // Review Form States
   const [formName, setFormName] = useState("");
   const [formRating, setFormRating] = useState(5);
@@ -166,52 +319,14 @@ const ProductDetail: React.FC = () => {
   const [formImage, setFormImage] = useState("");
   const [imagePreview, setImagePreview] = useState("");
 
-  // Base list of mockup/alternative images for premium gallery feel
-  const productImages = useMemo(() => {
-    if (!product) return [];
-    return [
-      { url: product.image, transformClass: "object-contain", label: "Front View" },
-      { url: product.image, transformClass: "scale-x-[-1] object-contain", label: "Side Angle" },
-      { url: product.image, transformClass: "scale-[1.4] object-contain", label: "Detail View" }
-    ];
-  }, [product]);
-
-  // Initial dummy reviews to match the premium looks
-  const initialReviews: Review[] = useMemo(() => [
-    {
-      id: "dummy-1",
-      name: "Aravind K.",
-      rating: 5,
-      comment: "Absolutely premium quality stainless steel. The heat distribution is very uniform and it is extremely easy to clean. Highly recommended!",
-      date: "May 12, 2026",
-      image: ""
-    },
-    {
-      id: "dummy-2",
-      name: "Meera Sen",
-      rating: 4,
-      comment: "Very elegant design and works perfectly on our induction cooktop. The glass lid fits snugly.",
-      date: "May 08, 2026",
-      image: ""
-    },
-    {
-      id: "dummy-3",
-      name: "Rajesh Prasad",
-      rating: 5,
-      comment: "Solid weight and professional finish. Excellent value for money. Highly durable.",
-      date: "April 29, 2026",
-      image: ""
-    }
-  ], []);
-
-  // State to manage reviews (with localStorage persistence)
+  // Initial reviews
   const [reviews, setReviews] = useState<Review[]>(() => {
     if (!product) return [];
     const saved = localStorage.getItem(`product_reviews_${product.id}`);
-    return saved ? JSON.parse(saved) : initialReviews;
+    return saved ? JSON.parse(saved) : [];
   });
 
-  // Sync to localStorage
+  // Sync reviews to localStorage
   useEffect(() => {
     if (product) {
       localStorage.setItem(`product_reviews_${product.id}`, JSON.stringify(reviews));
@@ -226,46 +341,30 @@ const ProductDetail: React.FC = () => {
     );
   }, [orders, user, isAuthenticated, product]);
 
-  // Filter reviews: Hide dummy if logged in
-  const displayedReviews = useMemo(() => {
-    if (isAuthenticated) {
-      return reviews.filter((r) => !r.id.startsWith("dummy-"));
-    }
-    return reviews;
-  }, [reviews, isAuthenticated]);
-
-  // Related products under the same category
-  const relatedProducts = useMemo(() => {
-    if (!product) return [];
-    return products
-      .filter((p) => p.category === product.category && p.id !== product.id)
-      .slice(0, 4);
-  }, [products, product]);
-
   // Rating aggregate calculations
   const { avgRating, ratingPercentages } = useMemo(() => {
-    if (displayedReviews.length === 0) {
+    if (reviews.length === 0) {
       return { avgRating: 0, ratingPercentages: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 } };
     }
-    const sum = displayedReviews.reduce((acc, r) => acc + r.rating, 0);
-    const avg = Math.round((sum / displayedReviews.length) * 10) / 10;
+    const sum = reviews.reduce((acc, r) => acc + r.rating, 0);
+    const avg = Math.round((sum / reviews.length) * 10) / 10;
 
     const counts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
-    displayedReviews.forEach((r) => {
+    reviews.forEach((r) => {
       const ratingKey = Math.min(Math.max(Math.round(r.rating), 1), 5) as 5 | 4 | 3 | 2 | 1;
       counts[ratingKey]++;
     });
 
     const percentages = {
-      5: Math.round((counts[5] / displayedReviews.length) * 100),
-      4: Math.round((counts[4] / displayedReviews.length) * 100),
-      3: Math.round((counts[3] / displayedReviews.length) * 100),
-      2: Math.round((counts[2] / displayedReviews.length) * 100),
-      1: Math.round((counts[1] / displayedReviews.length) * 100),
+      5: Math.round((counts[5] / reviews.length) * 100),
+      4: Math.round((counts[4] / reviews.length) * 100),
+      3: Math.round((counts[3] / reviews.length) * 100),
+      2: Math.round((counts[2] / reviews.length) * 100),
+      1: Math.round((counts[1] / reviews.length) * 100),
     };
 
     return { avgRating: avg, ratingPercentages: percentages };
-  }, [displayedReviews]);
+  }, [reviews]);
 
   // Handle Review Image Upload
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -309,6 +408,7 @@ const ProductDetail: React.FC = () => {
 
     setReviews([newRev, ...reviews]);
     toast.success("Review submitted successfully!");
+    setIsReviewModalOpen(false);
 
     // Reset Form
     setFormName("");
@@ -352,17 +452,54 @@ const ProductDetail: React.FC = () => {
     }
   };
 
+  // Related products under the same category (or fallback bottles)
+  const relatedProducts = useMemo(() => {
+    if (!product) return [];
+    const sameCat = products.filter((p) => p.category === product.category && p.id !== product.id);
+    if (sameCat.length >= 5) return sameCat.slice(0, 10);
+    const others = products.filter((p) => p.id !== product.id && !sameCat.some((sc) => sc.id === p.id));
+    return [...sameCat, ...others].slice(0, 10);
+  }, [products, product]);
+
+  const scrollRelated = (direction: "left" | "right") => {
+    if (relatedScrollRef.current) {
+      const scrollAmount = 300;
+      relatedScrollRef.current.scrollBy({
+        left: direction === "left" ? -scrollAmount : scrollAmount,
+        behavior: "smooth"
+      });
+    }
+  };
+
+  if (loading && !product) {
+    return (
+      <div className="min-h-screen bg-[#FAF9F5] pb-16 pt-12 flex items-center justify-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 animate-pulse">
+            <div className="lg:col-span-7 aspect-square bg-[#eae5dc] rounded-none" />
+            <div className="lg:col-span-5 space-y-6 pt-4">
+              <div className="h-6 bg-gray-200 rounded-none w-1/4" />
+              <div className="h-10 bg-gray-200 rounded-none w-3/4" />
+              <div className="h-28 bg-gray-200 rounded-none" />
+              <div className="h-14 bg-gray-200 rounded-none" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!product) {
     return (
-      <div className="min-h-screen bg-[#f8f8f7] flex flex-col items-center justify-center p-6 text-center">
-        <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-4">
+      <div className="min-h-screen bg-[#FAF9F5] flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-16 h-16 bg-red-100 text-red-600 rounded-none flex items-center justify-center mb-4">
           <Info size={28} />
         </div>
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Product Not Found</h2>
         <p className="text-gray-500 max-w-sm mb-6">The product you are looking for does not exist or has been removed.</p>
         <button
           onClick={() => navigate(state?.isReturnGift ? "/return-gifts" : "/products")}
-          className="flex items-center gap-2 px-6 py-3 bg-luxury-charcoal text-white font-bold uppercase tracking-widest text-xs rounded-full hover:bg-luxury-gold transition shadow-md"
+          className="flex items-center gap-2 px-6 py-3 bg-[#0F2920] text-white font-bold uppercase tracking-widest text-xs rounded-none hover:bg-black transition shadow-md"
         >
           <ArrowLeft size={18} /> Back to Catalog
         </button>
@@ -370,685 +507,917 @@ const ProductDetail: React.FC = () => {
     );
   }
 
-  // Percentage Off Calculation
-  const discountPercentage = product.actualPrice && product.price
-    ? Math.round(((product.actualPrice - product.price) / product.actualPrice) * 100)
-    : 0;
+  // Discount Calculation
+  const actualPriceVal = product.actualPrice || (product["act-price"] as number) || (product.price ? Math.round(product.price * 1.2) : 0);
+  const discountPercentage = actualPriceVal && product.price && actualPriceVal > product.price
+    ? Math.round(((actualPriceVal - product.price) / actualPriceVal) * 100)
+    : 17;
 
   return (
-    <div className="min-h-screen bg-[#f8f8f7] pb-16 font-sans">
+    <div className="min-h-screen bg-[#FAF9F6] pb-20 font-sans relative overflow-x-hidden">
       
+      {/* Subtle Botanical Watermarks on sides matching catalog screenshot */}
+      <div className="fixed top-28 left-0 -translate-x-12 w-64 h-96 pointer-events-none opacity-20 z-0 hidden 2xl:block select-none">
+        <svg viewBox="0 0 200 300" className="w-full h-full text-emerald-950/40 fill-current">
+          <path d="M10,150 Q70,70 120,40 Q100,100 80,160 Q130,120 180,100 Q150,160 110,210 Q160,200 190,220 Q130,250 80,260 Q50,265 20,280 Q40,220 20,180 Z" />
+        </svg>
+      </div>
+      <div className="fixed bottom-28 right-0 translate-x-12 w-64 h-96 pointer-events-none opacity-20 z-0 hidden 2xl:block select-none">
+        <svg viewBox="0 0 200 300" className="w-full h-full text-emerald-950/40 fill-current scale-x-[-1]">
+          <path d="M10,150 Q70,70 120,40 Q100,100 80,160 Q130,120 180,100 Q150,160 110,210 Q160,200 190,220 Q130,250 80,260 Q50,265 20,280 Q40,220 20,180 Z" />
+        </svg>
+      </div>
+
       {/* Luxury Sticky Mobile CTA Bar */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-100 p-4 z-40 flex items-center justify-between shadow-2xl">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200/80 p-3.5 z-40 flex items-center justify-between shadow-2xl">
         <div>
-          <span className="text-xs text-gray-400 block font-medium">Total Price</span>
-          <span className="text-xl font-extrabold text-gray-900">₹{(product.price * quantity) + 99}</span>
+          <span className="text-[10px] text-gray-500 block uppercase font-bold tracking-wider">Total Price</span>
+          <span className="text-lg font-black text-gray-900">₹{(product.price * quantity) + (deliveryFee || 0)}</span>
         </div>
         <div className="flex gap-2">
           <button 
             onClick={handleAddToCart}
-            className="px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-full font-bold text-sm transition"
+            className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-none font-bold text-xs uppercase tracking-wider transition"
           >
             Add to Cart
           </button>
           <button 
             onClick={handleBuyNow}
-            className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-full font-bold text-sm transition shadow-lg"
+            className="px-5 py-2.5 bg-[#0F2920] hover:bg-[#183E31] text-white rounded-none font-bold text-xs uppercase tracking-wider transition shadow-md"
           >
             Buy Now
           </button>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 relative z-10">
         
-        {/* Luxury Breadcrumb */}
-        <nav className="flex items-center space-x-2 text-xs text-gray-400 mb-8 font-medium">
+        {/* Luxury Breadcrumb matching screenshot (Home > Shop > Category > Title) */}
+        <nav className="flex items-center space-x-1.5 text-xs text-gray-500 mb-6 font-medium">
           <span className="cursor-pointer hover:text-gray-900 transition" onClick={() => navigate("/")}>Home</span>
-          <span>/</span>
+          <span>&gt;</span>
           <span className="cursor-pointer hover:text-gray-900 transition" onClick={() => navigate(state?.isReturnGift ? "/return-gifts" : "/products")}>
             {state?.isReturnGift ? "Return Gifts" : "Shop"}
           </span>
-          <span>/</span>
+          <span>&gt;</span>
           <span className="cursor-pointer hover:text-gray-900 transition" onClick={() => navigate(state?.isReturnGift ? `/return-gifts?category=${product.category}` : `/products?category=${product.category}`)}>
-            {product.category}
+            {product.category || "Water Bottles & Jars"}
           </span>
-          <span>/</span>
-          <span className="text-gray-900 font-semibold truncate max-w-[200px]">{product.title}</span>
+          <span>&gt;</span>
+          <span className="text-gray-900 font-bold truncate max-w-[280px]">{product.title || product.name}</span>
         </nav>
 
-        {/* 2-Column Hero layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 pb-16 border-b border-gray-200">
+        {/* 2-Column Product Showcase Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 pb-12">
           
-          {/* LEFT SIDE: Image Showcase */}
-          <div className="lg:col-span-7 flex flex-col md:flex-row-reverse gap-4">
+          {/* LEFT COLUMN: Gallery with Vertical Thumbnails, Main Stage & Horizontal Thumbnails */}
+          <div className="lg:col-span-7 flex flex-col gap-3">
             
-            {/* Main Premium Container with Hover Zoom */}
-            <div 
-              className="flex-1 relative overflow-hidden rounded-3xl bg-white aspect-square border border-gray-100 flex items-center justify-center p-6 cursor-zoom-in"
-              onMouseMove={handleMouseMove}
-              onMouseEnter={() => setIsZooming(true)}
-              onMouseLeave={() => setIsZooming(false)}
-            >
-              <img
-                src={productImages[activeImageIndex]?.url || product.image}
-                alt={product.title}
-                loading="eager"
-                // @ts-ignore
-                fetchPriority="high"
-                className={`max-w-full max-h-full transition-transform duration-200 ${productImages[activeImageIndex]?.transformClass || "object-contain"}`}
-                style={isZooming ? {
-                  transformOrigin: `${zoomPos.x}% ${zoomPos.y}%`,
-                  transform: 'scale(1.8)'
-                } : {}}
-              />
-              
-              {/* Luxury Badges */}
-              {discountPercentage > 0 && (
-                <span className="absolute top-6 left-6 bg-red-500 text-white px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-lg">
-                  {discountPercentage}% Save
-                </span>
-              )}
+            <div className="flex flex-col sm:flex-row gap-3 items-start">
+              {/* Vertical Thumbnails Strip (Left of main image on desktop) */}
+              <div className="hidden sm:flex flex-col items-center gap-2">
+                {productImages.slice(0, 5).map((imgObj, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => handleSelectThumbnail(idx)}
+                    className={`w-14 h-14 rounded-none p-1 bg-white border-2 transition-all overflow-hidden relative group flex items-center justify-center ${
+                      activeImageIndex === idx && !isVideoActive ? 'border-[#0F2920] shadow-sm' : 'border-gray-200/80 hover:border-gray-400'
+                    }`}
+                  >
+                    <img
+                      src={imgObj.url}
+                      alt={`Thumb ${idx + 1}`}
+                      className={`w-full h-full object-contain ${imgObj.transformClass || ""}`}
+                    />
+                  </button>
+                ))}
+                
+                {/* Vertical Scroll / Down Arrow */}
+                <button 
+                  onClick={() => handleSelectThumbnail((activeImageIndex + 1) % productImages.length)}
+                  className="w-14 h-7 rounded-none bg-white border border-gray-200/80 hover:bg-gray-50 flex items-center justify-center text-gray-500 transition shadow-2xs"
+                  title="Next View"
+                >
+                  <ChevronDown size={16} />
+                </button>
+              </div>
 
-              <button 
-                onClick={() => setIsWishlisted(!isWishlisted)}
-                className={`absolute top-6 right-6 p-3 rounded-full border shadow-lg transition ${
-                  isWishlisted ? 'bg-red-50 text-red-500 border-red-100' : 'bg-white text-gray-400 hover:text-gray-600 border-gray-100'
-                }`}
+              {/* Main Image Showcase Container */}
+              <div 
+                className="flex-1 w-full relative overflow-hidden rounded-none bg-[#F7F6F0] aspect-[4/3] sm:aspect-square border border-[#E5E1D8] flex items-center justify-center p-6 sm:p-10 select-none group"
+                onMouseMove={handleMouseMove}
+                onMouseEnter={() => !isVideoActive && setIsZooming(true)}
+                onMouseLeave={() => setIsZooming(false)}
               >
-                <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-current' : ''}`} />
-              </button>
-              
-              <button 
-                onClick={handleShare}
-                className="absolute top-20 right-6 p-3 rounded-full border shadow-lg transition bg-white text-gray-400 hover:text-blue-500 border-gray-100"
-                title="Share Product"
-              >
-                <Share2 className="w-5 h-5" />
-              </button>
+                {/* 360 & Expand Controls at Top Right */}
+                <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
+                  <button
+                    onClick={() => setIs360Active(!is360Active)}
+                    className={`px-2.5 py-1.5 rounded-none text-[11px] font-bold border transition flex items-center gap-1 shadow-sm ${
+                      is360Active ? 'bg-[#0F2920] text-white border-[#0F2920]' : 'bg-black/60 hover:bg-black/80 text-white backdrop-blur-sm border-white/20'
+                    }`}
+                    title="Interactive 360 View"
+                  >
+                    <RotateCw size={13} className={is360Active ? "animate-spin" : ""} />
+                    <span>360°</span>
+                  </button>
+
+                  <button
+                    onClick={() => setActiveLightboxImage(productImages[activeImageIndex]?.url || product.image)}
+                    className="p-1.5 rounded-none bg-black/60 hover:bg-black/80 text-white backdrop-blur-sm border border-white/20 transition shadow-sm"
+                    title="Fullscreen Lightbox"
+                  >
+                    <Maximize2 size={13} />
+                  </button>
+                </div>
+
+                {/* Left & Right Circular Nav Arrows */}
+                <button
+                  onClick={handlePrevImage}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-none bg-white/90 hover:bg-white text-gray-700 shadow-md border border-gray-200/60 flex items-center justify-center transition active:scale-95"
+                  title="Previous image"
+                >
+                  <ChevronLeft size={18} />
+                </button>
+                <button
+                  onClick={handleNextImage}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-none bg-white/90 hover:bg-white text-gray-700 shadow-md border border-gray-200/60 flex items-center justify-center transition active:scale-95"
+                  title="Next image"
+                >
+                  <ChevronRight size={18} />
+                </button>
+
+                {/* Bottom Right Zoom / Scan Icon */}
+                <button 
+                  onClick={() => setActiveLightboxImage(productImages[activeImageIndex]?.url || product.image)}
+                  className="absolute bottom-4 right-4 z-20 p-2 rounded-none bg-white/90 hover:bg-white text-gray-600 shadow-sm border border-gray-200 transition"
+                >
+                  <Scan size={15} />
+                </button>
+
+                {/* Main Media Content: Video or Studio Image */}
+                {isVideoActive ? (
+                  <div className="w-full h-full rounded-none overflow-hidden flex items-center justify-center bg-black/5">
+                    <video
+                      src="/videos/homepagevideo.mp4"
+                      autoPlay
+                      controls
+                      playsInline
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                ) : (
+                  <motion.div
+                    key={activeImageIndex}
+                    animate={is360Active ? { rotateY: [0, 360] } : {}}
+                    transition={is360Active ? { repeat: Infinity, duration: 4, ease: "linear" } : {}}
+                    className="w-full h-full flex items-center justify-center relative cursor-zoom-in"
+                  >
+                    {/* Realistic ambient ground shadow */}
+                    <div 
+                      className="absolute bottom-2 left-1/2 -translate-x-1/2 w-3/5 h-4 rounded-none bg-black/[0.06] blur-[6px] pointer-events-none" 
+                      aria-hidden="true" 
+                    />
+
+                    <StudioImage
+                      src={productImages[activeImageIndex]?.url || product.image}
+                      alt={product.title}
+                      loading="eager"
+                      className={`max-w-full max-h-full transition-transform duration-200 ${productImages[activeImageIndex]?.transformClass || "object-contain"}`}
+                      style={isZooming ? {
+                        transformOrigin: `${zoomPos.x}% ${zoomPos.y}%`,
+                        transform: 'scale(1.8)'
+                      } : {}}
+                    />
+                  </motion.div>
+                )}
+              </div>
             </div>
 
-            {/* Thumbnails Sidebar */}
-            <div className="flex md:flex-col gap-3 justify-center md:justify-start">
+            {/* Horizontal Thumbnails Row below main image (matching screenshot with 6 items and video play icon) */}
+            <div className="grid grid-cols-6 gap-2 sm:gap-2.5 pt-1">
               {productImages.map((imgObj, idx) => (
                 <button
                   key={idx}
-                  onClick={() => setActiveImageIndex(idx)}
-                  className={`w-16 h-16 md:w-20 md:h-20 rounded-2xl p-1 bg-white border-2 transition overflow-hidden relative group ${
-                    activeImageIndex === idx ? 'border-luxury-gold shadow-md' : 'border-transparent hover:border-gray-300'
+                  onClick={() => handleSelectThumbnail(idx)}
+                  className={`aspect-square rounded-none p-1 bg-white border-2 transition-all overflow-hidden relative group flex items-center justify-center ${
+                    activeImageIndex === idx ? 'border-[#0F2920] shadow-sm' : 'border-gray-200/80 hover:border-gray-400'
                   }`}
                 >
-                  <img src={imgObj.url} alt="Thumbnail" className={`w-full h-full ${imgObj.transformClass}`} />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <span className="text-[9px] font-bold text-white text-center leading-none px-1">
-                      {imgObj.label}
-                    </span>
-                  </div>
+                  <img
+                    src={imgObj.url}
+                    alt={imgObj.label}
+                    className={`w-full h-full object-contain ${imgObj.transformClass || ""}`}
+                  />
+                  {imgObj.isVideo && (
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                      <div className="w-6 h-6 rounded-none bg-white/90 text-gray-900 flex items-center justify-center shadow-sm">
+                        <Play size={12} className="ml-0.5 fill-current" />
+                      </div>
+                    </div>
+                  )}
                 </button>
               ))}
             </div>
+
           </div>
 
-          {/* RIGHT SIDE: Info panel */}
-          <div className="lg:col-span-5 flex flex-col justify-between">
+          {/* RIGHT COLUMN: Product Details, Pricing, Location, Stock, CTAs */}
+          <div className="lg:col-span-5 flex flex-col justify-between space-y-5">
             <div>
-              <div className="flex items-center space-x-2 mb-3">
-                <span className="text-[10px] uppercase font-bold tracking-widest text-luxury-gold bg-luxury-cream px-2.5 py-1 rounded-full">
-                  {product.category}
-                </span>
-                <span className="text-xs text-emerald-600 font-semibold flex items-center gap-1">
-                  <span className="w-2 h-2 bg-emerald-500 rounded-full animate-ping"></span>
-                  In Stock & Ready
-                </span>
+              {/* Category Pill, In Stock Dot, and Heart/Share icons */}
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-[10px] font-bold tracking-widest text-[#8C3259] bg-[#F8EAEF] px-2.5 py-1 rounded-none uppercase">
+                    {product.category || "Water Bottles & Jars"}
+                  </span>
+                  <span className="text-xs text-emerald-700 font-semibold flex items-center gap-1.5">
+                    <span className="w-2 h-2 bg-emerald-500 rounded-none animate-ping"></span>
+                    In Stock &amp; Ready
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => {
+                      setIsWishlisted(!isWishlisted);
+                      toast.success(isWishlisted ? "Removed from wishlist" : "Saved to wishlist!");
+                    }}
+                    className={`p-2 rounded-none border transition ${
+                      isWishlisted ? 'bg-red-50 text-red-500 border-red-200' : 'bg-white text-gray-400 hover:text-gray-600 border-gray-200'
+                    }`}
+                    title="Wishlist"
+                  >
+                    <Heart size={17} className={isWishlisted ? 'fill-current' : ''} />
+                  </button>
+
+                  <button 
+                    onClick={handleShare}
+                    className="p-2 rounded-none border border-gray-200 bg-white text-gray-400 hover:text-gray-600 transition"
+                    title="Share"
+                  >
+                    <Share2 size={17} />
+                  </button>
+                </div>
               </div>
 
-              <h1 className="text-3xl lg:text-4xl font-extrabold tracking-tight text-gray-900 leading-tight">
-                {product.title}
+              {/* Product Title */}
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900 leading-snug mb-2">
+                {product.title || product.name}
               </h1>
 
-              {/* Star aggregation */}
-              <div className="flex items-center gap-3 mt-4 mb-6">
-                <div className="flex items-center text-amber-500 bg-amber-50/50 px-2.5 py-0.5 rounded-lg border border-amber-100/50">
-                  <Star size={14} className="fill-amber-500 text-amber-500 mr-1" />
-                  <span className="text-xs font-bold text-gray-800">{avgRating || "0.0"}</span>
+              {/* Star Rating and Customer Reviews */}
+              <div className="flex items-center gap-2 mb-4">
+                <div className="flex items-center text-amber-500">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star key={star} size={15} className="fill-amber-400 text-amber-400" />
+                  ))}
                 </div>
-                <span className="text-xs text-gray-400 font-semibold">•</span>
-                <span className="text-xs text-gray-500 font-medium">({displayedReviews.length} Verified Customer Reviews)</span>
+                <span className="text-xs font-bold text-gray-900">0.0</span>
+                <span className="text-xs text-gray-500 font-normal">
+                  ({reviews.length} Verified Customer Reviews)
+                </span>
               </div>
 
-              {/* Pricing Section */}
-              <div className="p-6 bg-white rounded-3xl border border-gray-100 shadow-sm space-y-3">
-                {product.actualPrice && product.actualPrice > product.price && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">MRP</span>
-                    <span className="text-sm text-gray-400 line-through">₹{product.actualPrice}</span>
-                    <span className="text-[10px] font-bold text-luxury-gold bg-luxury-cream px-2 py-0.5 rounded-lg border border-luxury-gold/20 ml-1">
-                      SAVE {discountPercentage}%
-                    </span>
-                  </div>
-                )}
+              {/* Pricing Row matching screenshot (MRP, SAVE %, Price) */}
+              <div className="space-y-1 pb-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">MRP</span>
+                  <span className="text-sm text-gray-400 line-through">₹{actualPriceVal}</span>
+                  <span className="text-[10px] font-extrabold text-[#D32F2F] bg-[#FCE8E8] px-2 py-0.5 rounded-none">
+                    SAVE {discountPercentage}%
+                  </span>
+                </div>
+
+                <div className="flex items-baseline gap-3 pt-1">
+                  <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Price</span>
+                  <span className="text-3xl font-extrabold text-gray-900">₹{product.price}</span>
+                </div>
+              </div>
+
+              {/* Delivery Location Box matching screenshot */}
+              <div className="p-4 bg-white rounded-none border border-gray-200/90 shadow-2xs space-y-3.5 mb-5">
+                <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Delivery Location</span>
                 
-                <div className="flex items-center gap-3">
-                  <span className="text-xs font-bold text-gray-500 uppercase tracking-widest w-16">Price</span>
-                  <span className="text-xl font-bold text-gray-800">₹{product.price}</span>
-                </div>
-
-                {product.stock !== undefined && (
-                  <div className="mt-2 flex items-center gap-2">
-                    <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${
-                      product.stock > 10 ? "bg-green-50 text-green-700 border border-green-200" :
-                      product.stock > 0 ? "bg-orange-50 text-orange-700 border border-orange-200" :
-                      "bg-red-50 text-red-700 border border-red-200"
-                    }`}>
-                      {product.stock > 0 ? `${product.stock} left in stock` : "Out of Stock"}
-                    </span>
+                {isEditingPincode ? (
+                  <div className="flex items-center gap-2">
+                    <input 
+                      type="text" 
+                      placeholder="Enter 6-digit Pincode" 
+                      value={pincodeInput}
+                      onChange={(e) => setPincodeInput(e.target.value)}
+                      maxLength={6}
+                      className="flex-1 px-3.5 py-2 text-sm border border-gray-300 rounded-none focus:ring-2 focus:ring-[#0F2920] outline-none"
+                      disabled={isCheckingPincode}
+                    />
+                    <button 
+                      onClick={checkPincode}
+                      disabled={isCheckingPincode}
+                      className="px-4 py-2 bg-[#0F2920] text-white text-xs font-bold uppercase rounded-none hover:bg-black transition disabled:opacity-50"
+                    >
+                      {isCheckingPincode ? "Checking..." : "Apply"}
+                    </button>
+                    <button 
+                      onClick={() => setIsEditingPincode(false)}
+                      className="text-xs text-gray-500 hover:text-gray-700 px-2"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-none bg-[#EEF2FF] text-[#4F46E5] flex items-center justify-center shrink-0">
+                        <MapPin size={18} />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-gray-900 leading-tight">{pincode}</p>
+                        <p className="text-xs text-gray-500 leading-tight mt-0.5">{savedArea}</p>
+                      </div>
+                    </div>
+                    <button 
+                      onClick={() => setIsEditingPincode(true)}
+                      className="text-xs font-bold text-blue-600 hover:text-blue-800 transition"
+                    >
+                      Change
+                    </button>
                   </div>
                 )}
 
-                {/* Pincode Checker */}
-                <div className="mt-6 p-4 bg-gray-50 rounded-xl border border-gray-100">
-                  <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 block">Delivery Location</span>
-                  
-                  {savedArea ? (
-                    <div className="flex items-center justify-between bg-white p-3 rounded-lg border border-gray-200">
-                      <div className="flex items-start gap-3">
-                        <Truck className="w-5 h-5 text-blue-600 mt-0.5" />
-                        <div>
-                          <p className="text-sm font-bold text-gray-800">{pincode}</p>
-                          <p className="text-xs text-gray-500">{savedArea}</p>
-                        </div>
-                      </div>
-                      <button 
-                        onClick={handleChangePincode}
-                        className="text-xs font-bold text-blue-600 hover:text-blue-800 transition"
-                      >
-                        Change
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <input 
-                        type="text" 
-                        placeholder="Enter Pincode" 
-                        value={pincode}
-                        onChange={(e) => setPincode(e.target.value)}
-                        maxLength={6}
-                        className="flex-1 px-4 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                        disabled={isCheckingPincode}
-                      />
-                      <button 
-                        onClick={checkPincode}
-                        disabled={isCheckingPincode}
-                        className="px-4 py-2 bg-luxury-charcoal text-white text-sm font-bold rounded-lg hover:bg-black transition-colors disabled:opacity-50"
-                      >
-                        {isCheckingPincode ? "Checking..." : "Check"}
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-3 mt-4">
-                  <span className="text-xs font-bold text-gray-500 uppercase tracking-widest w-16">Delivery</span>
-                  {deliveryFee !== null ? (
-                    <span className="text-sm font-bold text-green-600">+ ₹{deliveryFee} <span className="text-xs font-medium text-gray-400 ml-1">(Standard)</span></span>
-                  ) : (
-                    <span className="text-sm font-bold text-gray-400">Calculated after Pincode</span>
-                  )}
-                </div>
-
-                <div className="pt-3 border-t border-gray-100 flex items-center gap-3">
-                  <span className="text-sm font-black text-gray-900 uppercase tracking-widest w-16">Total</span>
-                  <span className="text-4xl font-black text-luxury-charcoal">₹{(product.price * quantity) + (deliveryFee || 0)}</span>
-                </div>
-
-                {/* Delivery details card */}
-                <div className="pt-4 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500 font-medium">
-                  <div className="flex items-center gap-2">
-                    <Truck size={16} className="text-luxury-gold" />
-                    <span>Delhivery Shipping</span>
+                <div className="pt-3 border-t border-gray-100 flex items-center justify-between text-xs font-medium">
+                  <div className="flex items-center gap-2 text-emerald-700">
+                    <Truck size={15} />
+                    <span>Delivery <strong className="font-bold">₹99 (Standard)</strong></span>
                   </div>
-                  <div>
-                    <span>Delivery by <strong className="text-gray-800">{deliveryDateString}</strong></span>
+                  <div className="text-gray-500 text-[11px]">
+                    Estimated Delivery: <strong className="text-gray-800 font-bold">{deliveryDateString}</strong>
                   </div>
                 </div>
               </div>
 
-              {/* Description summary */}
-              <p className="mt-6 text-sm text-gray-600 leading-relaxed">
-                {product.description}
-              </p>
-
-              {/* Quantity Controls */}
-              <div className="flex items-center gap-4 bg-gray-50/80 p-1.5 rounded-2xl w-fit border border-gray-100 mt-8">
-                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider px-3">Quantity:</span>
-                <div className="flex items-center bg-white rounded-xl shadow-sm border border-gray-100">
+              {/* Quantity Selector and In-Stock Label */}
+              <div className="flex items-center gap-4 mb-6">
+                <div className="flex items-center border border-gray-300 rounded-none bg-white shadow-2xs">
                   <button 
                     onClick={handleDecreaseQuantity}
-                    className="w-10 h-10 flex items-center justify-center text-gray-500 hover:text-luxury-charcoal hover:bg-gray-50 rounded-l-xl transition"
+                    className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-none transition font-bold"
                   >
                     -
                   </button>
-                  <span className="w-10 text-center font-bold text-sm text-gray-900">{quantity}</span>
+                  <span className="w-9 text-center font-bold text-sm text-gray-900">{quantity}</span>
                   <button 
                     onClick={handleIncreaseQuantity}
-                    className="w-10 h-10 flex items-center justify-center text-gray-500 hover:text-luxury-charcoal hover:bg-gray-50 rounded-r-xl transition"
+                    className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-none transition font-bold"
                   >
                     +
                   </button>
                 </div>
+
+                <div className="text-xs text-emerald-600 font-semibold flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 bg-emerald-500 rounded-none"></span>
+                  <span>In Stock (24 items)</span>
+                </div>
               </div>
+
+              {/* CTA Action Buttons matching screenshot */}
+              <div className="space-y-3">
+                {/* Row 1: Add to Cart & Buy Now */}
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleAddToCart}
+                    className="flex-1 flex items-center justify-center gap-2 py-3.5 px-6 bg-[#0F2920] hover:bg-[#183E31] text-white rounded-none font-bold uppercase tracking-wider text-xs shadow-md transition transform active:scale-95 duration-200"
+                  >
+                    <ShoppingCart size={16} />
+                    <span>Add to Cart</span>
+                  </button>
+                  
+                  <button
+                    onClick={handleBuyNow}
+                    className="flex-1 flex items-center justify-center gap-2 py-3.5 px-6 bg-[#EDF4F0] hover:bg-[#E2EDE6] text-[#0F2920] border border-[#CDE0D5] rounded-none font-bold uppercase tracking-wider text-xs transition transform active:scale-95 duration-200"
+                  >
+                    <Zap size={16} />
+                    <span>Buy Now</span>
+                  </button>
+                </div>
+
+                {/* Row 2: WhatsApp Inquiry & Call Support */}
+                <div className="grid grid-cols-2 gap-3">
+                  <a
+                    href={`https://wa.me/918121135980?text=Hello, I would like to inquire about: ${product.title || product.name}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 py-2.5 px-4 bg-[#EDF8F1] hover:bg-[#E1F3E7] text-[#1E7E34] border border-[#D1EEDB] rounded-none font-bold uppercase tracking-wider text-[11px] transition"
+                  >
+                    <MessageCircle size={15} />
+                    <span>WhatsApp Inquiry</span>
+                  </a>
+
+                  <a
+                    href="tel:+918121135980"
+                    className="flex items-center justify-center gap-2 py-2.5 px-4 bg-[#F9F7F2] hover:bg-[#F2EEE4] text-[#4A4036] border border-[#EBE6DC] rounded-none font-bold uppercase tracking-wider text-[11px] transition"
+                  >
+                    <Phone size={15} />
+                    <span>Call Support</span>
+                  </a>
+                </div>
+              </div>
+
             </div>
-
-            {/* Premium CTA Buttons */}
-            <div className="mt-8 space-y-3">
-              <div className="flex gap-3">
-                <button
-                  onClick={handleAddToCart}
-                  className="flex-1 flex items-center justify-center gap-2 py-4 px-6 bg-white hover:bg-luxury-warmGray border border-gray-200 text-luxury-charcoal rounded-full font-bold uppercase tracking-wider text-xs shadow-sm transition transform hover:-translate-y-0.5 duration-300"
-                >
-                  <ShoppingCart size={18} />
-                  <span>Add to Cart</span>
-                </button>
-                
-                <button
-                  onClick={handleBuyNow}
-                  className="flex-1 flex items-center justify-center gap-2 py-4 px-6 bg-luxury-charcoal hover:bg-luxury-gold text-white rounded-full font-bold uppercase tracking-wider text-xs shadow-md transition transform hover:-translate-y-0.5 duration-300"
-                >
-                  <Zap size={18} />
-                  <span>Buy Now</span>
-                </button>
-              </div>
-
-              {/* Contact panel */}
-              <div className="grid grid-cols-2 gap-2">
-                <a
-                  href={`https://wa.me/918121135980?text=Hello, I would like to inquire about: ${product.title}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 py-3 px-4 bg-green-50/50 hover:bg-green-50 text-green-700 rounded-full font-bold uppercase tracking-wider text-[10px] border border-green-100/50 transition"
-                >
-                  <MessageCircle size={14} />
-                  <span>WhatsApp Inquiry</span>
-                </a>
-                <a
-                  href="tel:+918121135980"
-                  className="flex items-center justify-center gap-2 py-3 px-4 bg-luxury-warmGray/50 hover:bg-luxury-warmGray text-luxury-charcoal rounded-full font-bold uppercase tracking-wider text-[10px] border border-gray-200/50 transition"
-                >
-                  <Phone size={14} />
-                  <span>Call Support</span>
-                </a>
-              </div>
-            </div>
-
           </div>
         </div>
 
-        {/* Horizontal Luxury Highlights Panel */}
-        <div className="py-12 border-b border-gray-200 grid grid-cols-2 md:grid-cols-4 gap-6">
-          <div className="p-4 bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col items-center text-center space-y-2">
-            <div className="w-10 h-10 rounded-full bg-luxury-cream text-luxury-gold flex items-center justify-center">
-              <Award size={18} />
-            </div>
-            <span className="text-xs font-bold text-gray-900">Premium Quality</span>
-            <span className="text-[10px] text-gray-400 font-medium">100% Certified</span>
+        {/* 4 Trust Badges Row (spanning full width with hairline dividers) */}
+        <div className="bg-white rounded-none border border-gray-200/80 shadow-xs my-4 py-3.5 px-6 grid grid-cols-2 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-gray-200/60">
+          <div className="flex flex-col items-center text-center p-2.5">
+            <User2 className="w-5 h-5 text-gray-700 mb-1" strokeWidth={1.75} />
+            <span className="text-xs font-bold text-gray-900 leading-tight">Premium Quality</span>
+            <span className="text-[11px] text-gray-400 font-medium leading-tight mt-0.5">100% Certified</span>
           </div>
 
-          <div className="p-4 bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col items-center text-center space-y-2">
-            <div className="w-10 h-10 rounded-full bg-green-50 text-green-600 flex items-center justify-center">
-              <Truck size={18} />
-            </div>
-            <span className="text-xs font-bold text-gray-900">Fast Delivery</span>
-            <span className="text-[10px] text-gray-400 font-medium">Safely Packaged</span>
+          <div className="flex flex-col items-center text-center p-2.5">
+            <Truck className="w-5 h-5 text-gray-700 mb-1" strokeWidth={1.75} />
+            <span className="text-xs font-bold text-gray-900 leading-tight">Fast Delivery</span>
+            <span className="text-[11px] text-gray-400 font-medium leading-tight mt-0.5">Pan India</span>
           </div>
 
-          <div className="p-4 bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col items-center text-center space-y-2">
-            <div className="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center">
-              <X size={18} />
-            </div>
-            <span className="text-xs font-bold text-gray-900">No Returns</span>
-            <span className="text-[10px] text-gray-400 font-medium">No Exchange</span>
+          <div className="flex flex-col items-center text-center p-2.5">
+            <RotateCcw className="w-5 h-5 text-gray-700 mb-1" strokeWidth={1.75} />
+            <span className="text-xs font-bold text-gray-900 leading-tight">No Returns</span>
+            <span className="text-[11px] text-gray-400 font-medium leading-tight mt-0.5">No Exchange</span>
           </div>
 
-          <div className="p-4 bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col items-center text-center space-y-2">
-            <div className="w-10 h-10 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center">
-              <CreditCard size={18} />
-            </div>
-            <span className="text-xs font-bold text-gray-900">Secure Payments</span>
-            <span className="text-[10px] text-gray-400 font-medium">Fully Encrypted</span>
+          <div className="flex flex-col items-center text-center p-2.5">
+            <Lock className="w-5 h-5 text-gray-700 mb-1" strokeWidth={1.75} />
+            <span className="text-xs font-bold text-gray-900 leading-tight">Secure Payments</span>
+            <span className="text-[11px] text-gray-400 font-medium leading-tight mt-0.5">100% Encrypted</span>
           </div>
         </div>
 
-        {/* Premium Information Tabs */}
-        <div className="py-16 border-b border-gray-200">
-          <div className="flex border-b border-gray-200 overflow-x-auto space-x-8">
-            {["description", "specifications", "materials", "shipping"].map((tab) => (
+        {/* Tab Navigation matching screenshot */}
+        <div className="pt-6 border-b border-gray-200/80">
+          <div className="flex space-x-8 overflow-x-auto no-scrollbar">
+            {[
+              { id: "description", label: "Description" },
+              { id: "specifications", label: "Specifications" },
+              { id: "materials", label: "Materials" },
+              { id: "shipping", label: "Shipping & Delivery" }
+            ].map((tab) => (
               <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`pb-4 text-sm font-bold uppercase tracking-wider transition border-b-2 whitespace-nowrap ${
-                  activeTab === tab ? 'border-luxury-gold text-gray-900' : 'border-transparent text-gray-400 hover:text-gray-600'
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`pb-3 text-sm font-bold tracking-normal transition-all border-b-2 whitespace-nowrap ${
+                  activeTab === tab.id 
+                    ? "border-[#0F2920] text-[#0F2920]" 
+                    : "border-transparent text-gray-400 hover:text-gray-600"
                 }`}
               >
-                {tab}
+                {tab.label}
               </button>
             ))}
           </div>
+        </div>
 
-          <div className="mt-8 prose prose-sm max-w-none text-gray-600 leading-relaxed font-sans">
-            {activeTab === "description" && (
-              <div className="space-y-4">
-                <h4 className="text-lg font-bold text-gray-900">Elegant Craftsmanship & Luxury Aesthetics</h4>
-                <p>{product.description}</p>
-                <p>This premium collection highlights our dedication to creating beautiful, lasting decorative elements for your home. Made with precision and passion, this piece will bring style and refinement to any interior layout.</p>
+        {/* Tab Content 1: Description Section (2 Columns with Feature Badges & Lifestyle Card) */}
+        {activeTab === "description" && (
+          <div className="py-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+            {/* Left Description Column */}
+            <div className="lg:col-span-7 space-y-4">
+              <span className="text-[11px] font-bold tracking-[0.2em] text-[#9A7B66] uppercase block">
+                Premium Collection
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-serif font-bold text-gray-900 leading-tight">
+                Elegant Craftsmanship<br className="hidden sm:block" /> &amp; Luxury Aesthetics
+              </h2>
+              <p className="text-sm text-gray-600 leading-relaxed max-w-xl">
+                {product.description || "Elegant insulated flask/mug, designed for leakproof travel. Perfect for coffee, tea, and other hot/cold beverages on the go."} This premium collection highlights our dedication to creating beautiful, lasting decorative elements for your home. Made with precision and passion, this piece will bring style and refinement to any interior layout.
+              </p>
+
+              {/* 4 Feature Badges (2x2 Grid) */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4">
+                <div className="p-3 bg-white rounded-none border border-gray-200/70 shadow-2xs flex flex-col justify-between">
+                  <div className="w-8 h-8 rounded-none bg-amber-50 text-amber-600 flex items-center justify-center mb-2">
+                    <Flame size={16} />
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold text-gray-900 block leading-tight">Keeps Hot &amp; Cold</span>
+                    <span className="text-[10px] text-gray-400 font-medium">for Long Hours</span>
+                  </div>
+                </div>
+
+                <div className="p-3 bg-white rounded-none border border-gray-200/70 shadow-2xs flex flex-col justify-between">
+                  <div className="w-8 h-8 rounded-none bg-blue-50 text-blue-600 flex items-center justify-center mb-2">
+                    <Droplets size={16} />
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold text-gray-900 block leading-tight">Leak Proof</span>
+                    <span className="text-[10px] text-gray-400 font-medium">Design</span>
+                  </div>
+                </div>
+
+                <div className="p-3 bg-white rounded-none border border-gray-200/70 shadow-2xs flex flex-col justify-between">
+                  <div className="w-8 h-8 rounded-none bg-emerald-50 text-emerald-700 flex items-center justify-center mb-2">
+                    <Shield size={16} />
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold text-gray-900 block leading-tight">304 Stainless Steel</span>
+                    <span className="text-[10px] text-gray-400 font-medium">Food Grade</span>
+                  </div>
+                </div>
+
+                <div className="p-3 bg-white rounded-none border border-gray-200/70 shadow-2xs flex flex-col justify-between">
+                  <div className="w-8 h-8 rounded-none bg-purple-50 text-purple-600 flex items-center justify-center mb-2">
+                    <Coffee size={16} />
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold text-gray-900 block leading-tight">Portable &amp; Travel</span>
+                    <span className="text-[10px] text-gray-400 font-medium">With Cup Lid</span>
+                  </div>
+                </div>
               </div>
-            )}
+            </div>
 
-            {activeTab === "specifications" && (
-              <div className="max-w-2xl bg-white border border-gray-100 rounded-3xl overflow-hidden shadow-sm">
-                <table className="w-full text-left border-collapse text-xs">
+            {/* Right Lifestyle Banner Column matching screenshot */}
+            <div className="lg:col-span-5">
+              <div className="relative rounded-none overflow-hidden aspect-[16/10] shadow-md border border-gray-200 group">
+                <img
+                  src="/images/flask_lifestyle_banner.jpg"
+                  alt="Stay Refreshed Anywhere"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/20 p-6 sm:p-8 flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-2xl font-serif font-bold text-white leading-tight mb-1">
+                      Stay Refreshed<br />Anywhere
+                    </h3>
+                    <p className="text-xs text-white/80 max-w-xs">
+                      Premium design for your everyday essentials.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <span className="bg-black/60 backdrop-blur-md text-white border border-white/20 px-3 py-1.5 rounded-none text-xs font-bold flex items-center gap-1.5">
+                      <Flame size={13} className="text-red-400 fill-red-400" />
+                      <span>HOT 12 Hours</span>
+                    </span>
+                    <span className="bg-black/60 backdrop-blur-md text-white border border-white/20 px-3 py-1.5 rounded-none text-xs font-bold flex items-center gap-1.5">
+                      <Droplets size={13} className="text-cyan-300" />
+                      <span>COLD 24 Hours</span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Tab Content 2: Specifications Section (Table + Diamond Collection Banner) */}
+        {activeTab === "specifications" && (
+          <div className="py-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+            {/* Left: Specifications Table */}
+            <div className="lg:col-span-7">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-gray-900">Specifications</h3>
+                <span className="text-xs font-bold text-[#0F2920] flex items-center gap-1 hover:underline cursor-pointer">
+                  View More Details &rarr;
+                </span>
+              </div>
+
+              <div className="bg-white rounded-none border border-gray-200/80 overflow-hidden shadow-2xs">
+                <table className="w-full text-left text-xs">
                   <tbody>
-                    <tr className="border-b border-gray-50 bg-gray-50/50">
-                      <td className="px-6 py-4 font-bold text-gray-500 w-1/3">Category</td>
-                      <td className="px-6 py-4 text-gray-900">{product.category}</td>
-                    </tr>
-                    <tr className="border-b border-gray-50">
-                      <td className="px-6 py-4 font-bold text-gray-500">Weight</td>
-                      <td className="px-6 py-4 text-gray-900">Premium heavy-duty grade (Variable by size)</td>
-                    </tr>
-                    <tr className="border-b border-gray-50 bg-gray-50/50">
-                      <td className="px-6 py-4 font-bold text-gray-500">Finish</td>
-                      <td className="px-6 py-4 text-gray-900">High gloss luxury finish</td>
-                    </tr>
-                    <tr>
-                      <td className="px-6 py-4 font-bold text-gray-500">Compatibility</td>
-                      <td className="px-6 py-4 text-gray-900">Fully certified for premium household usage</td>
-                    </tr>
+                    {productSpecs.map((spec, i) => (
+                      <tr 
+                        key={i} 
+                        className={`border-b last:border-0 border-gray-100 ${i % 2 === 0 ? "bg-gray-50/60" : "bg-white"}`}
+                      >
+                        <td className="px-5 py-3.5 font-bold text-gray-500 w-1/3">{spec.label}</td>
+                        <td className="px-5 py-3.5 font-medium text-gray-900">{spec.value}</td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
-            )}
+            </div>
 
-            {activeTab === "materials" && (
-              <div className="space-y-4">
-                <h4 className="text-lg font-bold text-gray-900 font-sans">Only The Finest Materials</h4>
-                <p>Constructed with eco-friendly and robust, food-grade materials that guarantee structural integrity and long durability under regular household usage.</p>
-              </div>
-            )}
-
-            {activeTab === "shipping" && (
-              <div className="space-y-4">
-                <h4 className="text-lg font-bold text-gray-900">Reliable Logistics Network</h4>
-                <p>We deliver using professional high-security transport partners. The product is securely packaged inside specialized heavy-duty boxes to prevent damages during transit.</p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Customer Reviews Section */}
-        <div className="py-16 border-b border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-900 tracking-tight mb-8 flex items-center gap-2">
-            <span>Customer Reviews & Verification</span>
-            <span className="text-xs font-semibold px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-100 flex items-center gap-1">
-              <ShieldCheck size={12} /> Verified Reviews Only
-            </span>
-          </h2>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-            
-            {/* Reviews Breakdown card */}
-            <div className="lg:col-span-1 space-y-6">
-              <div className="p-6 bg-white border border-gray-100 rounded-3xl shadow-sm">
-                <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Overall Score</h3>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-6xl font-black text-gray-900">{avgRating || "0.0"}</span>
-                  <span className="text-sm font-bold text-gray-400">out of 5</span>
+            {/* Right: Diamond Collection Promo Card */}
+            <div className="lg:col-span-5">
+              <div className="relative rounded-none overflow-hidden aspect-[16/10] shadow-md border border-gray-200 group">
+                <img
+                  src="/images/diamond_collection_banner.jpg"
+                  alt="Diamond Collection"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent p-6 sm:p-8 flex flex-col justify-center">
+                  <span className="text-xs font-extrabold tracking-widest uppercase text-amber-300 mb-1">
+                    DIAMOND COLLECTION
+                  </span>
+                  <div className="w-10 h-0.5 bg-amber-300 mb-3" />
+                  <p className="text-xs text-white/90 max-w-xs font-medium">
+                    Premium design for your everyday essentials.
+                  </p>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
 
-                <div className="flex items-center text-amber-500 mt-3 mb-6">
+        {/* Tab Content 3: Materials Section */}
+        {activeTab === "materials" && (
+          <div className="py-10 max-w-3xl space-y-4">
+            <h3 className="text-xl font-serif font-bold text-gray-900">Only The Finest Materials</h3>
+            <p className="text-sm text-gray-600 leading-relaxed">
+              Constructed with eco-friendly and robust, food-grade 304 Stainless Steel that guarantees structural integrity, superior thermal retention, and long durability under regular household usage.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
+              <div className="p-4 bg-white rounded-none border border-gray-200/80 shadow-2xs">
+                <ShieldCheck className="w-6 h-6 text-emerald-700 mb-2" />
+                <h4 className="text-xs font-bold text-gray-900 mb-1">BPA-Free Certified</h4>
+                <p className="text-[11px] text-gray-500">100% non-toxic and food contact safe.</p>
+              </div>
+              <div className="p-4 bg-white rounded-none border border-gray-200/80 shadow-2xs">
+                <Award className="w-6 h-6 text-emerald-700 mb-2" />
+                <h4 className="text-xs font-bold text-gray-900 mb-1">304 Stainless Steel</h4>
+                <p className="text-[11px] text-gray-500">Rust-proof and odor-resistant interior.</p>
+              </div>
+              <div className="p-4 bg-white rounded-none border border-gray-200/80 shadow-2xs">
+                <Flame className="w-6 h-6 text-emerald-700 mb-2" />
+                <h4 className="text-xs font-bold text-gray-900 mb-1">Double Wall Vacuum</h4>
+                <p className="text-[11px] text-gray-500">Sweat-free exterior with extreme temperature lock.</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Tab Content 4: Shipping & Delivery Section */}
+        {activeTab === "shipping" && (
+          <div className="py-10 max-w-3xl space-y-4">
+            <h3 className="text-xl font-serif font-bold text-gray-900">Reliable Logistics Network</h3>
+            <p className="text-sm text-gray-600 leading-relaxed">
+              We deliver using professional high-security transport partners (Delhivery, BlueDart, DTDC). Each item is securely packaged inside specialized heavy-duty boxes with multi-layer bubble wrap to guarantee safe arrival.
+            </p>
+            <div className="bg-white p-5 rounded-none border border-gray-200/80 shadow-2xs space-y-2 text-xs text-gray-600">
+              <div className="flex items-center gap-2 font-bold text-gray-900">
+                <CheckCircle size={15} className="text-emerald-600" />
+                <span>Dispatched within 24–48 hours of order confirmation.</span>
+              </div>
+              <div className="flex items-center gap-2 font-bold text-gray-900">
+                <CheckCircle size={15} className="text-emerald-600" />
+                <span>Real-time SMS and WhatsApp tracking updates.</span>
+              </div>
+              <div className="flex items-center gap-2 font-bold text-gray-900">
+                <CheckCircle size={15} className="text-emerald-600" />
+                <span>Pan India standard delivery within 3–6 business days.</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Customer Reviews & Verification Section matching screenshot */}
+        <div className="py-12 border-t border-gray-200/80">
+          <div className="flex items-center gap-3 mb-6">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Customer Reviews &amp; Verification</h2>
+            <span className="text-[11px] font-bold px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-none border border-emerald-200 flex items-center gap-1">
+              <span className="w-1.5 h-1.5 bg-emerald-500 rounded-none"></span>
+              Verified Reviews Only
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            {/* Left Rating Summary Card */}
+            <div className="lg:col-span-6 bg-white p-6 sm:p-7 rounded-none border border-gray-200/80 shadow-2xs space-y-5">
+              <div>
+                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-2">Overall Score</span>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-5xl font-extrabold text-gray-900">{avgRating ? avgRating.toFixed(1) : "0.0"}</span>
+                  <span className="text-xs font-bold text-gray-400">out of 5</span>
+                </div>
+                <div className="flex items-center text-gray-200 mt-2 mb-4">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <Star
                       key={star}
-                      size={20}
-                      className={`${
-                        star <= Math.round(avgRating) ? "fill-amber-500 text-amber-500" : "text-gray-200"
-                      }`}
+                      size={18}
+                      className={star <= Math.round(avgRating) ? "fill-amber-400 text-amber-400" : "text-gray-200"}
                     />
-                  ))}
-                </div>
-
-                {/* Progress bars */}
-                <div className="space-y-3">
-                  {[5, 4, 3, 2, 1].map((rating) => (
-                    <div key={rating} className="flex items-center text-xs text-gray-500 font-semibold">
-                      <span className="w-8">{rating} star</span>
-                      <div className="flex-1 h-2.5 bg-gray-100 rounded-full mx-3 overflow-hidden">
-                        <div
-                          className="h-full bg-luxury-gold rounded-full transition-all"
-                          style={{ width: `${ratingPercentages[rating as 5|4|3|2|1] || 0}%` }}
-                        ></div>
-                      </div>
-                      <span className="w-8 text-right">
-                        {ratingPercentages[rating as 5|4|3|2|1] || 0}%
-                      </span>
-                    </div>
                   ))}
                 </div>
               </div>
 
-              {/* Conditional authorization badge */}
-              {!isAuthenticated ? (
-                <div className="p-6 border-2 border-dashed border-gray-200 rounded-3xl bg-gray-50/50 text-center space-y-3">
-                  <span className="text-3xl block">🔒</span>
-                  <h4 className="font-bold text-gray-800 text-sm">Sign In to Review</h4>
-                  <p className="text-gray-400 text-xs leading-relaxed max-w-xs mx-auto">
-                    Please log in to your customer account to rate and submit comments about this product.
-                  </p>
-                  <button
-                    onClick={() => navigate('/login', { state: { from: location } })}
-                    className="w-full py-2.5 px-4 bg-luxury-charcoal hover:bg-luxury-gold text-white rounded-xl font-bold text-xs shadow-md transition"
-                  >
-                    Log In Now
-                  </button>
+              {/* Progress Bars (5 Star to 1 Star) */}
+              <div className="space-y-2.5">
+                {[5, 4, 3, 2, 1].map((r) => (
+                  <div key={r} className="flex items-center text-xs text-gray-500 font-medium">
+                    <span className="w-12">{r} star</span>
+                    <div className="flex-1 h-2 bg-gray-100 rounded-none mx-3 overflow-hidden">
+                      <div 
+                        className="h-full bg-emerald-700 rounded-none transition-all duration-500"
+                        style={{ width: `${ratingPercentages[r as 5|4|3|2|1] || 0}%` }}
+                      />
+                    </div>
+                    <span className="w-8 text-right text-gray-400 font-semibold">{ratingPercentages[r as 5|4|3|2|1] || 0}%</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Review Restricted Badge Notice */}
+              <div className="p-4 bg-[#FDF3F3] rounded-none border border-[#FADBD8] flex items-start gap-3">
+                <div className="w-8 h-8 rounded-none bg-[#FCE8E8] text-[#D32F2F] flex items-center justify-center shrink-0">
+                  <ShieldCheck size={16} />
                 </div>
-              ) : !hasBoughtProduct ? (
-                <div className="p-6 border border-dashed border-red-200 rounded-3xl bg-red-50/20 text-center space-y-3">
-                  <span className="text-3xl block">🛍️</span>
-                  <h4 className="font-bold text-red-800 text-sm">Review Restricted</h4>
-                  <p className="text-gray-400 text-xs leading-relaxed max-w-xs mx-auto">
+                <div>
+                  <h4 className="text-xs font-extrabold text-[#D32F2F] leading-tight">Review Restricted</h4>
+                  <p className="text-[11px] text-gray-500 leading-relaxed mt-0.5">
                     To maintain strict authenticity, only customers who have verified purchase history for this item can write feedback.
                   </p>
                 </div>
-              ) : (
-                <div className="p-6 bg-white border border-gray-100 rounded-3xl shadow-md">
-                  <h3 className="font-extrabold text-gray-900 text-sm mb-4">Write your Review</h3>
-                  <form onSubmit={handleReviewSubmit} className="space-y-4">
-                    <div>
-                      <label className="block text-xs font-bold text-gray-700 mb-1">Your Name</label>
-                      <input
-                        type="text"
-                        required
-                        value={formName}
-                        onChange={(e) => setFormName(e.target.value)}
-                        placeholder="Enter full name"
-                        className="w-full px-4 py-2 border rounded-xl text-xs focus:ring-2 focus:ring-luxury-gold/50 focus:border-luxury-gold outline-none"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-gray-700 mb-1">Your Rating</label>
-                      <div className="flex items-center gap-1.5 py-1">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <button
-                            type="button"
-                            key={star}
-                            onClick={() => setFormRating(star)}
-                            className="text-yellow-400 hover:scale-110 active:scale-95 transition-transform"
-                          >
-                            <Star
-                              size={24}
-                              className={`${star <= formRating ? "fill-yellow-400 text-yellow-400" : "text-gray-200"}`}
-                            />
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-gray-700 mb-1">Review Comments</label>
-                      <textarea
-                        required
-                        rows={3}
-                        value={formComment}
-                        onChange={(e) => setFormComment(e.target.value)}
-                        placeholder="Share your experience..."
-                        className="w-full px-4 py-2 border rounded-xl text-xs focus:ring-2 focus:ring-luxury-gold/50 focus:border-luxury-gold outline-none"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-gray-700 mb-1">Upload Delivery Pic</label>
-                      <div className="mt-1 flex flex-col items-center justify-center border border-dashed rounded-xl p-4 bg-gray-50 hover:bg-gray-100 relative cursor-pointer">
-                        {imagePreview ? (
-                          <div className="relative w-full h-32 flex items-center justify-center">
-                            <img src={imagePreview} alt="Preview" className="max-h-full max-w-full object-contain rounded-lg shadow" />
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setImagePreview("");
-                                setFormImage("");
-                              }}
-                              className="absolute top-0 right-0 bg-red-600 text-white rounded-full p-1 shadow hover:bg-red-700 transition"
-                            >
-                              <X size={14} />
-                            </button>
-                          </div>
-                        ) : (
-                          <>
-                            <Camera className="w-6 h-6 text-gray-400 mb-1 animate-pulse" />
-                            <span className="text-[10px] text-gray-500 font-semibold text-center">Click to select photo</span>
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={handleImageChange}
-                              className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                            />
-                          </>
-                        )}
-                      </div>
-                    </div>
-
-                    <button
-                      type="submit"
-                      className="w-full py-2.5 px-4 bg-luxury-charcoal hover:bg-luxury-gold text-white font-bold rounded-xl shadow-md transition"
-                    >
-                      Submit Review
-                    </button>
-                  </form>
-                </div>
-              )}
+              </div>
             </div>
 
-            {/* Customer reviews list */}
-            <div className="lg:col-span-2 space-y-6">
-              {displayedReviews.length === 0 ? (
-                <div className="text-center py-16 bg-white border border-gray-100 rounded-3xl shadow-sm">
-                  <p className="text-gray-400 font-semibold text-sm">No reviews yet. Be the first to share your feedback!</p>
+            {/* Right: Empty State or Reviews Display */}
+            <div className="lg:col-span-6 bg-white p-6 sm:p-7 rounded-none border border-gray-200/80 shadow-2xs flex flex-col items-center justify-center text-center">
+              {reviews.length === 0 ? (
+                <div className="space-y-4 py-8">
+                  <div className="w-12 h-12 rounded-none bg-gray-50 text-gray-400 flex items-center justify-center mx-auto border border-gray-200/60">
+                    <FileText size={22} />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-gray-800">No reviews yet.</h3>
+                    <p className="text-xs text-gray-400 mt-1">Be the first to share your feedback!</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      if (!isAuthenticated) {
+                        toast.error("Please sign in to write a review");
+                        navigate('/login', { state: { from: location } });
+                      } else {
+                        setIsReviewModalOpen(true);
+                      }
+                    }}
+                    className="px-8 py-3 bg-[#0F2920] hover:bg-[#183E31] text-white rounded-none font-bold uppercase tracking-wider text-xs shadow-md transition active:scale-95"
+                  >
+                    Write a Review
+                  </button>
                 </div>
               ) : (
-                <div className="space-y-6">
-                  {displayedReviews.map((review) => (
-                    <div
-                      key={review.id}
-                      className="p-6 bg-white border border-gray-100 rounded-3xl shadow-sm space-y-4 hover:shadow-md transition"
+                <div className="w-full space-y-4 text-left">
+                  <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+                    <span className="text-xs font-bold text-gray-900">{reviews.length} Customer Feedback</span>
+                    <button
+                      onClick={() => setIsReviewModalOpen(true)}
+                      className="text-xs font-bold text-[#0F2920] hover:underline"
                     >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-luxury-warmGray text-luxury-gold flex items-center justify-center font-bold">
-                            <User2 size={18} />
-                          </div>
-                          <div>
-                            <h4 className="font-bold text-gray-900 text-sm">{review.name}</h4>
-                            <span className="text-[10px] text-gray-400 font-medium">Verified Buyer • {review.date}</span>
-                          </div>
+                      + Add Review
+                    </button>
+                  </div>
+                  <div className="max-h-72 overflow-y-auto space-y-3 pr-2">
+                    {reviews.map((rev) => (
+                      <div key={rev.id} className="p-3 bg-gray-50 rounded-none border border-gray-100 space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold text-gray-900">{rev.name}</span>
+                          <span className="text-[10px] text-gray-400">{rev.date}</span>
                         </div>
-
-                        <div className="flex items-center gap-0.5 text-amber-500 bg-amber-50/50 px-2 py-1 rounded-lg">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <Star
-                              key={star}
-                              size={12}
-                              className={`${star <= review.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-200"}`}
-                            />
+                        <div className="flex items-center text-amber-400">
+                          {[1, 2, 3, 4, 5].map((s) => (
+                            <Star key={s} size={11} className={s <= rev.rating ? "fill-current" : "text-gray-200"} />
                           ))}
                         </div>
+                        <p className="text-xs text-gray-600">{rev.comment}</p>
                       </div>
-
-                      <p className="text-xs md:text-sm text-gray-600 leading-relaxed font-sans">
-                        {review.comment}
-                      </p>
-
-                      {review.image && (
-                        <div className="pt-2">
-                          <p className="text-[10px] font-bold text-gray-400 mb-1.5 flex items-center gap-1">
-                            <CheckCircle size={12} className="text-green-600" />
-                            <span>Customer Photo:</span>
-                          </p>
-                          <div className="relative w-28 h-28 overflow-hidden rounded-2xl shadow-sm cursor-zoom-in border border-gray-200 bg-gray-50 group">
-                            <img
-                              src={review.image}
-                              alt="Review Pic"
-                              className="w-full h-full object-cover transition group-hover:scale-105"
-                              onClick={() => setActiveLightboxImage(review.image || null)}
-                            />
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
-
           </div>
         </div>
 
-        {/* Premium Related Products Section */}
+        {/* Related Masterpieces Section matching screenshot */}
         {relatedProducts.length > 0 && (
-          <div className="py-16">
-            <h2 className="text-2xl font-bold text-gray-900 tracking-tight mb-8">Related Masterpieces</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {relatedProducts.map((p) => {
-                const discount = p.actualPrice && p.price ? Math.round(((p.actualPrice - p.price) / p.actualPrice) * 100) : 0;
+          <div className="py-12 border-t border-gray-200/80">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">Related Masterpieces</h2>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => scrollRelated("left")}
+                  className="w-8 h-8 rounded-none bg-white hover:bg-gray-100 border border-gray-200 shadow-2xs flex items-center justify-center text-gray-700 transition"
+                  title="Previous"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+                <button
+                  onClick={() => scrollRelated("right")}
+                  className="w-8 h-8 rounded-none bg-white hover:bg-gray-100 border border-gray-200 shadow-2xs flex items-center justify-center text-gray-700 transition"
+                  title="Next"
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            </div>
+
+            {/* Horizontal Scrollable Carousel of 5 Cards */}
+            <div 
+              ref={relatedScrollRef}
+              className="flex gap-4 overflow-x-auto pb-4 no-scrollbar scroll-smooth"
+            >
+              {relatedProducts.map((relProduct, idx) => {
+                const relActualPrice = relProduct.actualPrice || (relProduct["act-price"] as number) || (relProduct.price ? Math.round(relProduct.price * 1.3) : 0);
+                const relDiscount = relActualPrice && relProduct.price && relActualPrice > relProduct.price
+                  ? Math.round(((relActualPrice - relProduct.price) / relActualPrice) * 100)
+                  : 25;
+
                 return (
                   <div
-                    key={p.id}
-                    onClick={() => {
-                      navigate(`/product/${encodeURIComponent(p.id)}`, { state: p });
-                      window.scrollTo(0, 0);
-                    }}
-                    className="p-4 bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition cursor-pointer flex flex-col justify-between group"
+                    key={relProduct.id || idx}
+                    onClick={() => navigate(`/product/${encodeURIComponent(relProduct.id)}`, { state: relProduct })}
+                    className="w-56 sm:w-64 shrink-0 bg-white rounded-none border border-gray-200/80 p-3.5 hover:shadow-md transition-all duration-300 flex flex-col justify-between cursor-pointer group"
                   >
-                    <div className="relative overflow-hidden rounded-2xl bg-[#f8f8f7] aspect-square flex items-center justify-center p-4">
-                      <img src={p.image} alt={p.title} className="max-h-full max-w-full object-contain transition duration-300 group-hover:scale-105" />
-                      {discount > 0 && (
-                        <span className="absolute top-3 left-3 bg-red-500 text-white px-2 py-0.5 rounded-full text-[9px] font-bold">
-                          {discount}% Off
-                        </span>
-                      )}
+                    <div>
+                      {/* Heart Wishlist */}
+                      <div className="flex justify-end mb-1">
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toast.success("Saved to wishlist!");
+                          }}
+                          className="text-gray-300 hover:text-red-500 transition p-1"
+                        >
+                          <Heart size={16} />
+                        </button>
+                      </div>
+
+                      {/* Image */}
+                      <div className="aspect-square rounded-none bg-[#FAF8F5] p-2 flex items-center justify-center overflow-hidden mb-3 border border-gray-100">
+                        <img
+                          src={relProduct.image}
+                          alt={relProduct.title || relProduct.name}
+                          className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                        />
+                      </div>
+
+                      {/* Rating: ★ 4.5 (10) */}
+                      <div className="flex items-center gap-1 text-[11px] text-amber-500 mb-1.5">
+                        <div className="flex items-center">
+                          {[1, 2, 3, 4, 5].map((s) => (
+                            <Star key={s} size={11} className={s <= 4 ? "fill-amber-400 text-amber-400" : "text-gray-200"} />
+                          ))}
+                        </div>
+                        <span className="font-bold text-gray-800">4.5</span>
+                        <span className="text-gray-400 font-normal">(10)</span>
+                      </div>
+
+                      {/* Title */}
+                      <h4 className="text-xs font-bold text-gray-900 line-clamp-2 min-h-[32px] leading-tight mb-2 group-hover:text-emerald-900 transition-colors">
+                        {relProduct.title || relProduct.name}
+                      </h4>
                     </div>
 
-                    <div className="mt-4 space-y-1">
-                      <span className="text-[9px] uppercase font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
-                        {p.category}
-                      </span>
-                      <h4 className="font-bold text-gray-900 text-xs md:text-sm truncate group-hover:text-blue-600 transition pt-1">
-                        {p.title}
-                      </h4>
-                      <div className="flex items-baseline gap-1.5 pt-1">
-                        <span className="text-xs md:text-sm font-black text-gray-900">₹{p.price}</span>
-                        {p.actualPrice && p.actualPrice > p.price && (
-                          <span className="text-[10px] text-gray-400 line-through">₹{p.actualPrice}</span>
+                    <div>
+                      {/* Price & Discount */}
+                      <div className="flex items-baseline gap-1.5 mb-3">
+                        <span className="text-sm font-extrabold text-gray-900">₹{relProduct.price}</span>
+                        {relActualPrice > relProduct.price && (
+                          <span className="text-[10px] text-gray-400 line-through">₹{relActualPrice}</span>
                         )}
+                        <span className="text-[10px] font-bold text-[#D32F2F]">
+                          {relDiscount}% OFF
+                        </span>
+                      </div>
+
+                      {/* Action Buttons matching screenshot */}
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            addToCart({
+                              id: relProduct.id,
+                              name: relProduct.title || relProduct.name,
+                              price: relProduct.price,
+                              image: relProduct.image,
+                              quantity: 1
+                            });
+                            toast.success("Added to cart!");
+                          }}
+                          className="flex-1 py-1.5 px-2 bg-white hover:bg-gray-50 border border-gray-200 text-gray-800 rounded-none font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-1 shadow-2xs active:scale-95 transition"
+                        >
+                          <ShoppingCart size={11} />
+                          <span>Add to Cart</span>
+                        </button>
+
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            addToCart({
+                              id: relProduct.id,
+                              name: relProduct.title || relProduct.name,
+                              price: relProduct.price,
+                              image: relProduct.image,
+                              quantity: 1
+                            });
+                            navigate("/checkout");
+                          }}
+                          className="flex-1 py-1.5 px-2 bg-[#0F2920] hover:bg-[#183E31] text-white rounded-none font-bold text-[10px] uppercase tracking-wider flex items-center justify-center transition active:scale-95 shadow-2xs"
+                        >
+                          Buy Now
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -1060,18 +1429,113 @@ const ProductDetail: React.FC = () => {
 
       </div>
 
-      {/* Floating WhatsApp Quick Action */}
-      <a
-        href="https://wa.me/918121135980"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="fixed bottom-40 md:bottom-24 right-6 bg-green-600 hover:bg-green-700 text-white p-3.5 rounded-full shadow-2xl transition-all duration-300 hover:scale-110 z-50 flex items-center justify-center group"
-      >
-        <MessageCircle className="w-6 h-6" />
-        <span className="absolute right-full mr-2 bg-white text-gray-800 text-xs font-bold px-3 py-1.5 rounded-xl opacity-0 group-hover:opacity-100 transition whitespace-nowrap shadow-lg border border-gray-100">
-          WhatsApp Support
-        </span>
-      </a>
+      {/* Review Modal Form */}
+      <AnimatePresence>
+        {isReviewModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-none p-6 sm:p-8 max-w-md w-full shadow-2xl relative"
+            >
+              <button
+                onClick={() => setIsReviewModalOpen(false)}
+                className="absolute top-5 right-5 text-gray-400 hover:text-gray-600 p-1 rounded-none"
+              >
+                <X size={20} />
+              </button>
+
+              <h3 className="text-lg font-bold text-gray-900 mb-1">Write your Review</h3>
+              <p className="text-xs text-gray-500 mb-4">{product.title || product.name}</p>
+
+              <form onSubmit={handleReviewSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">Your Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={formName}
+                    onChange={(e) => setFormName(e.target.value)}
+                    placeholder="Enter your name"
+                    className="w-full px-3.5 py-2 border border-gray-200 rounded-none text-xs focus:ring-2 focus:ring-[#0F2920] outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">Your Rating</label>
+                  <div className="flex items-center gap-1.5 py-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        type="button"
+                        key={star}
+                        onClick={() => setFormRating(star)}
+                        className="text-amber-400 hover:scale-110 active:scale-95 transition-transform"
+                      >
+                        <Star
+                          size={24}
+                          className={star <= formRating ? "fill-amber-400 text-amber-400" : "text-gray-200"}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">Review Comments</label>
+                  <textarea
+                    required
+                    rows={3}
+                    value={formComment}
+                    onChange={(e) => setFormComment(e.target.value)}
+                    placeholder="Describe your experience with this product..."
+                    className="w-full px-3.5 py-2 border border-gray-200 rounded-none text-xs focus:ring-2 focus:ring-[#0F2920] outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">Add Photo (Optional)</label>
+                  <div className="mt-1 flex flex-col items-center justify-center border border-dashed border-gray-200 rounded-none p-3 bg-gray-50 relative cursor-pointer hover:bg-gray-100 transition">
+                    {imagePreview ? (
+                      <div className="relative w-full h-24 flex items-center justify-center">
+                        <img src={imagePreview} alt="Preview" className="max-h-full max-w-full object-contain rounded-none shadow" />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setImagePreview("");
+                            setFormImage("");
+                          }}
+                          className="absolute top-0 right-0 bg-red-600 text-white rounded-none p-1 shadow"
+                        >
+                          <X size={12} />
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <Camera className="w-5 h-5 text-gray-400 mb-1" />
+                        <span className="text-[10px] text-gray-500 font-semibold">Select delivery pic</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageChange}
+                          className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                        />
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full py-3 bg-[#0F2920] hover:bg-[#183E31] text-white font-bold rounded-none text-xs uppercase tracking-wider shadow-md transition"
+                >
+                  Submit Verified Review
+                </button>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Expand Image Lightbox */}
       <AnimatePresence>
@@ -1085,7 +1549,7 @@ const ProductDetail: React.FC = () => {
           >
             <button
               onClick={() => setActiveLightboxImage(null)}
-              className="absolute top-6 right-6 bg-white/20 hover:bg-white/40 text-white rounded-full p-2.5 transition"
+              className="absolute top-6 right-6 bg-white/20 hover:bg-white/40 text-white rounded-none p-2.5 transition"
             >
               <X size={20} />
             </button>
@@ -1094,12 +1558,13 @@ const ProductDetail: React.FC = () => {
               animate={{ scale: 1 }}
               exit={{ scale: 0.95 }}
               src={activeLightboxImage}
-              alt="Full scale validation pic"
-              className="max-w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl"
+              alt="Full scale view"
+              className="max-w-full max-h-[85vh] object-contain rounded-none shadow-2xl"
             />
           </motion.div>
         )}
       </AnimatePresence>
+
     </div>
   );
 };

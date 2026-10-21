@@ -61,7 +61,7 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const BACKEND_URL = import.meta.env.VITE_AWS_API_URL || "https://backend.gharsansar.website/api";
+  const BACKEND_URL = import.meta.env.VITE_AWS_API_URL || "/api";
   const API_BASE = import.meta.env.VITE_AWS_API_URL || "https://lx70r6zsef.execute-api.ap-south-1.amazonaws.com/prod/api";
 
   // Fetch all products from backend
@@ -82,13 +82,23 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
 
       console.log("Categories found:", categories.length);
 
-      categories.forEach((category: any) => {
+      // Prioritize Sonu Steel Products first
+      const sortedCategories = [...categories].sort((a: any, b: any) => {
+        const nameA = (a.name || a.category || "").toLowerCase();
+        const nameB = (b.name || b.category || "").toLowerCase();
+        const aIsSonu = nameA.includes("sonu") ? 1 : 0;
+        const bIsSonu = nameB.includes("sonu") ? 1 : 0;
+        return bIsSonu - aIsSonu;
+      });
+
+      sortedCategories.forEach((category: any) => {
+        const catProducts: Product[] = [];
         category.subcategories?.forEach((sub: any) => {
           // Try 'products', 'images', and 'services'
           const items = sub.products || sub.images || sub.services || [];
           items.forEach((img: any, index: number) => {
             const imageUrl = fixImageUrl(img.image);
-            allProducts.push({
+            catProducts.push({
               id: img.id || `${category.name || category.category}-${sub.name}-${index}`,
               title: img.title || img.name || "Untitled Product",
               description: img.description || "",
@@ -101,12 +111,60 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
             });
           });
         });
+        // Sort items within this category according to price ascending
+        catProducts.sort((a, b) => (a.price || 0) - (b.price || 0));
+        allProducts.push(...catProducts);
       });
 
       console.log("Total products found:", allProducts.length);
       setProducts(allProducts);
     } catch (err) {
-      console.error("Error fetching products:", err);
+      console.warn("Backend API fetch failed, trying static /products.json fallback:", err);
+      try {
+        const localRes = await axios.get("/products.json");
+        const categories = Array.isArray(localRes.data) ? localRes.data : [];
+        const fallbackProducts: Product[] = [];
+        
+        // Prioritize Sonu Steel Products first in fallback as well
+        const sortedFallbackCategories = [...categories].sort((a: any, b: any) => {
+          const nameA = (a.name || a.category || "").toLowerCase();
+          const nameB = (b.name || b.category || "").toLowerCase();
+          const aIsSonu = nameA.includes("sonu") ? 1 : 0;
+          const bIsSonu = nameB.includes("sonu") ? 1 : 0;
+          return bIsSonu - aIsSonu;
+        });
+
+        sortedFallbackCategories.forEach((category: any) => {
+          const catProducts: Product[] = [];
+          category.subcategories?.forEach((sub: any) => {
+            const items = sub.products || sub.images || sub.services || [];
+            items.forEach((img: any, index: number) => {
+              const imageUrl = fixImageUrl(img.image);
+              catProducts.push({
+                id: img.id || `${category.name || category.category}-${sub.name}-${index}`,
+                title: img.title || img.name || "Untitled Product",
+                description: img.description || "",
+                price: parseInt(img.price) || parseInt(img["act-price"]) || 0,
+                actualPrice: parseInt(img["act-price"]) || parseInt(img.actual_price) || 0,
+                image: imageUrl,
+                video: img.video || "",
+                category: category.name || category.category || "General",
+                subCategory: sub.name,
+              });
+            });
+          });
+          // Sort items within this category according to price ascending
+          catProducts.sort((a, b) => (a.price || 0) - (b.price || 0));
+          fallbackProducts.push(...catProducts);
+        });
+        if (fallbackProducts.length > 0) {
+          console.log("Loaded products from static /products.json:", fallbackProducts.length);
+          setProducts(fallbackProducts);
+          return;
+        }
+      } catch (localErr) {
+        console.error("Static products fallback also failed:", localErr);
+      }
       setError(err instanceof Error ? err.message : "Failed to fetch products");
       setProducts([]);
     } finally {

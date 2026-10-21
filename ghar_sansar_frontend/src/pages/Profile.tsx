@@ -73,7 +73,7 @@ const Profile: React.FC = () => {
   const [loadingAvatar, setLoadingAvatar] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const API_BASE = import.meta.env.VITE_AWS_API_URL || "https://backend.gharsansar.website/api";
+  const API_BASE = import.meta.env.VITE_AWS_API_URL || "/api";
 
   // Fetch orders on mount
   useEffect(() => {
@@ -90,6 +90,21 @@ const Profile: React.FC = () => {
         phone: user.phone || ''
       });
       setAddresses(user.addresses || []);
+
+      if (user.addresses && user.addresses.length > 0) {
+        const defaultAddr = user.addresses.find((a: any) => a.isDefault) || user.addresses[0];
+        if (defaultAddr) {
+          localStorage.setItem(`shipping_address_${user.email}`, JSON.stringify(defaultAddr));
+          localStorage.setItem('user_shipping_address', JSON.stringify(defaultAddr));
+          const zip = defaultAddr.zipCode || defaultAddr.pincode;
+          if (zip) {
+            localStorage.setItem("user_pincode", String(zip).trim());
+            const area = [defaultAddr.city, defaultAddr.state].filter(Boolean).join(", ") || defaultAddr.city || "India";
+            localStorage.setItem("user_area", area);
+            window.dispatchEvent(new Event("storage"));
+          }
+        }
+      }
     }
   }, [user]);
 
@@ -215,18 +230,24 @@ const Profile: React.FC = () => {
       const data = await response.json();
       if (data.success && data.user) {
         updateUser(data.user);
-        // Sync default address to localStorage for Checkout defaults
-        const defaultAddr = updatedAddresses.find(a => a.isDefault);
+        // Sync default address to localStorage for Checkout & ProductDetail defaults
+        const defaultAddr = updatedAddresses.find(a => a.isDefault) || (updatedAddresses.length > 0 ? updatedAddresses[0] : null);
         if (defaultAddr) {
           localStorage.setItem(`shipping_address_${user.email}`, JSON.stringify(defaultAddr));
           localStorage.setItem('user_shipping_address', JSON.stringify(defaultAddr));
-        } else if (updatedAddresses.length > 0) {
-          // Fallback if none default
-          localStorage.setItem(`shipping_address_${user.email}`, JSON.stringify(updatedAddresses[0]));
-          localStorage.setItem('user_shipping_address', JSON.stringify(updatedAddresses[0]));
+          const zip = defaultAddr.zipCode || defaultAddr.pincode;
+          if (zip) {
+            localStorage.setItem("user_pincode", String(zip).trim());
+            const area = [defaultAddr.city, defaultAddr.state].filter(Boolean).join(", ") || defaultAddr.city || "India";
+            localStorage.setItem("user_area", area);
+            window.dispatchEvent(new Event("storage"));
+          }
         } else {
           localStorage.removeItem(`shipping_address_${user.email}`);
           localStorage.removeItem('user_shipping_address');
+          localStorage.removeItem('user_pincode');
+          localStorage.removeItem('user_area');
+          window.dispatchEvent(new Event("storage"));
         }
         return true;
       }

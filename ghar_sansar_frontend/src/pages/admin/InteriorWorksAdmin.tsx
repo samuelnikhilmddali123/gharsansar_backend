@@ -18,7 +18,7 @@ interface Category {
   subcategories: { name: string }[];
 }
 
-const API_UPLOAD = (import.meta.env.VITE_AWS_API_URL || "https://backend.gharsansar.website/api") + "/storage/upload";
+const API_UPLOAD = (import.meta.env.VITE_AWS_API_URL || "/api") + "/storage/upload";
 
 const InteriorWorksAdmin: React.FC = () => {
   const [works, setWorks] = useState<InteriorWork[]>([]);

@@ -17,7 +17,7 @@ const ChatBot: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const isProductDetailPage = location.pathname.startsWith("/product/");
-  const API_BASE = import.meta.env.VITE_AWS_API_URL || "https://backend.gharsansar.website/api";
+  const API_BASE = import.meta.env.VITE_AWS_API_URL || "/api";
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {

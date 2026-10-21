@@ -24,7 +24,26 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const BACKEND_URL = import.meta.env.VITE_AWS_API_URL || "https://backend.gharsansar.website/api";
+const BACKEND_URL = import.meta.env.VITE_AWS_API_URL || "/api";
+
+const syncUserShippingPincode = (u: User | null) => {
+  if (!u || !u.addresses || u.addresses.length === 0) return;
+  const defaultAddr = u.addresses.find((a: any) => a.isDefault) || u.addresses[0];
+  if (defaultAddr) {
+    localStorage.setItem("user_shipping_address", JSON.stringify(defaultAddr));
+    if (u.email) {
+      localStorage.setItem(`shipping_address_${u.email}`, JSON.stringify(defaultAddr));
+    }
+    const zip = defaultAddr.zipCode || defaultAddr.pincode;
+    if (zip) {
+      const code = String(zip).trim();
+      localStorage.setItem("user_pincode", code);
+      const area = [defaultAddr.city, defaultAddr.state].filter(Boolean).join(", ") || defaultAddr.city || "India";
+      localStorage.setItem("user_area", area);
+      window.dispatchEvent(new Event("storage"));
+    }
+  }
+};
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -35,8 +54,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
-      setIsAuthenticated(true);
+      try {
+        const parsed = JSON.parse(storedUser);
+        setUser(parsed);
+        setIsAuthenticated(true);
+        syncUserShippingPincode(parsed);
+      } catch (e) {
+        console.error("Failed to restore user", e);
+      }
     }
     setLoading(false);
   }, []);
@@ -52,6 +77,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(res.data.user);
         setIsAuthenticated(true);
         localStorage.setItem("user", JSON.stringify(res.data.user));
+        syncUserShippingPincode(res.data.user);
         return true;
       }
       return false;
@@ -76,6 +102,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(res.data.user);
         setIsAuthenticated(true);
         localStorage.setItem("user", JSON.stringify(res.data.user));
+        syncUserShippingPincode(res.data.user);
         alert("Registration successful! Welcome to Ghar Sansar.");
         return true;
       }
@@ -105,6 +132,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(res.data.user);
         setIsAuthenticated(true);
         localStorage.setItem("user", JSON.stringify(res.data.user));
+        syncUserShippingPincode(res.data.user);
         return true;
       }
       return false;
@@ -119,11 +147,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
     setIsAuthenticated(false);
     localStorage.removeItem("user");
+    localStorage.removeItem("user_pincode");
+    localStorage.removeItem("user_area");
+    localStorage.removeItem("user_shipping_address");
+    window.dispatchEvent(new Event("storage"));
   };
 
   const updateUser = (updatedUser: User) => {
     setUser(updatedUser);
     localStorage.setItem("user", JSON.stringify(updatedUser));
+    syncUserShippingPincode(updatedUser);
   };
 
   return (

@@ -32,7 +32,7 @@ interface NotificationContextType {
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
-const API_BASE = import.meta.env.VITE_AWS_API_URL || "https://backend.gharsansar.website/api";
+const API_BASE = import.meta.env.VITE_AWS_API_URL || "/api";
 
 // Pure Web Audio API synthesis for premium alert chime sound (no static file asset dependency)
 const playChime = () => {

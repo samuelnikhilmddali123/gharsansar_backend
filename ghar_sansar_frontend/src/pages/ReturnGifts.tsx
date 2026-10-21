@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../context/CartContext';
-import { ShoppingCart, Eye, Heart, ArrowRight, CheckCircle2, SlidersHorizontal, ChevronDown, Filter, Image as ImageIcon, Search, X } from 'lucide-react';
+import { ShoppingCart, Eye, Heart, ArrowRight, CheckCircle2, SlidersHorizontal, ChevronDown, Filter, Image as ImageIcon, Search, X, Plus } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import StudioImage from '../components/StudioImage';
 import toast from 'react-hot-toast';
 
 // ---------------------------------------------------------
@@ -19,7 +20,7 @@ function CMSImage({ src, alt, className }: { src?: string, alt: string, classNam
       </div>
     );
   }
-  return <img src={src} alt={alt} className={className} onError={() => setError(true)} loading="lazy" />;
+  return <StudioImage src={src} alt={alt} className={className} loading="lazy" />;
 }
 
 // ---------------------------------------------------------
@@ -45,7 +46,7 @@ export default function ReturnGifts() {
 
   // React Query Fetcher
   const fetchProducts = async () => {
-    const API_BASE = import.meta.env.VITE_AWS_API_URL || "https://backend.gharsansar.website/api";
+    const API_BASE = import.meta.env.VITE_AWS_API_URL || "/api";
     // Build query string
     const params = new URLSearchParams();
     if (q) params.append('q', q);
@@ -154,7 +155,7 @@ export default function ReturnGifts() {
                 <input
                   type="search"
                   placeholder="Search gifts..."
-                  className="w-full bg-white border border-gray-200 focus:border-[#6B21A8] focus:ring-4 focus:ring-[#6B21A8]/10 rounded-full py-2.5 pl-11 pr-10 text-sm focus:outline-none transition-all font-medium placeholder:text-gray-400 text-gray-800 shadow-sm"
+                  className="w-full bg-white border border-gray-200 focus:border-[#6B21A8] focus:ring-4 focus:ring-[#6B21A8]/10 rounded-none py-2.5 pl-11 pr-10 text-sm focus:outline-none transition-all font-medium placeholder:text-gray-400 text-gray-800 shadow-sm"
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
                 />
@@ -445,54 +446,89 @@ function FilterAccordion({ section, searchParams, setSearchParams }: any) {
 }
 
 // ---------------------------------------------------------
-// PREMIUM CATALOG CARD (Standard 4/5 Aspect Ratio)
+// ---------------------------------------------------------
+// STUDIO CATALOG CARD (Matching Exact Reference Aesthetic)
 // ---------------------------------------------------------
 function CatalogCard({ product, onAdd, navigate }: any) {
-  const handleAction = (e: React.MouseEvent, action: string) => {
+  const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (action === 'cart') {
-      onAdd({ ...product, quantity: 50, minQty: 50, isReturnGift: true, stock: product.stock });
-      toast.success(`Added 50 x ${product.title} to cart`);
-    } else {
-      toast(`${action} clicked`);
-    }
+    onAdd({ ...product, quantity: 50, minQty: 50, isReturnGift: true, stock: product.stock });
+    toast.success(`Added 50 x ${product.title || product.name} to cart`);
   };
+
+  const handleWishlist = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toast.success("Saved to wishlist!");
+  };
+
+  const title = (product.title || product.name || "Return Gift").replace(/_/g, " ").trim();
+  const desc = product.description && product.description.trim()
+    ? product.description.trim().replace(/^[-—·•\s]+/, "")
+    : `Curated ${title.toLowerCase()} perfect for wedding celebrations and special festive occasions.`;
 
   return (
     <div
-      className="bg-white rounded-xl sm:rounded-[20px] shadow-sm hover:shadow-xl border border-gray-100 transition-all duration-500 p-2.5 sm:p-4 cursor-pointer group flex flex-col relative h-full"
+      className="group relative bg-[#FFFFFF] rounded-none p-3.5 sm:p-5 border border-[#E8E5DC] hover:border-[#D6D0C2] hover:shadow-xl transition-all duration-300 flex flex-col justify-between cursor-pointer h-full"
       onClick={() => navigate(`/product/${product._id || product.id || product.name}`, { state: { ...product, isReturnGift: true } })}
     >
-      <div className="absolute top-3 right-3 sm:top-6 sm:right-6 z-20 flex flex-col gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-x-0 sm:translate-x-2 sm:group-hover:translate-x-0">
-        <button className="w-7 h-7 sm:w-8 sm:h-8 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-md text-gray-600 hover:text-red-500 hover:bg-white transition-colors">
-          <Heart size={14} className="sm:w-4 sm:h-4" />
-        </button>
-      </div>
-
-      <div className="relative w-full aspect-[4/5] bg-[#fdfdfc] rounded-lg sm:rounded-2xl overflow-hidden flex items-center justify-center p-2 sm:p-6 mb-3 sm:mb-5 border border-gray-50">
-        <CMSImage src={product.image || product.images?.[0]} alt={product.title} className="w-full h-full object-contain mix-blend-multiply transition-transform duration-700 ease-out group-hover:scale-110" />
-
-        <div className="absolute inset-x-3 bottom-3 flex gap-2 opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-500 z-20">
-          <button onClick={(e) => handleAction(e, 'quickview')} className="flex-1 bg-white/95 backdrop-blur-sm text-luxury-charcoal text-[10px] font-bold uppercase tracking-widest py-3 rounded-xl shadow-lg hover:bg-luxury-charcoal hover:text-white transition-colors text-center">
-            Quick View
+      <div>
+        {/* 1. Product Image Container */}
+        <div className="relative w-full aspect-square rounded-none overflow-hidden flex items-center justify-center p-5 sm:p-7 mb-4 bg-[#F7F6F0] border border-[#E8E5DC]">
+          <button
+            onClick={handleWishlist}
+            className="absolute top-3 right-3 sm:top-3.5 sm:right-3.5 z-10 w-9 h-9 sm:w-10 sm:h-10 rounded-none bg-white/95 hover:bg-white text-gray-700 hover:text-red-500 border border-gray-150 flex items-center justify-center transition-all shadow-xs active:scale-90"
+            aria-label="Add to wishlist"
+          >
+            <Heart size={18} strokeWidth={1.75} />
           </button>
-          <button onClick={(e) => handleAction(e, 'cart')} className="w-12 bg-[#6B21A8] text-white flex items-center justify-center rounded-xl shadow-lg hover:bg-[#581c87] transition-colors">
-            <ShoppingCart size={16} />
-          </button>
+
+          {/* Subtle realistic ground shadow under product */}
+          <div 
+            className="absolute bottom-3 left-1/2 -translate-x-1/2 w-7/12 h-2.5 rounded-[100%] bg-black/[0.04] blur-[4px] pointer-events-none" 
+            aria-hidden="true" 
+          />
+
+          <CMSImage
+            src={product.image || product.images?.[0]}
+            alt={product.title}
+            className="w-full h-full object-contain transition-transform duration-500 ease-out group-hover:scale-105"
+          />
         </div>
+
+        {/* 2. Product Name */}
+        <h3 className="text-base sm:text-[18px] font-bold text-[#111827] leading-snug line-clamp-2 min-h-[44px] sm:min-h-[50px] mb-1.5 group-hover:text-[#004e38] transition-colors">
+          {title}
+        </h3>
+
+        {/* 3. Product-Specific Description */}
+        <p className="text-xs sm:text-[13px] text-[#6B7280] font-normal leading-relaxed line-clamp-2 min-h-[36px] sm:min-h-[40px] mb-4">
+          {desc}
+        </p>
       </div>
 
-      <div className="flex flex-col flex-grow px-1">
-        <span className="text-[8px] sm:text-[9px] uppercase font-bold tracking-widest text-luxury-gold mb-1">
-          {product.category?.replace('_', ' ') || 'Return Gift'}
-        </span>
-        
-        <h3 className="text-xs sm:text-sm font-bold text-luxury-charcoal mb-1.5 sm:mb-2 line-clamp-2 leading-tight group-hover:text-luxury-gold transition-colors">
-          {product.title || product.name}
-        </h3>
-        
-        <div className="mt-auto pt-2 sm:pt-3 border-t border-gray-50 flex items-center justify-between">
-          <span className="text-sm sm:text-md font-extrabold text-luxury-charcoal">₹{product.price}</span>
+      <div>
+        {/* 4. Divider */}
+        <div className="w-full border-t border-[#EFECE6] mb-3 sm:mb-4" />
+
+        {/* 5. Price & Add to Cart */}
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="flex items-baseline">
+              <span className="text-lg sm:text-[22px] font-bold text-[#111827] tracking-tight">
+                ₹{Number(product.price).toLocaleString("en-IN")}
+              </span>
+            </div>
+            <span className="text-[11px] text-gray-400 block font-normal">(Min 50 pcs)</span>
+          </div>
+
+          <button
+            onClick={handleAddToCart}
+            className="bg-[#004e38] hover:bg-[#003c2b] text-white px-3.5 sm:px-4.5 py-2 sm:py-2.5 rounded-none text-xs sm:text-sm font-semibold flex items-center gap-1.5 sm:gap-2 transition-all shadow-sm active:scale-95 shrink-0"
+            aria-label="Add to cart"
+          >
+            <ShoppingCart size={15} className="stroke-[2]" />
+            <span>Add to Cart</span>
+          </button>
         </div>
       </div>
     </div>

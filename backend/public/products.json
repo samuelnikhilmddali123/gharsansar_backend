@@ -1,5 +1,201 @@
 [
   {
+    "name": "sonu_steel_products",
+    "subcategories": [
+      {
+        "name": "Pressure Cookers & Multi-Cookers",
+        "images": [
+          {
+            "prod_id": "sonu_1779295730883_0",
+            "id": "sonu_1779295730883_0",
+            "name": "Sonu 2 Tier Steamer With Glass Lid 20 Cm",
+            "title": "Sonu 2 Tier Steamer With Glass Lid 20 Cm",
+            "image": "/products/sonu_steel_products/sonu_2_tier_steamer_with_glass_lid_20_cm.webp",
+            "description": "Premium quality stainless steel 2-tier steamer featuring a durable tempered glass lid and 20 cm diameter. Perfect for steaming vegetables, dumplings, and healthy dishes efficiently on both gas and induction cooktops.",
+            "price": 1499,
+            "act-price": 1999
+          },
+          {
+            "prod_id": "sonu_1779295730883_1",
+            "id": "sonu_1779295730883_1",
+            "name": "Sonu Bellino Pressure Cooker 5.4 Lts",
+            "title": "Sonu Bellino Pressure Cooker 5.4 Lts",
+            "image": "/products/sonu_steel_products/sonu_bellino_pressure_cooker_5.4_lts.webp",
+            "description": "Robust 5.4-liter stainless steel pressure cooker with an outer lid design. Engineered with a heavy sandwich base for quick, even heat distribution, comfortable handles, and advanced safety features for everyday culinary perfection.",
+            "price": 3899,
+            "act-price": 4399
+          },
+          {
+            "prod_id": "sonu_1779295730883_2",
+            "id": "sonu_1779295730883_2",
+            "name": "Sonu Chefmate Multi Cooker 5.4 Lts",
+            "title": "Sonu Chefmate Multi Cooker 5.4 Lts",
+            "image": "/products/sonu_steel_products/sonu_chefmate_multi_cooker_5.4_lts.webp",
+            "description": "Highly versatile 5.4-liter multi-cooker crafted from premium food-grade stainless steel. Perfect for steaming, boiling, and deep cooking. Features strong riveted side handles and a sturdy design.",
+            "price": 5296,
+            "act-price": 6411
+          }
+        ]
+      },
+      {
+        "name": "Stockpots & Saucepan Pots",
+        "images": [
+          {
+            "prod_id": "sonu_1779295730883_3",
+            "id": "sonu_1779295730883_3",
+            "name": "Sonu Crysta Pot 14cm 1000 Ml",
+            "title": "Sonu Crysta Pot 14cm 1000 Ml",
+            "image": "/products/sonu_steel_products/sonu_crysta_pot_14cm_1000_ml.webp",
+            "description": "Elegant 1000 ml stainless steel Crysta pot with a 14 cm diameter. Beautiful mirror finish, heat-resistant handles, and superior heat retention, making it perfect for cooking and direct serving.",
+            "price": 599,
+            "act-price": 1050
+          },
+          {
+            "prod_id": "sonu_1779295730883_4",
+            "id": "sonu_1779295730883_4",
+            "name": "Sonu Crysta Pot 16cm 1500 Ml",
+            "title": "Sonu Crysta Pot 16cm 1500 Ml",
+            "image": "/products/sonu_steel_products/sonu_crysta_pot_16cm_1500_ml.webp",
+            "description": "Superior 1500 ml stainless steel Crysta pot with a 16 cm diameter. Designed with an encapsulation base for uniform heating, dual side grips, and a premium polish that elevates your kitchen aesthetic.",
+            "price": 799,
+            "act-price": 1137
+          },
+          {
+            "prod_id": "sonu_1779295730883_5",
+            "id": "sonu_1779295730883_5",
+            "name": "Sonu Crysta Pot 18cm ",
+            "title": "Sonu Crysta Pot 18cm ",
+            "image": "/products/sonu_steel_products/sonu_crysta_pot_18cm_.webp",
+            "description": "Spacious 18 cm stainless steel Crysta pot designed for preparing and serving larger portions. Extremely durable, easy to clean, and features an elegant sleek design ideal for modern kitchens.",
+            "price": 899,
+            "act-price": 1270
+          },
+          {
+            "prod_id": "sonu_1779295730883_8",
+            "id": "sonu_1779295730883_8",
+            "name": "Sonu Elito Gravy Pot Induction Base 12 Ltr",
+            "title": "Sonu Elito Gravy Pot Induction Base 12 Ltr",
+            "image": "/products/sonu_steel_products/sonu_elito_gravy_pot_induction_base_12_ltr.webp",
+            "description": "Commercial-grade 12-liter Sonu Elito gravy pot with a heavy-duty induction-compatible base. Ideal for large family feasts, restaurants, and catering services. Built to last a lifetime.",
+            "price": 3499,
+            "act-price": 3999
+          },
+          {
+            "prod_id": "sonu_1779295730883_9",
+            "id": "sonu_1779295730883_9",
+            "name": "Sonu Eliza Pot 16cm 1500 Ml",
+            "title": "Sonu Eliza Pot 16cm 1500 Ml",
+            "image": "/products/sonu_steel_products/sonu_eliza_pot_16cm_1500_ml.webp",
+            "description": "Beautifully designed 1500 ml Sonu Eliza pot with a 16 cm diameter. Crafted from premium mirror-polished stainless steel, featuring safe-grip side handles and outstanding thermal efficiency.",
+            "price": 550,
+            "act-price": 797
+          },
+          {
+            "prod_id": "sonu_1779295730883_10",
+            "id": "sonu_1779295730883_10",
+            "name": "Sonu Gravy Pot 16cm 1800ml",
+            "title": "Sonu Gravy Pot 16cm 1800ml",
+            "image": "/products/sonu_steel_products/sonu_gravy_pot_16cm_1800ml.webp",
+            "description": "Spacious 1800 ml Sonu Gravy Pot with a 16 cm diameter. Excellent for slow-cooking gravies, boiling milk, or preparing soups. Rust-resistant food-safe construction.",
+            "price": 2999,
+            "act-price": 3499
+          },
+          {
+            "prod_id": "sonu_1779295730883_11",
+            "id": "sonu_1779295730883_11",
+            "name": "Sonu Italian Floral Gold 16cm 1500 Ml",
+            "title": "Sonu Italian Floral Gold 16cm 1500 Ml",
+            "image": "/products/sonu_steel_products/sonu_italian_floral_gold_16cm_1500_ml.webp",
+            "description": "Luxurious 1500 ml pot boasting a breathtaking Italian Floral Gold motif on high-quality stainless steel. Seamlessly merges artistic styling with durable cooking capability, perfect for fine dining.",
+            "price": 600,
+            "act-price": 879
+          },
+          {
+            "prod_id": "sonu_1779295730883_14",
+            "id": "sonu_1779295730883_14",
+            "name": "Sonu Quantum Stock Pot 16cm 1700ml With Lid",
+            "title": "Sonu Quantum Stock Pot 16cm 1700ml With Lid",
+            "image": "/products/sonu_steel_products/sonu_quantum_stock_pot_16cm_1700ml_with_lid.webp",
+            "description": "Premium 1700 ml stock pot (16 cm diameter) equipped with a snug-fitting lid. Excellent heat circulation preserves maximum moisture, nutrients, and flavors in soups and stews.",
+            "price": 1299,
+            "act-price": 1799
+          },
+          {
+            "prod_id": "sonu_1779295730883_15",
+            "id": "sonu_1779295730883_15",
+            "name": "Sonu Quantum Stockpot 14cm 1.1 Ltr",
+            "title": "Sonu Quantum Stockpot 14cm 1.1 Ltr",
+            "image": "/products/sonu_steel_products/sonu_quantum_stockpot_14cm_1.1_ltr.webp",
+            "description": "Compact 1.1-liter Quantum stockpot with a 14 cm diameter. Perfect for cooking smaller portions, boiling liquids, or heating side dishes. Heavy sandwich base for uniform heat distribution.",
+            "price": 799,
+            "act-price": 1175
+          },
+          {
+            "prod_id": "sonu_1779295730883_16",
+            "id": "sonu_1779295730883_16",
+            "name": "Sonu Eliza Pot 14cm 1000ml",
+            "title": "Sonu Eliza Pot 14cm 1000ml",
+            "image": "/products/sonu_steel_products/sonu_eliza_pot_14cm_1000ml.webp",
+            "description": "Charming 1000 ml Sonu Eliza Pot featuring a 14 cm diameter. Crafted from pristine rust-proof stainless steel. Highly efficient heat distribution and induction compatible.",
+            "price": 350,
+            "act-price": 703
+          }
+        ]
+      },
+      {
+        "name": "Frypans, Kadais & Tawas",
+        "images": [
+          {
+            "prod_id": "sonu_1779295730883_7",
+            "id": "sonu_1779295730883_7",
+            "name": "Sonu Elite Square Tawa",
+            "title": "Sonu Elite Square Tawa",
+            "image": "/products/sonu_steel_products/sonu_elite_square_tawa.webp",
+            "description": "Exquisite square tawa crafted for making perfect crispy dosas, fluffy parathas, and crepes. Features a durable construction and ergonomic stay-cool handle for excellent control.",
+            "price": 1396,
+            "act-price": 1896
+          },
+          {
+            "prod_id": "sonu_1779295730883_12",
+            "id": "sonu_1779295730883_12",
+            "name": "Sonu Multi Kadai 8 Pcs",
+            "title": "Sonu Multi Kadai 8 Pcs",
+            "image": "/products/sonu_steel_products/sonu_multi_kadai_8_pcs.webp",
+            "description": "The complete 8-piece Sonu Multi Kadai cooker set. Includes specialized plates for preparing idlis, dhoklas, momos, and steam-based dishes. Highly durable stainless steel with induction base.",
+            "price": 2499,
+            "act-price": 2999
+          },
+          {
+            "prod_id": "sonu_1779295730883_13",
+            "id": "sonu_1779295730883_13",
+            "name": "Sonu Quantum Kadai With Lid 20 Cm 2.1Ltr",
+            "title": "Sonu Quantum Kadai With Lid 20 Cm 2.1Ltr",
+            "image": "/products/sonu_steel_products/sonu_quantum_kadai_with_lid_20_cm_2.1ltr",
+            "description": "Elegant 2.1-liter Sonu Quantum Kadai with a 20 cm diameter. Features a durable matching lid, induction compatible base, and sturdy stay-cool side handles.",
+            "price": 1250,
+            "act-price": 1750
+          }
+        ]
+      },
+      {
+        "name": "Cook & Serve Sets",
+        "images": [
+          {
+            "prod_id": "sonu_1779295730883_6",
+            "id": "sonu_1779295730883_6",
+            "name": "Sonu Dezire Cook & Serve Set 2 With Glass Lid 14 cm",
+            "title": "Sonu Dezire Cook & Serve Set 2 With Glass Lid 14 cm",
+            "image": "/products/sonu_steel_products/sonu_dezire_cook_serve_set_2_with_glass_lid.webp",
+            "description": "Premium 2-piece Sonu Dezire Cook & Serve cookware set complete with elegant glass lids. Perfect for seamless cooking and elegant dining presentation. Features an induction-compatible heavy base.",
+            "price": 900,
+            "act-price": 1315
+          }
+        ]
+      }
+    ],
+    "stock": 50
+  },
+  {
     "name": "Cello",
     "subcategories": [
       {
@@ -210,202 +406,6 @@
             "description": "Compact 2-piece Cello small mixing bowl set for sauces, dips, and portion servings. Stackable design for easy storage. BPA-free, microwave safe, and easy to clean.",
             "price": 449,
             "act-price": 689
-          }
-        ]
-      }
-    ],
-    "stock": 50
-  },
-  {
-    "name": "sonu_steel_products",
-    "subcategories": [
-      {
-        "name": "Pressure Cookers & Multi-Cookers",
-        "images": [
-          {
-            "prod_id": "sonu_1779295730883_0",
-            "id": "sonu_1779295730883_0",
-            "name": "Sonu 2 Tier Steamer With Glass Lid 20 Cm",
-            "title": "Sonu 2 Tier Steamer With Glass Lid 20 Cm",
-            "image": "/products/sonu_steel_products/sonu_2_tier_steamer_with_glass_lid_20_cm.webp",
-            "description": "Premium quality stainless steel 2-tier steamer featuring a durable tempered glass lid and 20 cm diameter. Perfect for steaming vegetables, dumplings, and healthy dishes efficiently on both gas and induction cooktops.",
-            "price": 1499,
-            "act-price": 1999
-          },
-          {
-            "prod_id": "sonu_1779295730883_1",
-            "id": "sonu_1779295730883_1",
-            "name": "Sonu Bellino Pressure Cooker 5.4 Lts",
-            "title": "Sonu Bellino Pressure Cooker 5.4 Lts",
-            "image": "/products/sonu_steel_products/sonu_bellino_pressure_cooker_5.4_lts.webp",
-            "description": "Robust 5.4-liter stainless steel pressure cooker with an outer lid design. Engineered with a heavy sandwich base for quick, even heat distribution, comfortable handles, and advanced safety features for everyday culinary perfection.",
-            "price": 3899,
-            "act-price": 4399
-          },
-          {
-            "prod_id": "sonu_1779295730883_2",
-            "id": "sonu_1779295730883_2",
-            "name": "Sonu Chefmate Multi Cooker 5.4 Lts",
-            "title": "Sonu Chefmate Multi Cooker 5.4 Lts",
-            "image": "/products/sonu_steel_products/sonu_chefmate_multi_cooker_5.4_lts.webp",
-            "description": "Highly versatile 5.4-liter multi-cooker crafted from premium food-grade stainless steel. Perfect for steaming, boiling, and deep cooking. Features strong riveted side handles and a sturdy design.",
-            "price": 5296,
-            "act-price": 6411
-          }
-        ]
-      },
-      {
-        "name": "Stockpots & Saucepan Pots",
-        "images": [
-          {
-            "prod_id": "sonu_1779295730883_3",
-            "id": "sonu_1779295730883_3",
-            "name": "Sonu Crysta Pot 14cm 1000 Ml",
-            "title": "Sonu Crysta Pot 14cm 1000 Ml",
-            "image": "/products/sonu_steel_products/sonu_crysta_pot_14cm_1000_ml.webp",
-            "description": "Elegant 1000 ml stainless steel Crysta pot with a 14 cm diameter. Beautiful mirror finish, heat-resistant handles, and superior heat retention, making it perfect for cooking and direct serving.",
-            "price": 599,
-            "act-price": 1050
-          },
-          {
-            "prod_id": "sonu_1779295730883_4",
-            "id": "sonu_1779295730883_4",
-            "name": "Sonu Crysta Pot 16cm 1500 Ml",
-            "title": "Sonu Crysta Pot 16cm 1500 Ml",
-            "image": "/products/sonu_steel_products/sonu_crysta_pot_16cm_1500_ml.webp",
-            "description": "Superior 1500 ml stainless steel Crysta pot with a 16 cm diameter. Designed with an encapsulation base for uniform heating, dual side grips, and a premium polish that elevates your kitchen aesthetic.",
-            "price": 799,
-            "act-price": 1137
-          },
-          {
-            "prod_id": "sonu_1779295730883_5",
-            "id": "sonu_1779295730883_5",
-            "name": "Sonu Crysta Pot 18cm ",
-            "title": "Sonu Crysta Pot 18cm ",
-            "image": "/products/sonu_steel_products/sonu_crysta_pot_18cm_.webp",
-            "description": "Spacious 18 cm stainless steel Crysta pot designed for preparing and serving larger portions. Extremely durable, easy to clean, and features an elegant sleek design ideal for modern kitchens.",
-            "price": 899,
-            "act-price": 1270
-          },
-          {
-            "prod_id": "sonu_1779295730883_8",
-            "id": "sonu_1779295730883_8",
-            "name": "Sonu Elito Gravy Pot Induction Base 12 Ltr",
-            "title": "Sonu Elito Gravy Pot Induction Base 12 Ltr",
-            "image": "/products/sonu_steel_products/sonu_elito_gravy_pot_induction_base_12_ltr.webp",
-            "description": "Commercial-grade 12-liter Sonu Elito gravy pot with a heavy-duty induction-compatible base. Ideal for large family feasts, restaurants, and catering services. Built to last a lifetime.",
-            "price": 3499,
-            "act-price": 3999
-          },
-          {
-            "prod_id": "sonu_1779295730883_9",
-            "id": "sonu_1779295730883_9",
-            "name": "Sonu Eliza Pot 16cm 1500 Ml",
-            "title": "Sonu Eliza Pot 16cm 1500 Ml",
-            "image": "/products/sonu_steel_products/sonu_eliza_pot_16cm_1500_ml.webp",
-            "description": "Beautifully designed 1500 ml Sonu Eliza pot with a 16 cm diameter. Crafted from premium mirror-polished stainless steel, featuring safe-grip side handles and outstanding thermal efficiency.",
-            "price": 550,
-            "act-price": 797
-          },
-          {
-            "prod_id": "sonu_1779295730883_10",
-            "id": "sonu_1779295730883_10",
-            "name": "Sonu Gravy Pot 16cm 1800ml",
-            "title": "Sonu Gravy Pot 16cm 1800ml",
-            "image": "/products/sonu_steel_products/sonu_gravy_pot_16cm_1800ml.webp",
-            "description": "Spacious 1800 ml Sonu Gravy Pot with a 16 cm diameter. Excellent for slow-cooking gravies, boiling milk, or preparing soups. Rust-resistant food-safe construction.",
-            "price": 2999,
-            "act-price": 3499
-          },
-          {
-            "prod_id": "sonu_1779295730883_11",
-            "id": "sonu_1779295730883_11",
-            "name": "Sonu Italian Floral Gold 16cm 1500 Ml",
-            "title": "Sonu Italian Floral Gold 16cm 1500 Ml",
-            "image": "/products/sonu_steel_products/sonu_italian_floral_gold_16cm_1500_ml.webp",
-            "description": "Luxurious 1500 ml pot boasting a breathtaking Italian Floral Gold motif on high-quality stainless steel. Seamlessly merges artistic styling with durable cooking capability, perfect for fine dining.",
-            "price": 600,
-            "act-price": 879
-          },
-          {
-            "prod_id": "sonu_1779295730883_14",
-            "id": "sonu_1779295730883_14",
-            "name": "Sonu Quantum Stock Pot 16cm 1700ml With Lid",
-            "title": "Sonu Quantum Stock Pot 16cm 1700ml With Lid",
-            "image": "/products/sonu_steel_products/sonu_quantum_stock_pot_16cm_1700ml_with_lid.webp",
-            "description": "Premium 1700 ml stock pot (16 cm diameter) equipped with a snug-fitting lid. Excellent heat circulation preserves maximum moisture, nutrients, and flavors in soups and stews.",
-            "price": 1299,
-            "act-price": 1799
-          },
-          {
-            "prod_id": "sonu_1779295730883_15",
-            "id": "sonu_1779295730883_15",
-            "name": "Sonu Quantum Stockpot 14cm 1.1 Ltr",
-            "title": "Sonu Quantum Stockpot 14cm 1.1 Ltr",
-            "image": "/products/sonu_steel_products/sonu_quantum_stockpot_14cm_1.1_ltr.webp",
-            "description": "Compact 1.1-liter Quantum stockpot with a 14 cm diameter. Perfect for cooking smaller portions, boiling liquids, or heating side dishes. Heavy sandwich base for uniform heat distribution.",
-            "price": 799,
-            "act-price": 1175
-          },
-          {
-            "prod_id": "sonu_1779295730883_16",
-            "id": "sonu_1779295730883_16",
-            "name": "Sonu Eliza Pot 14cm 1000ml",
-            "title": "Sonu Eliza Pot 14cm 1000ml",
-            "image": "/products/sonu_steel_products/sonu_eliza_pot_14cm_1000ml.webp",
-            "description": "Charming 1000 ml Sonu Eliza Pot featuring a 14 cm diameter. Crafted from pristine rust-proof stainless steel. Highly efficient heat distribution and induction compatible.",
-            "price": 350,
-            "act-price": 703
-          }
-        ]
-      },
-      {
-        "name": "Frypans, Kadais & Tawas",
-        "images": [
-          {
-            "prod_id": "sonu_1779295730883_7",
-            "id": "sonu_1779295730883_7",
-            "name": "Sonu Elite Square Tawa",
-            "title": "Sonu Elite Square Tawa",
-            "image": "/products/sonu_steel_products/sonu_elite_square_tawa.webp",
-            "description": "Exquisite square tawa crafted for making perfect crispy dosas, fluffy parathas, and crepes. Features a durable construction and ergonomic stay-cool handle for excellent control.",
-            "price": 1396,
-            "act-price": 1896
-          },
-          {
-            "prod_id": "sonu_1779295730883_12",
-            "id": "sonu_1779295730883_12",
-            "name": "Sonu Multi Kadai 8 Pcs",
-            "title": "Sonu Multi Kadai 8 Pcs",
-            "image": "/products/sonu_steel_products/sonu_multi_kadai_8_pcs.webp",
-            "description": "The complete 8-piece Sonu Multi Kadai cooker set. Includes specialized plates for preparing idlis, dhoklas, momos, and steam-based dishes. Highly durable stainless steel with induction base.",
-            "price": 2499,
-            "act-price": 2999
-          },
-          {
-            "prod_id": "sonu_1779295730883_13",
-            "id": "sonu_1779295730883_13",
-            "name": "Sonu Quantum Kadai With Lid 20 Cm 2.1Ltr",
-            "title": "Sonu Quantum Kadai With Lid 20 Cm 2.1Ltr",
-            "image": "/products/sonu_steel_products/sonu_quantum_kadai_with_lid_20_cm_2.1ltr",
-            "description": "Elegant 2.1-liter Sonu Quantum Kadai with a 20 cm diameter. Features a durable matching lid, induction compatible base, and sturdy stay-cool side handles.",
-            "price": 1250,
-            "act-price": 1750
-          }
-        ]
-      },
-      {
-        "name": "Cook & Serve Sets",
-        "images": [
-          {
-            "prod_id": "sonu_1779295730883_6",
-            "id": "sonu_1779295730883_6",
-            "name": "Sonu Dezire Cook & Serve Set 2 With Glass Lid 14 cm",
-            "title": "Sonu Dezire Cook & Serve Set 2 With Glass Lid 14 cm",
-            "image": "/products/sonu_steel_products/sonu_dezire_cook_serve_set_2_with_glass_lid.webp",
-            "description": "Premium 2-piece Sonu Dezire Cook & Serve cookware set complete with elegant glass lids. Perfect for seamless cooking and elegant dining presentation. Features an induction-compatible heavy base.",
-            "price": 900,
-            "act-price": 1315
           }
         ]
       }

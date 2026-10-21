@@ -1,13 +1,28 @@
-import React, { useState, useMemo, useEffect } from "react";
-import { useLocation } from "react-router-dom";
-import { Search } from "lucide-react";
-import axios from "axios";
+import React, { useState, useMemo, useEffect, useRef } from "react";
+import { useLocation, useNavigate, Link } from "react-router-dom";
+import {
+  Search,
+  Home,
+  ChevronRight,
+  ChevronLeft,
+  ChevronDown,
+  Check,
+  X,
+  Phone,
+  Mail,
+  MapPin,
+  ArrowRight,
+  Calendar,
+  Send,
+  Briefcase,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import axios from "axios";
 import categoriesData from "../data/categories.json";
 
 const itemsPerPage = 12;
 const placeholderImage = "/images/placeholder.jpg";
-const API_BASE = import.meta.env.VITE_AWS_API_URL || "https://backend.gharsansar.website/api";
+const API_BASE = import.meta.env.VITE_AWS_API_URL || "/api";
 const BACKEND_STATIC_URL = API_BASE.replace(/\/api$/, "");
 
 const sanitizeImageUrl = (path?: string) => {
@@ -16,14 +31,123 @@ const sanitizeImageUrl = (path?: string) => {
   if (path.startsWith("/products") || path.startsWith("/blogs") || path.startsWith("/uploads")) {
     return `${BACKEND_STATIC_URL}${path}`;
   }
-  return path;
+  return path.startsWith("/") ? path : `/${path}`;
 };
+
+// Formats category titles to match reference typography
+function formatCategoryTitle(name: string): string {
+  if (!name) return "";
+  const lower = name.trim().toLowerCase();
+  if (lower === "3d wallpapers" || lower === "3d wallapapers") return "3D Wallpapers";
+  if (lower === "wall art affects" || lower === "wall art effect") return "Wall Art Affects";
+  if (lower === "sofa cover") return "Sofa Cover";
+  if (lower === "pergola") return "Pergola";
+  if (lower === "epdm" || lower === "epdm flooring") return "EPDM Flooring";
+  if (lower === "icu flooring") return "ICU Flooring";
+  if (lower === "hdp planter pots") return "HDP Planter Pots";
+
+  return name
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+// Curated authentic 2-line descriptions for every interior category
+const categoryDescriptions: Record<string, string> = {
+  "3d wallpapers": "High-definition custom 3D wall murals with cartoon, landscape & spatial depth themes.",
+  "wall art affects": "Luxury illuminated wooden wall art, backlit acrylic panels & custom LED focal displays.",
+  "wallpaper rolls": "Textured, geometric & floral designer rolls with easy seamless self-adhesive application.",
+  "wallpapers": "Curated designer wallpapers in modern, vintage, botanical & abstract textured patterns.",
+  "vinyl flooring": "Durable, waterproof luxury vinyl planks with authentic wood grain & scratch resistance.",
+  "natural vertical garden": "Lush living green walls with real indoor plants & integrated automated drip irrigation.",
+  "blinds": "Custom roller, roman, venetian & wooden window blinds tailored for light control and privacy.",
+  "automation motorised blinds": "Smart motorized blinds with whisper-quiet motors, remote control & smart automation.",
+  "gym flooring": "Heavy-duty shock-absorbent rubber tiles & interlocking puzzle mats engineered for gym safety.",
+  "artificial wall garden": "Zero-maintenance UV-resistant synthetic greenery panels for indoor & outdoor accent walls.",
+  "icu flooring": "Seamless anti-microbial, hygienic & chemical-resistant hospital-grade vinyl flooring solutions.",
+  "sliding & metal door": "Architectural sliding glass partitions & high-strength powder-coated modern metal doors.",
+  "invisible grill": "High-tensile stainless steel safety cables ensuring unobstructed panoramic balcony views.",
+  "epdm flooring": "Seamless impact-absorbing colored rubber safety flooring for kids' play zones and sports areas.",
+  "bubble fountain": "Ambient illuminated acrylic bubble walls & contemporary soothing indoor water features.",
+  "terrace & outdoor gardening": "Complete rooftop landscaping, garden pathways, patio pergolas & green sanctuary designs.",
+  "canopy": "Weatherproof retractable patio awnings, entrance carports & modern tensile shade sails.",
+  "wooden flooring": "Authentic solid hardwood, engineered oak planks & premium moisture-resistant laminate flooring.",
+  "ceramic pots": "Handcrafted glazed & matte decorative ceramic planters for indoor botanical styling.",
+  "artificial lawn": "High-density 4-tone synthetic grass turf with realistic softness & all-weather drainage.",
+  "outdoor deck benches": "Weatherproof teak wood & cast-iron outdoor seating benches built for gardens and patios.",
+  "customised water fountain": "Bespoke indoor & garden water fountains with natural stone cascading water flows.",
+  "hdp planter pots": "Durable lightweight high-density polyethylene planters available in modern geometric forms.",
+  "pigeon net": "Transparent UV-stabilized balcony netting providing robust protection against birds and pigeons.",
+  "curtains": "Custom tailored sheer, velvet, linen & blackout drapery crafted with premium designer fabrics.",
+  "office room carpets": "Acoustic noise-dampening commercial carpet tiles featuring stain-resistant heavy-duty fibers.",
+  "cloth dry well": "Ceiling-mounted pulley clothes drying systems & space-efficient foldable wall racks.",
+  "sky light blinds": "Motorized heat-reflective skylight shades engineered for high ceilings & glass roof panels.",
+  "pergola": "Custom aluminum & wooden outdoor pergolas with adjustable louvers & ambient LED lighting.",
+  "wall and ceiling panels": "Decorative 3D fluted wall cladding & acoustic ceiling panels for luxury residential interiors.",
+  "mosquito doors & windows": "Magnetic pleated insect mesh screens with durable rust-proof aluminum frames.",
+  "hospital curtains": "Flame-retardant antibacterial hospital cubicle partition curtains with smooth ceiling tracks.",
+  "customised aquariums": "Designer glass aquariums tailored with aquatic plants, filtration systems & marine lighting.",
+  "sofa cover": "Custom-fit stretchable, washable slipcovers offering all-around protective sofa upholstery.",
+  "gifting plants": "Curated air-purifying potted desk plants & bonsai arrangements ready for gifting.",
+  "all types of doormats": "High-traction dirt-trapping entrance mats in natural coir, rubber & plush microfiber.",
+  "brass idols": "Hand-carved authentic brass deity statues & traditional heritage home decor figurines.",
+  "basket fruit packings": "Artisanal woven fruit gift hampers & festive basket packaging with premium ribbon styling."
+};
+
+// Clean features helper matching reference text
+function getFeatureSnippet(cat: any): string {
+  const lower = (cat.name || "").trim().toLowerCase();
+  if (categoryDescriptions[lower]) {
+    return categoryDescriptions[lower];
+  }
+  for (const [key, desc] of Object.entries(categoryDescriptions)) {
+    if (lower.includes(key) || key.includes(lower)) {
+      return desc;
+    }
+  }
+  if (cat.features && Array.isArray(cat.features) && cat.features.length > 0) {
+    const raw = cat.features.join(", ").trim();
+    return raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase();
+  }
+  return "Premium interior solutions and bespoke design installation tailored for your home.";
+}
+
+// Editorial design subtitle matching reference design
+function getDesignSubtitle(design: Subcategory | null | undefined, categoryName?: string | null): string {
+  if (!design) return "";
+  const cat = (categoryName || "").trim();
+  const catLower = cat.toLowerCase();
+  const dName = design.name.toLowerCase();
+
+  if (catLower.includes("wallpaper") || dName.includes("wallpaper")) {
+    return `Elegant ${design.name.toLowerCase()} rolls to add a touch of sophistication to your interiors.`;
+  }
+  if (catLower.includes("floor") || dName.includes("floor")) {
+    return `Premium high-durability ${design.name.toLowerCase()} featuring natural textures and easy-clean scratch resistance.`;
+  }
+  if (catLower.includes("blind") || dName.includes("blind")) {
+    return `Custom tailored ${design.name.toLowerCase()} offering precision light filtering, thermal efficiency and privacy.`;
+  }
+  if (catLower.includes("curtain") || dName.includes("curtain")) {
+    return `Luxurious bespoke drapery crafted with premium designer fabrics and custom motorized hardware.`;
+  }
+  if (catLower.includes("garden") || dName.includes("garden")) {
+    return `Lush living green wall crafted with precision aesthetics and integrated automated drip irrigation.`;
+  }
+  if (catLower.includes("pot") || dName.includes("pot")) {
+    return `Handcrafted artisanal planter pot designed for indoor botanical accent styling and durable finish.`;
+  }
+  if (catLower.includes("fountain") || dName.includes("fountain")) {
+    return `Soothing indoor and landscape water feature designed with ambient lighting and tranquil cascading water flow.`;
+  }
+  return `Bespoke ${design.name} tailored by expert craftsmen to elevate your interior living experience.`;
+}
 
 interface Subcategory {
   name: string;
   image?: string;
   video?: string;
 }
+
 interface Category {
   name: string;
   image?: string;
@@ -31,8 +155,88 @@ interface Category {
   subcategories: Subcategory[];
 }
 
-const InteriorDesignPage = () => {
+interface CustomSelectProps {
+  value: string;
+  options: string[];
+  onChange: (val: string) => void;
+  placeholder: string;
+}
+
+const CustomSelect: React.FC<CustomSelectProps> = ({
+  value,
+  options,
+  onChange,
+  placeholder,
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen]);
+
+  return (
+    <div ref={containerRef} className="relative w-44 sm:w-52">
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full h-10 flex items-center justify-between bg-white border border-[#D4CBBF] hover:border-gray-500 focus:border-[#0a2e22] rounded-lg px-3.5 text-xs sm:text-[13px] font-medium text-gray-800 focus:outline-none transition-all cursor-pointer shadow-2xs text-left"
+      >
+        <span className="truncate">{value === "All Categories" ? placeholder : formatCategoryTitle(value)}</span>
+        <ChevronDown
+          className={`w-4 h-4 text-gray-500 transition-transform duration-200 shrink-0 ml-1.5 ${
+            isOpen ? "transform rotate-180" : ""
+          }`}
+        />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 4 }}
+            transition={{ duration: 0.12 }}
+            className="absolute z-50 right-0 mt-1.5 w-64 max-h-72 overflow-y-auto bg-white border border-[#D4CBBF] rounded-xl shadow-xl py-1.5 focus:outline-none"
+          >
+            {options.map((opt) => (
+              <button
+                key={opt}
+                type="button"
+                onClick={() => {
+                  onChange(opt);
+                  setIsOpen(false);
+                }}
+                className={`w-full text-left px-4 py-2.5 text-xs sm:text-[13px] transition-colors flex items-center justify-between cursor-pointer ${
+                  opt === value
+                    ? "font-bold text-[#0a2e22] bg-[#F7F6F0]"
+                    : "font-medium text-gray-700 hover:bg-[#FAF8F5]"
+                }`}
+              >
+                <span className="truncate">{opt === "All Categories" ? placeholder : formatCategoryTitle(opt)}</span>
+                {opt === value && <Check size={14} className="text-[#0a2e22] shrink-0 ml-2" />}
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+const InteriorDesignPage: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const params = new URLSearchParams(location.search);
   const urlCategory = params.get("category");
 
@@ -48,103 +252,14 @@ const InteriorDesignPage = () => {
   const [activeDesign, setActiveDesign] = useState<Subcategory | null>(null);
   const [designForEnquiry, setDesignForEnquiry] = useState<Subcategory | null>(null);
 
-  // Remember page per category
-  const [pageState, setPageState] = useState<{ [key: string]: number }>({});
-
-  // Form state
+  // Form state for enquiry
   const [formName, setFormName] = useState("");
   const [formEmail, setFormEmail] = useState("");
   const [formPhone, setFormPhone] = useState("");
-  const [formPropertyName, setFormPropertyName] = useState("");
-  const [formWhatsAppUpdates, setFormWhatsAppUpdates] = useState(false);
+  const [formMessage, setFormMessage] = useState("");
+  const [enquirySuccess, setEnquirySuccess] = useState(false);
 
-  const [showMain, setShowMain] = useState(false);
-  const [typedTitle, setTypedTitle] = useState("");
-  const [typedSubtitle, setTypedSubtitle] = useState("");
-  const [typedSub2, setTypedSub2] = useState("");
-  const [showHeader, setShowHeader] = useState(true);
-
-  useEffect(() => {
-    const fullTitle = "Interior Design Solutions";
-    const fullSubtitle = "Browse our industry's finest collections for all your interior design needs.";
-    const fullSub2 = "WE PROVIDE SERVICES IN ANDHRAPRADESH AND TELANGANA";
-    let titleIndex = 0;
-    let subtitleIndex = 0;
-    let sub2Index = 0;
-    
-    const titleInterval = setInterval(() => {
-      if (titleIndex <= fullTitle.length) {
-        setTypedTitle(fullTitle.slice(0, titleIndex));
-        titleIndex++;
-      } else {
-        clearInterval(titleInterval);
-        
-        setTimeout(() => {
-          const subInterval = setInterval(() => {
-            if (subtitleIndex <= fullSubtitle.length) {
-              setTypedSubtitle(fullSubtitle.slice(0, subtitleIndex));
-              subtitleIndex++;
-            } else {
-              clearInterval(subInterval);
-              
-              setTimeout(() => {
-                const sub2Interval = setInterval(() => {
-                  if (sub2Index <= fullSub2.length) {
-                    setTypedSub2(fullSub2.slice(0, sub2Index));
-                    sub2Index++;
-                  } else {
-                    clearInterval(sub2Interval);
-
-                    setTimeout(() => {
-                      setShowHeader(false);
-                      setTimeout(() => {
-                        setShowMain(true);
-                      }, 600);
-                    }, 1500);
-                  }
-                }, 15);
-              }, 200);
-            }
-          }, 15);
-        }, 300);
-      }
-    }, 40);
-
-    return () => clearInterval(titleInterval);
-  }, []);
-
-  // Fetch categories from backend on mount
-  // useEffect(() => {
-  //   const fetchCategories = async () => {
-  //     try {
-  //       const res = await axios.get(API_URL);
-  //       const data = res.data;
-  //       const apiCategories: Category[] = data.categories.map((cat: any) => {
-  //         const subcategories: Subcategory[] = (cat.subcategories || []).map((sub: any) => ({
-  //           name: sub.name,
-  //           image: sub.images?.[0]?.image,
-  //           video: sub.images?.[0]?.video,
-  //         }));
-
-  //         return {
-  //           name: cat.name,
-  //           image: subcategories.length > 0 ? subcategories[0].image || "" : "",
-  //           features: cat.features || [],
-  //           subcategories,
-  //         };
-  //       });
-  //       setCategories(apiCategories);
-  //     } catch (err) {
-  //       console.error("Failed to fetch categories:", err);
-  //       setCategories([]);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-  //   fetchCategories();
-  // }, []);
-
-
+  // Fetch categories immediately without animation delay
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -157,20 +272,19 @@ const InteriorDesignPage = () => {
             data = res.data.data;
           }
         } catch (e) {
-          console.warn("Local backend categories fetch failed, using fallback static data:", e);
+          // Fallback to static data
         }
 
-        // Handle new JSON structure with data array
         const dataArr = Array.isArray(data) ? data : (data as any).data || [];
         const apiCategories: Category[] = dataArr.map((cat: any) => {
           const subcategories: Subcategory[] = (cat.subcategories || []).map((sub: any) => ({
             name: sub.name,
             image: sanitizeImageUrl(sub.image),
-            video: sanitizeImageUrl(sub.video)
+            video: sanitizeImageUrl(sub.video),
           }));
 
-          // Get category image (prioritize cat.image, fallback to first subcategory image)
-          const categoryImageRaw = cat.image || (subcategories.length > 0 ? subcategories[0].image : undefined);
+          const categoryImageRaw =
+            cat.image || (subcategories.length > 0 ? subcategories[0].image : undefined);
           const categoryImage = sanitizeImageUrl(categoryImageRaw) || "";
 
           return {
@@ -183,7 +297,6 @@ const InteriorDesignPage = () => {
 
         setCategories(apiCategories);
       } catch (err) {
-        console.error("Failed to load categories:", err);
         setCategories([]);
       } finally {
         setLoading(false);
@@ -192,8 +305,7 @@ const InteriorDesignPage = () => {
     fetchCategories();
   }, []);
 
-
-  // URL category param effect
+  // Handle URL category param
   useEffect(() => {
     if (urlCategory && categories.length) {
       const match = categories.find(
@@ -206,35 +318,30 @@ const InteriorDesignPage = () => {
     }
   }, [urlCategory, categories]);
 
-  // Save page state when changing category
-  useEffect(() => {
-    if (activeCategory) {
-      setPageState((prev) => ({ ...prev, [activeCategory]: currentPage }));
-    }
-  }, [activeCategory, currentPage]);
-
-  // Search/filter logic
+  // Filter categories
   const filteredCategories = useMemo(() => {
-    let filtered = categories;
-    if (selectedCategory !== "All Categories")
-      filtered = filtered.filter((c) => c.name === selectedCategory);
-    if (search.trim())
-      filtered = filtered.filter((c) =>
+    let result = categories;
+    if (selectedCategory !== "All Categories") {
+      result = result.filter((c) => c.name === selectedCategory);
+    }
+    if (search.trim()) {
+      result = result.filter((c) =>
         c.name.toLowerCase().includes(search.toLowerCase())
       );
-    return filtered;
+    }
+    return result;
   }, [categories, selectedCategory, search]);
 
-  const totalPages = Math.ceil(filteredCategories.length / itemsPerPage);
+  const totalPages = Math.max(1, Math.ceil(filteredCategories.length / itemsPerPage));
   const paginatedCategories = useMemo(() => {
     const startIdx = (currentPage - 1) * itemsPerPage;
     return filteredCategories.slice(startIdx, startIdx + itemsPerPage);
   }, [filteredCategories, currentPage]);
 
+  // Active Category details for subcategories view
   const currentCat = categories.find((c) => c.name === activeCategory);
   const allSubcategories = currentCat?.subcategories ?? [];
 
-  // Filter subcategories based on search
   const filteredSubcategories = useMemo(() => {
     if (!search.trim()) return allSubcategories;
     return allSubcategories.filter((sub) =>
@@ -242,493 +349,762 @@ const InteriorDesignPage = () => {
     );
   }, [allSubcategories, search]);
 
-  const subCatTotalPages = Math.ceil(filteredSubcategories.length / itemsPerPage);
+  const subCatTotalPages = Math.max(1, Math.ceil(filteredSubcategories.length / itemsPerPage));
   const paginatedSubCategories = useMemo(() => {
     const startIdx = (subCatPage - 1) * itemsPerPage;
     return filteredSubcategories.slice(startIdx, startIdx + itemsPerPage);
   }, [filteredSubcategories, subCatPage]);
 
-  useEffect(() => {
-    setSubCatPage(1);
-    setActiveDesign(null);
-    setDesignForEnquiry(null);
-  }, [activeCategory]);
-
-  // Reset subcategory page when search changes
-  useEffect(() => {
-    if (activeCategory) {
-      setSubCatPage(1);
-    }
-  }, [search]);
-
   // Handlers
   function onSelectCategory(catName: string) {
     setActiveCategory(catName);
-    setSelectedCategory(catName);
-    setCurrentPage(pageState[catName] || 1);
     setSubCatPage(1);
-    setActiveDesign(null);
-    setDesignForEnquiry(null);
+    window.scrollTo({ top: 380, behavior: "smooth" });
   }
 
+  function handleBackToCategories() {
+    setActiveCategory(null);
+    window.scrollTo({ top: 380, behavior: "smooth" });
+  }
+
+  // Active design gallery items from current category
+  const galleryItems = useMemo(() => {
+    if (allSubcategories && allSubcategories.length > 0) {
+      return allSubcategories;
+    }
+    const current = activeDesign || designForEnquiry;
+    return current ? [current] : [];
+  }, [allSubcategories, activeDesign, designForEnquiry]);
+
+  const activeIndex = useMemo(() => {
+    const current = activeDesign || designForEnquiry;
+    if (!current || !galleryItems.length) return 0;
+    const idx = galleryItems.findIndex((item) => item.name === current.name);
+    return idx >= 0 ? idx : 0;
+  }, [activeDesign, designForEnquiry, galleryItems]);
+
+  const handlePrevImage = () => {
+    if (!galleryItems.length) return;
+    const prevIdx = (activeIndex - 1 + galleryItems.length) % galleryItems.length;
+    setActiveDesign(galleryItems[prevIdx]);
+    setDesignForEnquiry(galleryItems[prevIdx]);
+  };
+
+  const handleNextImage = () => {
+    if (!galleryItems.length) return;
+    const nextIdx = (activeIndex + 1) % galleryItems.length;
+    setActiveDesign(galleryItems[nextIdx]);
+    setDesignForEnquiry(galleryItems[nextIdx]);
+  };
+
+  const visibleThumbnails = useMemo(() => {
+    if (galleryItems.length <= 5) return galleryItems;
+    let start = activeIndex - 2;
+    if (start < 0) start = 0;
+    if (start + 5 > galleryItems.length) start = galleryItems.length - 5;
+    return galleryItems.slice(start, start + 5);
+  }, [galleryItems, activeIndex]);
+
   function handleEnquiryOpen(subcategory: Subcategory) {
+    setActiveDesign(subcategory);
     setDesignForEnquiry(subcategory);
     setBookingOpen(true);
     setFormName("");
     setFormEmail("");
     setFormPhone("");
-    setFormPropertyName("");
-    setFormWhatsAppUpdates(false);
+    setFormMessage("");
+    setEnquirySuccess(false);
   }
 
-  function handleEnquiryClose() {
-    setBookingOpen(false);
+  function handleModalClose() {
+    setActiveDesign(null);
     setDesignForEnquiry(null);
+    setBookingOpen(false);
+    setEnquirySuccess(false);
   }
 
   function handleEnquirySubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!formName || !formEmail || !formPhone) {
-      alert("Please fill all required fields");
+    if (!formName.trim() || !formPhone.trim()) {
+      alert("Please enter your name and phone number.");
       return;
     }
-    if (!designForEnquiry) {
-      alert("No design selected for enquiry");
+    const currentDesign = activeDesign || designForEnquiry;
+    if (!currentDesign) {
+      alert("No design selected for enquiry.");
       return;
     }
 
-    const message = `Hello, I am ${formName}. I would like to inquire about the design: ${designForEnquiry.name}.
-Property Name: ${formPropertyName || "N/A"}
-Phone: ${formPhone}
-Email: ${formEmail}
-Send WhatsApp updates: ${formWhatsAppUpdates ? "Yes" : "No"}
-Please contact me.`;
+    const categoryTitle = formatCategoryTitle(activeCategory || currentCat?.name || "Interior Design");
+    const message = `Hello Ghar Sansar,
+I would like to inquire about the following Interior Design:
 
-    const newEnquiry = {
-      id: Date.now().toString(),
-      name: formName,
-      email: formEmail,
-      phone: formPhone,
-      propertyName: formPropertyName,
-      sendWhatsAppUpdates: formWhatsAppUpdates,
-      subcategory: designForEnquiry.name,
-      image: designForEnquiry.image || "",
-      date: new Date().toISOString(),
-    };
-    const storedEnquiries = JSON.parse(sessionStorage.getItem("enquiries") || "[]");
-    storedEnquiries.push(newEnquiry);
-    sessionStorage.setItem("enquiries", JSON.stringify(storedEnquiries));
+*Design:* ${currentDesign.name}
+*Category:* ${categoryTitle}
+*Customer Name:* ${formName.trim()}
+*Phone:* +91 ${formPhone.trim()}
+*Email:* ${formEmail.trim() || "Not provided"}
+*Requirements:* ${formMessage.trim() || "Please contact me for consultation and pricing."}
 
-    const phone = "918121135980"; // WhatsApp number
+Looking forward to your response!`;
+
+    const phone = "918121135980";
     const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-
     window.open(url, "_blank");
-    alert("Enquiry submitted! WhatsApp will open for further communication.");
-    handleEnquiryClose();
+    setEnquirySuccess(true);
+    setTimeout(() => {
+      handleModalClose();
+    }, 2000);
   }
 
-  // NEW: Restore last known page when returning to categories (Back button)
-  function handleBackToCategories() {
-    setActiveCategory(null);
-    setSelectedCategory("All Categories");
-    // Restore last category page if available
-    const lastPage = pageState["All Categories"] || currentPage;
-    setCurrentPage(lastPage);
-    setSubCatPage(1);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-
-  // Save current page state whenever changing pages in Categories view
-  useEffect(() => {
-    if (!activeCategory) {
-      setPageState((prev) => ({ ...prev, ["All Categories"]: currentPage }));
+  // Smooth scroll to explore collection
+  const scrollToCollection = () => {
+    const elem = document.getElementById("collection-section");
+    if (elem) {
+      elem.scrollIntoView({ behavior: "smooth" });
     }
-  }, [activeCategory, currentPage]);
-
-  // Loading/error screens
-  if (loading) return <div className="p-6 text-gray-500">Loading interior designs...</div>;
-  if (!categories.length) return <div className="p-6 text-gray-500">No categories found.</div>;
+  };
 
   return (
-    <main className="bg-[#f8f8f7] min-h-screen font-sans flex flex-col pb-20">
-      
-      <AnimatePresence>
-        {showHeader && (
-          <motion.div
-            initial={{ opacity: 1, minHeight: "100vh" }}
-            exit={{ opacity: 0, minHeight: 0, height: 0, overflow: "hidden" }}
-            transition={{ duration: 0.8, ease: "easeInOut" }}
-            className="flex items-center justify-center bg-white border-b border-gray-100 relative z-50 w-full"
+    <div className="bg-[#F7F6F0] min-h-screen font-sans pb-20 flex flex-col">
+      {/* 1. Hero Inset Banner matching reference screenshot */}
+      <div className="w-full bg-[#F7F6F0] -mt-20 sm:-mt-24 pt-[60px] sm:pt-[74px] pb-3 sm:pb-4">
+        <div className="w-full max-w-[1880px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10">
+          <div
+            className="relative w-full rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm border border-[#ece6dc] bg-[#1a2e22] group select-none aspect-[2171/724] min-h-[170px] sm:min-h-[220px]"
+            style={{ aspectRatio: "2171 / 724" }}
           >
-            <div className="absolute inset-0 bg-gradient-to-b from-luxury-cream/60 to-transparent"></div>
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative z-10 text-center w-full flex flex-col justify-center items-center">
-              <h1 className="text-4xl md:text-6xl font-serif font-light tracking-wide text-gray-900 mb-6 min-h-[72px] flex justify-center items-center">
-                {typedTitle}
-                <motion.span
-                  animate={{ opacity: [0, 1, 0] }}
-                  transition={{ repeat: Infinity, duration: 0.8 }}
-                  className="inline-block w-[2px] h-10 md:h-14 bg-[#6B21A8] ml-2"
-                />
-              </h1>
-              <p className="text-base md:text-lg text-gray-600 max-w-3xl mx-auto font-light leading-relaxed tracking-wide min-h-[56px] mb-6">
-                {typedSubtitle}
-              </p>
-              <p className="text-xs md:text-sm font-medium tracking-[0.25em] text-[#6B21A8] uppercase min-h-[24px]">
-                {typedSub2}
-              </p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {showMain && (
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="w-full flex-grow py-10 px-6"
-          >
-            {/* SEARCH */}
-            <header className="max-w-7xl mx-auto mb-8 text-center">
-              <div className="flex justify-center mt-6 space-x-4 max-w-3xl mx-auto">
-          <div className="relative flex-grow max-w-md">
-            <input
-              type="text"
-              placeholder="Search products..."
-              className="w-full border border-gray-300 rounded-lg pl-10 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+            {/* Banner Background Image */}
+            <img
+              src="/images/interior_hero_banner_hd.png"
+              alt="Interior Design - Transform Your Space Into A Beautiful Home"
+              className="w-full h-full object-cover block"
             />
-            <Search className="absolute left-3 top-2.5 text-gray-400" />
-          </div>
-          <select
-            className="border border-gray-300 rounded-lg py-2 px-3"
-            value={selectedCategory}
-            onChange={(e) => {
-              setSelectedCategory(e.target.value);
-              if (e.target.value === "All Categories") {
-                setActiveCategory(null);
-              } else {
-                onSelectCategory(e.target.value);
-              }
-            }}
-          >
-            <option>All Categories</option>
-            {categories.map((c) => (
-              <option key={c.name} value={c.name}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </div>
-      </header>
 
-      {/* CATEGORIES GRID */}
-      {!activeCategory ? (
-        <>
-          <section className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-            {paginatedCategories.map((cat, index) => {
-              return (
-              <motion.article
-                key={cat.name}
-                initial={{ opacity: 0, y: 40, filter: "blur(8px)" }}
-                whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ 
-                  duration: 0.8,
-                  ease: [0.22, 1, 0.36, 1],
-                  delay: (index % 12) * 0.08 
-                }}
-                onClick={() => onSelectCategory(cat.name)}
-                className="cursor-pointer rounded-lg shadow-md bg-white overflow-hidden hover:shadow-xl transition-all duration-500"
-              >
-                <img
-                  src={cat.image || placeholderImage}
-                  alt={cat.name}
-                  className="w-full h-48 object-cover"
-                />
-                <div className="p-4">
-                  <h2 className="font-semibold text-lg">{cat.name}</h2>
-                  <p className="mt-2 text-sm text-gray-600">{cat.features?.join(", ")}</p>
-                  <p className="mt-1 text-gray-600">{cat.subcategories.length} Designs</p>
-                </div>
-              </motion.article>
-              );
-            })}
-          </section>
-
-          {/* Pagination */}
-          {paginatedCategories.length > 0 && (
-            <nav className="flex justify-center mt-10 space-x-3">
-              <button
-                onClick={() => {
-                  setCurrentPage(Math.max(currentPage - 1, 1));
-                  window.scrollTo({ top: 0, behavior: "smooth" });
-                }}
-                disabled={currentPage === 1}
-                className="px-4 py-2 rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-200"
-              >
-                Prev
-              </button>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <button
-                  key={page}
-                  onClick={() => {
-                    setCurrentPage(page);
-                    window.scrollTo({ top: 0, behavior: "smooth" });
-                  }}
-                  className={`px-4 py-2 rounded border ${currentPage === page
-                      ? "bg-red-600 text-white border-red-600"
-                      : "hover:bg-gray-200"
-                    }`}
-                >
-                  {page}
-                </button>
-              ))}
-              <button
-                onClick={() => {
-                  setCurrentPage(Math.min(currentPage + 1, totalPages));
-                  window.scrollTo({ top: 0, behavior: "smooth" });
-                }}
-                disabled={currentPage === totalPages}
-                className="px-4 py-2 rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-200"
-              >
-                Next
-              </button>
-            </nav>
-          )}
-        </>
-      ) : (
-        <>
-          <section className="max-w-7xl mx-auto">
+            {/* Clickable Overlay to explore collection on banner button area */}
             <button
-              className="mb-6 inline-flex items-center px-5 py-2 bg-white border border-red-500 text-red-600 rounded shadow hover:bg-red-50 transition font-medium text-base gap-2"
-              onClick={handleBackToCategories}
-            >
-              <span className="text-xl">←</span>
-              <span>Back to Categories</span>
-            </button>
-            <h2 className="text-2xl font-semibold mb-6">{activeCategory} Designs</h2>
+              onClick={scrollToCollection}
+              className="absolute left-[7%] sm:left-[8%] bottom-[12%] sm:bottom-[15%] w-36 sm:w-44 h-8 sm:h-10 cursor-pointer opacity-0 z-20"
+              aria-label="Explore Collection"
+            />
+          </div>
+        </div>
+      </div>
 
-            {/* Subcategories Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-              {paginatedSubCategories.length > 0 ? (
-                paginatedSubCategories.map((sub, idx) => {
-                  return (
-                  <motion.div
-                    key={sub.name + idx}
-                    initial={{ opacity: 0, y: 40, filter: "blur(8px)" }}
-                    whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                    viewport={{ once: true, margin: "-50px" }}
-                    transition={{ 
-                      duration: 0.8,
-                      ease: [0.22, 1, 0.36, 1],
-                      delay: (idx % 12) * 0.08 
-                    }}
-                    className="bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-500 overflow-hidden flex flex-col"
-                  >
-                    {sub.video ? (
-                      <video
-                        src={encodeURI(sub.video)}
-                        autoPlay
-                        loop
-                        muted
-                        playsInline
-                        preload="auto"
-                        poster={sub.image || placeholderImage}
-                        className="w-full h-64 object-cover hover:scale-105 transition-transform bg-gray-100 cursor-pointer"
-                        onClick={() => setActiveDesign(sub)}
-                      />
-                    ) : (
-                      <img
-                        src={sub.image || placeholderImage}
-                        alt={sub.name}
-                        className="w-full h-64 object-cover hover:scale-105 transition-transform bg-gray-100 cursor-pointer"
-                        onClick={() => setActiveDesign(sub)}
-                      />
-                    )}
-                    <button
-                      className="mt-4 mx-4 mb-4 bg-red-500 text-white px-6 py-2 rounded hover:bg-red-600"
-                      onClick={() => handleEnquiryOpen(sub)}
-                    >
-                      Book an Enquiry
-                    </button>
-                  </motion.div>
-                  );
-                })
-              ) : (
-                <p className="text-center w-full py-14 text-gray-500">
-                  {search ? `No designs found matching "${search}"` : "No designs available."}
+      {/* 2. Main Content Container */}
+      <div id="collection-section" className="w-full max-w-[1880px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10 pt-4">
+        {/* Breadcrumb: [Home Icon] Home > Interior Design */}
+        <nav className="flex items-center space-x-2 text-xs sm:text-[13px] text-gray-500 font-medium mb-3">
+          <Link to="/" className="hover:text-[#0a2e22] transition-colors flex items-center gap-1.5">
+            <Home size={14} className="shrink-0 text-gray-500" />
+            <span>Home</span>
+          </Link>
+          <span className="text-gray-400 select-none px-0.5">&gt;</span>
+          {activeCategory ? (
+            <>
+              <button
+                onClick={handleBackToCategories}
+                className="hover:text-[#0a2e22] transition-colors cursor-pointer"
+              >
+                Interior Design
+              </button>
+              <span className="text-gray-400 select-none px-0.5">&gt;</span>
+              <span className="text-gray-900 font-semibold">
+                {formatCategoryTitle(activeCategory)}
+              </span>
+            </>
+          ) : (
+            <span className="text-gray-900 font-semibold">Interior Design</span>
+          )}
+        </nav>
+
+        {/* Categories View */}
+        {!activeCategory ? (
+          <>
+            {/* Title & Controls Row */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 border-b border-[#E8E5DC]">
+              <div>
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-serif text-[#1a241e] font-normal tracking-tight">
+                  Interior Design
+                </h1>
+                <p className="text-xs sm:text-sm text-gray-600 mt-1 font-normal leading-relaxed">
+                  Explore our wide range of interior solutions for a more beautiful home.
                 </p>
+              </div>
+
+              {/* Right Controls: Search bar + All Categories dropdown */}
+              <div className="flex items-center gap-2.5 flex-wrap shrink-0">
+                {/* Search Bar */}
+                <div className="relative w-64 sm:w-80 md:w-96">
+                  <Search className="w-4 h-4 text-gray-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <input
+                    type="search"
+                    placeholder="Search interior products, categories..."
+                    value={search}
+                    onChange={(e) => {
+                      setSearch(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                    className="w-full h-10 bg-white border border-[#D4CBBF] hover:border-gray-500 focus:border-[#0a2e22] focus:ring-1 focus:ring-[#0a2e22]/20 rounded-lg pl-10 pr-8 text-xs sm:text-[13px] font-normal text-gray-900 placeholder:text-gray-500 focus:outline-none transition-all shadow-2xs"
+                  />
+                  {search && (
+                    <button
+                      onClick={() => setSearch("")}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 text-sm font-medium cursor-pointer"
+                      aria-label="Clear search"
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
+
+                {/* Dropdown: All Categories [v] */}
+                <CustomSelect
+                  value={selectedCategory}
+                  options={["All Categories", ...categories.map((c) => c.name)]}
+                  onChange={(val) => {
+                    setSelectedCategory(val);
+                    setCurrentPage(1);
+                  }}
+                  placeholder="All Categories"
+                />
+              </div>
+            </div>
+
+            {/* 4-Column Categories Grid matching mockup */}
+            {loading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-6 mt-6">
+                {[...Array(12)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="animate-pulse bg-white rounded-2xl p-4 h-[320px] border border-[#E8E5DC]"
+                  >
+                    <div className="bg-gray-100 rounded-xl aspect-[4/3] mb-3"></div>
+                    <div className="bg-gray-100 h-4 w-3/4 rounded mb-2"></div>
+                    <div className="bg-gray-100 h-3 w-1/2 rounded mb-3"></div>
+                    <div className="bg-gray-100 h-4 w-1/3 rounded mt-auto"></div>
+                  </div>
+                ))}
+              </div>
+            ) : paginatedCategories.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-6 mt-6">
+                {paginatedCategories.map((cat) => (
+                  <div
+                    key={cat.name}
+                    onClick={() => onSelectCategory(cat.name)}
+                    className="group bg-white rounded-2xl border border-[#E8E5DC] hover:border-[#C4BAA9] hover:shadow-lg transition-all duration-300 flex flex-col justify-between p-3.5 sm:p-4 cursor-pointer"
+                  >
+                    <div>
+                      {/* Image container: aspect 4:3 rounded-xl */}
+                      <div className="relative w-full aspect-[4/3] rounded-xl overflow-hidden bg-[#FAF8F5] mb-3 border border-[#ECE7DC]">
+                        <img
+                          src={cat.image || placeholderImage}
+                          alt={cat.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                          loading="lazy"
+                        />
+                      </div>
+
+                      {/* Title */}
+                      <h3 className="text-sm sm:text-[15px] font-bold text-gray-900 group-hover:text-[#0a2e22] transition-colors mb-1.5 line-clamp-1">
+                        {formatCategoryTitle(cat.name)}
+                      </h3>
+
+                      {/* Feature snippet - authentic 2-line description */}
+                      <p className="text-xs text-gray-500 font-normal leading-relaxed line-clamp-2 min-h-[34px] mb-3">
+                        {getFeatureSnippet(cat)}
+                      </p>
+                    </div>
+
+                    {/* Bottom row: XX Designs + Circular Arrow */}
+                    <div className="flex items-center justify-between pt-2.5 border-t border-[#F2EFE9] mt-auto">
+                      <span className="text-xs text-gray-500 font-medium">
+                        {cat.subcategories.length} Designs
+                      </span>
+                      <div className="w-8 h-8 rounded-full border border-[#D6C7B2] bg-white group-hover:bg-[#0a2e22] group-hover:border-[#0a2e22] text-[#8C6D4F] group-hover:text-white flex items-center justify-center transition-all duration-200 shadow-2xs">
+                        <ChevronRight size={15} className="stroke-[2.2]" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-24 bg-white rounded-2xl border border-[#E8E5DC] mt-6 shadow-2xs">
+                <Search className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                <h3 className="text-base font-bold text-gray-900 mb-1">No categories found</h3>
+                <p className="text-xs text-gray-500 mb-4">
+                  Try adjusting your search query or dropdown filter.
+                </p>
+                <button
+                  onClick={() => {
+                    setSearch("");
+                    setSelectedCategory("All Categories");
+                    setCurrentPage(1);
+                  }}
+                  className="px-5 py-2 bg-[#0a2e22] text-white rounded-full text-xs font-semibold hover:bg-[#061d15] transition cursor-pointer"
+                >
+                  Reset Filter
+                </button>
+              </div>
+            )}
+
+            {/* Pagination Controls matching mockup: < Prev   1   2   3   4   Next > */}
+            {totalPages > 1 && (
+              <div className="flex justify-center mt-12 mb-6">
+                <nav className="flex items-center gap-1.5 sm:gap-2">
+                  {/* Prev Button */}
+                  <button
+                    disabled={currentPage === 1}
+                    onClick={() => {
+                      setCurrentPage(currentPage - 1);
+                      window.scrollTo({ top: 380, behavior: "smooth" });
+                    }}
+                    className="px-3.5 py-1.5 flex items-center gap-1 rounded-lg border border-[#E8E5DC] bg-white text-gray-700 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-50 transition cursor-pointer text-xs font-semibold shadow-2xs"
+                  >
+                    <span>&lt;</span>
+                    <span>Prev</span>
+                  </button>
+
+                  {/* Page Numbers */}
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                    <button
+                      key={`page-${p}`}
+                      onClick={() => {
+                        setCurrentPage(p);
+                        window.scrollTo({ top: 380, behavior: "smooth" });
+                      }}
+                      className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                        currentPage === p
+                          ? "bg-[#0a2e22] text-white shadow-xs font-bold"
+                          : "bg-white border border-[#E8E5DC] text-gray-700 hover:bg-gray-50"
+                      }`}
+                    >
+                      {p}
+                    </button>
+                  ))}
+
+                  {/* Next Button */}
+                  <button
+                    disabled={currentPage === totalPages}
+                    onClick={() => {
+                      setCurrentPage(currentPage + 1);
+                      window.scrollTo({ top: 380, behavior: "smooth" });
+                    }}
+                    className="px-3.5 py-1.5 flex items-center gap-1 rounded-lg border border-[#E8E5DC] bg-white text-gray-700 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-50 transition cursor-pointer text-xs font-semibold shadow-2xs"
+                  >
+                    <span>Next</span>
+                    <span>&gt;</span>
+                  </button>
+                </nav>
+              </div>
+            )}
+          </>
+        ) : (
+          /* Subcategories / Designs View for chosen category */
+          <div className="mt-2">
+            <div className="flex items-center justify-between pb-4 border-b border-[#E8E5DC] mb-6">
+              <div>
+                <button
+                  onClick={handleBackToCategories}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-white border border-[#D4CBBF] hover:border-[#0a2e22] rounded-lg text-xs font-semibold text-gray-800 transition-colors shadow-2xs mb-3 cursor-pointer"
+                >
+                  <ChevronLeft size={14} />
+                  <span>Back to Categories</span>
+                </button>
+                <h2 className="text-2xl sm:text-3xl font-serif text-[#1a241e] font-normal tracking-tight">
+                  {formatCategoryTitle(activeCategory)} Designs
+                </h2>
+                <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                  {getFeatureSnippet(currentCat || { name: activeCategory })}
+                </p>
+              </div>
+
+              {/* Search Subcategories */}
+              <div className="relative w-64 sm:w-80 md:w-96">
+                <Search className="w-4 h-4 text-gray-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type="search"
+                  placeholder="Search designs..."
+                  value={search}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setSubCatPage(1);
+                  }}
+                  className="w-full h-10 bg-white border border-[#D4CBBF] hover:border-gray-500 focus:border-[#0a2e22] focus:ring-1 focus:ring-[#0a2e22]/20 rounded-lg pl-10 pr-8 text-xs sm:text-[13px] font-normal text-gray-900 placeholder:text-gray-500 focus:outline-none transition-all shadow-2xs"
+                />
+                {search && (
+                  <button
+                    onClick={() => setSearch("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 text-sm font-medium cursor-pointer"
+                    aria-label="Clear search"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Designs Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-6">
+              {paginatedSubCategories.length > 0 ? (
+                paginatedSubCategories.map((sub, idx) => (
+                  <div
+                    key={sub.name + idx}
+                    className="bg-white rounded-2xl border border-[#E8E5DC] hover:border-[#C4BAA9] hover:shadow-lg transition-all duration-300 p-3.5 sm:p-4 flex flex-col justify-between group"
+                  >
+                    <div>
+                      {/* Media container */}
+                      <div className="relative w-full aspect-[4/3] rounded-xl overflow-hidden bg-[#FAF8F5] mb-3 border border-[#ECE7DC]">
+                        {sub.video ? (
+                          <video
+                            src={encodeURI(sub.video)}
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            preload="auto"
+                            poster={sub.image || placeholderImage}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 cursor-pointer"
+                            onClick={() => setActiveDesign(sub)}
+                          />
+                        ) : (
+                          <img
+                            src={sub.image || placeholderImage}
+                            alt={sub.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 cursor-pointer"
+                            onClick={() => setActiveDesign(sub)}
+                          />
+                        )}
+                      </div>
+
+                      <h3
+                        onClick={() => setActiveDesign(sub)}
+                        className="text-sm font-bold text-gray-900 group-hover:text-[#0a2e22] transition-colors cursor-pointer mb-2 line-clamp-2"
+                      >
+                        {sub.name}
+                      </h3>
+                    </div>
+
+                    <button
+                      onClick={() => handleEnquiryOpen(sub)}
+                      className="w-full mt-3 py-2 px-3 bg-[#0a2e22] hover:bg-[#061d15] text-white text-xs font-semibold rounded-lg shadow-2xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                    >
+                      <Calendar size={13} />
+                      <span>Book an Enquiry</span>
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <div className="col-span-full text-center py-20 bg-white rounded-2xl border border-[#E8E5DC]">
+                  <p className="text-gray-500 text-xs">
+                    {search ? `No designs found matching "${search}"` : "No designs available in this category."}
+                  </p>
+                </div>
               )}
             </div>
 
             {/* Subcategory Pagination */}
-            {filteredSubcategories.length > itemsPerPage && (
-              <nav className="flex justify-center mt-10 space-x-3">
-                <button
-                  onClick={() => {
-                    setSubCatPage(Math.max(subCatPage - 1, 1));
-                    window.scrollTo({ top: 0, behavior: "smooth" });
-                  }}
-                  disabled={subCatPage === 1}
-                  className="px-4 py-2 rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-200"
-                >
-                  Prev
-                </button>
-                {Array.from({ length: subCatTotalPages }, (_, i) => i + 1).map((page) => (
+            {subCatTotalPages > 1 && (
+              <div className="flex justify-center mt-12 mb-6">
+                <nav className="flex items-center gap-1.5 sm:gap-2">
                   <button
-                    key={page}
+                    disabled={subCatPage === 1}
                     onClick={() => {
-                      setSubCatPage(page);
-                      window.scrollTo({ top: 0, behavior: "smooth" });
+                      setSubCatPage(subCatPage - 1);
+                      window.scrollTo({ top: 380, behavior: "smooth" });
                     }}
-                    className={`px-4 py-2 rounded border ${subCatPage === page
-                        ? "bg-red-600 text-white border-red-600"
-                        : "hover:bg-gray-200"
-                      }`}
+                    className="px-3.5 py-1.5 flex items-center gap-1 rounded-lg border border-[#E8E5DC] bg-white text-gray-700 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-50 transition cursor-pointer text-xs font-semibold shadow-2xs"
                   >
-                    {page}
+                    <span>&lt;</span>
+                    <span>Prev</span>
                   </button>
-                ))}
-                <button
-                  onClick={() => {
-                    setSubCatPage(Math.min(subCatPage + 1, subCatTotalPages));
-                    window.scrollTo({ top: 0, behavior: "smooth" });
-                  }}
-                  disabled={subCatPage === subCatTotalPages}
-                  className="px-4 py-2 rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-200"
-                >
-                  Next
-                </button>
-              </nav>
-            )}
-          </section>
-        </>
-      )}
 
-      {/* Design Details Modal */}
-      {activeDesign && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 p-4">
-          <div className="bg-white rounded-lg p-6 w-full max-w-3xl relative shadow-md">
+                  {Array.from({ length: subCatTotalPages }, (_, i) => i + 1).map((p) => (
+                    <button
+                      key={`sub-page-${p}`}
+                      onClick={() => {
+                        setSubCatPage(p);
+                        window.scrollTo({ top: 380, behavior: "smooth" });
+                      }}
+                      className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                        subCatPage === p
+                          ? "bg-[#0a2e22] text-white shadow-xs font-bold"
+                          : "bg-white border border-[#E8E5DC] text-gray-700 hover:bg-gray-50"
+                      }`}
+                    >
+                      {p}
+                    </button>
+                  ))}
+
+                  <button
+                    disabled={subCatPage === subCatTotalPages}
+                    onClick={() => {
+                      setSubCatPage(subCatPage + 1);
+                      window.scrollTo({ top: 380, behavior: "smooth" });
+                    }}
+                    className="px-3.5 py-1.5 flex items-center gap-1 rounded-lg border border-[#E8E5DC] bg-white text-gray-700 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-50 transition cursor-pointer text-xs font-semibold shadow-2xs"
+                  >
+                    <span>Next</span>
+                    <span>&gt;</span>
+                  </button>
+                </nav>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* 2-Column Design Showcase & Enquiry Modal matching reference design */}
+      {(activeDesign || bookingOpen) && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-3 sm:p-5 overflow-y-auto">
+          <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-gray-100 w-full max-w-5xl overflow-hidden relative my-auto animate-fadeIn max-h-[92vh] flex flex-col lg:flex-row">
+            {/* Close Button */}
             <button
-              onClick={() => setActiveDesign(null)}
-              className="absolute top-1 right-1 text-2xl font-bold hover:text-red-600"
+              onClick={handleModalClose}
+              className="absolute top-3.5 right-3.5 z-30 text-gray-400 hover:text-black bg-white/90 hover:bg-white rounded-full p-1.5 transition-colors cursor-pointer shadow-xs border border-gray-100"
               aria-label="Close"
             >
-              ×
+              <X size={20} />
             </button>
-            {activeDesign.video ? (
-              <video
-                src={encodeURI(activeDesign.video)}
-                autoPlay
-                loop
-                muted
-                playsInline
-                controls
-                preload="auto"
-                className="w-full h-[400px] object-cover mb-4 rounded mx-auto"
-              />
-            ) : (
-              <img
-                src={activeDesign.image || placeholderImage}
-                alt={activeDesign.name}
-                className="w-full h-[400px] object-cover mb-4 rounded mx-auto"
-              />
-            )}
-            <div>
-              <h3 className="font-semibold text-lg mb-2">Contact for this Design</h3>
-              <p><strong>Phone 1:</strong> <a href="tel:+918121135980" className="text-blue-600 underline">+91 81211 35980</a></p>
-              <p><strong>Phone 2:</strong> <a href="tel:+919248344434" className="text-blue-600 underline">+91 92483 44434</a></p>
-              <p><strong>Phone 3:</strong> <a href="tel:+919100322379" className="text-blue-600 underline">+91 91003 22379</a></p>
-              <p><strong>Phone 4:</strong> <a href="tel:+919440293980" className="text-blue-600 underline">+91 94402 93980</a></p>
-              <p><strong>Phone 5:</strong> <a href="tel:+919542088164" className="text-blue-600 underline">+91 95420 88164</a></p>
 
-              <p><strong>Email:</strong> <a href="mailto:gharsansarshop@gmail.com" className="text-red-600 underline">gharsansarshop@gmail.com</a></p>
-              <p><strong>Address:</strong> 27-14-60, Rajagopalachari St, near Buckinghampet Post Office, Governor Peta, Vijayawada, Andhra Pradesh 520002.</p>
+            {/* Left Column: Image Showcase / Carousel */}
+            <div className="w-full lg:w-1/2 p-5 sm:p-6 lg:p-7 flex flex-col justify-between bg-white border-b lg:border-b-0 lg:border-r border-[#F0ECE1]">
+              <div>
+                {/* Main Image Container */}
+                <div className="relative w-full aspect-[4/3] sm:aspect-[1.15/1] rounded-2xl overflow-hidden bg-[#FAF8F5] border border-[#ECE7DC] flex items-center justify-center select-none group">
+                  {(activeDesign || designForEnquiry)?.video ? (
+                    <video
+                      src={encodeURI((activeDesign || designForEnquiry)!.video!)}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      controls
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <img
+                      src={(activeDesign || designForEnquiry)?.image || placeholderImage}
+                      alt={(activeDesign || designForEnquiry)?.name || "Design"}
+                      className="w-full h-full object-cover transition-all duration-300"
+                    />
+                  )}
+
+                  {/* Navigation Arrows */}
+                  {galleryItems.length > 1 && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={handlePrevImage}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/95 hover:bg-white border border-gray-200 shadow-md flex items-center justify-center text-gray-700 hover:text-black transition cursor-pointer"
+                        aria-label="Previous Design"
+                      >
+                        <ChevronLeft size={18} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleNextImage}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/95 hover:bg-white border border-gray-200 shadow-md flex items-center justify-center text-gray-700 hover:text-black transition cursor-pointer"
+                        aria-label="Next Design"
+                      >
+                        <ChevronRight size={18} />
+                      </button>
+                    </>
+                  )}
+                </div>
+
+                {/* Thumbnails Strip */}
+                {galleryItems.length > 1 && (
+                  <div className="flex items-center gap-2.5 sm:gap-3 mt-3.5 overflow-x-auto pb-1 pt-0.5">
+                    {visibleThumbnails.map((item, idx) => {
+                      const isSelected = item.name === (activeDesign || designForEnquiry)?.name;
+                      return (
+                        <button
+                          key={item.name + idx}
+                          type="button"
+                          onClick={() => {
+                            setActiveDesign(item);
+                            setDesignForEnquiry(item);
+                          }}
+                          className={`relative w-16 h-14 sm:w-20 sm:h-16 shrink-0 rounded-xl overflow-hidden cursor-pointer transition-all ${
+                            isSelected
+                              ? "ring-2 ring-[#0a2e22] ring-offset-2 border-transparent scale-102 shadow-xs"
+                              : "border border-[#E8E5DC] opacity-70 hover:opacity-100"
+                          }`}
+                        >
+                          <img
+                            src={item.image || placeholderImage}
+                            alt={item.name}
+                            className="w-full h-full object-cover"
+                          />
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             </div>
 
-          </div>
-        </div>
-      )}
+            {/* Right Column: Category Pill, Heading, Enquiry Form & Direct Contacts */}
+            <div className="w-full lg:w-1/2 p-5 sm:p-6 lg:p-7 flex flex-col justify-between overflow-y-auto">
+              <div>
+                {/* Category Badge */}
+                <div className="inline-flex items-center px-2.5 py-1 rounded-md bg-[#E5ECE7] text-[#1E3B2B] text-xs font-semibold tracking-wide mb-2 self-start">
+                  {formatCategoryTitle(activeCategory || currentCat?.name || "Wallpaper Rolls")}
+                </div>
 
-      {/* Booking Modal */}
-      {bookingOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 p-4">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md relative">
-            <button
-              onClick={handleEnquiryClose}
-              className="absolute top-2 right-4 text-2xl font-bold hover:text-red-600"
-              aria-label="Close"
-            >
-              ×
-            </button>
-            <h2 className="text-xl font-semibold mb-4">Book an Enquiry</h2>
-            <form onSubmit={handleEnquirySubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm mb-1">Name *</label>
-                <input
-                  type="text"
-                  value={formName}
-                  onChange={(e) => setFormName(e.target.value)}
-                  required
-                  className="w-full border rounded px-3 py-2"
-                />
+                {/* Editorial Title */}
+                <h2 className="font-serif text-2xl sm:text-3xl lg:text-[34px] leading-tight text-[#111827] font-normal tracking-tight mb-2">
+                  {(activeDesign || designForEnquiry)?.name}
+                </h2>
+
+                {/* Subtitle Description */}
+                <p className="text-xs sm:text-[13px] text-gray-600 leading-relaxed font-normal mb-4">
+                  {getDesignSubtitle(activeDesign || designForEnquiry, activeCategory || currentCat?.name)}
+                </p>
+
+                {/* Send an Enquiry Form */}
+                <form onSubmit={handleEnquirySubmit} className="space-y-3">
+                  <div className="flex items-center gap-2 text-sm sm:text-[15px] font-bold text-gray-900 mb-2">
+                    <Briefcase size={16} className="text-[#0a2e22]" />
+                    <span>Send an Enquiry</span>
+                  </div>
+
+                  {/* Row 1: Name & Phone */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 mb-1">Your Name *</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Enter your name"
+                        value={formName}
+                        onChange={(e) => setFormName(e.target.value)}
+                        className="w-full h-10 border border-[#D4CBBF] hover:border-gray-500 rounded-lg px-3 text-xs sm:text-[13px] text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#0a2e22] focus:ring-1 focus:ring-[#0a2e22]/20 transition-all bg-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 mb-1">Phone Number *</label>
+                      <div className="flex h-10 border border-[#D4CBBF] hover:border-gray-500 rounded-lg overflow-hidden focus-within:border-[#0a2e22] focus-within:ring-1 focus-within:ring-[#0a2e22]/20 bg-white transition-all">
+                        <span className="inline-flex items-center px-2.5 bg-gray-50 border-r border-[#D4CBBF] text-xs font-semibold text-gray-700 select-none">
+                          +91
+                        </span>
+                        <input
+                          type="tel"
+                          required
+                          placeholder="Enter phone number"
+                          value={formPhone}
+                          onChange={(e) => setFormPhone(e.target.value)}
+                          className="w-full px-3 text-xs sm:text-[13px] text-gray-900 placeholder:text-gray-400 focus:outline-none bg-transparent"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Row 2: Email */}
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Email Address</label>
+                    <input
+                      type="email"
+                      placeholder="Enter your email (optional)"
+                      value={formEmail}
+                      onChange={(e) => setFormEmail(e.target.value)}
+                      className="w-full h-10 border border-[#D4CBBF] hover:border-gray-500 rounded-lg px-3 text-xs sm:text-[13px] text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#0a2e22] focus:ring-1 focus:ring-[#0a2e22]/20 transition-all bg-white"
+                    />
+                  </div>
+
+                  {/* Row 3: Message */}
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Message *</label>
+                    <textarea
+                      rows={2}
+                      required
+                      placeholder="Tell us about your requirements (e.g. quantity, size, location, etc.)"
+                      value={formMessage}
+                      onChange={(e) => setFormMessage(e.target.value)}
+                      className="w-full border border-[#D4CBBF] hover:border-gray-500 rounded-lg p-2.5 text-xs sm:text-[13px] text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#0a2e22] focus:ring-1 focus:ring-[#0a2e22]/20 resize-none transition-all bg-white"
+                    ></textarea>
+                  </div>
+
+                  {/* Submit Button */}
+                  <button
+                    type="submit"
+                    className="w-full h-10 sm:h-11 bg-[#0a2e22] hover:bg-[#061d15] text-white rounded-lg text-xs sm:text-sm font-semibold transition-all duration-200 shadow-sm flex items-center justify-center gap-2 cursor-pointer mt-1"
+                  >
+                    <Send size={15} />
+                    <span>Send Enquiry</span>
+                  </button>
+
+                  {enquirySuccess && (
+                    <div className="p-2 bg-green-50 border border-green-200 text-green-800 rounded-lg text-xs text-center font-medium animate-fadeIn">
+                      ✓ Enquiry submitted! Connecting to WhatsApp...
+                    </div>
+                  )}
+                </form>
+
+                {/* Divider: OR CONTACT DIRECTLY */}
+                <div className="relative my-4">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-[#E8E5DC]"></div>
+                  </div>
+                  <div className="relative flex justify-center text-[10px] sm:text-[11px] font-semibold text-gray-400 uppercase tracking-widest">
+                    <span className="bg-white px-3">OR CONTACT DIRECTLY</span>
+                  </div>
+                </div>
+
+                {/* 3 Contact Columns */}
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  <a
+                    href="tel:+918121135980"
+                    className="group flex flex-col items-center p-2 rounded-xl hover:bg-[#FAF8F5] transition-colors"
+                  >
+                    <Phone size={16} className="text-[#0a2e22] mb-1.5" />
+                    <span className="text-[11px] sm:text-xs font-bold text-gray-900 group-hover:text-[#0a2e22] truncate w-full">
+                      +91 81211 35980
+                    </span>
+                    <span className="text-[10px] text-gray-500 font-medium">Call Now</span>
+                  </a>
+
+                  <a
+                    href="https://wa.me/919248344434"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex flex-col items-center p-2 rounded-xl hover:bg-[#FAF8F5] transition-colors"
+                  >
+                    <svg className="w-4 h-4 text-[#25D366] fill-current mb-1.5" viewBox="0 0 24 24">
+                      <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
+                    </svg>
+                    <span className="text-[11px] sm:text-xs font-bold text-gray-900 group-hover:text-[#0a2e22] truncate w-full">
+                      +91 92483 44434
+                    </span>
+                    <span className="text-[10px] text-gray-500 font-medium">WhatsApp</span>
+                  </a>
+
+                  <a
+                    href="mailto:gharsansarshop@gmail.com"
+                    className="group flex flex-col items-center p-2 rounded-xl hover:bg-[#FAF8F5] transition-colors"
+                  >
+                    <Mail size={16} className="text-[#0a2e22] mb-1.5" />
+                    <span className="text-[11px] sm:text-xs font-bold text-gray-900 group-hover:text-[#0a2e22] truncate w-full">
+                      gharsansarshop@gmail.com
+                    </span>
+                    <span className="text-[10px] text-gray-500 font-medium">Email Us</span>
+                  </a>
+                </div>
+
+                {/* Physical Address */}
+                <div className="flex items-start gap-2 pt-3 border-t border-[#F2EFE9] text-[11px] text-gray-500 leading-snug mt-3">
+                  <MapPin size={14} className="text-gray-400 shrink-0 mt-0.5" />
+                  <span>
+                    D.No. 27-14-60, Rajagopalachari Street, near BuckinghamPet Post Office, Governor Peta, Vijayawada, Andhra Pradesh 520002.
+                  </span>
+                </div>
               </div>
-              <div>
-                <label className="block text-sm mb-1">Email *</label>
-                <input
-                  type="email"
-                  value={formEmail}
-                  onChange={(e) => setFormEmail(e.target.value)}
-                  required
-                  className="w-full border rounded px-3 py-2"
-                />
-              </div>
-              <div>
-                <label className="block text-sm mb-1">Phone *</label>
-                <input
-                  type="tel"
-                  value={formPhone}
-                  onChange={(e) => setFormPhone(e.target.value)}
-                  required
-                  className="w-full border rounded px-3 py-2"
-                />
-              </div>
-              <div>
-                <label className="block text-sm mb-1">Property Name</label>
-                <input
-                  type="text"
-                  value={formPropertyName}
-                  onChange={(e) => setFormPropertyName(e.target.value)}
-                  className="w-full border rounded px-3 py-2"
-                />
-              </div>
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="whatsapp"
-                  checked={formWhatsAppUpdates}
-                  onChange={(e) => setFormWhatsAppUpdates(e.target.checked)}
-                  className="mr-2"
-                />
-                <label htmlFor="whatsapp">Send WhatsApp updates</label>
-              </div>
-              <button
-                type="submit"
-                className="w-full bg-red-500 text-white py-2 rounded hover:bg-red-600"
-              >
-                Submit Enquiry
-              </button>
-            </form>
+            </div>
           </div>
         </div>
       )}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </main>
+    </div>
   );
 };
 

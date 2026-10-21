@@ -3,7 +3,7 @@ import { Save, Edit3, X, Trash2, Plus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const ReturnGiftsAdmin: React.FC = () => {
-  const API_BASE = import.meta.env.VITE_AWS_API_URL || "https://backend.gharsansar.website/api";
+  const API_BASE = import.meta.env.VITE_AWS_API_URL || "/api";
 
   const [returnGifts, setReturnGifts] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);

@@ -13,7 +13,7 @@ const OrdersAdmin: React.FC = () => {
 
   const API_BASE =
     import.meta.env.VITE_AWS_API_URL ||
-    "https://backend.gharsansar.website/api";
+    "/api";
 
   const [shippingOrderId, setShippingOrderId] = useState<string | null>(null);
   const [trackingAwb, setTrackingAwb] = useState<string | null>(null);

@@ -1,76 +1,110 @@
 // src/pages/Home.tsx
-import React, { useState, useEffect, useMemo } from "react";
-import axios from "axios";
+import React, { useState, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowRight, Truck, Shield, Headphones, XCircle, Eye, Palette, HandHeart, CheckCircle, Home as HomeIcon, ShoppingCart, Zap, Star, Heart } from "lucide-react";
+import {
+  ArrowRight,
+  Truck,
+  Trophy,
+  Users,
+  Gem,
+  ShieldCheck,
+  Headphones,
+  Package,
+  Eye,
+  MessageSquare,
+  Home as HomeIcon,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { motion } from "framer-motion";
-import { useProducts } from "../context/ProductContext"; // ✅ using context
-import { useCart } from "../context/CartContext";
-import categoriesData from "../data/categories.json";
+import { useProducts } from "../context/ProductContext";
+import ProductCard from "../components/ProductCard";
 
 const Home: React.FC = () => {
   const { products } = useProducts();
-  const { addToCart } = useCart();
   const navigate = useNavigate();
 
-  // State for interior categories
-  const [interiorCategories, setInteriorCategories] = useState<any[]>([]);
-  const [loadingCategories, setLoadingCategories] = useState(true);
+  // How We Work steps matching reference image
+  const workSteps = [
+    {
+      number: "01",
+      icon: Eye,
+      title: "Browse & Select",
+      description:
+        "Explore a curated collection of products and interior design galleries, & select from our design services that match your style.",
+    },
+    {
+      number: "02",
+      icon: MessageSquare,
+      title: "Consultation",
+      description:
+        "Connect with our design experts for personalized advice and customization based on your space and preferences.",
+    },
+    {
+      number: "03",
+      icon: Truck,
+      title: "We Deliver",
+      description:
+        "Experience hassle-free delivery, installation and support. We handle everything for you.",
+    },
+    {
+      number: "04",
+      icon: HomeIcon,
+      title: "Enjoy",
+      description:
+        "Transform your space and enjoy a beautiful, functional home with our designs and products.",
+    },
+  ];
 
-  // Fetch interior categories
-  useEffect(() => {
-    const fetchInteriorCategories = async () => {
-      try {
-        let data = categoriesData;
-        const API_BASE = import.meta.env.VITE_AWS_API_URL || "https://backend.gharsansar.website/api";
-        try {
-          const res = await axios.get(`${API_BASE}/storage/upload/interior`);
-          if (res.data && res.data.success && res.data.data) {
-            data = res.data.data;
-          }
-        } catch (e) {
-          console.warn("Backend categories fetch failed, using fallback static data:", e);
-        }
+  // 6 Interior Works matching reference image
+  const interiorWorks = [
+    {
+      title: "Wallpaper Rolls",
+      count: "35+ Designs",
+      image: "/images/wallapaper rolls.jpg",
+      link: "/interior-design?category=wallpaper_rolls",
+    },
+    {
+      title: "Wallpapers",
+      count: "18+ Designs",
+      image: "/images/wallpapers.jpg",
+      link: "/interior-design?category=wallpaper",
+    },
+    {
+      title: "3d wallpapers",
+      count: "12+ Designs",
+      image: "/images/3d wallapapers.jpg",
+      link: "/interior-design?category=3dbokka",
+    },
+    {
+      title: "WALLART AFFECTS",
+      count: "5+ Designs",
+      image: "/images/wall art effect.jpg",
+      link: "/interior-design?category=wallart",
+    },
+    {
+      title: "Vinyl Flooring",
+      count: "15+ Designs",
+      image: "/images/vinyl flooring.jpg",
+      link: "/interior-design?category=vinyl_flooring",
+    },
+    {
+      title: "Natural Vertical Garden",
+      count: "12+ Designs",
+      image: "/images/natural vertical garden.jpg",
+      link: "/interior-design?category=artificial_vertical_garden",
+    },
+  ];
 
-        const BACKEND_STATIC_URL = API_BASE.replace(/\/api$/, "");
-        const sanitizeImageUrl = (path?: string) => {
-          if (!path) return undefined;
-          if (path.startsWith("http")) return path;
-          if (path.startsWith("/products") || path.startsWith("/blogs") || path.startsWith("/uploads")) {
-            return `${BACKEND_STATIC_URL}${path}`;
-          }
-          return path;
-        };
-
-        // Handle new JSON structure with data array
-        const dataArr = Array.isArray(data) ? data : (data as any).data || [];
-        const categories = dataArr.map((cat: any) => ({
-          name: cat.name,
-          image: sanitizeImageUrl(cat.subcategories?.[0]?.image),
-          features: cat.features || [],
-          subcategories: cat.subcategories || []
-        }));
-
-        setInteriorCategories(categories.slice(0, 6)); // Show only first 6
-      } catch (err) {
-        console.error("Failed to fetch interior categories:", err);
-        setInteriorCategories([]);
-      } finally {
-        setLoadingCategories(false);
-      }
-    };
-
-    fetchInteriorCategories();
-  }, []);
-
-  const features = [
+  // Trust Badges matching reference image
+  const trustBadges = [
     {
       icon: Truck,
       title: "Express Delivery",
-      description: "Fast nationwide shipping via Delhivery",
+      description: "Fast and reliable shipping across India",
     },
     {
-      icon: Shield,
+      icon: ShieldCheck,
       title: "Secure Payment",
       description: "100% secure payment processing",
     },
@@ -80,54 +114,42 @@ const Home: React.FC = () => {
       description: "Round-the-clock customer support",
     },
     {
-      icon: XCircle,
-      title: "No Return & Exchange",
-      description: "Products cannot be returned or exchanged",
+      icon: Package,
+      title: "Easy Returns",
+      description: "Product can be returned or exchanged",
     },
   ];
 
-  // ✅ Pick first 6 products as "recent" (backend usually gives newest first)
+  // Filter products for Recent Products carousel
+  const [productPage, setProductPage] = useState(0);
+
   const recentProducts = useMemo(() => {
-    return [...products].sort((a, b) => {
-      const aIsCello = (a.category?.toLowerCase().includes("cello") || a.title?.toLowerCase().includes("cello"));
-      const bIsCello = (b.category?.toLowerCase().includes("cello") || b.title?.toLowerCase().includes("cello"));
-      if (aIsCello && !bIsCello) return 1;
-      if (!aIsCello && bIsCello) return -1;
-      return 0;
-    }).slice(0, 6);
+    // Prioritize Sonu cookware items as shown in reference image
+    const sonuItems = products.filter(
+      (p) =>
+        p.title?.toLowerCase().includes("sonu") ||
+        p.category?.toLowerCase().includes("sonu")
+    );
+    const otherItems = products.filter((p) => !sonuItems.includes(p));
+    return [...sonuItems, ...otherItems];
   }, [products]);
 
-  // How We Work steps
-  const workSteps = [
-    {
-      icon: Eye,
-      title: "Browse & Select",
-      description: "Explore our extensive collection of products and interior design galleries. Select items or design services that match your style.",
-      color: "blue"
-    },
-    {
-      icon: Palette,
-      title: "Consultation",
-      description: "Connect with our design experts for personalized advice. Get professional recommendations tailored to your space and preferences.",
-      color: "purple"
-    },
-    {
-      icon: HandHeart,
-      title: "We Deliver",
-      description: "Experience hassle-free delivery right to your doorstep. We handle the logistics so you can focus on enjoying your new space.",
-      color: "green"
-    },
-    {
-      icon: CheckCircle,
-      title: "Enjoy",
-      description: "Transform your space and enjoy the results. Our commitment to quality ensures long-lasting satisfaction with your home transformation.",
-      color: "orange"
-    }
-  ];
+  const maxPages = Math.max(1, Math.ceil(recentProducts.length / 4));
+  const currentRecentProducts = recentProducts.slice(
+    productPage * 4,
+    productPage * 4 + 4
+  );
 
+  const prevProductPage = () => {
+    setProductPage((prev) => (prev > 0 ? prev - 1 : maxPages - 1));
+  };
+
+  const nextProductPage = () => {
+    setProductPage((prev) => (prev + 1 < maxPages ? prev + 1 : 0));
+  };
 
   return (
-    <main className="w-full max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="bg-[#FAF8F5] min-h-screen font-sans text-gray-900 flex flex-col">
       {/* SEO Headings for Regional Keywords */}
       <div className="sr-only">
         <h2>Best Interior Designers in Vijayawada, Andhra Pradesh</h2>
@@ -135,467 +157,401 @@ const Home: React.FC = () => {
         <h2>Best Interior Designers in Eluru, Andhra Pradesh</h2>
         <h2>Best Interior Designers in Hyderabad, Telangana</h2>
         <h2>Interior Design Services Vijayawada</h2>
-        <h2>Interior Design Services Guntur</h2>
-        <h2>Interior Design Services Eluru</h2>
-        <h2>Interior Design Services Hyderabad</h2>
-        <h2>Professional Interior Designers Andhra Pradesh</h2>
-        <h2>Professional Interior Designers Telangana</h2>
-        <h2>Top Interior Designers in Vijayawada</h2>
-        <h2>Top Interior Designers in Hyderabad</h2>
         <h2>Ghar Sansar - #1 Interior Designers Vijayawada</h2>
       </div>
 
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-[#faf9f6] via-[#f5f4f0] to-[#eae9e4] py-16 sm:py-24 overflow-hidden border-b border-gray-200/20">
-        {/* Decorative elements */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-amber-200/5 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-neutral-400/5 rounded-full blur-3xl"></div>
+      {/* 1. Hero Section with Sunlit Luxe Temple Lounge Background (Bright & Vibrant) */}
+      <section className="relative min-h-[580px] sm:min-h-[640px] lg:min-h-[680px] flex items-center py-14 sm:py-20 lg:py-24 overflow-hidden border-b border-gray-200/30">
+        {/* Luxury Background Image - Bright, Vibrant, Sunlit */}
+        <div className="absolute inset-0 z-0">
+          <img
+            src="/images/sunlit_luxe_temple_lounge.png"
+            alt="Interior Design Solutions - Sunlit Luxe Temple Lounge"
+            className="w-full h-full object-cover object-center brightness-[1.06] contrast-[1.04] saturate-[1.06]"
+          />
+          {/* Gentle localized gradient on the left text area only - keeps the rest of the image 100% bright, crisp & sunlit */}
+          <div className="absolute inset-y-0 left-0 w-full sm:w-[60%] lg:w-[48%] bg-gradient-to-r from-white/90 via-white/50 to-transparent pointer-events-none"></div>
+        </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 sm:gap-16 items-center">
-            
+        <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="max-w-2xl lg:max-w-3xl">
             {/* Text Content */}
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 25 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
+              transition={{ duration: 0.7, ease: "easeOut" }}
             >
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-luxury-charcoal mb-6 leading-[1.1] tracking-tight">
+              {/* Eyebrow Tag */}
+              <div className="inline-flex items-center gap-2 mb-3 sm:mb-4">
+                <span className="text-[11px] sm:text-xs font-semibold tracking-[0.25em] text-[#9A7B66] uppercase">
+                  Interior Design Solutions
+                </span>
+              </div>
+
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-950 mb-5 leading-[1.12] tracking-tight">
                 Best Interior Designers in
-                <span className="block font-serif italic font-normal text-luxury-gold mt-2">
-                  Andhra Pradesh & Telangana
+                <span className="block font-serif italic font-normal text-[#9E472A] mt-1.5">
+                  Andhra Pradesh &amp; Telangana
                 </span>
               </h1>
-              
-              <p className="text-sm sm:text-base md:text-lg text-gray-500 mb-8 sm:mb-10 leading-relaxed font-semibold max-w-xl">
+
+              <p className="text-sm sm:text-base text-gray-800 mb-8 leading-relaxed font-semibold max-w-xl">
                 Transform your space with bespoke decor collections and award-winning interior design services across Vijayawada, Guntur, Eluru, Hyderabad, and major regional centers.
               </p>
-              
-              <div className="flex flex-col sm:flex-row gap-3.5 sm:gap-4 mb-10">
+
+              <div className="flex flex-col sm:flex-row gap-3.5 sm:gap-4 mb-9">
                 <Link
                   to="/interior-design"
-                  className="bg-luxury-charcoal hover:bg-luxury-gold text-white px-8 py-4 rounded-full shadow-md transition-all duration-300 font-bold uppercase tracking-widest text-[11px] inline-flex items-center justify-center group active:scale-95"
+                  className="bg-luxury-charcoal hover:bg-[#9E472A] text-white px-7 py-3.5 rounded-none shadow-md transition-all duration-300 font-bold uppercase tracking-widest text-[11px] inline-flex items-center justify-center group active:scale-95"
                 >
                   Design Services
                   <ArrowRight className="ml-2 w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                 </Link>
                 <Link
                   to="/products"
-                  className="border border-luxury-charcoal text-luxury-charcoal px-8 py-4 rounded-full hover:bg-luxury-charcoal hover:text-white transition-all duration-300 font-bold uppercase tracking-widest text-[11px] inline-flex items-center justify-center active:scale-95"
+                  className="border border-luxury-charcoal bg-white/80 hover:bg-luxury-charcoal text-luxury-charcoal hover:text-white px-7 py-3.5 rounded-none backdrop-blur-xs transition-all duration-300 font-bold uppercase tracking-widest text-[11px] inline-flex items-center justify-center active:scale-95"
                 >
                   Shop Now
                 </Link>
               </div>
 
               {/* Trust Indicators */}
-              <div className="flex flex-wrap items-center gap-x-6 gap-y-2.5 pt-6 border-t border-gray-200/50">
-                <div className="flex items-center gap-1.5">
-                  <div className="w-1 h-1 bg-gray-400 rounded-full" />
-                  <span className="text-[10px] sm:text-[11px] font-bold text-gray-400 uppercase tracking-widest">
-                    10+ Years Experience
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <div className="w-1 h-1 bg-gray-400 rounded-full" />
-                  <span className="text-[10px] sm:text-[11px] font-bold text-gray-400 uppercase tracking-widest">
-                    500+ Projects Completed
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <div className="w-1 h-1 bg-gray-400 rounded-full" />
-                  <span className="text-[10px] sm:text-[11px] font-bold text-gray-400 uppercase tracking-widest">
-                    Premium Craftsmanship
-                  </span>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Video Player & Luxury Frame */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, ease: "easeOut", delay: 0.1 }}
-              className="relative w-full"
-            >
-              <div className="relative w-full p-2 sm:p-4">
-                {/* Floating Offset Frame */}
-                <div className="absolute inset-0 border border-gray-950/10 rounded-3xl transform translate-x-3 translate-y-3 -z-10"></div>
-                
-                <div className="aspect-video rounded-2xl overflow-hidden shadow-xl border border-white/60">
-                  <video
-                    src="/videos/homepagevideo.mp4"
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    className="w-full h-full object-cover"
-                    poster="https://content3.jdmagicbox.com/comp/vijayawada/89/0866p866std2000089/catalogue/ghar-sansar-governerpet-vijayawada-gift-shops-r9zm63fkbh.jpg"
-                  >
-                    Your browser does not support the video tag.
-                  </video>
-                </div>
-              </div>
-            </motion.div>
-
-          </div>
-        </div>
-      </section>
-
-      {/* How We Work Section */}
-      <section className="py-12 sm:py-16 bg-gradient-to-b from-white to-luxury-cream/20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-8 sm:mb-12">
-            <motion.h2
-              initial={{ opacity: 0, y: -20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="text-2xl sm:text-3xl lg:text-4xl font-serif font-bold text-luxury-charcoal mb-3 sm:mb-4"
-            >
-              How We Work
-            </motion.h2>
-            <motion.p
-              initial={{ opacity: 0, y: -20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-sm sm:text-base text-gray-500 max-w-2xl mx-auto px-4"
-            >
-              From browsing to delivery, we make your home transformation journey seamless
-            </motion.p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-12">
-            {workSteps.map((step, index) => {
-              return (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  className="bg-white rounded-2xl p-6 border border-gray-100 hover:border-luxury-gold/30 hover:shadow-xl transition-all duration-300 group relative"
-                >
-                  <div className="flex flex-col items-center text-center">
-                    {/* Step Number in Serif */}
-                    <span className="text-4xl font-serif font-light text-luxury-gold/20 mb-2">
-                      0{index + 1}
-                    </span>
-
-                    {/* Icon Container with subtle warm Gray */}
-                    <div className="w-16 h-16 rounded-full bg-luxury-warmGray text-luxury-charcoal flex items-center justify-center mb-5 group-hover:scale-105 transition-transform duration-300">
-                      <step.icon className="w-6 h-6 text-luxury-gold" />
-                    </div>
-
-                    {/* Content */}
-                    <h3 className="text-md font-bold text-luxury-charcoal mb-2 px-2">
-                      {step.title}
-                    </h3>
-                    <p className="text-gray-500 text-xs leading-relaxed px-2">
-                      {step.description}
-                    </p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-black/10 bg-white/75 backdrop-blur-xs p-3.5 sm:p-4 border border-white/60 shadow-xs">
+                <div className="flex items-center gap-2.5">
+                  <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-gray-800 shrink-0" strokeWidth={1.5} />
+                  <div>
+                    <div className="text-xs sm:text-sm font-extrabold text-gray-900 leading-none">10+</div>
+                    <div className="text-[10px] sm:text-[11px] text-gray-600 mt-0.5 font-medium leading-tight">Years Experience</div>
                   </div>
-                </motion.div>
-              );
-            })}
-          </div>
+                </div>
 
-          {/* Call to Action */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="mt-12 text-center"
-          >
-            <Link
-              to="/products"
-              className="bg-luxury-charcoal hover:bg-luxury-gold text-white px-8 py-4 rounded-full transition-all duration-300 font-bold uppercase tracking-widest text-[11px] inline-flex items-center group shadow-md"
-            >
-              Start Your Journey
-              <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </motion.div>
+                <div className="flex items-center gap-2.5">
+                  <Users className="w-4 h-4 sm:w-5 sm:h-5 text-gray-800 shrink-0" strokeWidth={1.5} />
+                  <div>
+                    <div className="text-xs sm:text-sm font-extrabold text-gray-900 leading-none">500+</div>
+                    <div className="text-[10px] sm:text-[11px] text-gray-600 mt-0.5 font-medium leading-tight">Projects Completed</div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2.5">
+                  <Gem className="w-4 h-4 sm:w-5 sm:h-5 text-gray-800 shrink-0" strokeWidth={1.5} />
+                  <div>
+                    <div className="text-xs sm:text-sm font-extrabold text-gray-900 leading-none">Premium</div>
+                    <div className="text-[10px] sm:text-[11px] text-gray-600 mt-0.5 font-medium leading-tight">Craftsmanship</div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2.5">
+                  <Truck className="w-4 h-4 sm:w-5 sm:h-5 text-gray-800 shrink-0" strokeWidth={1.5} />
+                  <div>
+                    <div className="text-xs sm:text-sm font-extrabold text-gray-900 leading-none">Pan India</div>
+                    <div className="text-[10px] sm:text-[11px] text-gray-600 mt-0.5 font-medium leading-tight">Delivery</div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
         </div>
       </section>
 
-      {/* Interior Works Section */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-b from-gray-50 via-luxury-cream/10 to-white relative overflow-hidden">
-        {/* Decorative background elements */}
-        <div className="absolute top-20 left-10 w-72 h-72 bg-luxury-gold/5 rounded-full blur-3xl hidden sm:block"></div>
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-luxury-bronze/5 rounded-full blur-3xl hidden sm:block"></div>
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="text-center mb-8 sm:mb-12 lg:mb-16">
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="inline-block"
-            >
-              <span className="text-luxury-gold font-semibold text-xs sm:text-sm uppercase tracking-wider mb-2 block">
-                Interior Design Services
-              </span>
-            </motion.div>
-            <motion.h2
-              initial={{ opacity: 0, y: -20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-serif font-bold text-luxury-charcoal mb-3 sm:mb-4"
-            >
-              Our Interior Works
-            </motion.h2>
-            <motion.p
-              initial={{ opacity: 0, y: -20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto px-4"
-            >
-              Transform your space with our professional interior design solutions
-            </motion.p>
+      {/* 2. How We Work Section matching Reference Design */}
+      <section className="py-16 sm:py-20 relative bg-[#FAF8F5]">
+        <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Section Header */}
+          <div className="text-center mb-12 sm:mb-14">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-normal text-gray-900 tracking-tight">
+              How We Work
+            </h2>
+            <p className="text-xs sm:text-sm text-gray-500 mt-2 max-w-xl mx-auto font-normal leading-relaxed">
+              From browsing to delivery, we make your home transformation journey seamless.
+            </p>
           </div>
 
-          {loadingCategories ? (
-            <div className="text-center py-12">
-              <p className="text-gray-500">Loading interior categories...</p>
-            </div>
-          ) : interiorCategories.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-              {interiorCategories.map((category, index) => (
-                <motion.div
-                  key={category.name}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  whileHover={{ y: -8 }}
-                  className="group"
-                >
-                  <Link to="/interior-design" className="block h-full">
-                    <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 h-full border border-gray-100">
-                      {/* Image/Thumbnail */}
-                      <div className="relative h-36 sm:h-40 md:h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
-                        {category.image ? (
-                          <img
-                            src={category.image}
-                            alt={category.name}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <HomeIcon className="w-16 h-16 text-gray-400" />
-                          </div>
-                        )}
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300"></div>
-                      </div>
+          {/* 4 Steps Row with Connecting Arrows */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative">
+            {workSteps.map((step, idx) => (
+              <div key={step.number} className="relative flex flex-col items-center">
+                {/* Step Card */}
+                <div className="w-full h-full bg-white rounded-2xl p-6 sm:p-7 border border-[#E8E5DC] shadow-2xs hover:shadow-md transition-all duration-300 text-center flex flex-col items-center group">
+                  {/* Step Number */}
+                  <span className="text-xs font-semibold text-[#9E472A] tracking-wider mb-3">
+                    {step.number}
+                  </span>
 
-                      {/* Content */}
-                      <div className="p-4 sm:p-6">
-                        <h3 className="text-base sm:text-lg md:text-xl font-bold text-gray-900 mb-2 sm:mb-3 group-hover:text-luxury-gold transition-colors duration-200">
-                          {category.name}
-                        </h3>
-                        <p className="text-gray-600 text-xs sm:text-sm leading-relaxed mb-1">
-                          {category.subcategories.length} {category.subcategories.length === 1 ? 'Design' : 'Designs'}
-                        </p>
-                        <div className="flex items-center text-luxury-gold font-semibold text-xs sm:text-sm group-hover:translate-x-1 transition-transform duration-200 mt-3">
-                          View Gallery
-                          <ArrowRight className="ml-2 w-3 h-3 sm:w-4 sm:h-4" />
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                </motion.div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-gray-500">No interior categories available.</p>
-            </div>
-          )}
+                  {/* Icon Circle */}
+                  <div className="w-14 h-14 rounded-full bg-[#FAF3EC] text-[#9E472A] flex items-center justify-center mb-4 group-hover:scale-105 transition-transform duration-300">
+                    <step.icon size={22} className="stroke-[1.8]" />
+                  </div>
 
-          {/* CTA Button */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
-            className="text-center mt-8 sm:mt-12 lg:mt-16"
-          >
+                  {/* Step Title */}
+                  <h3 className="text-sm sm:text-base font-bold text-gray-900 mb-2">
+                    {step.title}
+                  </h3>
+
+                  {/* Step Description */}
+                  <p className="text-xs text-gray-500 leading-relaxed font-normal">
+                    {step.description}
+                  </p>
+                </div>
+
+                {/* Arrow between cards on desktop */}
+                {idx < 3 && (
+                  <div className="hidden lg:flex absolute top-1/2 -translate-y-1/2 -right-3 text-gray-400 z-10 pointer-events-none">
+                    <ArrowRight size={16} className="text-gray-400" />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Start Your Journey Button */}
+          <div className="mt-12 text-center">
             <Link
               to="/interior-design"
-              className="bg-luxury-charcoal hover:bg-luxury-gold text-white px-8 py-4 rounded-full transition-all duration-300 font-bold uppercase tracking-widest text-[11px] inline-flex items-center group shadow-md"
+              className="inline-flex items-center gap-2 bg-[#0a2e22] hover:bg-[#061d15] text-white text-xs font-bold uppercase tracking-widest px-8 py-3.5 rounded-full shadow-sm transition-all hover:gap-3 cursor-pointer"
             >
-              Explore All Interior Works
-              <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
+              <span>START YOUR JOURNEY</span>
+              <ArrowRight size={14} />
             </Link>
-          </motion.div>
+          </div>
         </div>
       </section>
 
-      {/* Recent Products Section */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-b from-white to-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-8 sm:mb-12 lg:mb-16">
-            <motion.h2
-              initial={{ opacity: 0, y: -20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-serif font-bold text-luxury-charcoal mb-3 sm:mb-4"
+      {/* 3. Our Interior Works Section matching Reference Design */}
+      <section className="py-14 sm:py-18 bg-[#F7F5F0] border-y border-[#E8E5DC]">
+        <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Header Row */}
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 sm:mb-10">
+            <div>
+              <span className="text-[11px] sm:text-xs font-semibold tracking-[0.2em] text-[#9E472A] uppercase block mb-1">
+                INTERIOR DESIGN SERVICES
+              </span>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-gray-900 font-normal tracking-tight">
+                Our Interior Works
+              </h2>
+              <p className="text-xs sm:text-sm text-gray-500 mt-1 font-normal">
+                Transform your space with our professional interior design solutions.
+              </p>
+            </div>
+
+            <Link
+              to="/interior-design"
+              className="inline-flex items-center gap-2 text-xs font-semibold text-gray-800 bg-white border border-[#E8E5DC] hover:border-gray-400 px-4 py-2 rounded-full shadow-2xs transition-colors shrink-0 self-start sm:self-auto cursor-pointer"
             >
-              Recent Products
-            </motion.h2>
-            <motion.p
-              initial={{ opacity: 0, y: -20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-base sm:text-lg md:text-xl text-gray-500 max-w-2xl mx-auto px-4"
-            >
-              Check out our latest arrivals for your home.
-            </motion.p>
+              <span>View All Designs</span>
+              <ArrowRight size={13} />
+            </Link>
           </div>
 
-          {recentProducts.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-              {recentProducts.map((product, index) => {
-                const discount = product.actualPrice && product.price ? Math.round(((product.actualPrice - product.price) / product.actualPrice) * 100) : 0;
-                const rating = (Math.random() * (5 - 4) + 4).toFixed(1);
-                const reviewsCount = Math.floor(Math.random() * 200) + 15;
-
-                return (
-                  <motion.div
-                    key={product.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: index * 0.05 }}
-                    className="bg-white rounded-xl sm:rounded-[20px] shadow-sm hover:shadow-xl border border-gray-100 transition-all duration-500 p-2.5 sm:p-4 cursor-pointer group flex flex-col relative"
-                    onClick={() => navigate(`/product/${encodeURIComponent(product.id)}`)}
-                  >
-                    {/* Floating Action Icons */}
-                    <div className="absolute top-3 right-3 sm:top-6 sm:right-6 z-20 flex flex-col gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-x-0 sm:translate-x-2 sm:group-hover:translate-x-0">
-                      <button className="w-7 h-7 sm:w-8 sm:h-8 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-md text-gray-600 hover:text-red-500 hover:bg-white transition-colors">
-                        <Heart size={14} className="sm:w-4 sm:h-4" />
-                      </button>
-                    </div>
-
-                    {/* Image Container - Strictly Uncropped, Centered */}
-                    <div className="relative w-full aspect-[4/5] bg-[#fdfdfc] rounded-lg sm:rounded-2xl overflow-hidden flex items-center justify-center p-2 sm:p-6 mb-3 sm:mb-5 border border-gray-50">
-                      {discount > 0 && (
-                        <span className="absolute top-2 left-2 sm:top-3 sm:left-3 bg-luxury-gold text-white px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded text-[8px] sm:text-[9px] font-bold uppercase tracking-wider shadow-sm z-10">
-                          {discount}% Off
-                        </span>
-                      )}
-                      
-                      {product.image ? (
-                        <img
-                          src={product.image}
-                          alt={product.title}
-                          className="w-full h-full object-contain mix-blend-multiply transition-transform duration-700 ease-out group-hover:scale-110"
-                          loading={index < 3 ? "eager" : "lazy"}
-                          // @ts-ignore
-                          fetchPriority={index < 3 ? "high" : "low"}
-                        />
-                      ) : (
-                        <div className="text-gray-300 font-medium">No Image</div>
-                      )}
-                    </div>
-
-                    {/* Product Info */}
-                    <div className="flex flex-col flex-grow px-1">
-                      <span className="text-[8px] sm:text-[9px] uppercase font-bold tracking-widest text-luxury-gold mb-1">
-                        {product.category ? product.category.replace(/_/g, " ") : "Home Decor"}
-                      </span>
-                      
-                      <h2 className="text-xs sm:text-sm font-bold text-luxury-charcoal mb-1.5 sm:mb-2 line-clamp-2 leading-tight group-hover:text-luxury-gold transition-colors">
-                        {product.title?.replace(/_/g, " ")}
-                      </h2>
-                      
-                      <div className="flex items-center gap-1.5 mb-4">
-                        <div className="flex text-amber-500">
-                          <Star size={11} className="fill-current" />
-                        </div>
-                        <span className="text-[11px] font-bold text-gray-700">{rating}</span>
-                        <span className="text-[11px] text-gray-400">({reviewsCount})</span>
-                      </div>
-
-                      {/* Luxury Action Row */}
-                      <div className="mt-auto pt-2 sm:pt-3 border-t border-gray-50 flex items-center justify-between">
-                        <div>
-                          {product.price ? (
-                            <div className="flex flex-wrap items-baseline gap-1 sm:gap-1.5">
-                              <span className="text-sm sm:text-md font-extrabold text-luxury-charcoal">₹{product.price}</span>
-                              {product.actualPrice && product.actualPrice > product.price && (
-                                <span className="text-[9px] sm:text-[11px] font-medium text-gray-400 line-through">₹{product.actualPrice}</span>
-                              )}
-                            </div>
-                          ) : (
-                            <p className="text-[10px] sm:text-xs font-bold text-gray-500">Price on Request</p>
-                          )}
-                        </div>
-                        
-                        {product.price && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              addToCart({
-                                id: product.id,
-                                name: product.title,
-                                price: product.price,
-                                image: product.image
-                              });
-                              toast.success("Added to Cart!");
-                            }}
-                            className="w-7 h-7 sm:w-8 sm:h-8 shrink-0 rounded-full bg-luxury-charcoal hover:bg-luxury-gold text-white flex items-center justify-center transition-colors shadow-sm"
-                            aria-label="Add to cart"
-                          >
-                            <ShoppingCart size={12} className="sm:w-[13px] sm:h-[13px]" />
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
-          ) : (
-            <p className="text-center text-gray-500 text-lg">
-              No recent products available.
-            </p>
-          )}
-
-          {/* Show "View All" if more than 6 */}
-          {products.length > 6 && (
-            <div className="text-center mt-8 sm:mt-12 lg:mt-16">
+          {/* 6 Cards Grid (2 rows of 3 columns) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+            {interiorWorks.map((work) => (
               <Link
-                to="/products"
-                className="bg-luxury-charcoal hover:bg-luxury-gold text-white px-8 py-4 rounded-full transition-all duration-300 font-bold uppercase tracking-widest text-[11px] inline-flex items-center group shadow-md"
+                key={work.title}
+                to={work.link}
+                className="group relative aspect-[16/10] sm:aspect-[4/3] rounded-2xl overflow-hidden shadow-sm border border-[#ece6dc] cursor-pointer block bg-[#111]"
               >
-                View All Products
-                <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
-              </Link>
-            </div>
-          )}
-        </div>
-      </section>
+                {/* Background Image */}
+                <img
+                  src={work.image}
+                  alt={work.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
 
-      {/* Features Section (Above Footer) */}
-      <section className="py-12 sm:py-16 bg-white border-t">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-            {features.map((feature, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="text-center p-4 sm:p-6"
-              >
-                <div className="w-14 h-14 sm:w-16 sm:h-16 bg-luxury-warmGray rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
-                  <feature.icon className="w-7 h-7 sm:w-8 sm:h-8 text-luxury-gold" />
+                {/* Dark Gradient Overlay for perfect readability */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
+
+                {/* Bottom Content Row */}
+                <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5 flex items-end justify-between gap-3">
+                  <div>
+                    <h3 className="text-base sm:text-lg font-bold text-white tracking-tight group-hover:text-amber-200 transition-colors">
+                      {work.title}
+                    </h3>
+                    <p className="text-xs text-white/80 font-normal mt-0.5">
+                      {work.count}
+                    </p>
+                  </div>
+
+                  {/* Circular Arrow Button */}
+                  <div className="w-8 h-8 rounded-full bg-white/90 group-hover:bg-white text-gray-900 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110 shadow-sm">
+                    <ArrowRight size={14} />
+                  </div>
                 </div>
-                <h3 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 mb-2">
-                  {feature.title}
-                </h3>
-                <p className="text-sm sm:text-base text-gray-600">{feature.description}</p>
-              </motion.div>
+              </Link>
             ))}
           </div>
         </div>
       </section>
-    </main>
+
+      {/* 4. Recent Products Section matching Reference Design */}
+      <section className="py-14 sm:py-18 bg-[#FAF8F5]">
+        <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Header Row with Title & Controls */}
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 sm:mb-10">
+            <div>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-gray-900 font-normal tracking-tight">
+                Recent Products
+              </h2>
+              <p className="text-xs sm:text-sm text-gray-500 mt-1 font-normal">
+                — Check out our latest arrivals for your home.
+              </p>
+            </div>
+
+            {/* Right Controls: View All + Prev/Next Arrows */}
+            <div className="flex items-center gap-2.5 self-start sm:self-auto shrink-0">
+              <Link
+                to="/products"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-800 bg-white border border-[#E8E5DC] hover:border-gray-400 px-4 py-2 rounded-full shadow-2xs transition-colors cursor-pointer"
+              >
+                <span>View all Products</span>
+                <ArrowRight size={13} />
+              </Link>
+              <button
+                type="button"
+                onClick={prevProductPage}
+                aria-label="Previous products"
+                className="w-8 h-8 rounded-full border border-[#E8E5DC] bg-white hover:bg-gray-100 text-gray-700 flex items-center justify-center transition-colors shadow-2xs cursor-pointer"
+              >
+                <ChevronLeft size={16} />
+              </button>
+              <button
+                type="button"
+                onClick={nextProductPage}
+                aria-label="Next products"
+                className="w-8 h-8 rounded-full border border-[#E8E5DC] bg-white hover:bg-gray-100 text-gray-700 flex items-center justify-center transition-colors shadow-2xs cursor-pointer"
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          </div>
+
+          {/* 4 Product Cards in a row */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+            {currentRecentProducts.map((product, idx) => (
+              <ProductCard key={product.id || idx} product={product} index={idx} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 5. Custom Interior Design Services Split Banner matching Reference Design */}
+      <section className="py-8 sm:py-12 bg-[#FAF8F5]">
+        <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="rounded-3xl overflow-hidden bg-white border border-[#E8E5DC] shadow-sm grid grid-cols-1 lg:grid-cols-2 items-center">
+            {/* Left Image */}
+            <div className="w-full h-full min-h-[340px] sm:min-h-[420px] lg:min-h-[460px] overflow-hidden bg-gray-100">
+              <img
+                src="/images/custom_interior_banner.jpg"
+                alt="Custom Interior Design Services"
+                className="w-full h-full object-cover"
+              />
+            </div>
+
+            {/* Right Text Content */}
+            <div className="p-8 sm:p-12 lg:p-16 flex flex-col justify-center bg-gradient-to-br from-[#FAF8F5] to-white relative">
+              <span className="text-[11px] sm:text-xs font-semibold tracking-[0.2em] text-[#9E472A] uppercase mb-2">
+                TURNING HOUSES INTO HOMES
+              </span>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-gray-900 font-normal tracking-tight mb-4 leading-[1.15]">
+                Custom Interior
+                <br />
+                Design Services
+              </h2>
+              <p className="text-xs sm:text-sm text-gray-600 mb-7 max-w-md leading-relaxed font-normal">
+                From concept to completion, we deliver personalized interior solutions that reflect your style and needs.
+              </p>
+              <Link
+                to="/interior-design"
+                className="inline-flex items-center gap-2 bg-[#0a2e22] hover:bg-[#061d15] text-white text-xs font-bold px-7 py-3.5 rounded-full self-start shadow-sm transition-all hover:gap-3 cursor-pointer"
+              >
+                <span>Our design services</span>
+                <ArrowRight size={14} />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 6. Trust Badges Bar matching Reference Design */}
+      <section className="py-6 sm:py-10 bg-[#FAF8F5]">
+        <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-white border border-[#E8E5DC] rounded-2xl p-6 sm:p-8 shadow-2xs">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {trustBadges.map((badge) => (
+                <div key={badge.title} className="flex items-center space-x-3.5">
+                  <div className="w-10 h-10 rounded-full bg-[#FAF3EC] text-[#9E472A] flex items-center justify-center shrink-0">
+                    <badge.icon size={19} className="stroke-[2.2]" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-gray-900">{badge.title}</h4>
+                    <p className="text-[11px] text-gray-500 font-normal mt-0.5">{badge.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 7. Beautiful Homes Start Here Gallery Banner matching Reference Design */}
+      <section className="py-8 sm:py-12 pb-16 sm:pb-24 bg-[#FAF8F5]">
+        <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-[#F2ECE1] border border-[#E6DDD0] rounded-3xl p-6 sm:p-10 lg:p-12 shadow-sm grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            {/* Left Content */}
+            <div className="lg:col-span-4 flex flex-col justify-center">
+              <span className="text-[11px] sm:text-xs font-semibold tracking-[0.2em] text-[#9E472A] uppercase mb-2">
+                GET INSPIRED
+              </span>
+              <h2 className="text-3xl sm:text-4xl font-serif text-gray-900 font-normal tracking-tight mb-3 leading-tight">
+                Beautiful Homes
+                <br />
+                Start Here
+              </h2>
+              <p className="text-xs sm:text-sm text-gray-600 mb-7 leading-relaxed font-normal">
+                Explore our latest interior design projects, décor ideas, and home essentials to create a space that's truly yours.
+              </p>
+              <Link
+                to="/interior-design"
+                className="inline-flex items-center gap-2 bg-[#0a2e22] hover:bg-[#061d15] text-white text-xs font-bold px-7 py-3.5 rounded-full self-start shadow-sm transition-all hover:gap-3 cursor-pointer"
+              >
+                <span>Explore Gallery</span>
+                <ArrowRight size={14} />
+              </Link>
+            </div>
+
+            {/* Right 3 Gallery Images */}
+            <div className="lg:col-span-8 grid grid-cols-3 gap-3.5 sm:gap-4">
+              {/* Image 1: Dining */}
+              <div className="rounded-2xl overflow-hidden aspect-[3/4] shadow-sm border border-black/5 group bg-gray-100">
+                <img
+                  src="/images/gallery_dining.jpg"
+                  alt="Modern Dining Room Interior Design"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+              </div>
+
+              {/* Image 2: Living Room */}
+              <div className="rounded-2xl overflow-hidden aspect-[3/4] shadow-sm border border-black/5 group bg-gray-100">
+                <img
+                  src="/images/gallery_living.jpg"
+                  alt="Contemporary Living Room Interior Design"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+              </div>
+
+              {/* Image 3: Bedroom */}
+              <div className="rounded-2xl overflow-hidden aspect-[3/4] shadow-sm border border-black/5 group bg-gray-100">
+                <img
+                  src="/images/gallery_bedroom.jpg"
+                  alt="Luxury Master Bedroom Interior Design"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
   );
 };
 

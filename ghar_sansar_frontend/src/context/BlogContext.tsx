@@ -33,7 +33,7 @@ export const useBlogs = () => {
 
 const API_FETCH = import.meta.env.VITE_AWS_API_URL
   ? `${import.meta.env.VITE_AWS_API_URL}/storage/upload/blog`
-  : "https://backend.gharsansar.website/api/storage/upload/blog";
+  : "/api/storage/upload/blog";
 
 interface BlogProviderProps {
   children: ReactNode;
@@ -60,7 +60,7 @@ export const BlogProvider: React.FC<BlogProviderProps> = ({ children }) => {
 
       let allBlogs: Blog[] = [];
       
-      const BACKEND_STATIC_URL = (import.meta.env.VITE_AWS_API_URL || "https://backend.gharsansar.website/api").replace(/\/api$/, "");
+      const BACKEND_STATIC_URL = (import.meta.env.VITE_AWS_API_URL || "/api").replace(/\/api$/, "");
       const sanitizeImageUrl = (path?: string) => {
         if (!path) return undefined;
         // Fix hardcoded localhost or local IPs from backend if present

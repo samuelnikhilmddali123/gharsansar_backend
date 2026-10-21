@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Menu, X, Search, ShoppingCart, User, LogOut } from "lucide-react";
+import { Menu, X, Search, ShoppingCart, User, LogOut, Heart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
@@ -184,206 +184,205 @@ const Header: React.FC = () => {
 
   return (
     <>
-      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 transform flex items-center px-3 sm:px-6 w-full min-w-0 ${
-        isVisible ? "translate-y-0" : "-translate-y-full"
-      } ${
-        isScrolled 
-          ? "h-16 bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-100/40" 
-          : "h-20 bg-white/95 border-b border-gray-100/20"
+      <header className={`fixed top-0 left-0 right-0 z-50 pointer-events-none transition-all duration-300 transform ${
+        isVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"
       }`}>
-        <div className="max-w-7xl mx-auto w-full flex items-center justify-between h-full relative">
-          
-          {/* Logo */}
-          <Link to="/" aria-label="Go to home" className="flex items-center space-x-2 shrink-0 hover:opacity-80 transition-opacity">
-            <img 
-              src="/ghar sansar logo.svg" 
-              alt="Ghar Sansar Logo" 
-              className={`object-contain transition-all duration-300 ${isScrolled ? "h-12 sm:h-14" : "h-16 sm:h-19"}`} 
-              style={{ minWidth: 0, width: "auto" }} 
-            />
-          </Link>
-
-          {/* Desktop Nav - Centered */}
-          <nav className="hidden md:flex items-center space-x-10 uppercase tracking-widest text-[11px] font-bold text-gray-400" role="navigation">
-            <Link to="/" className={`relative py-2 transition-all duration-300 group ${isActive('/') ? 'text-luxury-charcoal font-black' : 'hover:text-luxury-charcoal'}`}>
-              Home
-              <span className={`absolute bottom-0 left-0 h-[1.5px] bg-luxury-gold transition-all duration-300 ${isActive('/') ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
-            </Link>
-            <Link to="/interior-design" className={`relative py-2 transition-all duration-300 group ${isActive('/interior-design') ? 'text-luxury-charcoal font-black' : 'hover:text-luxury-charcoal'}`}>
-              Interior Design
-              <span className={`absolute bottom-0 left-0 h-[1.5px] bg-luxury-gold transition-all duration-300 ${isActive('/interior-design') ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
-            </Link>
-            <Link to="/products" className={`relative py-2 transition-all duration-300 group ${isActive('/products') ? 'text-luxury-charcoal font-black' : 'hover:text-luxury-charcoal'}`}>
-              Products
-              <span className={`absolute bottom-0 left-0 h-[1.5px] bg-luxury-gold transition-all duration-300 ${isActive('/products') ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
-            </Link>
-            <Link to="/return-gifts" className={`relative py-2 transition-all duration-300 group ${isActive('/return-gifts') ? 'text-luxury-charcoal font-black' : 'hover:text-luxury-charcoal'}`}>
-              Return Gifts
-              <span className={`absolute bottom-0 left-0 h-[1.5px] bg-luxury-gold transition-all duration-300 ${isActive('/return-gifts') ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
-            </Link>
-            <Link to="/services" className={`relative py-2 transition-all duration-300 group ${isActive('/services') ? 'text-luxury-charcoal font-black' : 'hover:text-luxury-charcoal'}`}>
-              Services
-              <span className={`absolute bottom-0 left-0 h-[1.5px] bg-luxury-gold transition-all duration-300 ${isActive('/services') ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
-            </Link>
-            <Link to="/blog" className={`relative py-2 transition-all duration-300 group ${isActive('/blog') ? 'text-luxury-charcoal font-black' : 'hover:text-luxury-charcoal'}`}>
-              Blog
-              <span className={`absolute bottom-0 left-0 h-[1.5px] bg-luxury-gold transition-all duration-300 ${isActive('/blog') ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
-            </Link>
-          </nav>
-
-          {/* Right side actions */}
-          <div className="flex items-center space-x-3 shrink-0">
-            {/* Desktop Search */}
-            <form ref={desktopSearchRef} onSubmit={onSearchSubmit} className="hidden sm:flex items-center relative" role="search">
-              <div className={`flex items-center transition-all duration-300 ${isSearchOpen ? 'w-64 border-gray-900 bg-white shadow-sm ring-4 ring-gray-100/50' : 'w-10 border-transparent bg-transparent'} border rounded-full overflow-hidden`}>
-                {isSearchOpen && (
-                  <input
-                    ref={inputRef}
-                    type="search"
-                    aria-label="Search products or categories"
-                    placeholder="Search products..."
-                    value={searchTerm}
-                    onChange={(e) => updateSearchTerm(e.target.value)}
-                    className="w-full bg-transparent pl-4 pr-2 py-2 text-xs font-semibold focus:outline-none placeholder:text-gray-400 text-gray-800"
-                    autoComplete="off"
-                  />
-                )}
-                <button
-                  type="button"
-                  aria-label={isSearchOpen ? "Close search" : "Open search"}
-                  className={`p-2.5 text-gray-500 hover:text-gray-900 transition-colors shrink-0 ${isSearchOpen ? 'mr-1' : ''}`}
-                  onClick={() => {
-                    setSearchOpen((v) => !v);
-                    setShowSuggestions(false);
-                  }}
-                >
-                  <Search size={16} />
-                </button>
-              </div>
-              {isSearchOpen && showSuggestions && suggestions.length > 0 && (
-                <div className="absolute top-full right-0 mt-3 w-64 bg-white/95 backdrop-blur-md border border-gray-100 rounded-2xl shadow-xl py-2 z-50 overflow-hidden">
-                  {suggestions.map((s, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      className="w-full text-left px-4 py-2 text-xs font-semibold text-gray-650 hover:bg-gray-50 hover:text-gray-950 transition-colors"
-                      onClick={() => onSuggestionSelect(s)}
-                    >
-                      {s}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </form>
-
-            {/* Mobile Search */}
-            <button aria-label="Open search" className="sm:hidden p-2 text-gray-500 hover:text-gray-900" onClick={() => setMobileSearchOpen(true)}>
-              <Search size={20} />
-            </button>
+        <div className={`w-full pointer-events-auto transition-all duration-300 ${
+          isScrolled 
+            ? "bg-[#F7F6F0]/95 backdrop-blur-md shadow-xs border-b border-[#e8e5dc]" 
+            : "bg-transparent"
+        }`}>
+          <div className="relative w-full max-w-[1880px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10 h-14 sm:h-[60px] flex items-center justify-between">
             
-            {isMobileSearchOpen && (
-              <div className="fixed inset-0 bg-black/30 backdrop-blur-xs flex items-start p-4 pt-20 z-50">
-                <div className="relative w-full max-w-md bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-gray-100">
-                  <form onSubmit={onSearchSubmit} className="flex flex-col p-4 animate-scaleIn" role="search" ref={mobileSearchRef}>
-                    <div className="flex items-center">
-                      <input
-                        ref={inputRef}
-                        type="search"
-                        aria-label="Mobile search"
-                        placeholder="Search products or categories..."
-                        value={searchTerm}
-                        onChange={(e) => updateSearchTerm(e.target.value)}
-                        className="flex-grow px-4 py-2.5 text-sm font-semibold border border-gray-200 focus:border-gray-900 rounded-l-xl focus:outline-none placeholder:text-gray-400"
-                        autoComplete="off"
-                        autoFocus
-                      />
+            {/* Brand Logo - Balanced size */}
+            <Link to="/" aria-label="Go to home" className="flex items-center shrink-0 hover:opacity-90 transition-opacity pr-2 sm:pr-4">
+              <img 
+                src="/ghar_sansar_logo_nav.png" 
+                alt="Ghar Sansar" 
+                className="h-8 sm:h-9 md:h-10 w-auto object-contain transition-all" 
+                style={{ minWidth: 0, width: "auto" }} 
+              />
+            </Link>
+
+            {/* Desktop Navigation Links - Centered horizontally and nudged slightly down */}
+            <nav className="hidden lg:flex items-center space-x-1 xl:space-x-3 uppercase tracking-wider text-xs lg:text-[13px] font-bold text-[#1f2e24] absolute left-1/2 top-[calc(50%+4px)] -translate-x-1/2 -translate-y-1/2" role="navigation">
+              {[
+                { path: "/", label: "Home" },
+                { path: "/interior-design", label: "Interior Design" },
+                { path: "/products", label: "Products" },
+                { path: "/return-gifts", label: "Return Gifts" },
+                { path: "/services", label: "Services" },
+                { path: "/blog", label: "Blog" },
+              ].map((link) => (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  className={`relative py-1 px-2.5 transition-colors duration-200 group ${
+                    isActive(link.path)
+                      ? "text-black font-bold"
+                      : "text-[#26372c] hover:text-black"
+                  }`}
+                >
+                  <span>{link.label}</span>
+                  {/* Clean black underline down on selected heading */}
+                  <span
+                    className={`absolute bottom-0 left-2.5 right-2.5 h-[2px] rounded-full transition-all duration-300 ${
+                      isActive(link.path)
+                        ? "bg-black opacity-100 scale-x-100"
+                        : "bg-black opacity-0 scale-x-0 group-hover:opacity-40 group-hover:scale-x-100"
+                    }`}
+                  />
+                </Link>
+              ))}
+            </nav>
+
+            {/* Right side sharp action icons */}
+            <div className="flex items-center space-x-1.5 sm:space-x-2.5 shrink-0">
+              
+              {/* Desktop Search Bar - Sharp Square */}
+              <div className="relative hidden sm:flex items-center">
+                <form ref={desktopSearchRef} onSubmit={onSearchSubmit} className="flex items-center relative" role="search">
+                  <div className="flex items-center w-36 md:w-44 lg:w-48 xl:w-56 h-8 sm:h-[34px] px-3 bg-white/80 hover:bg-white border border-[#ded5c5] hover:border-gray-400 focus-within:border-black focus-within:bg-white focus-within:ring-2 focus-within:ring-black/5 rounded-none transition-all shadow-2xs">
+                    <Search className="w-3.5 h-3.5 text-gray-500 shrink-0 mr-2" />
+                    <input
+                      ref={inputRef}
+                      type="search"
+                      aria-label="Search products or categories"
+                      placeholder="Search products..."
+                      value={searchTerm}
+                      onChange={(e) => updateSearchTerm(e.target.value)}
+                      onFocus={() => {
+                        if (suggestions.length > 0) setShowSuggestions(true);
+                      }}
+                      className="w-full bg-transparent py-1 text-xs font-medium focus:outline-none placeholder:text-gray-400 text-gray-800"
+                      autoComplete="off"
+                    />
+                    {searchTerm && (
                       <button
-                        type="submit"
-                        className="h-10 px-4 bg-gray-950 hover:bg-gray-800 text-white rounded-r-xl transition-colors"
-                        aria-label="Submit search"
+                        type="button"
+                        onClick={() => {
+                          setSearchTerm("");
+                          setShowSuggestions(false);
+                        }}
+                        className="text-gray-400 hover:text-black ml-1 text-xs shrink-0 cursor-pointer"
                       >
-                        <Search size={16} />
+                        ×
+                      </button>
+                    )}
+                  </div>
+                  {showSuggestions && suggestions.length > 0 && (
+                    <div className="absolute top-full right-0 mt-2 w-64 bg-white/95 backdrop-blur-md border border-gray-100 rounded-none shadow-xl py-2 z-50 overflow-hidden">
+                      {suggestions.map((s, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          className="w-full text-left px-4 py-2 text-xs font-semibold text-gray-650 hover:bg-gray-50 hover:text-gray-950 transition-colors cursor-pointer"
+                          onClick={() => onSuggestionSelect(s)}
+                        >
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </form>
+              </div>
+
+              {/* Mobile Search Button */}
+              <button
+                type="button"
+                aria-label="Open search"
+                className="sm:hidden w-8 h-8 rounded-none border border-[#ded5c5] bg-white/80 hover:bg-white flex items-center justify-center text-gray-650 hover:text-gray-950 shadow-2xs"
+                onClick={() => setMobileSearchOpen(true)}
+              >
+                <Search size={15} />
+              </button>
+
+              {/* Wishlist Heart Button */}
+              <Link
+                to="/products"
+                aria-label="Wishlist"
+                className="w-8 h-8 sm:w-[34px] sm:h-[34px] rounded-none border border-[#e5dfd5] bg-white/80 hover:bg-white hover:border-gray-400 flex items-center justify-center text-gray-700 hover:text-black transition-all relative shadow-2xs group"
+              >
+                <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:scale-105 transition-transform" />
+              </Link>
+
+              {/* Cart Button */}
+              <Link
+                to="/cart"
+                aria-label="Cart"
+                className="w-8 h-8 sm:w-[34px] sm:h-[34px] rounded-none border border-[#e5dfd5] bg-white/80 hover:bg-white hover:border-gray-400 flex items-center justify-center text-gray-700 hover:text-black transition-all relative shadow-2xs group"
+              >
+                <ShoppingCart className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:scale-105 transition-transform" />
+                {totalItems > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-[#004e38] text-white text-[8.5px] rounded-none w-3.5 h-3.5 flex items-center justify-center font-bold shadow-xs">
+                    {totalItems}
+                  </span>
+                )}
+              </Link>
+
+              {/* User Button */}
+              {user ? (
+                <div className="relative" ref={userMenuRef}>
+                  <button
+                    aria-haspopup="true"
+                    aria-expanded={isUserMenuOpen}
+                    onClick={() => setUserMenuOpen((v) => !v)}
+                    className="w-8 h-8 sm:w-[34px] sm:h-[34px] rounded-none bg-[#1c2921] hover:bg-[#2c3f33] text-white flex items-center justify-center shadow-xs transition-all overflow-hidden border border-[#1c2921] cursor-pointer group"
+                    aria-label="User menu"
+                  >
+                    {user.profilePicture ? (
+                      <img 
+                        src={user.profilePicture} 
+                        alt="User avatar" 
+                        className="w-full h-full object-cover" 
+                      />
+                    ) : (
+                      <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white group-hover:scale-105 transition-transform" />
+                    )}
+                  </button>
+                  {isUserMenuOpen && (
+                    <div className="absolute right-0 mt-3 w-52 bg-white/95 backdrop-blur-md border border-gray-100 rounded-none shadow-xl shadow-gray-200/40 p-1.5 z-50 animate-fadeIn">
+                      <div className="px-4 py-2 border-b border-gray-100 mb-1">
+                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Signed in as</p>
+                        <p className="text-xs font-bold text-gray-900 truncate">{user.email || user.name}</p>
+                      </div>
+                      <Link to="/profile" className="block px-4 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 rounded-none transition-colors" onClick={() => setUserMenuOpen(false)}>
+                        Profile
+                      </Link>
+                      {user.role === "admin" && location.pathname.startsWith('/admin') && (
+                        <Link to="/admin" className="block px-4 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 rounded-none transition-colors" onClick={() => setUserMenuOpen(false)}>
+                          Admin Dashboard
+                        </Link>
+                      )}
+                      <button onClick={handleLogout} className="w-full flex items-center px-4 py-2 text-xs font-bold text-red-650 hover:bg-red-50 rounded-none transition-colors mt-0.5 cursor-pointer">
+                        <LogOut className="mr-2 w-3.5 h-3.5" />
+                        Logout
                       </button>
                     </div>
-                    {showSuggestions && suggestions.length > 0 && (
-                      <ul className="border border-gray-100 rounded-b-xl max-h-60 overflow-auto mt-1 bg-white">
-                        {suggestions.map((s, idx) => (
-                          <li
-                            key={idx}
-                            tabIndex={0}
-                            className="px-4 py-2 text-xs font-semibold text-gray-650 cursor-pointer hover:bg-gray-50 hover:text-gray-950 transition-colors"
-                            onClick={() => onSuggestionSelect(s)}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") onSuggestionSelect(s);
-                            }}
-                          >
-                            {s}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </form>
-                </div>
-              </div>
-            )}
-
-            {/* Cart */}
-            <Link to="/cart" aria-label="Cart" className="relative p-2 text-gray-500 hover:text-luxury-charcoal transition-colors">
-              <ShoppingCart className="w-5 h-5" />
-              {totalItems > 0 && (
-                <span className="absolute top-0.5 right-0.5 bg-luxury-gold text-white text-[9px] rounded-full w-4 h-4 flex items-center justify-center font-bold">
-                  {totalItems}
-                </span>
-              )}
-            </Link>
-
-            {/* User menu */}
-            {user ? (
-              <div className="relative" ref={userMenuRef}>
-                <button aria-haspopup="true" aria-expanded={isUserMenuOpen} onClick={() => setUserMenuOpen((v) => !v)} className="flex items-center space-x-1.5 p-1 text-gray-500 hover:text-luxury-charcoal transition-colors" aria-label="User menu">
-                  {user.profilePicture ? (
-                    <img 
-                      src={user.profilePicture} 
-                      alt="User avatar" 
-                      className="w-6 h-6 rounded-full object-cover border border-gray-200" 
-                    />
-                  ) : (
-                    <User className="w-5 h-5" />
                   )}
-                  <span className="hidden sm:inline text-[11px] uppercase tracking-wider font-bold">
-                    {user.email ? user.email.split('@')[0] : (user.name || "User")}
-                  </span>
-                </button>
-                {isUserMenuOpen && (
-                  <div className="absolute right-0 mt-3 w-52 bg-white/95 backdrop-blur-md border border-gray-100 rounded-2xl shadow-xl shadow-gray-200/40 p-1.5 z-50">
-                    <Link to="/profile" className="block px-4 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 rounded-xl transition-colors" onClick={() => setUserMenuOpen(false)}>
-                      Profile
-                    </Link>
-                    {user.role === "admin" && location.pathname.startsWith('/admin') && (
-                      <Link to="/admin" className="block px-4 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 rounded-xl transition-colors" onClick={() => setUserMenuOpen(false)}>
-                        Admin Dashboard
-                      </Link>
-                    )}
-                    <button onClick={handleLogout} className="w-full flex items-center px-4 py-2 text-xs font-bold text-red-650 hover:bg-red-50 rounded-xl transition-colors mt-0.5">
-                      <LogOut className="mr-2 w-3.5 h-3.5" />
-                      Logout
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <Link to="/login" className="hidden sm:inline-flex items-center justify-center bg-luxury-charcoal hover:bg-luxury-gold text-white px-6 py-2.5 rounded-full shadow-sm hover:shadow transition-all duration-300 font-bold text-[11px] uppercase tracking-wider active:scale-95" aria-label="Login">
-                Login
-              </Link>
-            )}
+                </div>
+              ) : (
+                <Link
+                  to="/login"
+                  aria-label="Sign In"
+                  className="w-8 h-8 sm:w-[34px] sm:h-[34px] rounded-none bg-[#1c2921] hover:bg-[#2c3f33] text-white flex items-center justify-center shadow-xs transition-all cursor-pointer group"
+                >
+                  <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white group-hover:scale-105 transition-transform" />
+                </Link>
+              )}
 
-            {/* Mobile Menu Toggle */}
-            <button aria-label="Toggle menu" className="md:hidden p-2 text-gray-500 hover:text-gray-950 transition-colors" onClick={() => setMenuOpen((v) => !v)}>
-              {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
+              {/* Mobile Menu Toggle Button */}
+              <button
+                aria-label="Toggle menu"
+                className="lg:hidden w-8 h-8 sm:w-[34px] sm:h-[34px] rounded-none border border-[#e5dfd5] bg-white/80 hover:bg-white flex items-center justify-center text-gray-700 hover:text-black shadow-2xs transition-all cursor-pointer"
+                onClick={() => setMenuOpen((v) => !v)}
+              >
+                {isMenuOpen ? <X size={16} /> : <Menu size={16} />}
+              </button>
+
+            </div>
           </div>
         </div>
-
       </header>
       {/* Mobile Drawer Menu */}
       <AnimatePresence>
@@ -410,7 +409,7 @@ const Header: React.FC = () => {
                 <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Navigation</span>
                 <button
                   onClick={() => setMenuOpen(false)}
-                  className="p-1.5 hover:bg-gray-100 rounded-full text-gray-500 hover:text-gray-900 transition-colors"
+                  className="p-1.5 hover:bg-gray-100 rounded-none text-gray-500 hover:text-gray-900 transition-colors"
                 >
                   <X size={18} />
                 </button>
@@ -460,7 +459,7 @@ const Header: React.FC = () => {
                       Cart
                     </span>
                     {totalItems > 0 && (
-                      <span className="bg-gray-900 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                      <span className="bg-gray-900 text-white text-xs font-bold px-2 py-0.5 rounded-none">
                         {totalItems}
                       </span>
                     )}
@@ -486,7 +485,7 @@ const Header: React.FC = () => {
                         handleLogout();
                         setMenuOpen(false);
                       }}
-                      className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-red-50 hover:bg-red-100 text-red-650 rounded-xl text-sm font-bold transition-colors"
+                      className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-red-50 hover:bg-red-100 text-red-650 rounded-none text-sm font-bold transition-colors"
                     >
                       <LogOut size={16} />
                       Logout
@@ -502,7 +501,7 @@ const Header: React.FC = () => {
                     <Link
                       to="/login"
                       onClick={() => setMenuOpen(false)}
-                      className="flex items-center justify-center py-2.5 px-4 bg-gray-950 hover:bg-gray-800 text-white rounded-full text-sm font-bold transition-all shadow-sm"
+                      className="flex items-center justify-center py-2.5 px-4 bg-gray-950 hover:bg-gray-800 text-white rounded-none text-sm font-bold transition-all shadow-sm"
                     >
                       Login
                     </Link>

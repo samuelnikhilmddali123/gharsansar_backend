@@ -3,7 +3,20 @@ import react from '@vitejs/plugin-react';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    {
+      name: 'spa-fallback-products-fix',
+      configureServer(server) {
+        server.middlewares.use((req, res, next) => {
+          if (req.url === '/products' || req.url?.startsWith('/products?')) {
+            req.url = '/index.html';
+          }
+          next();
+        });
+      }
+    }
+  ],
   server: {
     proxy: {
       '/api': {

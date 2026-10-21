@@ -57,38 +57,36 @@
     "name": "3d wallpapers",
     "image": "/interior/3dbokka/2.jpeg",
     "subcategories": [
-      { "name": "Blackout Curtains", "image": "/interior/3dbokka/1.jpg" },
-      { "name": "Sheer Curtains", "image": "/interior/3dbokka/3.jpeg" },
-      { "name": "Thermal Curtains", "image": "/interior/3dbokka/4.jpeg" },
-      { "name": "Patterned Curtains", "image": "/interior/3dbokka/5.jpeg" },
-      { "name": "Solid Color Curtains", "image": "/interior/3dbokka/6.jpeg" },
-      { "name": "Velvet Curtains", "image": "/interior/3dbokka/7.jpeg" },
-      { "name": "Linen Curtains", "image": "/interior/3dbokka/8.jpeg" },
-      { "name": "Silk Curtains", "image": "/interior/3dbokka/9.webp" },
-      { "name": "Cotton Curtains", "image": "/interior/3dbokka/10.webp" },
-      { "name": "Embroidered Curtains", "image": "/interior/3dbokka/11.webp" },
-      { "name": "Grommet Curtains", "image": "/interior/3dbokka/12.jpg" },
-      { "name": "Rod Pocket Curtains", "image": "/interior/3dbokka/13.jpg" }
-     
-      
+      { "name": "Kids Animated 3D Murals", "image": "/interior/3dbokka/1.jpg" },
+      { "name": "Modern Geometric 3D", "image": "/interior/3dbokka/3.jpeg" },
+      { "name": "Nature & Forest 3D Murals", "image": "/interior/3dbokka/4.jpeg" },
+      { "name": "Abstract Spatial Depth", "image": "/interior/3dbokka/5.jpeg" },
+      { "name": "Luxury Marble & Gold 3D", "image": "/interior/3dbokka/6.jpeg" },
+      { "name": "Celestial Galaxy Murals", "image": "/interior/3dbokka/7.jpeg" },
+      { "name": "Botanical Floral 3D", "image": "/interior/3dbokka/8.jpeg" },
+      { "name": "Architectural Cityscape", "image": "/interior/3dbokka/9.webp" },
+      { "name": "Underwater Marine Life", "image": "/interior/3dbokka/10.webp" },
+      { "name": "Textured Brick & Stone 3D", "image": "/interior/3dbokka/11.webp" },
+      { "name": "Fantasy Mythical Theme", "image": "/interior/3dbokka/12.jpg" },
+      { "name": "Contemporary Wall Murals", "image": "/interior/3dbokka/13.jpg" }
     ],
-    "features": ["Light control", "Privacy"]
+    "features": ["High-definition 3D depth", "Custom wall sizing"]
   },
-    {
+  {
     "name": "WALL ART AFFECTS",
     "image": "/interior/wallart/8.webp",
     "subcategories": [
-      { "name": "Blackout Curtains", "image": "/interior/wallart/11.jpg" },
-      { "name": "Sheer Curtains", "image": "/interior/wallart/12.avif" },
-      { "name": "Thermal Curtains", "image": "/interior/wallart/13.jpg" },
-      { "name": "Patterned Curtains", "image": "/interior/wallart/14.jpeg" },
-      { "name": "Solid Color Curtains", "image": "/interior/wallart/15.webp" },
-      { "name": "Velvet Curtains", "image": "/interior/wallart/16.png" },
-      { "name": "Linen Curtains", "image": "/interior/wallart/17.jpg" },
-      { "name": "Silk Curtains", "image": "/interior/wallart/18.jpg" },
-      { "name": "Cotton Curtains", "image": "/interior/wallart/8.webp" }
+      { "name": "Illuminated Wooden Wall Art", "image": "/interior/wallart/11.jpg" },
+      { "name": "Backlit Geometric Panel", "image": "/interior/wallart/12.avif" },
+      { "name": "Contemporary Acrylic Accent", "image": "/interior/wallart/13.jpg" },
+      { "name": "Laser-Cut Floral Silhouette", "image": "/interior/wallart/14.jpeg" },
+      { "name": "LED Backlit Mandala Art", "image": "/interior/wallart/15.webp" },
+      { "name": "Textured Wooden Lattice Art", "image": "/interior/wallart/16.png" },
+      { "name": "Abstract Landscape Panel", "image": "/interior/wallart/17.jpg" },
+      { "name": "Metallic Calligraphy Accent", "image": "/interior/wallart/18.jpg" },
+      { "name": "Bespoke Focal Wall Feature", "image": "/interior/wallart/8.webp" }
     ],
-    "features": ["Light control", "Privacy"]
+    "features": ["Illuminated LED panels", "Custom wooden craft"]
   },
 {
     "name": "Vinyl Flooring",
