@@ -121,7 +121,7 @@ async function initDatabase() {
 
 function readData(filePath, defaultData = []) {
   const colName = resolveCollectionName(filePath);
-  if (atlasCache[colName] !== undefined && (!Array.isArray(atlasCache[colName]) || atlasCache[colName].length > 0)) {
+  if (atlasCache[colName] !== undefined) {
     return atlasCache[colName];
   }
   if (fs.existsSync(filePath)) {
@@ -131,7 +131,7 @@ function readData(filePath, defaultData = []) {
       return fileData;
     } catch (e) {}
   }
-  return atlasCache[colName] !== undefined ? atlasCache[colName] : defaultData;
+  return defaultData;
 }
 
 function writeData(filePath, data) {

@@ -1433,7 +1433,7 @@ app.post("/api/storage/upload", productUpload.single("image"), (req, res) => {
         category.subcategories.push(newSub);
       }
 
-      fs.writeFileSync(categoriesPath, JSON.stringify(rawData, null, 2));
+      writeJsonFile(categoriesPath, rawData);
       return res.status(201).json({ success: true, message: "Interior work saved successfully" });
     }
 
@@ -1481,7 +1481,7 @@ app.post("/api/storage/upload", productUpload.single("image"), (req, res) => {
     };
 
     subcategory[itemKey].push(newProduct);
-    fs.writeFileSync(productsPath, JSON.stringify(rawData, null, 2));
+    writeJsonFile(productsPath, rawData);
 
     res.status(201).json({ success: true, message: "Product created successfully", product: newProduct });
   } catch (error) {
@@ -1557,7 +1557,7 @@ app.put("/api/storage/upload/products", productUpload.single("image"), (req, res
       return res.status(404).json({ error: "Product not found to update" });
     }
 
-    fs.writeFileSync(productsPath, JSON.stringify(rawData, null, 2));
+    writeJsonFile(productsPath, rawData);
     res.json({ success: true, message: "Product updated successfully" });
   } catch (error) {
     console.error("Admin product update error:", error);
@@ -1614,7 +1614,7 @@ app.delete("/api/storage/uploads/products", (req, res) => {
       return res.status(404).json({ error: "Product not found to delete" });
     }
 
-    fs.writeFileSync(productsPath, JSON.stringify(rawData, null, 2));
+    writeJsonFile(productsPath, rawData);
     res.json({ success: true, message: "Product deleted successfully" });
   } catch (error) {
     console.error("Admin product delete error:", error);
@@ -1656,7 +1656,7 @@ app.delete("/api/storage/upload/interior", (req, res) => {
       return res.status(404).json({ error: "Interior work not found to delete" });
     }
 
-    fs.writeFileSync(categoriesPath, JSON.stringify(rawData, null, 2));
+    writeJsonFile(categoriesPath, rawData);
     res.json({ success: true, message: "Interior work deleted successfully" });
   } catch (error) {
     console.error("Delete interior work error:", error);
@@ -1731,7 +1731,7 @@ app.post(["/api/orders", "/orders"], (req, res) => {
     };
 
     rawData.unshift(newOrder); // Newest order on top
-    fs.writeFileSync(ORDERS_FILE, JSON.stringify(rawData, null, 2));
+    writeJsonFile(ORDERS_FILE, rawData);
 
     // Auto-save customer data to customers.json
     if (customer && customer.email) {
@@ -1750,7 +1750,7 @@ app.post(["/api/orders", "/orders"], (req, res) => {
       } else {
         customers.unshift(customerRecord);
       }
-      fs.writeFileSync(CUSTOMERS_FILE, JSON.stringify(customers, null, 2));
+      writeJsonFile(CUSTOMERS_FILE, customers);
       console.log(`👤 Customer saved: ${customer.firstName} ${customer.lastName} (${customer.email})`);
     }
 
@@ -1845,7 +1845,7 @@ app.patch("/api/orders/:id/shipped", (req, res) => {
     orders[idx].status = shipped ? "shipped" : "processing";
     orders[idx].shippedAt = shipped ? new Date().toISOString() : null;
     orders[idx].updatedAt = new Date().toISOString();
-    fs.writeFileSync(ORDERS_FILE, JSON.stringify(orders, null, 2));
+    writeJsonFile(ORDERS_FILE, orders);
     console.log(`\n🚚 Order ${id} marked as ${shipped ? 'shipped' : 'processing'}`);
     if (shipped && orders[idx].userId) {
       createInternalNotification(orders[idx].userId, "Order Shipped! 📦", `Your order #${id} has been shipped and is on its way.`, "order");
@@ -1874,7 +1874,7 @@ app.patch("/api/orders/:id/status", (req, res) => {
       orders[idx].shippedAt = new Date().toISOString();
     }
     orders[idx].updatedAt = new Date().toISOString();
-    fs.writeFileSync(ORDERS_FILE, JSON.stringify(orders, null, 2));
+    writeJsonFile(ORDERS_FILE, orders);
     console.log(`\n📦 Order ${id} status updated to ${normalizedStatus}`);
     res.json({ success: true, order: orders[idx] });
   } catch (error) {
@@ -1931,7 +1931,7 @@ app.post("/api/chats", (req, res) => {
       chats.unshift(sessionRecord);
     }
 
-    fs.writeFileSync(CHATS_FILE, JSON.stringify(chats, null, 2));
+    writeJsonFile(CHATS_FILE, chats);
     res.json({ success: true, chat: sessionRecord });
   } catch (error) {
     console.error("Save chat error:", error);
