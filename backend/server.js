@@ -2896,10 +2896,6 @@ const RETURN_GIFTS_FILE = path.join(__dirname, "public", "return_gifts.json");
 
 app.get("/api/return_gifts", (req, res) => {
   try {
-    if (!fs.existsSync(RETURN_GIFTS_FILE)) {
-      return res.json({ products: [], total: 0, page: 1, limit: 20 });
-    }
-    
     let gifts = readJsonFile(RETURN_GIFTS_FILE, []);
     
     // 1. Text Search

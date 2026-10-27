@@ -55,6 +55,8 @@ async function initDatabase() {
       if (doc) {
         delete doc._id;
         atlasCache[colName] = doc;
+      } else {
+        atlasCache[colName] = {};
       }
     } else if (colName === "reviews") {
       const list = await col.find({}).toArray();
@@ -79,6 +81,19 @@ async function initDatabase() {
       const docs = await col.find({}).toArray();
       docs.forEach(d => delete d._id);
       atlasCache[colName] = docs;
+    }
+  }
+
+  // Ensure default cache for all known collections if empty or missing
+  for (const colName of Object.values(COLLECTION_MAP)) {
+    if (atlasCache[colName] === undefined) {
+      if (["homepage_layout", "flashsale", "analytics"].includes(colName)) {
+        atlasCache[colName] = {};
+      } else if (colName === "reviews") {
+        atlasCache[colName] = {};
+      } else {
+        atlasCache[colName] = [];
+      }
     }
   }
 
@@ -121,7 +136,7 @@ async function initDatabase() {
 
 function readData(filePath, defaultData = []) {
   const colName = resolveCollectionName(filePath);
-  if (atlasCache[colName] !== undefined && (!Array.isArray(atlasCache[colName]) || atlasCache[colName].length > 0)) {
+  if (atlasCache[colName] !== undefined) {
     return atlasCache[colName];
   }
   if (fs.existsSync(filePath)) {
@@ -131,7 +146,7 @@ function readData(filePath, defaultData = []) {
       return fileData;
     } catch (e) {}
   }
-  return atlasCache[colName] !== undefined ? atlasCache[colName] : defaultData;
+  return defaultData;
 }
 
 function writeData(filePath, data) {
