@@ -1,0 +1,4 @@
+@echo off
+echo Starting Official Cloudflare Tunnel for gharsansar.website...
+"C:\Program Files (x86)\cloudflared\cloudflared.exe" tunnel run --token eyJhIjoiZDllNmQ4MTYzNWUyMzA0NTk2NWYwNTAyYjU2ODhlMzMiLCJ0IjoiMWFlMGVhYjMtZGU0OS00MTVjLWJkODgtZGQwYzkzNmZjNTg5IiwicyI6Ik1qVXdZemc1WWpFdE1EVTFaaTAwWldOaUxUa3lORGd0T0RCaVpXUm1OV0l4T1RZeiJ9
+pause

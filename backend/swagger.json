@@ -1,0 +1,3101 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Ghar Sansar Backend API",
+    "version": "1.0.0",
+    "description": "Complete REST API Documentation for Ghar Sansar E-commerce (Web, Mobile App, & Admin Portal). Backed by MongoDB Atlas cloud database."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5001",
+      "description": "Local Development Server"
+    },
+    {
+      "url": "https://backend.gharsansar.website",
+      "description": "Production Cloudflare Tunnel"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Health",
+      "description": "System health and status endpoints"
+    },
+    {
+      "name": "Products",
+      "description": "Catalog, search, filtering, and categories"
+    },
+    {
+      "name": "Authentication",
+      "description": "User login, registration, and profile management"
+    },
+    {
+      "name": "Cart",
+      "description": "User-specific persistent cart management backed by MongoDB Atlas"
+    },
+    {
+      "name": "Wishlist",
+      "description": "User-specific persistent wishlist management backed by MongoDB Atlas"
+    },
+    {
+      "name": "Orders",
+      "description": "Order placement, tracking, and management"
+    },
+    {
+      "name": "CMS & Layout",
+      "description": "Homepage layout, banners, collections, and flash sales"
+    },
+    {
+      "name": "Reviews",
+      "description": "Customer reviews and ratings"
+    },
+    {
+      "name": "Shipping",
+      "description": "Courier serviceability and shipment tracking"
+    },
+    {
+      "name": "Mobile Features",
+      "description": "Wishlist, push tokens, and customer notifications"
+    },
+    {
+      "name": "Analytics & Admin",
+      "description": "Store metrics, chats, and customer management"
+    },
+    {
+      "name": "Storage & Uploads",
+      "description": "Image and media file storage endpoints for products, interior designs, and blog articles"
+    }
+  ],
+  "paths": {
+    "/api/health": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Check backend health",
+        "responses": {
+          "200": {
+            "description": "Server is healthy",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": "healthy",
+                  "port": 5001,
+                  "uptime": 120.5
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/products": {
+      "get": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Get complete product catalog grouped by categories",
+        "responses": {
+          "200": {
+            "description": "List of categories with nested subcategories and products"
+          }
+        }
+      }
+    },
+    "/api/products/categories": {
+      "get": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Get list of all categories with product counts and images",
+        "responses": {
+          "200": {
+            "description": "Array of category objects"
+          }
+        }
+      }
+    },
+    "/api/products/paginated": {
+      "get": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Get paginated, filtered, and sorted products",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "Page number"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            },
+            "description": "Items per page"
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by category name"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Keyword search query"
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "price_asc",
+                "price_desc",
+                "rating",
+                "newest"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated product results with pagination metadata"
+          }
+        }
+      }
+    },
+    "/api/products/search": {
+      "get": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Search products with auto-suggestions",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search keyword"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matching products and suggested categories"
+          }
+        }
+      }
+    },
+    "/api/return_gifts": {
+      "get": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Get return gift collections",
+        "responses": {
+          "200": {
+            "description": "Array of return gift items"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Create a new return gift product",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Return gift created successfully"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Update an existing return gift product",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Return gift updated successfully"
+          }
+        }
+      }
+    },
+    "/api/auth/register": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Register a new user account (Strict Unique Email & Phone)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email",
+                  "password",
+                  "name"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Nikhitha Maddali"
+                  },
+                  "full_name": {
+                    "type": "string",
+                    "example": "Nikhitha Maddali"
+                  },
+                  "email": {
+                    "type": "string",
+                    "example": "nikhithamaddali@gmail.com"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "example": "9398357638"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "Secret123"
+                  },
+                  "street_address": {
+                    "type": "string",
+                    "example": "Flat 402, High Street"
+                  },
+                  "city": {
+                    "type": "string",
+                    "example": "Vijayawada"
+                  },
+                  "state": {
+                    "type": "string",
+                    "example": "Andhra Pradesh"
+                  },
+                  "pincode": {
+                    "type": "string",
+                    "example": "520008"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created successfully with sequential integer ID and Image 2 document schema",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "token": "user_token_3_1792823000",
+                  "user": {
+                    "id": 3,
+                    "email": "nikhithamaddali@gmail.com",
+                    "password_hash": "Secret123",
+                    "full_name": "Nikhitha Maddali",
+                    "phone": "9398357638",
+                    "company_name": "",
+                    "gstin": "",
+                    "role": "CUSTOMER",
+                    "is_active": true,
+                    "firebase_uid": "",
+                    "photo_url": "",
+                    "street_address": "",
+                    "city": "",
+                    "state": "",
+                    "pincode": "",
+                    "created_at": "2026-10-24T06:30:00.000Z",
+                    "__v": 0,
+                    "createdAt": "2026-10-24T06:30:00.000Z",
+                    "updatedAt": "2026-10-24T06:30:00.000Z",
+                    "addresses": []
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Duplicate email, duplicate phone, or missing fields"
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Login with email/phone and password (Admin or Customer)",
+        "description": "Log in to obtain a user profile and auth token. \n\n**Admin credentials:** `gharsansarshop@gmail.com` / `GharStack@07`\n**User credentials:** `mnikhil2401@gmail.com` / `Nikhil@123`",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "emailOrPhone",
+                  "password"
+                ],
+                "properties": {
+                  "emailOrPhone": {
+                    "type": "string",
+                    "example": "gharsansarshop@gmail.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "GharStack@07"
+                  }
+                }
+              },
+              "examples": {
+                "AdminLogin": {
+                  "summary": "Admin Account (gharsansarshop@gmail.com)",
+                  "value": {
+                    "emailOrPhone": "gharsansarshop@gmail.com",
+                    "password": "GharStack@07"
+                  }
+                },
+                "CustomerLogin": {
+                  "summary": "Customer Account (mnikhil2401@gmail.com)",
+                  "value": {
+                    "emailOrPhone": "mnikhil2401@gmail.com",
+                    "password": "Nikhil@123"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful, user profile and bearer token returned",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "token": "user_token_2_1792823000",
+                  "user": {
+                    "id": 2,
+                    "email": "mnikhil2401@gmail.com",
+                    "full_name": "Nikhil",
+                    "phone": "9121266269",
+                    "role": "CUSTOMER",
+                    "is_active": true,
+                    "street_address": "currency nagar SF1 dno 4/147",
+                    "city": "Vijayawada",
+                    "state": "Andhra Pradesh",
+                    "pincode": "520008"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials"
+          }
+        }
+      }
+    },
+    "/api/auth/google": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Sign in or register with Google OAuth / Firebase",
+        "description": "Authenticates Google login. Returns `isProfileIncomplete: true` if user has missing phone or delivery address so the frontend immediately prompts the shipping address modal.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "nikhithamaddali@gmail.com"
+                  },
+                  "name": {
+                    "type": "string",
+                    "example": "Nikhitha Maddali"
+                  },
+                  "full_name": {
+                    "type": "string",
+                    "example": "Nikhitha Maddali"
+                  },
+                  "firebase_uid": {
+                    "type": "string",
+                    "example": "fXgqh30xhOhBIb3NAYkQtWXIJ3T2"
+                  },
+                  "photo_url": {
+                    "type": "string",
+                    "example": "https://lh3.googleusercontent.com/..."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Google authentication successful",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "token": "user_token_6_1792823000",
+                  "isProfileIncomplete": true,
+                  "user": {
+                    "id": 6,
+                    "email": "nikhithamaddali@gmail.com",
+                    "password_hash": "",
+                    "full_name": "Nikhitha Maddali",
+                    "phone": "",
+                    "company_name": "",
+                    "gstin": "",
+                    "role": "CUSTOMER",
+                    "is_active": true,
+                    "firebase_uid": "fXgqh30xhOhBIb3NAYkQtWXIJ3T2",
+                    "photo_url": "https://lh3.googleusercontent.com/...",
+                    "street_address": "",
+                    "city": "",
+                    "state": "",
+                    "pincode": "",
+                    "created_at": "2026-10-24T06:30:00.000Z",
+                    "__v": 0,
+                    "createdAt": "2026-10-24T06:30:00.000Z",
+                    "updatedAt": "2026-10-24T06:30:00.000Z",
+                    "addresses": []
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/profile": {
+      "get": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Get current user profile",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User profile data"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Update user profile and saved delivery addresses (Strict Unique Phone)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "nikhithamaddali@gmail.com"
+                  },
+                  "full_name": {
+                    "type": "string",
+                    "example": "Nikhitha Maddali"
+                  },
+                  "name": {
+                    "type": "string",
+                    "example": "Nikhitha Maddali"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "example": "9398357638"
+                  },
+                  "street_address": {
+                    "type": "string",
+                    "example": "Door 4/147, Currency Nagar"
+                  },
+                  "city": {
+                    "type": "string",
+                    "example": "Vijayawada"
+                  },
+                  "state": {
+                    "type": "string",
+                    "example": "Andhra Pradesh"
+                  },
+                  "pincode": {
+                    "type": "string",
+                    "example": "520008"
+                  },
+                  "company_name": {
+                    "type": "string",
+                    "example": ""
+                  },
+                  "gstin": {
+                    "type": "string",
+                    "example": ""
+                  },
+                  "photo_url": {
+                    "type": "string",
+                    "example": "https://lh3.googleusercontent.com/..."
+                  },
+                  "addresses": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profile updated successfully"
+          },
+          "400": {
+            "description": "Duplicate phone number or invalid phone format"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
+    "/api/auth/profile/upload-avatar": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Upload user profile avatar picture",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "avatar"
+                ],
+                "properties": {
+                  "avatar": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Image file (PNG, JPG, WEBP)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Avatar uploaded successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "url": "http://localhost:5001/profile_pictures/profile_1792823000.png"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "No file uploaded"
+          }
+        }
+      }
+    },
+    "/api/orders": {
+      "get": {
+        "tags": [
+          "Orders"
+        ],
+        "summary": "List all customer orders",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Optional filter by customer email"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Array of orders"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Orders"
+        ],
+        "summary": "Place a new customer order",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "items",
+                  "customer",
+                  "shippingAddress",
+                  "totalAmount"
+                ],
+                "properties": {
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "customer": {
+                    "type": "object"
+                  },
+                  "shippingAddress": {
+                    "type": "object"
+                  },
+                  "totalAmount": {
+                    "type": "number",
+                    "example": 2499
+                  },
+                  "paymentMethod": {
+                    "type": "string",
+                    "example": "UPI / COD"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Order placed successfully"
+          }
+        }
+      }
+    },
+    "/api/orders/{id}/status": {
+      "put": {
+        "tags": [
+          "Orders"
+        ],
+        "summary": "Update order status",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "Processing",
+                      "Confirmed",
+                      "Shipped",
+                      "Delivered",
+                      "Cancelled"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Order status updated"
+          }
+        }
+      }
+    },
+    "/api/banners": {
+      "get": {
+        "tags": [
+          "CMS & Layout"
+        ],
+        "summary": "Get all promotional banners",
+        "responses": {
+          "200": {
+            "description": "Array of banners"
+          }
+        }
+      }
+    },
+    "/api/flashsale": {
+      "get": {
+        "tags": [
+          "CMS & Layout"
+        ],
+        "summary": "Get active flash sale deals & countdown time",
+        "responses": {
+          "200": {
+            "description": "Flash sale data with products"
+          }
+        }
+      }
+    },
+    "/api/cms/homepage_layout": {
+      "get": {
+        "tags": [
+          "CMS & Layout"
+        ],
+        "summary": "Get homepage layout sections & order",
+        "responses": {
+          "200": {
+            "description": "Homepage layout configuration"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "CMS & Layout"
+        ],
+        "summary": "Save homepage layout configuration",
+        "responses": {
+          "200": {
+            "description": "Layout updated"
+          }
+        }
+      }
+    },
+    "/api/reviews/{productId}": {
+      "get": {
+        "tags": [
+          "Reviews"
+        ],
+        "summary": "Get customer reviews and average rating for a product",
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reviews list with rating count and average"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Reviews"
+        ],
+        "summary": "Submit a new product review",
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "userName",
+                  "rating",
+                  "comment"
+                ],
+                "properties": {
+                  "userName": {
+                    "type": "string",
+                    "example": "Rahul K."
+                  },
+                  "rating": {
+                    "type": "number",
+                    "minimum": 1,
+                    "maximum": 5,
+                    "example": 5
+                  },
+                  "comment": {
+                    "type": "string",
+                    "example": "Excellent quality! Exactly as described."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Review submitted successfully"
+          }
+        }
+      }
+    },
+    "/api/shipping/serviceability": {
+      "get": {
+        "tags": [
+          "Shipping"
+        ],
+        "summary": "Check courier pincode serviceability and shipping rates",
+        "parameters": [
+          {
+            "name": "pincode",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "500001"
+          },
+          {
+            "name": "weight",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "default": 0.5
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Serviceable couriers, delivery ETA, and pricing"
+          }
+        }
+      }
+    },
+    "/api/shipping/track/{awb}": {
+      "get": {
+        "tags": [
+          "Shipping"
+        ],
+        "summary": "Track shipment status by AWB number",
+        "parameters": [
+          {
+            "name": "awb",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Shipment tracking events and current status"
+          }
+        }
+      }
+    },
+    "/api/mobile/wishlist": {
+      "get": {
+        "tags": [
+          "Mobile Features"
+        ],
+        "summary": "Get user wishlist items",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Array of favorited product IDs"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Mobile Features"
+        ],
+        "summary": "Toggle product in user wishlist",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "userId",
+                  "productId"
+                ],
+                "properties": {
+                  "userId": {
+                    "type": "string"
+                  },
+                  "productId": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Wishlist updated"
+          }
+        }
+      }
+    },
+    "/api/mobile/notifications": {
+      "get": {
+        "tags": [
+          "Mobile Features"
+        ],
+        "summary": "Get customer push notifications and alerts",
+        "responses": {
+          "200": {
+            "description": "List of notifications"
+          }
+        }
+      }
+    },
+    "/api/analytics/stats": {
+      "get": {
+        "tags": [
+          "Analytics & Admin"
+        ],
+        "summary": "Get store statistics and sales analytics",
+        "responses": {
+          "200": {
+            "description": "Revenue, total orders, top products, and user growth"
+          }
+        }
+      }
+    },
+    "/api/chats": {
+      "get": {
+        "tags": [
+          "Analytics & Admin"
+        ],
+        "summary": "Get customer support chat sessions",
+        "responses": {
+          "200": {
+            "description": "Array of chat conversations"
+          }
+        }
+      }
+    },
+    "/api/auth/check": {
+      "get": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Check if email or phone is already registered (Strict Uniqueness Check)",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "mnikhil2401@gmail.com"
+            }
+          },
+          {
+            "name": "phone",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "9121266269"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Availability status of email and phone",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "emailTaken": true,
+                  "phoneTaken": false,
+                  "emailMessage": "This email address is already registered.",
+                  "phoneMessage": ""
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/me": {
+      "get": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Get authenticated user profile directly from MongoDB Atlas",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User profile details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized or expired token"
+          }
+        }
+      }
+    },
+    "/api/v1/cart": {
+      "get": {
+        "tags": [
+          "Cart"
+        ],
+        "summary": "Get currently authenticated user's persistent cart from MongoDB Atlas",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User cart with computed subtotal and items count",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Cart"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Cart"
+        ],
+        "summary": "Clear all items from currently authenticated user's cart",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cart cleared successfully"
+          }
+        }
+      }
+    },
+    "/api/v1/cart/items": {
+      "post": {
+        "tags": [
+          "Cart"
+        ],
+        "summary": "Add an item to the authenticated user's cart (creates or updates in MongoDB Atlas)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "productId",
+                  "quantity"
+                ],
+                "properties": {
+                  "productId": {
+                    "type": "string",
+                    "example": "prod_101"
+                  },
+                  "name": {
+                    "type": "string",
+                    "example": "Brass Pooja Thali"
+                  },
+                  "price": {
+                    "type": "number",
+                    "example": 799
+                  },
+                  "quantity": {
+                    "type": "integer",
+                    "example": 1
+                  },
+                  "image": {
+                    "type": "string",
+                    "example": "/images/thali.jpg"
+                  },
+                  "selectedSize": {
+                    "type": "string",
+                    "example": "Medium"
+                  },
+                  "selectedColor": {
+                    "type": "string",
+                    "example": "Gold"
+                  },
+                  "isReturnGift": {
+                    "type": "boolean",
+                    "example": false
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cart updated with added item"
+          },
+          "400": {
+            "description": "Missing productId or invalid quantity"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/v1/cart/items/{item}": {
+      "put": {
+        "tags": [
+          "Cart"
+        ],
+        "summary": "Update item quantity or attributes in the authenticated user's cart",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "item",
+            "in": "path",
+            "required": true,
+            "description": "Unique item ID or productId",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "quantity": {
+                    "type": "integer",
+                    "example": 2
+                  },
+                  "selectedSize": {
+                    "type": "string",
+                    "example": "Large"
+                  },
+                  "selectedColor": {
+                    "type": "string",
+                    "example": "Antique Gold"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cart item updated successfully"
+          },
+          "404": {
+            "description": "Item not found in cart"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Cart"
+        ],
+        "summary": "Remove an item from the authenticated user's cart",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "item",
+            "in": "path",
+            "required": true,
+            "description": "Unique item ID or productId",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Item removed from cart"
+          }
+        }
+      }
+    },
+    "/api/v1/cart/merge": {
+      "post": {
+        "tags": [
+          "Cart"
+        ],
+        "summary": "Merge guest localStorage items into user's MongoDB Atlas cart on login",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "guestItems": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/CartItem"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cart merged successfully"
+          }
+        }
+      }
+    },
+    "/api/v1/wishlist": {
+      "get": {
+        "tags": [
+          "Wishlist"
+        ],
+        "summary": "Get authenticated user's persistent wishlist from MongoDB Atlas",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User wishlist document with productIds and items",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Wishlist"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Wishlist"
+        ],
+        "summary": "Add item to authenticated user's wishlist",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "productId"
+                ],
+                "properties": {
+                  "productId": {
+                    "type": "string",
+                    "example": "prod_101"
+                  },
+                  "name": {
+                    "type": "string",
+                    "example": "Brass Pooja Thali"
+                  },
+                  "price": {
+                    "type": "number",
+                    "example": 799
+                  },
+                  "image": {
+                    "type": "string",
+                    "example": "/images/thali.jpg"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Item added to wishlist"
+          }
+        }
+      }
+    },
+    "/api/v1/wishlist/toggle": {
+      "post": {
+        "tags": [
+          "Wishlist"
+        ],
+        "summary": "Toggle product in authenticated user's persistent wishlist",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "productId"
+                ],
+                "properties": {
+                  "productId": {
+                    "type": "string",
+                    "example": "prod_101"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "price": {
+                    "type": "number"
+                  },
+                  "image": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Toggle result indicating added or removed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "action": {
+                      "type": "string",
+                      "example": "added"
+                    },
+                    "inWishlist": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "count": {
+                      "type": "integer",
+                      "example": 3
+                    },
+                    "productIds": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/wishlist/{productId}": {
+      "delete": {
+        "tags": [
+          "Wishlist"
+        ],
+        "summary": "Remove item from user's wishlist",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Item removed from wishlist"
+          }
+        }
+      }
+    },
+    "/api/v1/wishlist/sync": {
+      "post": {
+        "tags": [
+          "Wishlist"
+        ],
+        "summary": "Sync guest wishlist IDs with user's MongoDB Atlas wishlist on login",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "productIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Wishlist synced successfully"
+          }
+        }
+      }
+    },
+    "/api/v1/orders": {
+      "get": {
+        "tags": [
+          "Orders"
+        ],
+        "summary": "List orders for the currently authenticated user",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of user's orders",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "orders": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Order"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Orders"
+        ],
+        "summary": "Place an order linked to the authenticated user and saved to MongoDB Atlas",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "items",
+                  "customer",
+                  "shippingAddress",
+                  "totalAmount"
+                ],
+                "properties": {
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/CartItem"
+                    }
+                  },
+                  "customer": {
+                    "type": "object"
+                  },
+                  "shippingAddress": {
+                    "$ref": "#/components/schemas/ShippingAddress"
+                  },
+                  "totalAmount": {
+                    "type": "number",
+                    "example": 1999
+                  },
+                  "paymentMethod": {
+                    "type": "string",
+                    "example": "COD"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Order placed and saved to MongoDB Atlas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "order": {
+                      "$ref": "#/components/schemas/Order"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/orders/{id}": {
+      "get": {
+        "tags": [
+          "Orders"
+        ],
+        "summary": "Get specific order details for the authenticated user",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Order details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "order": {
+                      "$ref": "#/components/schemas/Order"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Order not found or unauthorized"
+          }
+        }
+      }
+    },
+    "/api/v1/auth/send-otp": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Send 6-digit OTP verification code to user's email",
+        "description": "Dispatches a luxury branded one-time password to the specified email address via Gmail SMTP. Valid for 10 minutes with 45-second rate-limiting.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "customer@gmail.com",
+                    "description": "User's email address"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OTP sent successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Verification code sent to your email address.",
+                  "email": "customer@gmail.com",
+                  "expiresInSeconds": 600,
+                  "delivered": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid email format"
+          },
+          "429": {
+            "description": "Too many requests. Please wait before requesting another OTP."
+          }
+        }
+      }
+    },
+    "/api/v1/auth/verify-otp": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Verify email OTP code and log in (Web & Mobile Apps)",
+        "description": "Verifies the 6-digit OTP code. Automatically registers first-time users or logs in existing users, returning a JWT token, legacy token, and user profile.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email",
+                  "otp"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "customer@gmail.com"
+                  },
+                  "otp": {
+                    "type": "string",
+                    "example": "849201",
+                    "description": "6-digit OTP code received in email"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Login successful"
+                    },
+                    "token": {
+                      "type": "string",
+                      "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    },
+                    "legacyToken": {
+                      "type": "string",
+                      "example": "user_token_12_1793039999"
+                    },
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    },
+                    "isProfileIncomplete": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "isNewUser": {
+                      "type": "boolean",
+                      "example": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or expired OTP code"
+          }
+        }
+      }
+    },
+    "/api/cms/categories": {
+      "get": {
+        "tags": [
+          "CMS & Layout"
+        ],
+        "summary": "Get all product categories configuration",
+        "responses": {
+          "200": {
+            "description": "List of categories with keys, labels, and display order"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "CMS & Layout"
+        ],
+        "summary": "Update product categories configuration",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Categories updated successfully"
+          }
+        }
+      }
+    },
+    "/api/cms/collections": {
+      "get": {
+        "tags": [
+          "CMS & Layout"
+        ],
+        "summary": "Get all featured collections configuration",
+        "responses": {
+          "200": {
+            "description": "List of featured collections with banners and metadata"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "CMS & Layout"
+        ],
+        "summary": "Update featured collections configuration",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Collections updated successfully"
+          }
+        }
+      }
+    },
+    "/api/storage/upload": {
+      "post": {
+        "tags": [
+          "Storage & Uploads"
+        ],
+        "summary": "Upload product image to public uploads storage",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "image"
+                ],
+                "properties": {
+                  "image": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Image file (JPEG, PNG, WEBP)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Image uploaded successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "url": "http://localhost:5001/uploads/products/image-12345.webp",
+                  "filename": "image-12345.webp"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "No file uploaded or invalid format"
+          }
+        }
+      }
+    },
+    "/api/storage/upload/products": {
+      "get": {
+        "tags": [
+          "Storage & Uploads"
+        ],
+        "summary": "Get list of all uploaded product images",
+        "responses": {
+          "200": {
+            "description": "Array of uploaded product images"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Storage & Uploads"
+        ],
+        "summary": "Replace or update an existing uploaded product image",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "image": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Product image updated successfully"
+          }
+        }
+      }
+    },
+    "/api/storage/uploads/products": {
+      "delete": {
+        "tags": [
+          "Storage & Uploads"
+        ],
+        "summary": "Delete an uploaded product image by filename",
+        "parameters": [
+          {
+            "name": "filename",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filename of the image to remove"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product image removed successfully"
+          }
+        }
+      }
+    },
+    "/api/storage/upload/interior": {
+      "get": {
+        "tags": [
+          "Storage & Uploads"
+        ],
+        "summary": "List all uploaded interior design images",
+        "responses": {
+          "200": {
+            "description": "Array of interior design image filenames"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Storage & Uploads"
+        ],
+        "summary": "Delete an interior design image by filename",
+        "parameters": [
+          {
+            "name": "filename",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filename of the interior design image to delete"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Interior design image removed"
+          }
+        }
+      }
+    },
+    "/api/storage/upload/blog": {
+      "get": {
+        "tags": [
+          "Storage & Uploads"
+        ],
+        "summary": "List all uploaded blog article images",
+        "responses": {
+          "200": {
+            "description": "Array of blog image filenames"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Storage & Uploads"
+        ],
+        "summary": "Upload a featured image for a blog article",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Blog image uploaded successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "url": "http://localhost:5001/uploads/blogs/blog-image-12345.webp"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Storage & Uploads"
+        ],
+        "summary": "Delete a blog image by filename",
+        "parameters": [
+          {
+            "name": "filename",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Blog image deleted successfully"
+          }
+        }
+      }
+    },
+    "/api/v1/auth/mobile-code": {
+      "post": {
+        "tags": [
+          "Authentication",
+          "Mobile Features"
+        ],
+        "summary": "Generate or exchange single-use mobile authorization code for deep linking",
+        "description": "Used by the mobile apps for Google OAuth sign-in bridge via gharsansar://auth/callback",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "user@example.com"
+                  },
+                  "redirect_uri": {
+                    "type": "string",
+                    "example": "gharsansar://auth/callback"
+                  },
+                  "firebase_uid": {
+                    "type": "string"
+                  },
+                  "photo_url": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string",
+                    "description": "Optional code to exchange immediately"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Authorization code generated or exchanged successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "code": "a1b2c3d4e5f6..."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid redirect URI or code expired"
+          }
+        }
+      }
+    },
+    "/api/v1/auth/mobile-code/exchange": {
+      "post": {
+        "tags": [
+          "Authentication",
+          "Mobile Features"
+        ],
+        "summary": "Exchange mobile authorization code for permanent JWT token and user profile",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "code"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "example": "a1b2c3d4e5f6...",
+                    "description": "Single-use 32-byte authorization code"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Code exchanged successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "token": "user_token_12_1792823000",
+                  "user": {
+                    "id": 12,
+                    "email": "customer@gmail.com",
+                    "full_name": "Customer Name"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid, expired, or already-used authorization code"
+          }
+        }
+      }
+    },
+    "/api/mobile/push-token": {
+      "post": {
+        "tags": [
+          "Mobile Features"
+        ],
+        "summary": "Register or update mobile push notification token",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "token"
+                ],
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "example": "ExponentPushToken[xxxxxxxxxxxxxx]"
+                  },
+                  "userId": {
+                    "type": "string",
+                    "example": "12"
+                  },
+                  "deviceId": {
+                    "type": "string",
+                    "example": "android-uuid-1234"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Push token registered successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Token is required"
+          }
+        }
+      }
+    },
+    "/api/mobile/notifications/read": {
+      "post": {
+        "tags": [
+          "Mobile Features"
+        ],
+        "summary": "Mark one or all mobile notifications as read",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "example": "notif-1234",
+                    "description": "Optional notification ID. Omitting marks all as read."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Notifications marked as read"
+          }
+        }
+      }
+    },
+    "/api/mobile/notifications/clear": {
+      "post": {
+        "tags": [
+          "Mobile Features"
+        ],
+        "summary": "Clear all customer notifications",
+        "responses": {
+          "200": {
+            "description": "Notifications cleared successfully"
+          }
+        }
+      }
+    },
+    "/api/admin/notifications/send": {
+      "post": {
+        "tags": [
+          "Analytics & Admin",
+          "Mobile Features"
+        ],
+        "summary": "Send broadcast or targeted push notification to customers",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "title",
+                  "body"
+                ],
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "example": "Special Festive Offer 🎉"
+                  },
+                  "body": {
+                    "type": "string",
+                    "example": "Get Flat 30% OFF on all Sonu Cookware items today."
+                  },
+                  "userId": {
+                    "type": "string",
+                    "example": "ALL",
+                    "description": "'ALL' for all customers or specific user ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Notification dispatched successfully"
+          }
+        }
+      }
+    },
+    "/api/orders/{id}/shipped": {
+      "patch": {
+        "tags": [
+          "Orders"
+        ],
+        "summary": "Toggle order shipped status and notify customer",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Order ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "shipped"
+                ],
+                "properties": {
+                  "shipped": {
+                    "type": "boolean",
+                    "example": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Order shipped status updated successfully"
+          },
+          "404": {
+            "description": "Order not found"
+          }
+        }
+      }
+    },
+    "/api/customers": {
+      "get": {
+        "tags": [
+          "Analytics & Admin"
+        ],
+        "summary": "List all registered customer accounts",
+        "responses": {
+          "200": {
+            "description": "Array of registered customers with contact and address details"
+          }
+        }
+      }
+    },
+    "/api/shipping/create-shipment": {
+      "post": {
+        "tags": [
+          "Shipping"
+        ],
+        "summary": "Create automated courier consignment with Delhivery or Shiprocket",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "orderId"
+                ],
+                "properties": {
+                  "orderId": {
+                    "type": "string",
+                    "example": "order-1792823000"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Shipment booked with waybill and tracking details"
+          },
+          "400": {
+            "description": "Order ID is required"
+          },
+          "404": {
+            "description": "Order not found"
+          }
+        }
+      }
+    },
+    "/api/analytics/hit": {
+      "post": {
+        "tags": [
+          "Analytics & Admin"
+        ],
+        "summary": "Record page view or analytics event hit",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "page": {
+                    "type": "string",
+                    "example": "/products"
+                  },
+                  "event": {
+                    "type": "string",
+                    "example": "view_item"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Metric recorded successfully"
+          }
+        }
+      }
+    },
+    "/api/return_gifts/{id}": {
+      "delete": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Delete a return gift product by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return gift deleted successfully"
+          },
+          "404": {
+            "description": "Return gift not found"
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Enter your authentication token from the login response (or user ID, e.g. admin_01)"
+      }
+    },
+    "schemas": {
+      "User": {
+        "type": "object",
+        "description": "User account document schema matching MongoDB Atlas database specification",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "6ad342ba45514496b672371d",
+            "description": "MongoDB ObjectID"
+          },
+          "id": {
+            "type": "integer",
+            "example": 6,
+            "description": "Sequential integer user ID"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "nikhithamaddali@gmail.com",
+            "description": "Unique email address"
+          },
+          "password_hash": {
+            "type": "string",
+            "example": "",
+            "description": "Hashed password or empty for Google login"
+          },
+          "full_name": {
+            "type": "string",
+            "example": "Nikhitha Maddali",
+            "description": "User's full display name"
+          },
+          "phone": {
+            "type": "string",
+            "example": "9398357638",
+            "description": "Unique 10-digit primary phone number"
+          },
+          "company_name": {
+            "type": "string",
+            "example": "",
+            "description": "Optional business name"
+          },
+          "gstin": {
+            "type": "string",
+            "example": "",
+            "description": "Optional GST identification number"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "CUSTOMER",
+              "ADMIN"
+            ],
+            "example": "CUSTOMER"
+          },
+          "is_active": {
+            "type": "boolean",
+            "example": true
+          },
+          "firebase_uid": {
+            "type": "string",
+            "example": "fXgqh30xhOhBIb3NAYkQtWXIJ3T2",
+            "description": "Firebase OAuth UID"
+          },
+          "photo_url": {
+            "type": "string",
+            "example": "https://lh3.googleusercontent.com/a/ACg8ocKHNBscw_f7DRZJotvcVxEspn2Fyp8HcZtrgFs0a96QgUphJuh0=s96-c",
+            "description": "Profile picture URL"
+          },
+          "street_address": {
+            "type": "string",
+            "example": "Door 4/147, Currency Nagar",
+            "description": "Primary street address"
+          },
+          "city": {
+            "type": "string",
+            "example": "Vijayawada",
+            "description": "Primary city"
+          },
+          "state": {
+            "type": "string",
+            "example": "Andhra Pradesh",
+            "description": "Primary state"
+          },
+          "pincode": {
+            "type": "string",
+            "example": "520008",
+            "description": "6-digit postal zip code"
+          },
+          "created_at": {
+            "type": "string",
+            "example": "2026-09-14T09:43:55.416Z",
+            "description": "Creation timestamp in ISO format"
+          },
+          "__v": {
+            "type": "integer",
+            "example": 0,
+            "description": "Mongoose schema version key"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-10-17T09:41:14.346Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-10-24T06:30:00.000Z"
+          },
+          "addresses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShippingAddress"
+            }
+          }
+        }
+      },
+      "ShippingAddress": {
+        "type": "object",
+        "description": "Delivery contact and shipping address details (Image 3 form)",
+        "required": [
+          "firstName",
+          "lastName",
+          "address",
+          "city",
+          "state",
+          "zipCode",
+          "phone"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "addr_1792821718667"
+          },
+          "firstName": {
+            "type": "string",
+            "example": "Nikhitha"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "Maddali"
+          },
+          "phone": {
+            "type": "string",
+            "example": "9398357638"
+          },
+          "address": {
+            "type": "string",
+            "example": "Door 4/147, Currency Nagar"
+          },
+          "city": {
+            "type": "string",
+            "example": "Vijayawada"
+          },
+          "state": {
+            "type": "string",
+            "example": "Andhra Pradesh"
+          },
+          "zipCode": {
+            "type": "string",
+            "example": "520008"
+          },
+          "country": {
+            "type": "string",
+            "example": "India"
+          },
+          "isDefault": {
+            "type": "boolean",
+            "example": true
+          }
+        }
+      },
+      "GoogleAuthRequest": {
+        "type": "object",
+        "required": [
+          "email"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "nikhithamaddali@gmail.com"
+          },
+          "name": {
+            "type": "string",
+            "example": "Nikhitha Maddali"
+          },
+          "full_name": {
+            "type": "string",
+            "example": "Nikhitha Maddali"
+          },
+          "firebase_uid": {
+            "type": "string",
+            "example": "fXgqh30xhOhBIb3NAYkQtWXIJ3T2"
+          },
+          "photo_url": {
+            "type": "string",
+            "example": "https://lh3.googleusercontent.com/..."
+          }
+        }
+      },
+      "GoogleAuthResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "token": {
+            "type": "string",
+            "example": "user_token_6_1792823000"
+          },
+          "isProfileIncomplete": {
+            "type": "boolean",
+            "example": true,
+            "description": "True if user lacks a registered phone or shipping address, prompting the frontend to display the address modal"
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          }
+        }
+      },
+      "RegisterRequest": {
+        "type": "object",
+        "required": [
+          "name",
+          "email",
+          "password"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Nikhitha Maddali"
+          },
+          "email": {
+            "type": "string",
+            "example": "nikhithamaddali@gmail.com"
+          },
+          "phone": {
+            "type": "string",
+            "example": "9398357638"
+          },
+          "password": {
+            "type": "string",
+            "example": "Secret123"
+          },
+          "street_address": {
+            "type": "string",
+            "example": "Door 4/147, Currency Nagar"
+          },
+          "city": {
+            "type": "string",
+            "example": "Vijayawada"
+          },
+          "state": {
+            "type": "string",
+            "example": "Andhra Pradesh"
+          },
+          "pincode": {
+            "type": "string",
+            "example": "520008"
+          }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "required": [
+          "emailOrPhone",
+          "password"
+        ],
+        "properties": {
+          "emailOrPhone": {
+            "type": "string",
+            "example": "nikhithamaddali@gmail.com"
+          },
+          "password": {
+            "type": "string",
+            "example": "Secret123"
+          }
+        }
+      },
+      "UpdateProfileRequest": {
+        "type": "object",
+        "required": [
+          "email"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "nikhithamaddali@gmail.com"
+          },
+          "full_name": {
+            "type": "string",
+            "example": "Nikhitha Maddali"
+          },
+          "phone": {
+            "type": "string",
+            "example": "9398357638"
+          },
+          "street_address": {
+            "type": "string",
+            "example": "Door 4/147, Currency Nagar"
+          },
+          "city": {
+            "type": "string",
+            "example": "Vijayawada"
+          },
+          "state": {
+            "type": "string",
+            "example": "Andhra Pradesh"
+          },
+          "pincode": {
+            "type": "string",
+            "example": "520008"
+          },
+          "company_name": {
+            "type": "string",
+            "example": ""
+          },
+          "gstin": {
+            "type": "string",
+            "example": ""
+          },
+          "photo_url": {
+            "type": "string",
+            "example": "https://lh3.googleusercontent.com/..."
+          },
+          "addresses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShippingAddress"
+            }
+          }
+        }
+      },
+      "CartItem": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "string",
+            "example": "prod_101"
+          },
+          "name": {
+            "type": "string",
+            "example": "Brass Pooja Thali"
+          },
+          "price": {
+            "type": "number",
+            "example": 799
+          },
+          "quantity": {
+            "type": "integer",
+            "example": 1
+          },
+          "image": {
+            "type": "string",
+            "example": "/images/thali.jpg"
+          },
+          "selectedSize": {
+            "type": "string",
+            "example": "Medium"
+          },
+          "selectedColor": {
+            "type": "string",
+            "example": "Gold"
+          },
+          "isReturnGift": {
+            "type": "boolean",
+            "example": false
+          },
+          "addedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Cart": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "cart": {
+            "type": "object",
+            "properties": {
+              "_id": {
+                "type": "string"
+              },
+              "userId": {
+                "type": "string",
+                "example": "6"
+              },
+              "items": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/CartItem"
+                }
+              },
+              "totalAmount": {
+                "type": "number",
+                "example": 1598
+              },
+              "totalItems": {
+                "type": "integer",
+                "example": 2
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updatedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        }
+      },
+      "Wishlist": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "productIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "prod_101",
+              "prod_202"
+            ]
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "productId": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "price": {
+                  "type": "number"
+                },
+                "image": {
+                  "type": "string"
+                },
+                "addedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          },
+          "count": {
+            "type": "integer",
+            "example": 2
+          }
+        }
+      },
+      "Order": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string",
+            "example": "ORD-1792823000"
+          },
+          "userId": {
+            "type": "string",
+            "example": "6"
+          },
+          "orderNumber": {
+            "type": "string",
+            "example": "ORD-1792823000"
+          },
+          "customer": {
+            "type": "object"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CartItem"
+            }
+          },
+          "shippingAddress": {
+            "$ref": "#/components/schemas/ShippingAddress"
+          },
+          "totalAmount": {
+            "type": "number",
+            "example": 1999
+          },
+          "paymentMethod": {
+            "type": "string",
+            "example": "COD"
+          },
+          "paymentStatus": {
+            "type": "string",
+            "example": "Pending"
+          },
+          "status": {
+            "type": "string",
+            "example": "Confirmed"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  }
+}
