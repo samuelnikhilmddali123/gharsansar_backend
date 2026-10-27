@@ -40,7 +40,7 @@ const fixImageUrl = (url: string) => {
     .replace(/([^:]\/)\/+/g, "$1");
   
   // Strip localhost / 127.0.0.1 / private IPs from image URLs so they load as relative paths through the current domain / tunnel proxy
-  fixed = fixed.replace(/^https?:\/\/(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+)(:\d+)?/, "");
+  fixed = fixed.replace(/^https?:\/\/(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+)(:\d+)?/, "");
 
   // Enforce HTTPS for known live backend domains to prevent Mixed Content errors
   if (fixed.startsWith("http://backend.gharsansar.website") || fixed.startsWith("http://lx70r6zsef")) {

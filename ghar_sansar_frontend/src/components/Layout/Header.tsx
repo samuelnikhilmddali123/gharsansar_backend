@@ -4,6 +4,7 @@ import { Menu, X, Search, ShoppingCart, User, LogOut, Heart } from "lucide-react
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
+import { useWishlist } from "../../context/WishlistContext";
 
 const searchList = [
   "Wallpaper Rolls",
@@ -91,6 +92,7 @@ const Header: React.FC = () => {
 
   const { user, logout } = useAuth();
   const { totalItems } = useCart();
+  const { wishlist } = useWishlist();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -182,15 +184,18 @@ const Header: React.FC = () => {
     navigate("/");
   };
 
+  const isHomePage = location.pathname === "/";
+  const isTransparent = isHomePage && !isScrolled;
+
   return (
     <>
       <header className={`fixed top-0 left-0 right-0 z-50 pointer-events-none transition-all duration-300 transform ${
         isVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"
       }`}>
         <div className={`w-full pointer-events-auto transition-all duration-300 ${
-          isScrolled 
-            ? "bg-[#F7F6F0]/95 backdrop-blur-md shadow-xs border-b border-[#e8e5dc]" 
-            : "bg-transparent"
+          isTransparent 
+            ? "bg-transparent border-b border-transparent" 
+            : "bg-[#F7F6F0]/95 backdrop-blur-md shadow-xs border-b border-[#e8e5dc]"
         }`}>
           <div className="relative w-full max-w-[1880px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10 h-14 sm:h-[60px] flex items-center justify-between">
             
@@ -199,13 +204,15 @@ const Header: React.FC = () => {
               <img 
                 src="/ghar_sansar_logo_nav.png" 
                 alt="Ghar Sansar" 
-                className="h-8 sm:h-9 md:h-10 w-auto object-contain transition-all" 
+                className={`h-8 sm:h-9 md:h-10 w-auto object-contain transition-all duration-300 ${
+                  isTransparent ? "drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]" : ""
+                }`} 
                 style={{ minWidth: 0, width: "auto" }} 
               />
             </Link>
 
             {/* Desktop Navigation Links - Centered horizontally and nudged slightly down */}
-            <nav className="hidden lg:flex items-center space-x-1 xl:space-x-3 uppercase tracking-wider text-xs lg:text-[13px] font-bold text-[#1f2e24] absolute left-1/2 top-[calc(50%+4px)] -translate-x-1/2 -translate-y-1/2" role="navigation">
+            <nav className="hidden lg:flex items-center space-x-1 xl:space-x-3 uppercase tracking-wider text-xs lg:text-[13px] font-bold absolute left-1/2 top-[calc(50%+4px)] -translate-x-1/2 -translate-y-1/2" role="navigation">
               {[
                 { path: "/", label: "Home" },
                 { path: "/interior-design", label: "Interior Design" },
@@ -218,32 +225,46 @@ const Header: React.FC = () => {
                   key={link.path}
                   to={link.path}
                   className={`relative py-1 px-2.5 transition-colors duration-200 group ${
-                    isActive(link.path)
-                      ? "text-black font-bold"
-                      : "text-[#26372c] hover:text-black"
+                    isTransparent
+                      ? isActive(link.path)
+                        ? "text-white font-bold"
+                        : "text-white/80 hover:text-white"
+                      : isActive(link.path)
+                        ? "text-black font-bold"
+                        : "text-[#26372c] hover:text-black"
                   }`}
                 >
                   <span>{link.label}</span>
-                  {/* Clean black underline down on selected heading */}
+                  {/* Clean underline on selected heading */}
                   <span
                     className={`absolute bottom-0 left-2.5 right-2.5 h-[2px] rounded-full transition-all duration-300 ${
-                      isActive(link.path)
-                        ? "bg-black opacity-100 scale-x-100"
-                        : "bg-black opacity-0 scale-x-0 group-hover:opacity-40 group-hover:scale-x-100"
+                      isTransparent
+                        ? isActive(link.path)
+                          ? "bg-white opacity-100 scale-x-100 shadow-[0_0_8px_rgba(255,255,255,0.7)]"
+                          : "bg-white opacity-0 scale-x-0 group-hover:opacity-50 group-hover:scale-x-100"
+                        : isActive(link.path)
+                          ? "bg-black opacity-100 scale-x-100"
+                          : "bg-black opacity-0 scale-x-0 group-hover:opacity-40 group-hover:scale-x-100"
                     }`}
                   />
                 </Link>
               ))}
             </nav>
 
-            {/* Right side sharp action icons */}
+            {/* Right side action icons */}
             <div className="flex items-center space-x-1.5 sm:space-x-2.5 shrink-0">
               
-              {/* Desktop Search Bar - Sharp Square */}
+              {/* Desktop Search Bar */}
               <div className="relative hidden sm:flex items-center">
                 <form ref={desktopSearchRef} onSubmit={onSearchSubmit} className="flex items-center relative" role="search">
-                  <div className="flex items-center w-36 md:w-44 lg:w-48 xl:w-56 h-8 sm:h-[34px] px-3 bg-white/80 hover:bg-white border border-[#ded5c5] hover:border-gray-400 focus-within:border-black focus-within:bg-white focus-within:ring-2 focus-within:ring-black/5 rounded-none transition-all shadow-2xs">
-                    <Search className="w-3.5 h-3.5 text-gray-500 shrink-0 mr-2" />
+                  <div className={`flex items-center w-36 md:w-44 lg:w-48 xl:w-56 h-8 sm:h-[34px] px-3 rounded-md transition-all ${
+                    isTransparent
+                      ? "bg-white/10 hover:bg-white/20 border border-white/30 focus-within:border-white focus-within:bg-black/40 focus-within:ring-2 focus-within:ring-white/20 backdrop-blur-md"
+                      : "bg-white/80 hover:bg-white border border-[#ded5c5] hover:border-gray-400 focus-within:border-black focus-within:bg-white focus-within:ring-2 focus-within:ring-black/5 shadow-2xs"
+                  }`}>
+                    <Search className={`w-3.5 h-3.5 shrink-0 mr-2 transition-colors ${
+                      isTransparent ? "text-white/80" : "text-gray-500"
+                    }`} />
                     <input
                       ref={inputRef}
                       type="search"
@@ -254,7 +275,11 @@ const Header: React.FC = () => {
                       onFocus={() => {
                         if (suggestions.length > 0) setShowSuggestions(true);
                       }}
-                      className="w-full bg-transparent py-1 text-xs font-medium focus:outline-none placeholder:text-gray-400 text-gray-800"
+                      className={`w-full bg-transparent py-1 text-xs font-medium focus:outline-none transition-colors ${
+                        isTransparent 
+                          ? "text-white placeholder:text-white/60" 
+                          : "text-gray-800 placeholder:text-gray-400"
+                      }`}
                       autoComplete="off"
                     />
                     {searchTerm && (
@@ -264,14 +289,16 @@ const Header: React.FC = () => {
                           setSearchTerm("");
                           setShowSuggestions(false);
                         }}
-                        className="text-gray-400 hover:text-black ml-1 text-xs shrink-0 cursor-pointer"
+                        className={`ml-1 text-xs shrink-0 cursor-pointer transition-colors ${
+                          isTransparent ? "text-white/70 hover:text-white" : "text-gray-400 hover:text-black"
+                        }`}
                       >
                         ×
                       </button>
                     )}
                   </div>
                   {showSuggestions && suggestions.length > 0 && (
-                    <div className="absolute top-full right-0 mt-2 w-64 bg-white/95 backdrop-blur-md border border-gray-100 rounded-none shadow-xl py-2 z-50 overflow-hidden">
+                    <div className="absolute top-full right-0 mt-2 w-64 bg-white/95 backdrop-blur-md border border-gray-100 rounded-md shadow-xl py-2 z-50 overflow-hidden">
                       {suggestions.map((s, idx) => (
                         <button
                           key={idx}
@@ -291,7 +318,11 @@ const Header: React.FC = () => {
               <button
                 type="button"
                 aria-label="Open search"
-                className="sm:hidden w-8 h-8 rounded-none border border-[#ded5c5] bg-white/80 hover:bg-white flex items-center justify-center text-gray-650 hover:text-gray-950 shadow-2xs"
+                className={`sm:hidden w-8 h-8 rounded-md flex items-center justify-center transition-all ${
+                  isTransparent
+                    ? "border border-white/30 bg-white/10 hover:bg-white/20 text-white backdrop-blur-md"
+                    : "border border-[#ded5c5] bg-white/80 hover:bg-white text-gray-650 hover:text-gray-950 shadow-2xs"
+                }`}
                 onClick={() => setMobileSearchOpen(true)}
               >
                 <Search size={15} />
@@ -301,20 +332,37 @@ const Header: React.FC = () => {
               <Link
                 to="/products"
                 aria-label="Wishlist"
-                className="w-8 h-8 sm:w-[34px] sm:h-[34px] rounded-none border border-[#e5dfd5] bg-white/80 hover:bg-white hover:border-gray-400 flex items-center justify-center text-gray-700 hover:text-black transition-all relative shadow-2xs group"
+                className={`w-8 h-8 sm:w-[34px] sm:h-[34px] rounded-md flex items-center justify-center transition-all relative group ${
+                  isTransparent
+                    ? "border border-white/30 bg-white/10 hover:bg-white/20 hover:border-white text-white backdrop-blur-md"
+                    : "border border-[#e5dfd5] bg-white/80 hover:bg-white hover:border-gray-400 text-gray-700 hover:text-black shadow-2xs"
+                }`}
               >
                 <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:scale-105 transition-transform" />
+                {wishlist.length > 0 && (
+                  <span className={`absolute -top-1 -right-1 text-[8.5px] rounded-full w-3.5 h-3.5 flex items-center justify-center font-bold shadow-xs ${
+                    isTransparent ? "bg-[#C89A65] text-black" : "bg-red-500 text-white"
+                  }`}>
+                    {wishlist.length}
+                  </span>
+                )}
               </Link>
 
               {/* Cart Button */}
               <Link
                 to="/cart"
                 aria-label="Cart"
-                className="w-8 h-8 sm:w-[34px] sm:h-[34px] rounded-none border border-[#e5dfd5] bg-white/80 hover:bg-white hover:border-gray-400 flex items-center justify-center text-gray-700 hover:text-black transition-all relative shadow-2xs group"
+                className={`w-8 h-8 sm:w-[34px] sm:h-[34px] rounded-md flex items-center justify-center transition-all relative group ${
+                  isTransparent
+                    ? "border border-white/30 bg-white/10 hover:bg-white/20 hover:border-white text-white backdrop-blur-md"
+                    : "border border-[#e5dfd5] bg-white/80 hover:bg-white hover:border-gray-400 text-gray-700 hover:text-black shadow-2xs"
+                }`}
               >
                 <ShoppingCart className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:scale-105 transition-transform" />
                 {totalItems > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-[#004e38] text-white text-[8.5px] rounded-none w-3.5 h-3.5 flex items-center justify-center font-bold shadow-xs">
+                  <span className={`absolute -top-1 -right-1 text-[8.5px] rounded-full w-3.5 h-3.5 flex items-center justify-center font-bold shadow-xs ${
+                    isTransparent ? "bg-[#C89A65] text-black" : "bg-[#004e38] text-white"
+                  }`}>
                     {totalItems}
                   </span>
                 )}
@@ -327,7 +375,11 @@ const Header: React.FC = () => {
                     aria-haspopup="true"
                     aria-expanded={isUserMenuOpen}
                     onClick={() => setUserMenuOpen((v) => !v)}
-                    className="w-8 h-8 sm:w-[34px] sm:h-[34px] rounded-none bg-[#1c2921] hover:bg-[#2c3f33] text-white flex items-center justify-center shadow-xs transition-all overflow-hidden border border-[#1c2921] cursor-pointer group"
+                    className={`w-8 h-8 sm:w-[34px] sm:h-[34px] rounded-md flex items-center justify-center transition-all overflow-hidden cursor-pointer group ${
+                      isTransparent
+                        ? "bg-white/15 hover:bg-white/25 text-white border border-white/30 backdrop-blur-md"
+                        : "bg-[#1c2921] hover:bg-[#2c3f33] text-white border border-[#1c2921] shadow-xs"
+                    }`}
                     aria-label="User menu"
                   >
                     {user.profilePicture ? (
@@ -341,7 +393,7 @@ const Header: React.FC = () => {
                     )}
                   </button>
                   {isUserMenuOpen && (
-                    <div className="absolute right-0 mt-3 w-52 bg-white/95 backdrop-blur-md border border-gray-100 rounded-none shadow-xl shadow-gray-200/40 p-1.5 z-50 animate-fadeIn">
+                    <div className="absolute right-0 mt-3 w-52 bg-white/95 backdrop-blur-md border border-gray-100 rounded-md shadow-xl shadow-gray-200/40 p-1.5 z-50 animate-fadeIn">
                       <div className="px-4 py-2 border-b border-gray-100 mb-1">
                         <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Signed in as</p>
                         <p className="text-xs font-bold text-gray-900 truncate">{user.email || user.name}</p>
@@ -365,7 +417,11 @@ const Header: React.FC = () => {
                 <Link
                   to="/login"
                   aria-label="Sign In"
-                  className="w-8 h-8 sm:w-[34px] sm:h-[34px] rounded-none bg-[#1c2921] hover:bg-[#2c3f33] text-white flex items-center justify-center shadow-xs transition-all cursor-pointer group"
+                  className={`w-8 h-8 sm:w-[34px] sm:h-[34px] rounded-md flex items-center justify-center transition-all cursor-pointer group ${
+                    isTransparent
+                      ? "bg-white/15 hover:bg-white/25 text-white border border-white/30 backdrop-blur-md"
+                      : "bg-[#1c2921] hover:bg-[#2c3f33] text-white shadow-xs"
+                  }`}
                 >
                   <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white group-hover:scale-105 transition-transform" />
                 </Link>
@@ -374,7 +430,11 @@ const Header: React.FC = () => {
               {/* Mobile Menu Toggle Button */}
               <button
                 aria-label="Toggle menu"
-                className="lg:hidden w-8 h-8 sm:w-[34px] sm:h-[34px] rounded-none border border-[#e5dfd5] bg-white/80 hover:bg-white flex items-center justify-center text-gray-700 hover:text-black shadow-2xs transition-all cursor-pointer"
+                className={`lg:hidden w-8 h-8 sm:w-[34px] sm:h-[34px] rounded-md flex items-center justify-center transition-all cursor-pointer ${
+                  isTransparent
+                    ? "border border-white/30 bg-white/10 hover:bg-white/20 text-white backdrop-blur-md"
+                    : "border border-[#e5dfd5] bg-white/80 hover:bg-white text-gray-700 hover:text-black shadow-2xs"
+                }`}
                 onClick={() => setMenuOpen((v) => !v)}
               >
                 {isMenuOpen ? <X size={16} /> : <Menu size={16} />}

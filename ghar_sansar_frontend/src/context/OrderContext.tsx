@@ -74,6 +74,19 @@ export const OrderProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
 
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem("token");
+    const userId = getUserId();
+    const headers: Record<string, string> = {
+      "user-id": userId,
+      "Content-Type": "application/json"
+    };
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+    return headers;
+  };
+
   const getUserId = (): string => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
@@ -89,27 +102,45 @@ export const OrderProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   const fetchUserOrders = async () => {
     const userId = getUserId();
-    if (userId === "guest") {
+    const token = localStorage.getItem("token");
+
+    if (userId === "guest" && !token) {
       setOrders([]);
       return;
     }
 
     setLoading(true);
     try {
-      const res = await axios.get(`${BACKEND_URL}/orders`, {
-        headers: { "user-id": userId }
+      const res = await axios.get(`${BACKEND_URL}/v1/orders`, {
+        headers: getAuthHeaders()
       });
       setOrders(res.data || []);
     } catch (error) {
-      console.error("Error fetching user orders:", error);
+      console.error("Error fetching user orders from MongoDB Atlas:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  // Fetch orders on mount and when user changes in localStorage
+  // Fetch orders on mount and on auth change
   useEffect(() => {
     fetchUserOrders();
+
+    const handleLogin = () => {
+      fetchUserOrders();
+    };
+
+    const handleLogout = () => {
+      setOrders([]);
+    };
+
+    window.addEventListener("auth_login", handleLogin);
+    window.addEventListener("auth_logout", handleLogout);
+
+    return () => {
+      window.removeEventListener("auth_login", handleLogin);
+      window.removeEventListener("auth_logout", handleLogout);
+    };
   }, []);
 
   const createOrder = async (orderData: Partial<Order>): Promise<Order | null> => {
@@ -128,11 +159,8 @@ export const OrderProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         paymentMethod: orderData.paymentMethod || 'razorpay'
       };
 
-      const res = await axios.post(`${BACKEND_URL}/orders`, payload, {
-        headers: {
-          "user-id": userId,
-          "Content-Type": "application/json"
-        }
+      const res = await axios.post(`${BACKEND_URL}/v1/orders`, payload, {
+        headers: getAuthHeaders()
       });
 
       if (res.data.success && res.data.order) {

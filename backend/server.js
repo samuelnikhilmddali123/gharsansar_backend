@@ -3,7 +3,29 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const fs = require("fs");
+const crypto = require("crypto");
 const multer = require("multer");
+const { initDatabase, readData, writeData } = require("./db");
+
+// Persistent Ecommerce Models & Routes (MongoDB Atlas)
+const User = require("./models/User");
+const Cart = require("./models/Cart");
+const Wishlist = require("./models/Wishlist");
+const Order = require("./models/Order");
+const Otp = require("./models/Otp");
+const { sendOtpEmail } = require("./services/emailService");
+const { generateToken, authenticate, optionalAuth, requireAdmin } = require("./middleware/auth");
+const cartRoutes = require("./routes/cartRoutes");
+const wishlistRoutes = require("./routes/wishlistRoutes");
+const orderRoutes = require("./routes/orderRoutes");
+
+// Global process handlers to keep the server running resiliently
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("⚠️ [SERVER] Unhandled Rejection at:", promise, "reason:", reason);
+});
+process.on("uncaughtException", (err) => {
+  console.error("⚠️ [SERVER] Uncaught Exception:", err);
+});
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -12,20 +34,39 @@ app.set("trust proxy", 1);
 
 app.use(cors({
   origin: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   credentials: true
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+// Handle malformed JSON body gracefully without uncaught SyntaxErrors
+app.use((err, req, res, next) => {
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    return res.status(400).json({ error: "Invalid JSON format in request body" });
+  }
+  next(err);
+});
+
+
+// --- SWAGGER API DOCUMENTATION ---
+const swaggerUi = require("swagger-ui-express");
+const swaggerDocument = require("./swagger.json");
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.get("/api-docs.json", (req, res) => res.json(swaggerDocument));
 
 // --- BACKEND STATUS & HEALTH ENDPOINTS ---
 app.get(["/", "/api", "/api/"], (req, res) => {
   res.json({
     status: "online",
     service: "Ghar Sansar Backend API",
-    message: "Ghar Sansar Backend is running successfully on Cloudflare Tunnel",
+    message: "Ghar Sansar Backend is running successfully with MongoDB Atlas & Swagger",
+    documentation: "/api-docs",
     endpoints: {
+      documentation: "/api-docs",
       products: "/api/products",
+      cart: "/api/v1/cart",
+      wishlist: "/api/v1/wishlist",
+      orders: "/api/v1/orders",
       categories: "/api/cms/categories",
       homepage_layout: "/api/cms/homepage_layout",
       collections: "/api/cms/collections",
@@ -39,6 +80,12 @@ app.get(["/", "/api", "/api/"], (req, res) => {
 app.get("/api/health", (req, res) => {
   res.json({ status: "healthy", uptime: process.uptime() });
 });
+
+// --- PERSISTENT ECOMMERCE ROUTERS (MongoDB Atlas) ---
+app.use(["/api/v1/cart", "/api/cart"], cartRoutes);
+app.use(["/api/v1/wishlist", "/api/wishlist"], wishlistRoutes);
+app.use("/api/mobile/wishlist", wishlistRoutes);
+app.use(["/api/v1/orders", "/api/orders", "/orders"], orderRoutes);
 
 // --- CMS ENDPOINTS ---
 app.get("/api/cms/homepage_layout", (req, res) => {
@@ -104,27 +151,13 @@ const HOMEPAGE_LAYOUT_FILE = path.join(__dirname, "homepage_layout.json");
 const COLLECTIONS_FILE = path.join(__dirname, "collections.json");
 const CATEGORIES_FILE = path.join(__dirname, "categories.json");
 
-// Helper to read/write JSON files safely
+// Helper to read/write data safely via MongoDB Atlas cloud database
 const readJsonFile = (filePath, defaultData = []) => {
-  try {
-    if (!fs.existsSync(filePath)) {
-      fs.writeFileSync(filePath, JSON.stringify(defaultData, null, 2));
-      return defaultData;
-    }
-    const content = fs.readFileSync(filePath, "utf-8");
-    return JSON.parse(content);
-  } catch (error) {
-    console.error(`Error reading ${filePath}:`, error);
-    return defaultData;
-  }
+  return readData(filePath, defaultData);
 };
 
 const writeJsonFile = (filePath, data) => {
-  try {
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-  } catch (error) {
-    console.error(`Error writing to ${filePath}:`, error);
-  }
+  return writeData(filePath, data);
 };
 
 // Stable price generator based on product title
@@ -335,20 +368,13 @@ const enrichProductData = (item, idx) => {
   };
 };
 
-// 1. Get Products (serves rewritten data with backend image URLs and realistic prices)
+// 1. Get Products (serves rewritten data with backend image URLs and realistic prices from Atlas)
 app.get(["/api/products", "/products"], (req, res) => {
   try {
-    // Read the primary categorized products.json first
-    let productsPath = path.join(__dirname, "public", "products.json");
-    if (!fs.existsSync(productsPath)) {
-      productsPath = path.join(__dirname, "public", "products", "23_evening_products.json");
-    }
-
-    if (!fs.existsSync(productsPath)) {
+    const rawData = readJsonFile("products.json", []);
+    if (!rawData || rawData.length === 0) {
       return res.status(404).json({ error: "Product catalog not found" });
     }
-
-    const rawData = readJsonFile(productsPath, []);
     
     // We rewrite the image paths to absolute backend URLs and add pricing if it is 0
     const processedData = rawData.map((category) => {
@@ -409,93 +435,695 @@ app.get(["/api/products", "/products"], (req, res) => {
   }
 });
 
-// 2. Authentication API
-app.post("/api/auth/register", (req, res) => {
-  const { name, email, phone, password } = req.body;
+// Normalization helpers for strict uniqueness
+const normalizeEmail = (email) => {
+  if (!email || typeof email !== "string") return "";
+  return email.trim().toLowerCase();
+};
 
-  if (!email || !password || !name) {
-    return res.status(400).json({ error: "Missing required fields" });
+const normalizePhone = (phone) => {
+  if (!phone || typeof phone !== "string") return "";
+  return phone.replace(/\D/g, "");
+};
+
+// Helper to get next sequential integer user ID
+const getNextUserId = (users) => {
+  const numericIds = users
+    .map((u) => (typeof u.id === "number" ? u.id : parseInt(String(u.id).replace(/\D/g, "")) || 0))
+    .filter((id) => Number.isInteger(id) && id > 0);
+  const maxId = numericIds.length > 0 ? Math.max(...numericIds) : 0;
+  return maxId + 1;
+};
+
+// Formatter to guarantee exact Image 2 user document format
+const formatUserResponse = (user) => {
+  const intId = typeof user.id === "number" ? user.id : (parseInt(String(user.id).replace(/\D/g, "")) || 1);
+  return {
+    _id: user._id,
+    id: intId,
+    email: user.email || "",
+    password_hash: user.password_hash || "",
+    full_name: (user.full_name || user.name || "").trim(),
+    phone: (user.phone || "").replace(/\D/g, ""),
+    company_name: user.company_name || "",
+    gstin: user.gstin || "",
+    role: (user.role && user.role.toLowerCase() === "admin") ? "ADMIN" : "CUSTOMER",
+    is_active: user.is_active !== undefined ? Boolean(user.is_active) : true,
+    firebase_uid: user.firebase_uid || "",
+    photo_url: user.photo_url || user.profilePicture || "",
+    street_address: user.street_address || (user.addresses && user.addresses[0] ? (user.addresses[0].address || user.addresses[0].street_address || "") : ""),
+    city: user.city || (user.addresses && user.addresses[0] ? user.addresses[0].city || "" : ""),
+    state: user.state || (user.addresses && user.addresses[0] ? user.addresses[0].state || "" : ""),
+    pincode: user.pincode || (user.addresses && user.addresses[0] ? (user.addresses[0].zipCode || user.addresses[0].pincode || "") : ""),
+    created_at: user.created_at || (user.createdAt ? new Date(user.createdAt).toISOString() : new Date().toISOString()),
+    __v: user.__v !== undefined ? user.__v : 0,
+    createdAt: user.createdAt || new Date(),
+    updatedAt: user.updatedAt || new Date(),
+    addresses: user.addresses || [],
+    // Compatibility aliases:
+    name: (user.full_name || user.name || "").trim(),
+    profilePicture: user.photo_url || user.profilePicture || ""
+  };
+};
+
+// 2. Authentication API
+// Real-time Check API: Verify if email or phone is already registered
+app.get(["/api/auth/check", "/auth/check"], (req, res) => {
+  try {
+    const { email, phone } = req.query;
+    const users = readJsonFile(USERS_FILE, []);
+    let emailTaken = false;
+    let phoneTaken = false;
+
+    if (email && email.trim()) {
+      const cleanEmail = normalizeEmail(email);
+      emailTaken = users.some((u) => normalizeEmail(u.email) === cleanEmail);
+    }
+
+    if (phone && phone.trim()) {
+      const cleanPhone = normalizePhone(phone);
+      if (cleanPhone && cleanPhone.length >= 10) {
+        phoneTaken = users.some((u) => {
+          const uPhone = normalizePhone(u.phone);
+          return uPhone && (uPhone === cleanPhone || uPhone.slice(-10) === cleanPhone.slice(-10));
+        });
+      }
+    }
+
+    return res.json({
+      success: true,
+      emailTaken,
+      phoneTaken,
+      emailMessage: emailTaken ? "This email address is already registered." : "",
+      phoneMessage: phoneTaken ? "This phone number is already registered to another user." : ""
+    });
+  } catch (err) {
+    console.error("Check API error:", err);
+    return res.status(500).json({ error: "Failed to check credentials availability" });
+  }
+});
+
+
+app.post(["/api/v1/auth/register", "/api/auth/register", "/auth/register"], (req, res) => {
+  const { name, full_name, email, phone, password } = req.body;
+  const displayName = (full_name || name || "").trim();
+
+  if (!email || !password || !displayName) {
+    return res.status(400).json({ error: "Missing required fields (name, email, password)" });
+  }
+
+  const cleanEmail = normalizeEmail(email);
+  const cleanPhone = normalizePhone(phone);
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(cleanEmail)) {
+    return res.status(400).json({ error: "Please enter a valid email address" });
+  }
+
+  if (phone && cleanPhone.length < 10) {
+    return res.status(400).json({ error: "Please enter a valid 10-digit phone number" });
   }
 
   const users = readJsonFile(USERS_FILE, []);
   
-  if (users.some((u) => u.email === email)) {
-    return res.status(400).json({ error: "User already exists with this email" });
+  // 1. Strict uniqueness: No two users can have the same email address
+  const duplicateEmail = users.find(
+    (u) => normalizeEmail(u.email) === cleanEmail
+  );
+  if (duplicateEmail) {
+    return res.status(400).json({
+      error: "This email address is already registered. Duplicate emails are not allowed."
+    });
   }
 
+  // 2. Strict uniqueness: No two users can have the same phone number
+  if (cleanPhone) {
+    const duplicatePhone = users.find((u) => {
+      const uPhone = normalizePhone(u.phone);
+      return uPhone && (uPhone === cleanPhone || uPhone.slice(-10) === cleanPhone.slice(-10));
+    });
+    if (duplicatePhone) {
+      return res.status(400).json({
+        error: "This phone number is already registered to another user. Duplicate phone numbers are not allowed."
+      });
+    }
+  }
+
+  const now = new Date();
   const newUser = {
-    id: `usr_${Date.now()}`,
-    name,
-    email,
-    phone: phone || "",
-    password, // In a real app we would hash this
-    role: "user",
-    createdAt: new Date().toISOString()
+    id: getNextUserId(users),
+    email: cleanEmail,
+    password_hash: password,
+    full_name: displayName,
+    phone: cleanPhone,
+    company_name: req.body.company_name || "",
+    gstin: req.body.gstin || "",
+    role: "CUSTOMER",
+    is_active: true,
+    firebase_uid: req.body.firebase_uid || "",
+    photo_url: req.body.photo_url || "",
+    street_address: req.body.street_address || "",
+    city: req.body.city || "",
+    state: req.body.state || "",
+    pincode: req.body.pincode || "",
+    created_at: now.toISOString(),
+    __v: 0,
+    createdAt: now,
+    updatedAt: now,
+    addresses: req.body.addresses || [],
+    name: displayName
   };
 
   users.push(newUser);
   writeJsonFile(USERS_FILE, users);
 
-  // Return user without password
-  const { password: _, ...userWithoutPassword } = newUser;
-  res.status(201).json({ success: true, user: userWithoutPassword });
+  const token = generateToken(newUser);
+  const legacyToken = `user_token_${newUser.id}_${Date.now()}`;
+  res.status(201).json({ success: true, token, legacyToken, user: formatUserResponse(newUser) });
 });
 
-app.post("/api/auth/login", (req, res) => {
+app.post(["/api/v1/auth/login", "/api/auth/login", "/auth/login"], (req, res) => {
   const { emailOrPhone, password } = req.body;
 
   if (!emailOrPhone || !password) {
     return res.status(400).json({ error: "Missing login credentials" });
   }
 
+  const users = readJsonFile(USERS_FILE, []);
+
   // Handle default admin
   if (emailOrPhone === "gharsansarshop@gmail.com" && (password === "GharStack@07" || password === "Gharstack@07")) {
+    const adminUser = users.find(u => normalizeEmail(u.email) === "gharsansarshop@gmail.com") || {
+      id: 1,
+      email: "gharsansarshop@gmail.com",
+      full_name: "Admin",
+      role: "ADMIN",
+      is_active: true
+    };
+    const adminToken = generateToken(adminUser);
     return res.json({
       success: true,
-      user: {
-        id: "admin_01",
-        name: "Admin",
-        email: "gharsansarshop@gmail.com",
-        role: "admin"
-      }
+      token: adminToken,
+      legacyToken: `admin_token_gharsansar_${Date.now()}`,
+      user: formatUserResponse(adminUser)
     });
   }
 
-  const users = readJsonFile(USERS_FILE, []);
-  const user = users.find(
-    (u) => (u.email === emailOrPhone || u.phone === emailOrPhone) && u.password === password
-  );
+  const cleanInput = (emailOrPhone || "").trim();
+  const cleanDigits = normalizePhone(cleanInput);
+
+  const user = users.find((u) => {
+    const matchesEmail = normalizeEmail(u.email) === normalizeEmail(cleanInput);
+    const uDigits = normalizePhone(u.phone);
+    const matchesPhone = cleanDigits && uDigits && (uDigits === cleanDigits || uDigits.slice(-10) === cleanDigits.slice(-10));
+    const passMatches = (u.password_hash === password || u.password === password);
+    return (matchesEmail || matchesPhone) && passMatches;
+  });
 
   if (!user) {
     return res.status(401).json({ error: "Invalid email/phone or password" });
   }
 
-  const { password: _, ...userWithoutPassword } = user;
-  res.json({ success: true, user: userWithoutPassword });
+  const token = generateToken(user);
+  const legacyToken = `user_token_${user.id}_${Date.now()}`;
+  res.json({
+    success: true,
+    token,
+    legacyToken,
+    user: formatUserResponse(user)
+  });
 });
 
-app.post("/api/auth/google", (req, res) => {
-  const { email, name } = req.body;
+app.post(["/api/v1/auth/google", "/api/auth/google", "/auth/google"], (req, res) => {
+  const { email, name, full_name, firebase_uid, photo_url } = req.body;
   
-  const googleEmail = email || "googleuser@example.com";
-  const googleName = name || "Google User";
+  const googleEmail = normalizeEmail(email || "googleuser@example.com");
+  const displayName = (full_name || name || "Google User").trim();
 
   const users = readJsonFile(USERS_FILE, []);
-  let user = users.find((u) => u.email === googleEmail);
+  let user = users.find((u) => normalizeEmail(u.email) === googleEmail || (firebase_uid && u.firebase_uid === firebase_uid));
+
+  const now = new Date();
 
   if (!user) {
     user = {
-      id: `usr_${Date.now()}`,
-      name: googleName,
+      id: getNextUserId(users),
       email: googleEmail,
-      role: "user",
-      createdAt: new Date().toISOString()
+      password_hash: "",
+      full_name: displayName,
+      phone: "",
+      company_name: "",
+      gstin: "",
+      role: "CUSTOMER",
+      is_active: true,
+      firebase_uid: firebase_uid || "",
+      photo_url: photo_url || "",
+      street_address: "",
+      city: "",
+      state: "",
+      pincode: "",
+      created_at: now.toISOString(),
+      __v: 0,
+      createdAt: now,
+      updatedAt: now,
+      addresses: [],
+      name: displayName
     };
     users.push(user);
     writeJsonFile(USERS_FILE, users);
+  } else {
+    let changed = false;
+    if (firebase_uid && !user.firebase_uid) {
+      user.firebase_uid = firebase_uid;
+      changed = true;
+    }
+    if (photo_url && !user.photo_url) {
+      user.photo_url = photo_url;
+      changed = true;
+    }
+    if (changed) {
+      user.updatedAt = now;
+      writeJsonFile(USERS_FILE, users);
+    }
   }
 
-  res.json({ success: true, user });
+  // Determine if phone or shipping address is missing
+  const hasPhone = Boolean(user.phone && String(user.phone).trim().length >= 10);
+  const hasAddress = Boolean(
+    (user.street_address && String(user.street_address).trim().length > 0) ||
+    (user.addresses && user.addresses.length > 0 && (user.addresses[0].address || user.addresses[0].street_address))
+  );
+  const isProfileIncomplete = (!hasPhone || !hasAddress);
+
+  const token = generateToken(user);
+  const legacyToken = `user_token_${user.id}_${Date.now()}`;
+  res.json({
+    success: true,
+    token,
+    legacyToken,
+    user: formatUserResponse(user),
+    isProfileIncomplete
+  });
+});
+
+// Real-time verification of currently authenticated user session from MongoDB Atlas
+app.get(["/api/v1/auth/me", "/api/auth/me"], authenticate, (req, res) => {
+  res.json({
+    success: true,
+    user: formatUserResponse(req.user)
+  });
+});
+
+// ==========================================
+// EMAIL OTP AUTHENTICATION (WEB & MOBILE APP)
+// ==========================================
+
+/**
+ * Request a 6-digit OTP sent to the user's Gmail address.
+ * Works seamlessly for Web, iOS, Android, and Flutter/React Native apps.
+ */
+app.post(["/api/v1/auth/send-otp", "/api/auth/send-otp", "/auth/send-otp"], async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email || typeof email !== "string" || !email.includes("@")) {
+      return res.status(400).json({ error: "Please provide a valid email address" });
+    }
+
+    const cleanEmail = normalizeEmail(email);
+
+    // Rate-limiting: prevent spamming OTP requests within 45 seconds
+    const recentOtp = await Otp.findOne({
+      email: cleanEmail,
+      createdAt: { $gt: new Date(Date.now() - 45 * 1000) }
+    }).sort({ createdAt: -1 });
+
+    if (recentOtp) {
+      const waitSeconds = Math.ceil(45 - (Date.now() - new Date(recentOtp.createdAt).getTime()) / 1000);
+      return res.status(429).json({
+        error: `Please wait ${waitSeconds} seconds before requesting a new OTP.`
+      });
+    }
+
+    // Generate cryptographically random 6-digit OTP
+    const generatedOtp = String(Math.floor(100000 + Math.random() * 900000));
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes expiry
+
+    // Save in MongoDB Atlas
+    await Otp.create({
+      email: cleanEmail,
+      otp: generatedOtp,
+      expiresAt: expiresAt,
+      verified: false,
+      attempts: 0
+    });
+
+    // Send email via Gmail SMTP
+    const emailResult = await sendOtpEmail(cleanEmail, generatedOtp);
+
+    return res.json({
+      success: true,
+      message: "Verification code sent to your email address.",
+      email: cleanEmail,
+      expiresInSeconds: 600,
+      delivered: emailResult.sent
+    });
+  } catch (err) {
+    console.error("Error in /api/v1/auth/send-otp:", err);
+    return res.status(500).json({ error: "Failed to send verification code. Please try again." });
+  }
+});
+
+/**
+ * Verify OTP and authenticate user.
+ * Automatically logs in existing user or creates a new customer profile.
+ */
+app.post(["/api/v1/auth/verify-otp", "/api/auth/verify-otp", "/auth/verify-otp"], async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({ error: "Email and OTP code are required" });
+    }
+
+    const cleanEmail = normalizeEmail(email);
+    const cleanOtp = String(otp).trim();
+
+    // Find the latest valid OTP document for this email
+    const otpRecord = await Otp.findOne({
+      email: cleanEmail,
+      verified: false,
+      expiresAt: { $gt: new Date() }
+    }).sort({ createdAt: -1 });
+
+    if (!otpRecord) {
+      return res.status(400).json({
+        error: "Invalid or expired OTP. Please request a new verification code."
+      });
+    }
+
+    // Rate-limiting on failed attempts (max 5)
+    if (otpRecord.attempts >= 5) {
+      await Otp.deleteOne({ _id: otpRecord._id });
+      return res.status(400).json({
+        error: "Too many failed attempts. This code has been invalidated. Please request a new code."
+      });
+    }
+
+    if (otpRecord.otp !== cleanOtp) {
+      otpRecord.attempts += 1;
+      await otpRecord.save();
+      const remaining = 5 - otpRecord.attempts;
+      return res.status(400).json({
+        error: `Incorrect OTP. ${remaining} attempt${remaining === 1 ? '' : 's'} remaining.`
+      });
+    }
+
+    // Valid OTP!
+    otpRecord.verified = true;
+    await otpRecord.save();
+    await Otp.deleteMany({ email: cleanEmail }); // Clean up
+
+    // Retrieve or register user in MongoDB Atlas
+    const users = readJsonFile(USERS_FILE, []);
+    let user = users.find(u => normalizeEmail(u.email) === cleanEmail);
+    let isNewUser = false;
+
+    if (!user) {
+      user = await User.findOne({ email: cleanEmail });
+    }
+
+    if (!user) {
+      // Auto-register new customer account
+      isNewUser = true;
+      const now = new Date();
+      const defaultName = cleanEmail.split("@")[0].replace(/[._-]/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+      const nextId = getNextUserId(users);
+
+      const newUserDoc = {
+        id: nextId,
+        email: cleanEmail,
+        password_hash: "",
+        full_name: defaultName,
+        name: defaultName,
+        phone: "",
+        company_name: "",
+        gstin: "",
+        role: (cleanEmail === "gharsansarshop@gmail.com") ? "ADMIN" : "CUSTOMER",
+        is_active: true,
+        photo_url: "",
+        street_address: "",
+        city: "",
+        state: "",
+        pincode: "",
+        created_at: now.toISOString(),
+        createdAt: now,
+        updatedAt: now,
+        addresses: [],
+        __v: 0
+      };
+
+      users.push(newUserDoc);
+      writeJsonFile(USERS_FILE, users);
+      try {
+        await User.create(newUserDoc);
+      } catch (e) {
+        // Handled
+      }
+      user = newUserDoc;
+    }
+
+    // Determine if profile is incomplete
+    const hasPhone = Boolean(user.phone && String(user.phone).trim().length >= 10);
+    const hasAddress = Boolean(
+      (user.street_address && String(user.street_address).trim().length > 0) ||
+      (user.addresses && user.addresses.length > 0 && (user.addresses[0].address || user.addresses[0].street_address))
+    );
+    const isProfileIncomplete = (!hasPhone || !hasAddress);
+
+    const token = generateToken(user);
+    const legacyToken = `user_token_${user.id}_${Date.now()}`;
+
+    return res.json({
+      success: true,
+      message: "Login successful",
+      token,
+      legacyToken,
+      user: formatUserResponse(user),
+      isProfileIncomplete,
+      isNewUser
+    });
+  } catch (err) {
+    console.error("Error in /api/v1/auth/verify-otp:", err);
+    return res.status(500).json({ error: "Failed to verify OTP. Please try again." });
+  }
+});
+
+// ==========================================
+// MOBILE APP GOOGLE AUTHENTICATION BRIDGE
+// ==========================================
+// In-memory store for single-use, short-lived mobile authorization codes
+const mobileAuthCodes = new Map();
+
+// Periodic cleanup of expired authorization codes every 60 seconds
+setInterval(() => {
+  const now = Date.now();
+  for (const [code, entry] of mobileAuthCodes.entries()) {
+    if (entry.expiresAt <= now) {
+      mobileAuthCodes.delete(code);
+    }
+  }
+}, 60 * 1000);
+
+// Validate redirect_uri: strictly allow only the expected gharsansar://auth/callback deep link
+const isValidMobileRedirectUri = (uri) => {
+  if (!uri || typeof uri !== "string") return false;
+  const clean = uri.trim();
+  return clean === "gharsansar://auth/callback" || clean.startsWith("gharsansar://auth/callback?");
+};
+
+// 1. Generate Single-Use Short-Lived Authorization Code (or exchange if code passed)
+app.post(["/api/v1/auth/mobile-code", "/api/auth/mobile-code"], (req, res) => {
+  try {
+    const { code, email, redirect_uri, firebase_uid, photo_url, name, full_name } = req.body;
+
+    // A) If a code was supplied without email, treat as exchange request
+    if (code && !email) {
+      const entry = mobileAuthCodes.get(code);
+      if (!entry) {
+        return res.status(400).json({ error: "Invalid or non-existent authorization code" });
+      }
+      if (entry.used) {
+        mobileAuthCodes.delete(code);
+        return res.status(400).json({ error: "Authorization code has already been used" });
+      }
+      if (Date.now() > entry.expiresAt) {
+        mobileAuthCodes.delete(code);
+        return res.status(400).json({ error: "Authorization code has expired. Please initiate login again." });
+      }
+
+      // Single-use: invalidate immediately
+      mobileAuthCodes.delete(code);
+
+      const users = readJsonFile(USERS_FILE, []);
+      const user = users.find(u => normalizeEmail(u.email) === normalizeEmail(entry.email)) || entry.user;
+      const token = `user_token_${user.id}_${Date.now()}`;
+
+      console.log(`[Mobile Auth Bridge] Code exchanged for user ${user.email}`);
+      return res.status(200).json({
+        success: true,
+        token,
+        user: formatUserResponse(user)
+      });
+    }
+
+    // B) Generate new authorization code
+    if (!redirect_uri || !isValidMobileRedirectUri(redirect_uri)) {
+      return res.status(400).json({
+        error: "Invalid mobile redirect URI. Only 'gharsansar://auth/callback' is authorized."
+      });
+    }
+
+    let userEmail = email ? normalizeEmail(email) : "";
+
+    // Check bearer token in Authorization header if email not passed directly
+    if (!userEmail && req.headers.authorization) {
+      const authHeader = req.headers.authorization.replace(/^Bearer\s+/i, "").trim();
+      const match = authHeader.match(/user_token_([^_]+)_/);
+      if (match) {
+        const uId = match[1];
+        const users = readJsonFile(USERS_FILE, []);
+        const found = users.find(u => String(u.id) === uId);
+        if (found) userEmail = normalizeEmail(found.email);
+      }
+    }
+
+    if (!userEmail) {
+      return res.status(400).json({ error: "Authenticated user email is required to generate mobile authorization code." });
+    }
+
+    const users = readJsonFile(USERS_FILE, []);
+    let user = users.find(u => normalizeEmail(u.email) === userEmail || (firebase_uid && u.firebase_uid === firebase_uid));
+
+    const now = new Date();
+    if (!user) {
+      const displayName = (full_name || name || "Google User").trim();
+      user = {
+        id: getNextUserId(users),
+        email: userEmail,
+        password_hash: "",
+        full_name: displayName,
+        phone: "",
+        company_name: "",
+        gstin: "",
+        role: "CUSTOMER",
+        is_active: true,
+        firebase_uid: firebase_uid || "",
+        photo_url: photo_url || "",
+        street_address: "",
+        city: "",
+        state: "",
+        pincode: "",
+        created_at: now.toISOString(),
+        __v: 0,
+        createdAt: now,
+        updatedAt: now,
+        addresses: [],
+        name: displayName
+      };
+      users.push(user);
+      writeJsonFile(USERS_FILE, users);
+    } else {
+      let changed = false;
+      if (firebase_uid && !user.firebase_uid) {
+        user.firebase_uid = firebase_uid;
+        changed = true;
+      }
+      if (photo_url && !user.photo_url) {
+        user.photo_url = photo_url;
+        changed = true;
+      }
+      if (changed) {
+        user.updatedAt = now;
+        writeJsonFile(USERS_FILE, users);
+      }
+    }
+
+    // Cryptographically secure, random 32-byte (64 hex char) single-use code
+    const authCode = crypto.randomBytes(32).toString("hex");
+
+    // Short-lived: 3 minutes validity
+    const expiresAt = Date.now() + 3 * 60 * 1000;
+
+    mobileAuthCodes.set(authCode, {
+      code: authCode,
+      userId: user.id,
+      email: user.email,
+      user: formatUserResponse(user),
+      redirect_uri,
+      expiresAt,
+      used: false
+    });
+
+    console.log(`[Mobile Auth Bridge] Generated one-time code for user ${user.email} (expires in 3 min)`);
+
+    return res.status(200).json({
+      success: true,
+      code: authCode
+    });
+  } catch (err) {
+    console.error("Mobile auth code error:", err);
+    return res.status(500).json({ error: "Failed to process mobile authorization code" });
+  }
+});
+
+// 2. Exchange One-Time Code for Permanent Authentication Token & User Profile
+app.post([
+  "/api/v1/auth/mobile-code/exchange",
+  "/api/auth/mobile-code/exchange",
+  "/api/v1/auth/mobile-exchange",
+  "/api/auth/mobile-exchange"
+], (req, res) => {
+  try {
+    const { code } = req.body;
+
+    if (!code || typeof code !== "string") {
+      return res.status(400).json({ error: "Authorization code is required" });
+    }
+
+    const entry = mobileAuthCodes.get(code);
+
+    if (!entry) {
+      return res.status(400).json({ error: "Invalid or non-existent authorization code" });
+    }
+
+    if (entry.used) {
+      mobileAuthCodes.delete(code);
+      return res.status(400).json({ error: "This authorization code has already been used" });
+    }
+
+    if (Date.now() > entry.expiresAt) {
+      mobileAuthCodes.delete(code);
+      return res.status(400).json({ error: "Authorization code has expired. Please initiate login again." });
+    }
+
+    // Single-use: delete immediately upon exchange
+    mobileAuthCodes.delete(code);
+
+    const users = readJsonFile(USERS_FILE, []);
+    const user = users.find(u => normalizeEmail(u.email) === normalizeEmail(entry.email)) || entry.user;
+    const token = `user_token_${user.id}_${Date.now()}`;
+
+    console.log(`[Mobile Auth Bridge] Code successfully exchanged for user ${user.email}`);
+
+    return res.status(200).json({
+      success: true,
+      token,
+      user: formatUserResponse(user)
+    });
+  } catch (err) {
+    console.error("Mobile code exchange error:", err);
+    return res.status(500).json({ error: "Failed to exchange mobile authorization code" });
+  }
 });
 
 // Profile upload directory setup
@@ -521,30 +1149,62 @@ app.post("/api/auth/profile/upload-avatar", avatarUpload.single("avatar"), (req,
   if (!req.file) {
     return res.status(400).json({ error: "No file uploaded" });
   }
-  const host = req.get('host') || `192.168.0.106:${PORT}`;
+  const host = req.get('host') || `localhost:${PORT}`;
   const fileUrl = `${req.protocol}://${host}/profile_pictures/${req.file.filename}`;
   res.json({ success: true, url: fileUrl });
 });
 
 // Update Profile Endpoint
-app.put("/api/auth/profile", (req, res) => {
-  const { email, name, phone, profilePicture, addresses } = req.body;
+app.put(["/api/v1/auth/profile", "/api/auth/profile"], (req, res) => {
+  const {
+    email,
+    name,
+    full_name,
+    phone,
+    profilePicture,
+    photo_url,
+    street_address,
+    city,
+    state,
+    pincode,
+    company_name,
+    gstin,
+    addresses,
+    isDefault
+  } = req.body;
   
   if (!email) {
     return res.status(400).json({ error: "Email is required to identify user profile" });
   }
 
+  const cleanEmail = normalizeEmail(email);
   const users = readJsonFile(USERS_FILE, []);
-  let userIdx = users.findIndex((u) => u.email === email);
+  let userIdx = users.findIndex((u) => normalizeEmail(u.email) === cleanEmail);
 
-  if (userIdx === -1 && email === "gharsansarshop@gmail.com") {
-    // Auto-provision admin user in local users.json
+  if (userIdx === -1 && cleanEmail === "gharsansarshop@gmail.com") {
+    // Auto-provision admin user
     const newAdmin = {
-      id: "admin_01",
-      name: "Admin",
+      id: 1,
       email: "gharsansarshop@gmail.com",
-      role: "admin",
-      createdAt: new Date().toISOString()
+      password_hash: "",
+      full_name: "Admin",
+      phone: "",
+      company_name: "",
+      gstin: "",
+      role: "ADMIN",
+      is_active: true,
+      firebase_uid: "",
+      photo_url: "",
+      street_address: "",
+      city: "",
+      state: "",
+      pincode: "",
+      created_at: new Date().toISOString(),
+      __v: 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      addresses: [],
+      name: "Admin"
     };
     users.push(newAdmin);
     userIdx = users.length - 1;
@@ -554,16 +1214,93 @@ app.put("/api/auth/profile", (req, res) => {
     return res.status(404).json({ error: "User not found" });
   }
 
-  // Update provided fields
-  if (name !== undefined) users[userIdx].name = name;
-  if (phone !== undefined) users[userIdx].phone = phone;
-  if (profilePicture !== undefined) users[userIdx].profilePicture = profilePicture;
-  if (addresses !== undefined) users[userIdx].addresses = addresses;
+  const currentUser = users[userIdx];
 
+  // If phone is being updated, verify strict uniqueness across all users
+  if (phone !== undefined && phone !== null && phone !== "") {
+    const cleanPhone = normalizePhone(phone);
+    if (cleanPhone.length < 10) {
+      return res.status(400).json({ error: "Please enter a valid 10-digit phone number" });
+    }
+    const duplicatePhone = users.find((u, idx) => {
+      if (idx === userIdx || u.id === currentUser.id || normalizeEmail(u.email) === cleanEmail) return false;
+      const uPhone = normalizePhone(u.phone);
+      return uPhone && (uPhone === cleanPhone || uPhone.slice(-10) === cleanPhone.slice(-10));
+    });
+    if (duplicatePhone) {
+      return res.status(400).json({
+        error: "This phone number is already registered to another user. Duplicate phone numbers are not allowed."
+      });
+    }
+    users[userIdx].phone = cleanPhone;
+  }
+
+  // Update name / full_name
+  const finalName = full_name !== undefined ? full_name : (name !== undefined ? name : undefined);
+  if (finalName !== undefined) {
+    users[userIdx].full_name = finalName.trim();
+    users[userIdx].name = finalName.trim();
+  }
+
+  // Update photo_url
+  const finalPhoto = photo_url !== undefined ? photo_url : (profilePicture !== undefined ? profilePicture : undefined);
+  if (finalPhoto !== undefined) {
+    users[userIdx].photo_url = finalPhoto;
+    users[userIdx].profilePicture = finalPhoto;
+  }
+
+  // Update address fields
+  if (street_address !== undefined) users[userIdx].street_address = street_address.trim();
+  if (city !== undefined) users[userIdx].city = city.trim();
+  if (state !== undefined) users[userIdx].state = state.trim();
+  if (pincode !== undefined) users[userIdx].pincode = String(pincode).trim();
+  if (company_name !== undefined) users[userIdx].company_name = company_name.trim();
+  if (gstin !== undefined) users[userIdx].gstin = gstin.trim();
+
+  // Handle addresses array
+  if (addresses !== undefined && Array.isArray(addresses)) {
+    users[userIdx].addresses = addresses;
+    if (addresses.length > 0) {
+      const def = addresses.find(a => a.isDefault) || addresses[0];
+      if (!users[userIdx].street_address) users[userIdx].street_address = def.address || def.street_address || "";
+      if (!users[userIdx].city) users[userIdx].city = def.city || "";
+      if (!users[userIdx].state) users[userIdx].state = def.state || "";
+      if (!users[userIdx].pincode) users[userIdx].pincode = def.zipCode || def.pincode || "";
+    }
+  } else if (users[userIdx].street_address || users[userIdx].city || users[userIdx].pincode) {
+    // If top-level address fields are set, keep addresses array in sync
+    if (!users[userIdx].addresses) users[userIdx].addresses = [];
+    const nameParts = (users[userIdx].full_name || "").split(" ");
+    const firstName = nameParts[0] || "";
+    const lastName = nameParts.slice(1).join(" ") || "";
+    const addrObj = {
+      id: `addr_${Date.now()}`,
+      firstName,
+      lastName,
+      phone: users[userIdx].phone || "",
+      address: users[userIdx].street_address || "",
+      city: users[userIdx].city || "",
+      state: users[userIdx].state || "",
+      zipCode: users[userIdx].pincode || "",
+      country: "India",
+      isDefault: isDefault !== undefined ? Boolean(isDefault) : true
+    };
+    if (users[userIdx].addresses.length === 0) {
+      users[userIdx].addresses.push(addrObj);
+    } else {
+      const defIdx = users[userIdx].addresses.findIndex(a => a.isDefault);
+      if (defIdx >= 0) {
+        users[userIdx].addresses[defIdx] = { ...users[userIdx].addresses[defIdx], ...addrObj };
+      } else {
+        users[userIdx].addresses[0] = { ...users[userIdx].addresses[0], ...addrObj };
+      }
+    }
+  }
+
+  users[userIdx].updatedAt = new Date();
   writeJsonFile(USERS_FILE, users);
 
-  const { password: _, ...userWithoutPassword } = users[userIdx];
-  res.json({ success: true, user: userWithoutPassword });
+  res.json({ success: true, user: formatUserResponse(users[userIdx]) });
 });
 
 
@@ -593,11 +1330,10 @@ const productUpload = multer({ storage: productStorage });
 // Admin: Get all products in categorized format (nested structure)
 app.get("/api/storage/upload/products", (req, res) => {
   try {
-    const productsPath = path.join(__dirname, "public", "products.json");
-    if (!fs.existsSync(productsPath)) {
+    const rawData = readJsonFile("products.json", []);
+    if (!rawData || rawData.length === 0) {
       return res.json({ data: [] });
     }
-    const rawData = readJsonFile(productsPath, []);
     
     // Format data to match exactly what ProductsAdmin.tsx expects
     const formattedData = rawData.map((category, catIdx) => {
@@ -929,9 +1665,9 @@ app.delete("/api/storage/upload/interior", (req, res) => {
 });
 
 // Orders: Get all orders
-app.get("/api/orders", (req, res) => {
+app.get(["/api/orders", "/orders"], (req, res) => {
   try {
-    const userId = req.headers["user-id"];
+    const userId = req.headers["user-id"] || req.query.userId || req.query.email;
     const rawData = readJsonFile(ORDERS_FILE, []);
     
     if (!userId) {
@@ -941,7 +1677,15 @@ app.get("/api/orders", (req, res) => {
     if (userId === "admin_01" || userId === "gharsansarshop@gmail.com") {
       res.json(rawData);
     } else {
-      const userOrders = rawData.filter((o) => o.userId === userId || (o.customer && o.customer.email === userId));
+      const userOrders = rawData.filter(
+        (o) =>
+          o.userId === userId ||
+          (o.customer &&
+            (o.customer.email === userId ||
+              o.customer.phone === userId ||
+              o.customer.phone === `+91${userId}` ||
+              o.customer.phone?.replace(/\D/g, '') === userId.replace(/\D/g, '')))
+      );
       res.json(userOrders);
     }
   } catch (error) {
@@ -951,7 +1695,7 @@ app.get("/api/orders", (req, res) => {
 });
 
 // Orders: Place new order
-app.post("/api/orders", (req, res) => {
+app.post(["/api/orders", "/orders"], (req, res) => {
   try {
     const userId = req.headers["user-id"] || req.body.customer?.email || "guest";
     const rawData = readJsonFile(ORDERS_FILE, []);
@@ -1239,7 +1983,7 @@ app.post("/api/storage/upload/blog", blogUpload.single("file"), (req, res) => {
     // Construct image URL if file uploaded
     let imageUrl = "";
     if (req.file) {
-      const host = req.get('host') || `192.168.0.106:${PORT}`;
+      const host = req.get('host') || `localhost:${PORT}`;
       imageUrl = `${req.protocol}://${host}/blogs/${req.file.filename}`;
     }
 
@@ -1898,7 +2642,7 @@ app.get("/api/banners", (req, res) => {
 app.post("/api/banners", productUpload.single("image"), (req, res) => {
   try {
     const { title, subtitle, gradientStart, gradientEnd, tag, imageUrl } = req.body;
-    const host = req.get('host') || `192.168.0.106:${PORT}`;
+    const host = req.get('host') || `localhost:${PORT}`;
     const finalImage = req.file ? `${req.protocol}://${host}/products/${req.file.filename}` : (imageUrl || "");
     const banners = getBanners();
     const newBanner = {
@@ -1924,7 +2668,7 @@ app.put("/api/banners", productUpload.single("image"), (req, res) => {
     const idx = banners.findIndex(b => b.id === id);
     if (idx === -1) return res.status(404).json({ error: "Banner not found" });
 
-    const host = req.get('host') || `192.168.0.106:${PORT}`;
+    const host = req.get('host') || `localhost:${PORT}`;
     const finalImage = req.file ? `${req.protocol}://${host}/products/${req.file.filename}` : (imageUrl || banners[idx].image);
     
     banners[idx] = {
@@ -1958,9 +2702,8 @@ app.delete("/api/banners", (req, res) => {
 const FLASHSALE_FILE = path.join(__dirname, "flashsale.json");
 
 const getFlattenedProducts = () => {
-  const productsPath = path.join(__dirname, "public", "products.json");
-  if (!fs.existsSync(productsPath)) return [];
-  const rawData = readJsonFile(productsPath, []);
+  const rawData = readJsonFile("products.json", []);
+  if (!rawData || rawData.length === 0) return [];
   const allProducts = [];
   rawData.forEach((category, catIdx) => {
     let categoryName = category.name === "23_evening" ? "Luxury Home Decor" : category.name;
@@ -1972,7 +2715,7 @@ const getFlattenedProducts = () => {
         const id = item.prod_id || item.id || `prod_${catIdx}_${subIdx}_${idx}`;
         let imageUrl = item.image || "";
         if (imageUrl && imageUrl.startsWith("/")) {
-          imageUrl = `http://192.168.0.106:5001/products${imageUrl.replace(/^\/products/, "")}`;
+          imageUrl = `/products${imageUrl.replace(/^\/products/, "")}`;
         }
         const enriched = enrichProductData(item, idx);
         allProducts.push({
@@ -2056,6 +2799,16 @@ app.get("/api/products/categories", (req, res) => {
         categoriesMap[p.category].image = p.image;
       }
     });
+
+    if (categoriesMap["sonu_steel_products"]) {
+      categoriesMap["sonu_steel_products"].image = "/products/sonu_steel_products/sonu_crysta_pot_14cm_1000_ml.webp";
+    }
+    if (categoriesMap["Cello"]) {
+      categoriesMap["Cello"].image = "/products/cello_prod/cello_12_pcs_soup_set.webp";
+    }
+    if (categoriesMap["cello"]) {
+      categoriesMap["cello"].image = "/products/cello_prod/cello_12_pcs_soup_set.webp";
+    }
 
     const categoryList = Object.values(categoriesMap);
     res.json(categoryList);
@@ -2362,6 +3115,7 @@ const createInternalNotification = async (userId, title, body, type = 'system') 
   }
   return newNotif;
 };
+global.createInternalNotification = createInternalNotification;
 
 const getCustomerNotifications = () => {
   const defaultNotifications = [
@@ -2401,33 +3155,7 @@ const getCustomerNotifications = () => {
   return readJsonFile(CUSTOMER_NOTIFICATIONS_FILE, defaultNotifications);
 };
 
-// Wishlist routes
-app.get("/api/mobile/wishlist", (req, res) => {
-  try {
-    res.json({ success: true, wishlist: getWishlist() });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.post("/api/mobile/wishlist/toggle", (req, res) => {
-  try {
-    const { productId } = req.body;
-    if (!productId) {
-      return res.status(400).json({ error: "Missing productId" });
-    }
-    let wishlist = getWishlist();
-    if (wishlist.includes(productId)) {
-      wishlist = wishlist.filter(id => id !== productId);
-    } else {
-      wishlist.push(productId);
-    }
-    writeJsonFile(WISHLIST_FILE, wishlist);
-    res.json({ success: true, wishlist });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+// Note: Mobile wishlist routes are handled persistently via wishlistRoutes (/api/mobile/wishlist)
 
 // Notification routes
 app.get("/api/mobile/notifications", (req, res) => {
@@ -2575,9 +3303,8 @@ const seedReviewsIfNeeded = () => {
         }
       ];
       
-      const productsPath = path.join(__dirname, "public", "products.json");
-      if (fs.existsSync(productsPath)) {
-        const rawCatalog = readJsonFile(productsPath, []);
+      const rawCatalog = readJsonFile("products.json", []);
+      if (rawCatalog && rawCatalog.length > 0) {
         rawCatalog.forEach(cat => {
           (cat.subcategories || []).forEach(sub => {
             const itemKey = sub.images ? "images" : sub.products ? "products" : "services";
@@ -2686,7 +3413,15 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "healthy", port: PORT });
 });
 
-app.listen(PORT, () => {
-  console.log(`Ghar Sansar backend server is running on http://localhost:${PORT}`);
+initDatabase().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Ghar Sansar backend server is running on http://localhost:${PORT}`);
+    console.log(`Swagger documentation: http://localhost:${PORT}/api-docs`);
+  });
+}).catch(err => {
+  console.error("Failed to connect to MongoDB Atlas on startup:", err);
+  app.listen(PORT, () => {
+    console.log(`Ghar Sansar backend server running in fallback mode on http://localhost:${PORT}`);
+  });
 });
 

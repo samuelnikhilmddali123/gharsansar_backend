@@ -36,10 +36,13 @@ import {
   FileText,
   Scan,
   Check,
-  ExternalLink
+  ExternalLink,
+  Plus,
+  Minus
 } from "lucide-react";
 import { useProducts, Product } from "../context/ProductContext";
 import { useCart } from "../context/CartContext";
+import { useWishlist } from "../context/WishlistContext";
 import { useAuth } from "../context/AuthContext";
 import { useOrders } from "../context/OrderContext";
 import ProductCard from "../components/ProductCard";
@@ -59,7 +62,7 @@ interface Review {
 const ProductDetail: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { addToCart } = useCart();
+  const { items, addToCart, updateQuantity, removeFromCart } = useCart();
   const { isAuthenticated, user } = useAuth();
   const { orders } = useOrders();
   const { products, loading } = useProducts();
@@ -79,6 +82,12 @@ const ProductDetail: React.FC = () => {
     );
   }, [id, products]);
 
+  const mainProductId = String(product?.id || (product as any)?._id || id || "");
+  const cartItemForProduct = items.find(
+    (item) => String(item.id) === mainProductId || String(item.productId) === mainProductId
+  );
+  const quantityInCart = cartItemForProduct ? cartItemForProduct.quantity : 0;
+
   // Gallery States
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isVideoActive, setIsVideoActive] = useState(false);
@@ -91,7 +100,8 @@ const ProductDetail: React.FC = () => {
   // Commerce States
   const [quantity, setQuantity] = useState(state?.isReturnGift ? 50 : 1);
   const [activeTab, setActiveTab] = useState("description");
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const { isInWishlist, toggleWishlist } = useWishlist();
+  const isWishlisted = product ? isInWishlist(product.id) : false;
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
   // Related products carousel ref
@@ -534,13 +544,40 @@ const ProductDetail: React.FC = () => {
           <span className="text-[10px] text-gray-500 block uppercase font-bold tracking-wider">Total Price</span>
           <span className="text-lg font-black text-gray-900">₹{(product.price * quantity) + (deliveryFee || 0)}</span>
         </div>
-        <div className="flex gap-2">
-          <button 
-            onClick={handleAddToCart}
-            className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-none font-bold text-xs uppercase tracking-wider transition"
-          >
-            Add to Cart
-          </button>
+        <div className="flex gap-2 items-center">
+          {quantityInCart > 0 ? (
+            <div className="flex items-center border border-[#0F2920] bg-[#f0f6f3] rounded-none px-2 py-1 gap-2">
+              <button 
+                type="button"
+                onClick={() => {
+                  if (quantityInCart > 1) {
+                    updateQuantity(cartItemForProduct!.id, quantityInCart - 1);
+                  } else {
+                    removeFromCart(cartItemForProduct!.id);
+                    toast.success("Removed from cart");
+                  }
+                }}
+                className="w-7 h-7 flex items-center justify-center bg-white text-gray-800 border border-gray-300 rounded-none font-bold text-sm active:scale-90 transition"
+              >
+                -
+              </button>
+              <span className="font-bold text-xs text-[#0F2920] px-1 select-none">{quantityInCart}</span>
+              <button 
+                type="button"
+                onClick={() => updateQuantity(cartItemForProduct!.id, quantityInCart + 1)}
+                className="w-7 h-7 flex items-center justify-center bg-[#0F2920] text-white rounded-none font-bold text-sm active:scale-90 transition"
+              >
+                +
+              </button>
+            </div>
+          ) : (
+            <button 
+              onClick={handleAddToCart}
+              className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-none font-bold text-xs uppercase tracking-wider transition"
+            >
+              Add to Cart
+            </button>
+          )}
           <button 
             onClick={handleBuyNow}
             className="px-5 py-2.5 bg-[#0F2920] hover:bg-[#183E31] text-white rounded-none font-bold text-xs uppercase tracking-wider transition shadow-md"
@@ -740,8 +777,7 @@ const ProductDetail: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <button 
                     onClick={() => {
-                      setIsWishlisted(!isWishlisted);
-                      toast.success(isWishlisted ? "Removed from wishlist" : "Saved to wishlist!");
+                      if (product) toggleWishlist(product);
                     }}
                     className={`p-2 rounded-none border transition ${
                       isWishlisted ? 'bg-red-50 text-red-500 border-red-200' : 'bg-white text-gray-400 hover:text-gray-600 border-gray-200'
@@ -883,13 +919,51 @@ const ProductDetail: React.FC = () => {
               <div className="space-y-3">
                 {/* Row 1: Add to Cart & Buy Now */}
                 <div className="flex gap-3">
-                  <button
-                    onClick={handleAddToCart}
-                    className="flex-1 flex items-center justify-center gap-2 py-3.5 px-6 bg-[#0F2920] hover:bg-[#183E31] text-white rounded-none font-bold uppercase tracking-wider text-xs shadow-md transition transform active:scale-95 duration-200"
-                  >
-                    <ShoppingCart size={16} />
-                    <span>Add to Cart</span>
-                  </button>
+                  {quantityInCart > 0 ? (
+                    <div className="flex-1 flex items-center justify-between border-2 border-[#0F2920] bg-[#f0f6f3] rounded-none py-2 px-3 shadow-xs">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (quantityInCart > 1) {
+                            updateQuantity(cartItemForProduct!.id, quantityInCart - 1);
+                          } else {
+                            removeFromCart(cartItemForProduct!.id);
+                            toast.success(`Removed from cart`);
+                          }
+                        }}
+                        className="w-9 h-9 flex items-center justify-center bg-white hover:bg-gray-100 text-[#0F2920] border border-[#c4d6cc] rounded-none active:scale-90 transition font-bold"
+                        aria-label="Decrease quantity"
+                      >
+                        <Minus size={15} strokeWidth={2.5} />
+                      </button>
+
+                      <div className="text-center select-none">
+                        <span className="font-bold text-[#0F2920] text-sm sm:text-base block">
+                          {quantityInCart} in Cart
+                        </span>
+                        <span className="text-[10px] text-gray-500 uppercase font-semibold">
+                          Click - / + to adjust
+                        </span>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => updateQuantity(cartItemForProduct!.id, quantityInCart + 1)}
+                        className="w-9 h-9 flex items-center justify-center bg-[#0F2920] hover:bg-[#183E31] text-white rounded-none active:scale-90 transition font-bold"
+                        aria-label="Increase quantity"
+                      >
+                        <Plus size={15} strokeWidth={2.5} />
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={handleAddToCart}
+                      className="flex-1 flex items-center justify-center gap-2 py-3.5 px-6 bg-[#0F2920] hover:bg-[#183E31] text-white rounded-none font-bold uppercase tracking-wider text-xs shadow-md transition transform active:scale-95 duration-200"
+                    >
+                      <ShoppingCart size={16} />
+                      <span>Add to Cart</span>
+                    </button>
+                  )}
                   
                   <button
                     onClick={handleBuyNow}
@@ -1323,6 +1397,10 @@ const ProductDetail: React.FC = () => {
                 const relDiscount = relActualPrice && relProduct.price && relActualPrice > relProduct.price
                   ? Math.round(((relActualPrice - relProduct.price) / relActualPrice) * 100)
                   : 25;
+                const relCartItem = items.find(
+                  (item) => String(item.id) === String(relProduct.id) || String(item.productId) === String(relProduct.id)
+                );
+                const relQtyInCart = relCartItem ? relCartItem.quantity : 0;
 
                 return (
                   <div
@@ -1336,11 +1414,13 @@ const ProductDetail: React.FC = () => {
                         <button 
                           onClick={(e) => {
                             e.stopPropagation();
-                            toast.success("Saved to wishlist!");
+                            toggleWishlist(relProduct);
                           }}
-                          className="text-gray-300 hover:text-red-500 transition p-1"
+                          className={`transition p-1 ${
+                            isInWishlist(relProduct.id) ? "text-red-500" : "text-gray-300 hover:text-red-500"
+                          }`}
                         >
-                          <Heart size={16} />
+                          <Heart size={16} className={isInWishlist(relProduct.id) ? "fill-current" : ""} />
                         </button>
                       </div>
 
@@ -1384,23 +1464,63 @@ const ProductDetail: React.FC = () => {
 
                       {/* Action Buttons matching screenshot */}
                       <div className="flex items-center gap-2">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            addToCart({
-                              id: relProduct.id,
-                              name: relProduct.title || relProduct.name,
-                              price: relProduct.price,
-                              image: relProduct.image,
-                              quantity: 1
-                            });
-                            toast.success("Added to cart!");
-                          }}
-                          className="flex-1 py-1.5 px-2 bg-white hover:bg-gray-50 border border-gray-200 text-gray-800 rounded-none font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-1 shadow-2xs active:scale-95 transition"
-                        >
-                          <ShoppingCart size={11} />
-                          <span>Add to Cart</span>
-                        </button>
+                        {relQtyInCart > 0 ? (
+                          <div
+                            onClick={(e) => e.stopPropagation()}
+                            className="flex-1 h-[28px] border border-[#0F2920] bg-[#f0f6f3] rounded-none flex items-center justify-between px-1 shadow-2xs"
+                          >
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (relQtyInCart > 1) {
+                                  updateQuantity(relCartItem!.id, relQtyInCart - 1);
+                                } else {
+                                  removeFromCart(relCartItem!.id);
+                                  toast.success(`Removed from cart`);
+                                }
+                              }}
+                              className="w-5 h-5 flex items-center justify-center bg-white hover:bg-gray-100 text-[#0F2920] border border-[#c4d6cc] rounded-none active:scale-90 transition font-bold"
+                              aria-label="Decrease quantity"
+                            >
+                              <Minus size={10} strokeWidth={2.5} />
+                            </button>
+
+                            <span className="font-bold text-[#0F2920] text-[11px] px-1 select-none">
+                              {relQtyInCart}
+                            </span>
+
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                updateQuantity(relCartItem!.id, relQtyInCart + 1);
+                              }}
+                              className="w-5 h-5 flex items-center justify-center bg-[#0F2920] hover:bg-[#183E31] text-white rounded-none active:scale-90 transition font-bold"
+                              aria-label="Increase quantity"
+                            >
+                              <Plus size={10} strokeWidth={2.5} />
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              addToCart({
+                                id: relProduct.id,
+                                name: relProduct.title || relProduct.name,
+                                price: relProduct.price,
+                                image: relProduct.image,
+                                quantity: 1
+                              });
+                              toast.success("Added to cart!");
+                            }}
+                            className="flex-1 py-1.5 px-2 bg-white hover:bg-gray-50 border border-gray-200 text-gray-800 rounded-none font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-1 shadow-2xs active:scale-95 transition"
+                          >
+                            <ShoppingCart size={11} />
+                            <span>Add to Cart</span>
+                          </button>
+                        )}
 
                         <button
                           onClick={(e) => {

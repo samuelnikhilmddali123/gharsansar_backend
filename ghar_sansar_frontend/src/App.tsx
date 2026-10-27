@@ -1,5 +1,5 @@
 // src/App.tsx
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 import { ProductProvider } from "./context/ProductContext";
@@ -8,6 +8,7 @@ import { ServiceProvider } from "./context/ServiceContext";
 import { InteriorProvider } from "./context/InteriorContext";
 import { PaymentProvider } from "./context/PaymentContext";
 import { OrderProvider } from "./context/OrderContext";
+import { WishlistProvider } from "./context/WishlistContext";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import ScrollToTop from "./components/ScrollToTop";
@@ -45,94 +46,105 @@ import ProductsPage from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
 import ReturnGifts from "./pages/ReturnGifts";
 
+const AppLayout = () => {
+  const location = useLocation();
+  const isHomePage = location.pathname === "/";
+
+  return (
+    <div className="min-h-screen bg-[#F7F6F0]">
+      <Header />
+      <main className={isHomePage ? "" : "pt-20 sm:pt-24"}>
+        <Routes>
+          {/* ---------- Public routes ---------- */}
+          <Route path="/" element={<Home />} />
+          <Route path="/products" element={<ProductsPage />} />
+          <Route path="/product/:id" element={<ProductDetail />} />
+          <Route path="/return-gifts" element={<ReturnGifts />} />
+          <Route path="/services" element={<Services />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:id" element={<BlogPost />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/cart" element={<Cart />} />
+
+          {/* Public Interior Design page */}
+          <Route path="/interior-design" element={<InteriorDesignPage />} />
+
+          {/* ---------- Protected routes ---------- */}
+          <Route
+            path="/checkout"
+            element={
+              <ProtectedRoute>
+                <Checkout />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/interior-works"
+            element={
+              <ProtectedRoute>
+                <InteriorWorks />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* ---------- Admin protected routes ---------- */}
+          <Route
+            path="/admin/*"
+            element={
+              <ProtectedRoute role="admin">
+                <AdminLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<AdminDashboard />} />
+            <Route path="blog-admin" element={<BlogAdmin />} />
+            {/* <Route path="enquiries" element={<AdminEnquiryList />} /> */}
+            <Route path="services-admin" element={<ServicesAdmin />} />
+            <Route path="products-admin" element={<ProductsAdmin />} />
+            <Route path="products-bulk" element={<ProductAdminBulk />} />
+            <Route path="interior-works" element={<InteriorWorksAdmin />} />
+            <Route path="orders" element={<OrdersAdmin />} />
+            <Route path="chats" element={<ChatsAdmin />} />
+            <Route path="return-gifts" element={<ReturnGiftsAdmin />} />
+          </Route>
+        </Routes>
+      </main>
+      <Footer />
+    </div>
+  );
+};
+
 export default function App() {
   return (
     <AuthProvider>
-      <CartProvider>
-        <ProductProvider>
-          <BlogProvider>
-            <ServiceProvider>
-              <InteriorProvider>
-                <PaymentProvider>
-                  <OrderProvider>
-                    <BrowserRouter>
-                      <ScrollToTop />
-                      <div className="min-h-screen bg-[#F7F6F0]">
-                        <Header />
-                        <main className="pt-20 sm:pt-24">
-                          <Routes>
-                        {/* ---------- Public routes ---------- */}
-                        <Route path="/" element={<Home />} />
-                        <Route path="/products" element={<ProductsPage />} />
-                        <Route path="/product/:id" element={<ProductDetail />} />
-                        <Route path="/return-gifts" element={<ReturnGifts />} />
-                        <Route path="/services" element={<Services />} />
-                        <Route path="/blog" element={<Blog />} />
-                        <Route path="/blog/:id" element={<BlogPost />} />
-                        <Route path="/login" element={<Login />} />
-                        <Route path="/cart" element={<Cart />} />
-
-                        {/* Public Interior Design page */}
-                        <Route path="/interior-design" element={<InteriorDesignPage />} />
-
-                        {/* ---------- Protected routes ---------- */}
-                        <Route
-                          path="/checkout"
-                          element={
-                            <ProtectedRoute>
-                              <Checkout />
-                            </ProtectedRoute>
-                          }
-                        />
-                        <Route
-                          path="/interior-works"
-                          element={
-                            <ProtectedRoute>
-                              <InteriorWorks />
-                            </ProtectedRoute>
-                          }
-                        />
-                        <Route
-                          path="/profile"
-                          element={
-                            <ProtectedRoute>
-                              <Profile />
-                            </ProtectedRoute>
-                          }
-                        />
-
-                        {/* ---------- Admin protected routes ---------- */}
-                        <Route
-                          path="/admin/*"
-                          element={
-                            <ProtectedRoute role="admin">
-                              <AdminLayout />
-                            </ProtectedRoute>
-                          }
-                        >
-                          <Route index element={<AdminDashboard />} />
-                          <Route path="blog-admin" element={<BlogAdmin />} />
-                          {/* <Route path="enquiries" element={<AdminEnquiryList />} /> */}
-                          <Route path="services-admin" element={<ServicesAdmin />} />
-                          <Route path="products-admin" element={<ProductsAdmin />} />
-                          <Route path="products-bulk" element={<ProductAdminBulk />} />
-                          <Route path="interior-works" element={<InteriorWorksAdmin />} />
-                          <Route path="orders" element={<OrdersAdmin />} />
-                          <Route path="chats" element={<ChatsAdmin />} />
-                          <Route path="return-gifts" element={<ReturnGiftsAdmin />} />
-                        </Route>
-                      </Routes>
-                    </main>
-                    <Footer />
-                  </div>
-                </BrowserRouter>
-                  </OrderProvider>
-                </PaymentProvider>
-              </InteriorProvider>
-            </ServiceProvider>
-          </BlogProvider>
-        </ProductProvider>
-      </CartProvider>
+      <WishlistProvider>
+        <CartProvider>
+          <ProductProvider>
+            <BlogProvider>
+              <ServiceProvider>
+                <InteriorProvider>
+                  <PaymentProvider>
+                    <OrderProvider>
+                      <BrowserRouter>
+                        <ScrollToTop />
+                        <AppLayout />
+                      </BrowserRouter>
+                    </OrderProvider>
+                  </PaymentProvider>
+                </InteriorProvider>
+              </ServiceProvider>
+            </BlogProvider>
+          </ProductProvider>
+        </CartProvider>
+      </WishlistProvider>
     </AuthProvider>
   );
 }

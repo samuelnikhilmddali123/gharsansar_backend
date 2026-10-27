@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../context/CartContext';
-import { ShoppingCart, Eye, Heart, ArrowRight, CheckCircle2, SlidersHorizontal, ChevronDown, Filter, Image as ImageIcon, Search, X, Plus } from 'lucide-react';
+import { useWishlist } from '../context/WishlistContext';
+import { ShoppingCart, Eye, Heart, ArrowRight, CheckCircle2, SlidersHorizontal, ChevronDown, Filter, Image as ImageIcon, Search, X, Plus, Minus } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import StudioImage from '../components/StudioImage';
@@ -450,15 +451,25 @@ function FilterAccordion({ section, searchParams, setSearchParams }: any) {
 // STUDIO CATALOG CARD (Matching Exact Reference Aesthetic)
 // ---------------------------------------------------------
 function CatalogCard({ product, onAdd, navigate }: any) {
+  const { items, updateQuantity, removeFromCart } = useCart();
+  const targetId = String(product._id || product.id || product.name || "");
+  const cartItem = items.find(
+    (item) => String(item.id) === targetId || String(item.productId) === targetId
+  );
+  const quantityInCart = cartItem ? cartItem.quantity : 0;
+
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
     onAdd({ ...product, quantity: 50, minQty: 50, isReturnGift: true, stock: product.stock });
     toast.success(`Added 50 x ${product.title || product.name} to cart`);
   };
 
+  const { isInWishlist, toggleWishlist } = useWishlist();
+  const isWishlisted = isInWishlist(targetId);
+
   const handleWishlist = (e: React.MouseEvent) => {
     e.stopPropagation();
-    toast.success("Saved to wishlist!");
+    toggleWishlist({ ...product, id: targetId });
   };
 
   const title = (product.title || product.name || "Return Gift").replace(/_/g, " ").trim();
@@ -476,10 +487,12 @@ function CatalogCard({ product, onAdd, navigate }: any) {
         <div className="relative w-full aspect-square rounded-none overflow-hidden flex items-center justify-center p-5 sm:p-7 mb-4 bg-[#F7F6F0] border border-[#E8E5DC]">
           <button
             onClick={handleWishlist}
-            className="absolute top-3 right-3 sm:top-3.5 sm:right-3.5 z-10 w-9 h-9 sm:w-10 sm:h-10 rounded-none bg-white/95 hover:bg-white text-gray-700 hover:text-red-500 border border-gray-150 flex items-center justify-center transition-all shadow-xs active:scale-90"
+            className={`absolute top-3 right-3 sm:top-3.5 sm:right-3.5 z-10 w-9 h-9 sm:w-10 sm:h-10 rounded-none bg-white/95 hover:bg-white border border-gray-150 flex items-center justify-center transition-all shadow-xs active:scale-90 ${
+              isWishlisted ? "text-red-500" : "text-gray-700 hover:text-red-500"
+            }`}
             aria-label="Add to wishlist"
           >
-            <Heart size={18} strokeWidth={1.75} />
+            <Heart size={18} strokeWidth={1.75} className={isWishlisted ? "fill-current" : ""} />
           </button>
 
           {/* Subtle realistic ground shadow under product */}
@@ -510,7 +523,7 @@ function CatalogCard({ product, onAdd, navigate }: any) {
         {/* 4. Divider */}
         <div className="w-full border-t border-[#EFECE6] mb-3 sm:mb-4" />
 
-        {/* 5. Price & Add to Cart */}
+        {/* 5. Price & Add to Cart / Stepper */}
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-baseline">
@@ -521,14 +534,54 @@ function CatalogCard({ product, onAdd, navigate }: any) {
             <span className="text-[11px] text-gray-400 block font-normal">(Min 50 pcs)</span>
           </div>
 
-          <button
-            onClick={handleAddToCart}
-            className="bg-[#004e38] hover:bg-[#003c2b] text-white px-3.5 sm:px-4.5 py-2 sm:py-2.5 rounded-none text-xs sm:text-sm font-semibold flex items-center gap-1.5 sm:gap-2 transition-all shadow-sm active:scale-95 shrink-0"
-            aria-label="Add to cart"
-          >
-            <ShoppingCart size={15} className="stroke-[2]" />
-            <span>Add to Cart</span>
-          </button>
+          {quantityInCart > 0 ? (
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="h-[36px] sm:h-[40px] border border-[#004e38] bg-[#f0f6f3] rounded-none flex items-center justify-between px-1.5 shadow-2xs gap-1.5"
+            >
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (quantityInCart > 50) {
+                    updateQuantity(cartItem!.id, quantityInCart - 10);
+                  } else {
+                    removeFromCart(cartItem!.id);
+                    toast.success(`Removed from cart`);
+                  }
+                }}
+                className="w-7 h-7 flex items-center justify-center bg-white hover:bg-gray-100 text-[#004e38] border border-[#c4d6cc] rounded-none active:scale-90 transition font-bold"
+                aria-label="Decrease quantity"
+              >
+                <Minus size={12} strokeWidth={2.5} />
+              </button>
+
+              <span className="font-bold text-[#004e38] text-xs sm:text-sm px-1 select-none">
+                {quantityInCart} pcs
+              </span>
+
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  updateQuantity(cartItem!.id, quantityInCart + 10);
+                }}
+                className="w-7 h-7 flex items-center justify-center bg-[#004e38] hover:bg-[#003c2b] text-white rounded-none active:scale-90 transition font-bold"
+                aria-label="Increase quantity"
+              >
+                <Plus size={12} strokeWidth={2.5} />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={handleAddToCart}
+              className="bg-[#004e38] hover:bg-[#003c2b] text-white px-3.5 sm:px-4.5 py-2 sm:py-2.5 rounded-none text-xs sm:text-sm font-semibold flex items-center gap-1.5 sm:gap-2 transition-all shadow-sm active:scale-95 shrink-0"
+              aria-label="Add to cart"
+            >
+              <ShoppingCart size={15} className="stroke-[2]" />
+              <span>Add to Cart</span>
+            </button>
+          )}
         </div>
       </div>
     </div>

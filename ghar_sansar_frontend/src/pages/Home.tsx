@@ -4,9 +4,6 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
   Truck,
-  Trophy,
-  Users,
-  Gem,
   ShieldCheck,
   Headphones,
   Package,
@@ -160,97 +157,66 @@ const Home: React.FC = () => {
         <h2>Ghar Sansar - #1 Interior Designers Vijayawada</h2>
       </div>
 
-      {/* 1. Hero Section with Sunlit Luxe Temple Lounge Background (Bright & Vibrant) */}
-      <section className="relative min-h-[580px] sm:min-h-[640px] lg:min-h-[680px] flex items-center py-14 sm:py-20 lg:py-24 overflow-hidden border-b border-gray-200/30">
-        {/* Luxury Background Image - Bright, Vibrant, Sunlit */}
-        <div className="absolute inset-0 z-0">
+      {/* 1. Hero Section - Centered Luxury Layout matching Reference Design with Blurred Backdrop */}
+      <section className="relative min-h-screen min-h-[100dvh] w-full flex flex-col items-center justify-center pt-20 sm:pt-24 pb-12 sm:pb-16 overflow-hidden">
+        {/* Luxury Background Image with Soft Gaussian Blur & Cinematic Dark Overlay - Full Viewport Cover */}
+        <div className="absolute inset-0 z-0 overflow-hidden">
           <img
             src="/images/sunlit_luxe_temple_lounge.png"
             alt="Interior Design Solutions - Sunlit Luxe Temple Lounge"
-            className="w-full h-full object-cover object-center brightness-[1.06] contrast-[1.04] saturate-[1.06]"
+            className="w-full h-full object-cover object-center scale-105 filter blur-[4px] brightness-[0.68] contrast-[1.08]"
           />
-          {/* Gentle localized gradient on the left text area only - keeps the rest of the image 100% bright, crisp & sunlit */}
-          <div className="absolute inset-y-0 left-0 w-full sm:w-[60%] lg:w-[48%] bg-gradient-to-r from-white/90 via-white/50 to-transparent pointer-events-none"></div>
+          {/* Moody Luxury Cinematic Overlays */}
+          <div className="absolute inset-0 bg-black/40 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/20 to-black/80 pointer-events-none" />
+          <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/70 to-transparent pointer-events-none" />
         </div>
 
-        <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="max-w-2xl lg:max-w-3xl">
-            {/* Text Content */}
-            <motion.div
-              initial={{ opacity: 0, y: 25 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, ease: "easeOut" }}
-            >
-              {/* Eyebrow Tag */}
-              <div className="inline-flex items-center gap-2 mb-3 sm:mb-4">
-                <span className="text-[11px] sm:text-xs font-semibold tracking-[0.25em] text-[#9A7B66] uppercase">
-                  Interior Design Solutions
-                </span>
-              </div>
+        <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center flex flex-col items-center">
+          {/* Centered Text Content */}
+          <motion.div
+            initial={{ opacity: 0, y: 25 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="flex flex-col items-center -mt-6 sm:-mt-10 lg:-mt-12"
+          >
+            {/* Spaced Eyebrow Tag matching 2nd image */}
+            <div className="inline-flex items-center justify-center mb-4 sm:mb-6">
+              <span className="text-xs sm:text-sm font-medium tracking-[0.35em] text-[#D4AF37] uppercase drop-shadow-sm font-sans">
+                B E A U T I F U L &nbsp; S P A C E S
+              </span>
+            </div>
 
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-950 mb-5 leading-[1.12] tracking-tight">
-                Best Interior Designers in
-                <span className="block font-serif italic font-normal text-[#9E472A] mt-1.5">
-                  Andhra Pradesh &amp; Telangana
-                </span>
-              </h1>
+            {/* Elegant Centered Serif Heading */}
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif text-white tracking-wide leading-[1.12] mb-5 sm:mb-6 max-w-4xl drop-shadow-lg">
+              Best Interior Designers in
+              <span className="block italic font-light text-[#F3E2C7] mt-2">
+                Andhra Pradesh &amp; Telangana
+              </span>
+            </h1>
 
-              <p className="text-sm sm:text-base text-gray-800 mb-8 leading-relaxed font-semibold max-w-xl">
-                Transform your space with bespoke decor collections and award-winning interior design services across Vijayawada, Guntur, Eluru, Hyderabad, and major regional centers.
-              </p>
+            {/* Subtitle description */}
+            <p className="text-sm sm:text-base md:text-lg text-gray-200 font-light max-w-2xl mx-auto leading-relaxed mb-7 sm:mb-8 drop-shadow-md">
+              Transform your space into a story of comfort, elegance, and timeless design with bespoke decor collections and award-winning interior design services.
+            </p>
 
-              <div className="flex flex-col sm:flex-row gap-3.5 sm:gap-4 mb-9">
-                <Link
-                  to="/interior-design"
-                  className="bg-luxury-charcoal hover:bg-[#9E472A] text-white px-7 py-3.5 rounded-none shadow-md transition-all duration-300 font-bold uppercase tracking-widest text-[11px] inline-flex items-center justify-center group active:scale-95"
-                >
-                  Design Services
-                  <ArrowRight className="ml-2 w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-                </Link>
-                <Link
-                  to="/products"
-                  className="border border-luxury-charcoal bg-white/80 hover:bg-luxury-charcoal text-luxury-charcoal hover:text-white px-7 py-3.5 rounded-none backdrop-blur-xs transition-all duration-300 font-bold uppercase tracking-widest text-[11px] inline-flex items-center justify-center active:scale-95"
-                >
-                  Shop Now
-                </Link>
-              </div>
-
-              {/* Trust Indicators */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-black/10 bg-white/75 backdrop-blur-xs p-3.5 sm:p-4 border border-white/60 shadow-xs">
-                <div className="flex items-center gap-2.5">
-                  <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-gray-800 shrink-0" strokeWidth={1.5} />
-                  <div>
-                    <div className="text-xs sm:text-sm font-extrabold text-gray-900 leading-none">10+</div>
-                    <div className="text-[10px] sm:text-[11px] text-gray-600 mt-0.5 font-medium leading-tight">Years Experience</div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2.5">
-                  <Users className="w-4 h-4 sm:w-5 sm:h-5 text-gray-800 shrink-0" strokeWidth={1.5} />
-                  <div>
-                    <div className="text-xs sm:text-sm font-extrabold text-gray-900 leading-none">500+</div>
-                    <div className="text-[10px] sm:text-[11px] text-gray-600 mt-0.5 font-medium leading-tight">Projects Completed</div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2.5">
-                  <Gem className="w-4 h-4 sm:w-5 sm:h-5 text-gray-800 shrink-0" strokeWidth={1.5} />
-                  <div>
-                    <div className="text-xs sm:text-sm font-extrabold text-gray-900 leading-none">Premium</div>
-                    <div className="text-[10px] sm:text-[11px] text-gray-600 mt-0.5 font-medium leading-tight">Craftsmanship</div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2.5">
-                  <Truck className="w-4 h-4 sm:w-5 sm:h-5 text-gray-800 shrink-0" strokeWidth={1.5} />
-                  <div>
-                    <div className="text-xs sm:text-sm font-extrabold text-gray-900 leading-none">Pan India</div>
-                    <div className="text-[10px] sm:text-[11px] text-gray-600 mt-0.5 font-medium leading-tight">Delivery</div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
+            {/* CTA Buttons - Warm caramel rounded-full button matching 2nd image */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Link
+                to="/interior-design"
+                className="bg-[#C89A65] hover:bg-[#B58752] text-black px-8 py-4 rounded-full shadow-2xl transition-all duration-300 font-semibold uppercase tracking-wider text-xs inline-flex items-center justify-center gap-2 hover:scale-105 active:scale-95"
+              >
+                Explore Our Designs
+                <ArrowRight className="w-4 h-4 ml-1" />
+              </Link>
+              <Link
+                to="/products"
+                className="border border-white/30 hover:border-white bg-white/10 hover:bg-white/20 text-white px-8 py-4 rounded-full backdrop-blur-md transition-all duration-300 font-semibold uppercase tracking-wider text-xs inline-flex items-center justify-center hover:scale-105 active:scale-95 shadow-lg"
+              >
+                Shop Now
+              </Link>
+            </div>
+          </motion.div>
         </div>
       </section>
 
