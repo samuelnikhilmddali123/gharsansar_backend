@@ -18,6 +18,8 @@ const { generateToken, authenticate, optionalAuth, requireAdmin } = require("./m
 const cartRoutes = require("./routes/cartRoutes");
 const wishlistRoutes = require("./routes/wishlistRoutes");
 const orderRoutes = require("./routes/orderRoutes");
+const discountRoutes = require("./routes/discountRoutes");
+const { getActiveDiscounts, calculateProductPricing } = require("./services/pricingService");
 
 // Global process handlers to keep the server running resiliently
 process.on("unhandledRejection", (reason, promise) => {
@@ -86,6 +88,7 @@ app.use(["/api/v1/cart", "/api/cart"], cartRoutes);
 app.use(["/api/v1/wishlist", "/api/wishlist"], wishlistRoutes);
 app.use("/api/mobile/wishlist", wishlistRoutes);
 app.use(["/api/v1/orders", "/api/orders", "/orders"], orderRoutes);
+app.use(["/api/v1/discounts", "/api/discounts", "/discounts"], discountRoutes);
 
 // --- CMS ENDPOINTS ---
 app.get("/api/cms/homepage_layout", (req, res) => {
@@ -368,15 +371,18 @@ const enrichProductData = (item, idx) => {
   };
 };
 
-// 1. Get Products (serves rewritten data with backend image URLs and realistic prices from Atlas)
-app.get(["/api/products", "/products"], (req, res) => {
+// 1. Get Products (serves rewritten data with backend image URLs, active category discounts & final prices)
+app.get(["/api/products", "/products"], async (req, res) => {
   try {
     const rawData = readJsonFile("products.json", []);
     if (!rawData || rawData.length === 0) {
       return res.status(404).json({ error: "Product catalog not found" });
     }
+
+    // Load active category discounts
+    const activeDiscounts = await getActiveDiscounts();
     
-    // We rewrite the image paths to absolute backend URLs and add pricing if it is 0
+    // We rewrite the image paths to absolute backend URLs and apply active discounts
     const processedData = rawData.map((category) => {
       let categoryName = category.name;
       if (categoryName === "23_evening") {
@@ -403,14 +409,37 @@ app.get(["/api/products", "/products"], (req, res) => {
           // Enrich dynamically
           const enriched = enrichProductData(item, idx);
 
+          // Calculate final pricing based on active category & product discounts
+          const pricing = calculateProductPricing({
+            price: enriched.price,
+            "act-price": enriched.actualPrice,
+            category: categoryName,
+            product_discount: item.product_discount || item.productDiscount
+          }, activeDiscounts);
+
           return {
             ...item,
             name: enriched.name,
             title: enriched.title,
             description: enriched.description,
             image: imageUrl,
-            price: enriched.price,
-            "act-price": enriched.actualPrice
+            strikePrice: pricing.strikePrice,
+            strike_price: pricing.strikePrice,
+            "act-price": pricing.strikePrice,
+            actualPrice: pricing.actualPrice,
+            actual_price: pricing.actualPrice,
+            price: pricing.actualPrice, // Customer pays actualPrice (e.g., ₹2,500)
+            finalPrice: pricing.actualPrice,
+            final_price: pricing.actualPrice,
+            categoryDiscountPercentage: pricing.categoryDiscountPercentage,
+            category_discount_percentage: pricing.categoryDiscountPercentage,
+            categoryDiscountAmount: pricing.categoryDiscountAmount,
+            category_discount_amount: pricing.categoryDiscountAmount,
+            currentDifference: pricing.currentDifference,
+            hasCategoryDiscount: pricing.hasCategoryDiscount,
+            isDiscounted: pricing.isDiscounted,
+            discount_percentage: pricing.categoryDiscountPercentage,
+            discount_amount: pricing.categoryDiscountAmount
           };
         });
 
@@ -1335,13 +1364,15 @@ const productStorage = multer.diskStorage({
 });
 const productUpload = multer({ storage: productStorage });
 
-// Admin: Get all products in categorized format (nested structure)
-app.get("/api/storage/upload/products", (req, res) => {
+// Admin: Get all products in categorized format (nested structure) with pricing & active discounts
+app.get("/api/storage/upload/products", async (req, res) => {
   try {
     const rawData = readJsonFile("products.json", []);
     if (!rawData || rawData.length === 0) {
       return res.json({ data: [] });
     }
+
+    const activeDiscounts = await getActiveDiscounts();
     
     // Format data to match exactly what ProductsAdmin.tsx expects
     const formattedData = rawData.map((category, catIdx) => {
@@ -1366,13 +1397,35 @@ app.get("/api/storage/upload/products", (req, res) => {
           // Enrich dynamically
           const enriched = enrichProductData(item, idx);
 
+          const pricing = calculateProductPricing({
+            price: enriched.price,
+            "act-price": enriched.actualPrice,
+            category: categoryName,
+            product_discount: item.product_discount || item.productDiscount
+          }, activeDiscounts);
+
           return {
             prod_id: id,
             id: id,
             title: enriched.title,
+            name: enriched.title,
             description: enriched.description,
-            price: enriched.price,
-            actual_price: enriched.actualPrice,
+            price: pricing.actualPrice,
+            actualPrice: pricing.actualPrice,
+            actual_price: pricing.actualPrice,
+            strikePrice: pricing.strikePrice,
+            strike_price: pricing.strikePrice,
+            final_price: pricing.actualPrice,
+            categoryDiscountPercentage: pricing.categoryDiscountPercentage,
+            category_discount_percentage: pricing.categoryDiscountPercentage,
+            categoryDiscountAmount: pricing.categoryDiscountAmount,
+            category_discount_amount: pricing.categoryDiscountAmount,
+            currentDifference: pricing.currentDifference,
+            hasCategoryDiscount: pricing.hasCategoryDiscount,
+            isDiscounted: pricing.isDiscounted,
+            discount_percentage: pricing.categoryDiscountPercentage,
+            discount_amount: pricing.categoryDiscountAmount,
+            stock: item.stock !== undefined ? item.stock : 50,
             image: imageUrl,
             category: categoryName,
             subCategory: subName
@@ -1446,7 +1499,16 @@ app.post("/api/storage/upload", productUpload.single("image"), (req, res) => {
     }
 
     // Default product saving
-    const { category_name, subcategory_name, title, price, actual_price, description, stock } = req.body;
+    const { category_name, subcategory_name, title, price, actual_price, description, stock, product_discount } = req.body;
+    const parsedPrice = parseInt(price) || 0;
+    const parsedActualPrice = parseInt(actual_price) || 0;
+
+    if (parsedActualPrice > 0 && parsedPrice > parsedActualPrice) {
+      return res.status(400).json({
+        error: `Actual selling price (₹${parsedPrice}) cannot be higher than Strike Price / MRP (₹${parsedActualPrice}).`
+      });
+    }
+
     const imagePath = req.file ? `/products/${req.file.filename}` : "/products/placeholder.jpg";
 
     const productsPath = path.join(__dirname, "public", "products.json");
@@ -1481,8 +1543,9 @@ app.post("/api/storage/upload", productUpload.single("image"), (req, res) => {
       id: newProdId,
       name: title,
       title: title,
-      price: parseInt(price) || 0,
-      "act-price": parseInt(actual_price) || 0,
+      price: parsedPrice,
+      "act-price": parsedActualPrice || Math.round(parsedPrice * 1.25),
+      product_discount: product_discount ? parseFloat(product_discount) : undefined,
       description: description || "",
       image: imagePath,
       stock: stock !== undefined ? parseInt(stock) : 50
@@ -1501,7 +1564,17 @@ app.post("/api/storage/upload", productUpload.single("image"), (req, res) => {
 // Admin: Update product
 app.put("/api/storage/upload/products", productUpload.single("image"), (req, res) => {
   try {
-    const { id, title, price, actual_price, description, category_name, subcategory_name, stock } = req.body;
+    const { id, title, price, actual_price, description, category_name, subcategory_name, stock, product_discount } = req.body;
+
+    const parsedPrice = price !== undefined ? parseInt(price) : null;
+    const parsedActualPrice = actual_price !== undefined ? parseInt(actual_price) : null;
+
+    if (parsedPrice !== null && parsedActualPrice !== null && parsedActualPrice > 0 && parsedPrice > parsedActualPrice) {
+      return res.status(400).json({
+        error: `Actual selling price (₹${parsedPrice}) cannot be higher than Strike Price / MRP (₹${parsedActualPrice}).`
+      });
+    }
+
     const imagePath = req.file ? `/products/${req.file.filename}` : null;
     const productsPath = path.join(__dirname, "public", "products.json");
     const rawData = readJsonFile(productsPath, []);
@@ -1520,8 +1593,9 @@ app.put("/api/storage/upload/products", productUpload.single("image"), (req, res
               ...items[idx],
               name: title || items[idx].name,
               title: title || items[idx].title,
-              price: price ? parseInt(price) : items[idx].price,
-              "act-price": actual_price ? parseInt(actual_price) : items[idx]["act-price"],
+              price: price !== undefined ? parseInt(price) : items[idx].price,
+              "act-price": actual_price !== undefined ? parseInt(actual_price) : items[idx]["act-price"],
+              product_discount: product_discount !== undefined ? parseFloat(product_discount) : items[idx].product_discount,
               description: description || items[idx].description,
               image: imagePath || items[idx].image,
               stock: stock !== undefined ? parseInt(stock) : items[idx].stock
@@ -1550,10 +1624,12 @@ app.put("/api/storage/upload/products", productUpload.single("image"), (req, res
               ...items[idx],
               name: title || items[idx].name || items[idx].title,
               title: title || items[idx].title || items[idx].name,
-              price: price ? parseInt(price) : items[idx].price,
-              "act-price": actual_price ? parseInt(actual_price) : items[idx]["act-price"] || items[idx].price,
+              price: price !== undefined ? parseInt(price) : items[idx].price,
+              "act-price": actual_price !== undefined ? parseInt(actual_price) : items[idx]["act-price"] || items[idx].price,
+              product_discount: product_discount !== undefined ? parseFloat(product_discount) : items[idx].product_discount,
               description: description || items[idx].description,
-              image: imagePath || items[idx].image
+              image: imagePath || items[idx].image,
+              stock: stock !== undefined ? parseInt(stock) : items[idx].stock
             };
             updated = true;
           }

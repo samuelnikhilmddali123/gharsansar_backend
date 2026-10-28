@@ -1,5 +1,5 @@
 import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
-import { LayoutDashboard, Package, Settings, PenBox, Hammer, Mail, LogOut, User, Home, MessageSquare, Gift } from "lucide-react";
+import { LayoutDashboard, Package, Settings, PenBox, Hammer, Mail, LogOut, User, Home, MessageSquare, Gift, Percent } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
 export default function AdminLayout() {
@@ -9,7 +9,7 @@ export default function AdminLayout() {
 
   const handleLogout = () => {
     logout();
-    navigate("/");
+    navigate("/login");
   };
 
   const isActive = (path: string) => location.pathname === path;
@@ -56,6 +56,16 @@ export default function AdminLayout() {
               }`}
             >
               <Package size={20} /> <span className="font-semibold">Products Admin</span>
+            </Link>
+            <Link
+              to="/admin/discounts"
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                isActive("/admin/discounts")
+                  ? "bg-blue-600 text-white shadow-lg"
+                  : "hover:bg-gray-700 text-gray-300"
+              }`}
+            >
+              <Percent size={20} /> <span className="font-semibold">Discounts & Pricing</span>
             </Link>
             <Link
               to="/admin/services-admin"
@@ -121,16 +131,10 @@ export default function AdminLayout() {
         </div>
 
         {/* Bottom Actions */}
-        <div className="p-4 border-t border-gray-700 space-y-2">
-          <Link
-            to="/"
-            className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-700 text-gray-300 transition-all"
-          >
-            <Home size={20} /> <span className="font-semibold">Back to Site</span>
-          </Link>
+        <div className="p-4 border-t border-gray-700">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-red-600 hover:bg-red-700 text-white transition-all font-semibold"
+            className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-lg bg-red-600 hover:bg-red-700 text-white transition-all font-semibold cursor-pointer shadow-md"
           >
             <LogOut size={20} /> Logout
           </button>

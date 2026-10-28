@@ -5,13 +5,24 @@ import axios from "axios";
 export interface Product {
   id: string;
   title: string;
+  name?: string;
   description: string;
-  price: number;
-  actualPrice: number;
+  strikePrice: number; // Original / reference price displayed with strikethrough (e.g. ₹3,000)
+  actualPrice: number; // Current product price entered manually by admin (e.g. ₹2,500)
+  categoryDiscountPercentage: number; // Promotional category discount % (e.g. 10%)
+  categoryDiscountAmount: number; // Calculated from Strike Price: Strike * Discount% (e.g. ₹300)
+  currentDifference?: number; // Strike Price - Actual Price (e.g. ₹500)
+  hasCategoryDiscount?: boolean;
+  price: number; // Customer purchase price = actualPrice (₹2,500)
+  sellingPrice: number; // alias for actualPrice
+  finalPrice: number; // alias for actualPrice (never reduced below actualPrice)
+  discountPercentage: number; // alias for categoryDiscountPercentage
+  isOnSale?: boolean;
   image: string;
   video?: string;
   category: string;
   subCategory: string;
+  stock?: number;
 }
 
 interface ProductContextType {
@@ -21,6 +32,7 @@ interface ProductContextType {
   addProduct: (p: Partial<Product> & { imageFile?: File }) => Promise<void>;
   updateProduct: (id: string, p: Partial<Product> & { imageFile?: File }) => Promise<void>;
   deleteProduct: (id: string, category_type: string) => Promise<void>;
+  refreshProducts: () => Promise<void>;
 }
 
 const ProductContext = createContext<ProductContextType | undefined>(undefined);
@@ -98,16 +110,35 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
           const items = sub.products || sub.images || sub.services || [];
           items.forEach((img: any, index: number) => {
             const imageUrl = fixImageUrl(img.image);
+            const actualPrice = parseInt(img.actualPrice) || parseInt(img.actual_price) || parseInt(img.price) || parseInt(img.selling_price) || 0;
+            const strikePrice = parseInt(img.strikePrice) || parseInt(img.strike_price) || parseInt(img["act-price"]) || (actualPrice > 0 ? actualPrice : 0);
+            const categoryDiscountPercentage = parseFloat(img.categoryDiscountPercentage) || parseFloat(img.category_discount_percentage) || parseFloat(img.discount_percentage) || 0;
+            const categoryDiscountAmount = parseInt(img.categoryDiscountAmount) || parseInt(img.category_discount_amount) || Math.round(strikePrice * (categoryDiscountPercentage / 100));
+            const currentDifference = Math.max(0, strikePrice - actualPrice);
+            const hasCategoryDiscount = categoryDiscountPercentage > 0;
+            const isOnSale = hasCategoryDiscount || strikePrice > actualPrice;
+
             catProducts.push({
               id: img.id || `${category.name || category.category}-${sub.name}-${index}`,
               title: img.title || img.name || "Untitled Product",
+              name: img.title || img.name || "Untitled Product",
               description: img.description || "",
-              price: parseInt(img.price) || parseInt(img["act-price"]) || 0,
-              actualPrice: parseInt(img["act-price"]) || parseInt(img.actual_price) || 0,
+              strikePrice: strikePrice,
+              actualPrice: actualPrice,
+              categoryDiscountPercentage: categoryDiscountPercentage,
+              categoryDiscountAmount: categoryDiscountAmount,
+              currentDifference: currentDifference,
+              hasCategoryDiscount: hasCategoryDiscount,
+              price: actualPrice, // Customer purchase price = actualPrice (₹2,500)
+              sellingPrice: actualPrice,
+              finalPrice: actualPrice,
+              discountPercentage: categoryDiscountPercentage,
+              isOnSale: isOnSale,
               image: imageUrl,
               video: img.video || "",
               category: category.name || category.category || "General",
               subCategory: sub.name,
+              stock: img.stock !== undefined ? img.stock : 50
             });
           });
         });
@@ -140,16 +171,36 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
             const items = sub.products || sub.images || sub.services || [];
             items.forEach((img: any, index: number) => {
               const imageUrl = fixImageUrl(img.image);
+              const sellingPrice = parseInt(img.selling_price) || parseInt(img.price) || 0;
+              const strikePrice = parseInt(img.strike_price) || parseInt(img.actual_price) || parseInt(img["act-price"]) || parseInt(img.actualPrice) || (sellingPrice > 0 ? Math.round(sellingPrice * 1.25) : 0);
+              const finalPrice = parseInt(img.final_price) || parseInt(img.finalPrice) || parseInt(img.price) || sellingPrice;
+              const discountPct = parseFloat(img.discount_percentage) || 0;
+              const savings = parseInt(img.savings) || Math.max(0, strikePrice - finalPrice);
+              const totalDiscountPercent = parseInt(img.total_discount_percent) || (strikePrice > 0 ? Math.round(((strikePrice - finalPrice) / strikePrice) * 100) : 0);
+              const isOnSale = img.is_on_sale !== undefined ? Boolean(img.is_on_sale) : (finalPrice < strikePrice || discountPct > 0);
+
               catProducts.push({
                 id: img.id || `${category.name || category.category}-${sub.name}-${index}`,
                 title: img.title || img.name || "Untitled Product",
+                name: img.title || img.name || "Untitled Product",
                 description: img.description || "",
-                price: parseInt(img.price) || parseInt(img["act-price"]) || 0,
-                actualPrice: parseInt(img["act-price"]) || parseInt(img.actual_price) || 0,
+                price: finalPrice,
+                sellingPrice: sellingPrice,
+                actualPrice: strikePrice,
+                strikePrice: strikePrice,
+                finalPrice: finalPrice,
+                discountPercentage: discountPct,
+                discountSource: img.discount_source || null,
+                categoryDiscount: parseFloat(img.category_discount) || 0,
+                productDiscount: parseFloat(img.product_discount) || 0,
+                savings: savings,
+                totalDiscountPercent: totalDiscountPercent,
+                isOnSale: isOnSale,
                 image: imageUrl,
                 video: img.video || "",
                 category: category.name || category.category || "General",
                 subCategory: sub.name,
+                stock: img.stock !== undefined ? img.stock : 50
               });
             });
           });
@@ -242,7 +293,17 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
   };
 
   return (
-    <ProductContext.Provider value={{ products, loading, error, addProduct, updateProduct, deleteProduct }}>
+    <ProductContext.Provider
+      value={{
+        products,
+        loading,
+        error,
+        addProduct,
+        updateProduct,
+        deleteProduct,
+        refreshProducts: fetchProducts
+      }}
+    >
       {children}
     </ProductContext.Provider>
   );

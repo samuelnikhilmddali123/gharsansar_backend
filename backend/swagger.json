@@ -63,6 +63,10 @@
     {
       "name": "Storage & Uploads",
       "description": "Image and media file storage endpoints for products, interior designs, and blog articles"
+    },
+    {
+      "name": "Discounts & Pricing",
+      "description": "Category promotional discounts and controlled two-price architecture (Strike Price & Actual Price)"
     }
   ],
   "paths": {
@@ -2560,6 +2564,277 @@
           }
         }
       }
+    },
+    "/api/v1/discounts": {
+      "get": {
+        "tags": [
+          "Discounts & Pricing"
+        ],
+        "summary": "List all category discounts",
+        "description": "Returns all category discount rules with active status and live affected product counts.",
+        "responses": {
+          "200": {
+            "description": "Array of category discounts",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "count": 1,
+                  "data": [
+                    {
+                      "id": "disc_1793218250855",
+                      "category": "Sonu Products",
+                      "discountPercentage": 10,
+                      "startDate": "2026-10-28T00:00:00.000Z",
+                      "endDate": "2026-11-11T00:00:00.000Z",
+                      "status": "active",
+                      "isCurrentlyActive": true,
+                      "affectedProductsCount": 24
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Discounts & Pricing"
+        ],
+        "summary": "Create or update a category discount",
+        "description": "Applies a promotional discount percentage to all products in a category based on their Strike Price. If an active discount for the category already exists, it is updated in-place.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "category",
+                  "discountPercentage",
+                  "startDate",
+                  "endDate"
+                ],
+                "properties": {
+                  "category": {
+                    "type": "string",
+                    "example": "Sonu Products",
+                    "description": "Target product category"
+                  },
+                  "discountPercentage": {
+                    "type": "number",
+                    "example": 10,
+                    "description": "Discount % calculated based on Strike Price"
+                  },
+                  "startDate": {
+                    "type": "string",
+                    "format": "date",
+                    "example": "2026-10-28"
+                  },
+                  "endDate": {
+                    "type": "string",
+                    "format": "date",
+                    "example": "2026-11-11"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "active",
+                      "inactive"
+                    ],
+                    "default": "active"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Festival promotional offer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Discount successfully created or updated"
+          },
+          "400": {
+            "description": "Validation error (invalid percentage or dates)"
+          }
+        }
+      }
+    },
+    "/api/v1/discounts/active": {
+      "get": {
+        "tags": [
+          "Discounts & Pricing"
+        ],
+        "summary": "Get currently active category discounts",
+        "description": "Returns only category discounts that are active and currently within their valid date range.",
+        "responses": {
+          "200": {
+            "description": "List of currently active category discounts"
+          }
+        }
+      }
+    },
+    "/api/v1/discounts/stats": {
+      "get": {
+        "tags": [
+          "Discounts & Pricing"
+        ],
+        "summary": "Get pricing & discount engine analytics",
+        "description": "Returns total catalog products, active promotions, and average discount percentages.",
+        "responses": {
+          "200": {
+            "description": "Discount statistics",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "stats": {
+                    "totalProducts": 639,
+                    "activeDiscounts": 2,
+                    "discountedProducts": 114,
+                    "averageDiscount": 10
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/discounts/{id}": {
+      "put": {
+        "tags": [
+          "Discounts & Pricing"
+        ],
+        "summary": "Update category discount by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "category": {
+                    "type": "string"
+                  },
+                  "discountPercentage": {
+                    "type": "number"
+                  },
+                  "startDate": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "endDate": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "active",
+                      "inactive"
+                    ]
+                  },
+                  "description": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Discount updated"
+          },
+          "404": {
+            "description": "Discount not found"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Discounts & Pricing"
+        ],
+        "summary": "Delete category discount by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Discount deleted"
+          },
+          "404": {
+            "description": "Discount not found"
+          }
+        }
+      }
+    },
+    "/api/v1/discounts/{id}/status": {
+      "patch": {
+        "tags": [
+          "Discounts & Pricing"
+        ],
+        "summary": "Toggle category discount status (active / inactive)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "status"
+                ],
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "active",
+                      "inactive"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Status updated successfully"
+          }
+        }
+      }
     }
   },
   "security": [
@@ -3093,6 +3368,83 @@
           "updatedAt": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "CategoryDiscount": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "disc_1793218250855"
+          },
+          "category": {
+            "type": "string",
+            "example": "Sonu Products"
+          },
+          "discountPercentage": {
+            "type": "number",
+            "example": 10
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "inactive"
+            ],
+            "example": "active"
+          },
+          "description": {
+            "type": "string",
+            "example": "Category promotional offer"
+          },
+          "affectedProductsCount": {
+            "type": "integer",
+            "example": 24
+          }
+        }
+      },
+      "ProductPricing": {
+        "type": "object",
+        "description": "Two separate prices architecture with category discount calculated strictly on Strike Price",
+        "properties": {
+          "strikePrice": {
+            "type": "number",
+            "example": 3000,
+            "description": "Original reference price displayed crossed out"
+          },
+          "actualPrice": {
+            "type": "number",
+            "example": 2500,
+            "description": "Current selling price manually controlled by admin (never reduced by category discount)"
+          },
+          "categoryDiscountPercentage": {
+            "type": "number",
+            "example": 10,
+            "description": "Promotional discount percentage calculated from Strike Price"
+          },
+          "categoryDiscountAmount": {
+            "type": "number",
+            "example": 300,
+            "description": "Promotional discount amount: Strike Price × Category Discount %"
+          },
+          "currentDifference": {
+            "type": "number",
+            "example": 500,
+            "description": "Difference: Strike Price - Actual Price"
+          },
+          "price": {
+            "type": "number",
+            "example": 2500,
+            "description": "Customer purchase price = actualPrice (₹2,500, NOT ₹2,250)"
           }
         }
       }

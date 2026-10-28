@@ -38,7 +38,8 @@ import {
   Check,
   ExternalLink,
   Plus,
-  Minus
+  Minus,
+  Sparkles
 } from "lucide-react";
 import { useProducts, Product } from "../context/ProductContext";
 import { useCart } from "../context/CartContext";
@@ -438,10 +439,15 @@ const ProductDetail: React.FC = () => {
 
   const handleAddToCart = () => {
     if (!product) return;
+    const effectivePrice = Number(
+      product.actualPrice !== undefined ? product.actualPrice :
+      product.price !== undefined ? product.price :
+      product.sellingPrice || 0
+    );
     addToCart({
       id: product.id || product._id,
       name: product.title || product.name,
-      price: product.price,
+      price: effectivePrice, // Customer pays actualPrice (₹2,500)
       image: product.image || product.images?.[0],
       quantity: quantity,
       isReturnGift: state?.isReturnGift,
@@ -517,11 +523,38 @@ const ProductDetail: React.FC = () => {
     );
   }
 
-  // Discount Calculation
-  const actualPriceVal = product.actualPrice || (product["act-price"] as number) || (product.price ? Math.round(product.price * 1.2) : 0);
-  const discountPercentage = actualPriceVal && product.price && actualPriceVal > product.price
-    ? Math.round(((actualPriceVal - product.price) / actualPriceVal) * 100)
-    : 17;
+  // Controlled Two-Price Architecture (Section 1, 3, 10, 16)
+  // Actual Price: Current price entered manually by admin (e.g. ₹2,500). Never reduced by category discount!
+  const actualPrice = Number(
+    product.actualPrice !== undefined ? product.actualPrice :
+    product.price !== undefined ? product.price :
+    product.sellingPrice || 0
+  ) || 0;
+
+  // Strike Price: Reference price displayed with strikethrough (e.g. ₹3,000)
+  const strikePrice = Number(
+    product.strikePrice !== undefined ? product.strikePrice :
+    (product as any)["act-price"] !== undefined ? (product as any)["act-price"] :
+    actualPrice
+  ) || actualPrice;
+
+  // Category promotional discount % (e.g. 10%)
+  const categoryDiscount = Number(
+    product.categoryDiscountPercentage !== undefined ? product.categoryDiscountPercentage :
+    product.discountPercentage || 0
+  );
+
+  // Discount Amount calculated based on STRIKE PRICE: ₹3,000 × 10% = ₹300
+  const categoryDiscountAmount = strikePrice > 0 && categoryDiscount > 0
+    ? Math.round(strikePrice * (categoryDiscount / 100))
+    : 0;
+
+  // Current Difference between Strike Price and Actual Price: ₹3,000 - ₹2,500 = ₹500
+  const currentDifference = Math.max(0, strikePrice - actualPrice);
+
+  const displayDiscountBadge = categoryDiscount > 0
+    ? `${categoryDiscount}% OFF`
+    : (strikePrice > actualPrice ? `${Math.round(((strikePrice - actualPrice) / strikePrice) * 100)}% OFF` : null);
 
   return (
     <div className="min-h-screen bg-[#FAF9F6] pb-20 font-sans relative overflow-x-hidden">
@@ -542,7 +575,7 @@ const ProductDetail: React.FC = () => {
       <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200/80 p-3.5 z-40 flex items-center justify-between shadow-2xl">
         <div>
           <span className="text-[10px] text-gray-500 block uppercase font-bold tracking-wider">Total Price</span>
-          <span className="text-lg font-black text-gray-900">₹{(product.price * quantity) + (deliveryFee || 0)}</span>
+          <span className="text-lg font-black text-gray-900">₹{(actualPrice * quantity) + (deliveryFee || 0)}</span>
         </div>
         <div className="flex gap-2 items-center">
           {quantityInCart > 0 ? (
@@ -815,20 +848,40 @@ const ProductDetail: React.FC = () => {
                 </span>
               </div>
 
-              {/* Pricing Row matching screenshot (MRP, SAVE %, Price) */}
-              <div className="space-y-1 pb-4">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">MRP</span>
-                  <span className="text-sm text-gray-400 line-through">₹{actualPriceVal}</span>
-                  <span className="text-[10px] font-extrabold text-[#D32F2F] bg-[#FCE8E8] px-2 py-0.5 rounded-none">
-                    SAVE {discountPercentage}%
+              {/* Pricing Section (Strike Price crossed out, Actual Price dominant, Category Discount Badge) */}
+              <div className="space-y-2.5 pb-5 border-b border-gray-100 mb-5">
+                <div className="flex items-center gap-3 flex-wrap">
+                  {strikePrice > actualPrice && (
+                    <span className="text-base sm:text-lg text-gray-400 line-through font-medium">
+                      ₹{strikePrice.toLocaleString("en-IN")}
+                    </span>
+                  )}
+                  <span className="text-3xl sm:text-4xl font-black text-gray-950 tracking-tight">
+                    ₹{actualPrice.toLocaleString("en-IN")}
                   </span>
+                  {displayDiscountBadge && (
+                    <span className="text-xs sm:text-sm font-black text-emerald-800 bg-emerald-100 border border-emerald-300/80 px-2.5 py-1 rounded-sm uppercase tracking-wider">
+                      {displayDiscountBadge}
+                    </span>
+                  )}
                 </div>
 
-                <div className="flex items-baseline gap-3 pt-1">
-                  <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Price</span>
-                  <span className="text-3xl font-extrabold text-gray-900">₹{product.price}</span>
-                </div>
+                {/* Promotional Category Offer info line */}
+                {categoryDiscount > 0 ? (
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 pt-1 text-xs">
+                    <span className="inline-flex items-center gap-1.5 font-bold text-emerald-800 bg-emerald-50 border border-emerald-200/90 px-3 py-1.5 rounded-sm">
+                      <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Category Offer: {categoryDiscount}% OFF</span>
+                    </span>
+                    <span className="text-gray-500 font-medium">
+                      (₹{categoryDiscountAmount.toLocaleString("en-IN")} promotional discount based on Strike Price)
+                    </span>
+                  </div>
+                ) : currentDifference > 0 ? (
+                  <div className="flex items-center gap-2 pt-1 text-xs text-gray-500 font-medium">
+                    <span>Direct Price Benefit: ₹{currentDifference.toLocaleString("en-IN")} below MRP</span>
+                  </div>
+                ) : null}
               </div>
 
               {/* Delivery Location Box matching screenshot */}

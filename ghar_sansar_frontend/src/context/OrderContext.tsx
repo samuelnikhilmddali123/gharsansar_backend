@@ -104,7 +104,8 @@ export const OrderProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     const userId = getUserId();
     const token = localStorage.getItem("token");
 
-    if (userId === "guest" && !token) {
+    // Do not call server for guest users without token
+    if (!token || userId === "guest") {
       setOrders([]);
       return;
     }
@@ -114,9 +115,13 @@ export const OrderProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       const res = await axios.get(`${BACKEND_URL}/v1/orders`, {
         headers: getAuthHeaders()
       });
-      setOrders(res.data || []);
-    } catch (error) {
-      console.error("Error fetching user orders from MongoDB Atlas:", error);
+      setOrders(res.data?.orders || res.data || []);
+    } catch (error: any) {
+      if (error?.response?.status === 401 || error?.response?.status === 403) {
+        setOrders([]);
+      } else {
+        console.warn("Could not fetch user orders:", error?.message);
+      }
     } finally {
       setLoading(false);
     }

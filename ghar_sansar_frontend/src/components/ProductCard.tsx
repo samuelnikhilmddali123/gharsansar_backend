@@ -64,23 +64,60 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
   );
   const quantityInCart = cartItem ? cartItem.quantity : 0;
 
+  // Controlled Two-Price Architecture (Section 1, 4, 9, 16)
+  // Actual Price: Current price entered manually by admin (e.g., ₹2,500). Never reduced by category discount!
+  const actualPrice = Number(
+    product.actualPrice !== undefined ? product.actualPrice :
+    product.price !== undefined ? product.price :
+    product.sellingPrice || 0
+  ) || 0;
+
+  // Strike Price: Reference price displayed with strikethrough (e.g., ₹3,000)
+  const strikePrice = Number(
+    product.strikePrice !== undefined ? product.strikePrice :
+    (product as any)["act-price"] !== undefined ? (product as any)["act-price"] :
+    actualPrice
+  ) || actualPrice;
+
+  // Category Promotional Discount %
+  const categoryDiscount = Number(
+    product.categoryDiscountPercentage !== undefined ? product.categoryDiscountPercentage :
+    product.discountPercentage || 0
+  );
+
+  const displayDiscountBadge = categoryDiscount > 0
+    ? `${categoryDiscount}% OFF`
+    : (strikePrice > actualPrice ? `${Math.round(((strikePrice - actualPrice) / strikePrice) * 100)}% OFF` : null);
+
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!product.price) {
+    if (!actualPrice) {
       toast("Price on request");
       return;
     }
-    addToCart(product);
+    addToCart({
+      id: product.id,
+      name: product.title?.replace(/_/g, " "),
+      price: actualPrice,
+      image: product.image,
+      stock: product.stock,
+    });
     toast.success(`Added ${product.title?.replace(/_/g, " ")} to cart!`);
   };
 
   const handleIncrement = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!product.price) return;
+    if (!actualPrice) return;
     if (cartItem) {
       updateQuantity(cartItem.id, quantityInCart + 1);
     } else {
-      addToCart(product);
+      addToCart({
+        id: product.id,
+        name: product.title?.replace(/_/g, " "),
+        price: actualPrice,
+        image: product.image,
+        stock: product.stock,
+      });
     }
   };
 
@@ -100,11 +137,17 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
 
   const handleBuyNow = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!product.price) {
+    if (!actualPrice) {
       toast("Price on request");
       return;
     }
-    addToCart(product);
+    addToCart({
+      id: product.id,
+      name: product.title?.replace(/_/g, " "),
+      price: actualPrice,
+      image: product.image,
+      stock: product.stock,
+    });
     navigate("/checkout");
   };
 
@@ -140,7 +183,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
 
       <div>
         {/* Product Image Container */}
-        <div className="relative w-full aspect-square rounded-lg overflow-hidden flex items-center justify-center p-3 mb-3 bg-[#FAF8F5] border border-[#F0ECE1]">
+        <div className="relative w-full aspect-square rounded-none overflow-hidden flex items-center justify-center p-3 mb-3 bg-[#FAF8F5] border border-[#F0ECE1]">
+          {displayDiscountBadge && (
+            <div className="absolute top-2 left-2 z-10 bg-[#004e38] text-white text-[10px] sm:text-[11px] font-black uppercase tracking-wider px-2 py-0.5 shadow-sm">
+              {displayDiscountBadge}
+            </div>
+          )}
           {product.image ? (
             <StudioImage
               src={product.image}
@@ -174,16 +222,21 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
       </div>
 
       <div>
-        {/* Price Row */}
+        {/* Price Row: Strike Price crossed out + Dominant Actual Price + Category Discount Badge (Section 4, 9, 16) */}
         <div className="mb-3">
-          {product.price ? (
-            <div className="flex items-baseline gap-2">
-              <span className="text-base sm:text-lg font-bold text-gray-900 tracking-tight">
-                ₹{Number(product.price).toLocaleString("en-IN")}
+          {actualPrice > 0 ? (
+            <div className="flex items-baseline gap-2 flex-wrap">
+              <span className="text-lg sm:text-xl font-black text-gray-950 tracking-tight">
+                ₹{actualPrice.toLocaleString("en-IN")}
               </span>
-              {product.actualPrice && product.actualPrice > product.price && (
-                <span className="text-xs text-gray-400 line-through font-normal">
-                  ₹{Number(product.actualPrice).toLocaleString("en-IN")}
+              {strikePrice > actualPrice && (
+                <span className="text-xs sm:text-sm text-gray-400 line-through font-normal">
+                  ₹{strikePrice.toLocaleString("en-IN")}
+                </span>
+              )}
+              {displayDiscountBadge && (
+                <span className="text-[11px] font-extrabold text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-1.5 py-0.5 rounded-sm tracking-wide">
+                  {displayDiscountBadge}
                 </span>
               )}
             </div>

@@ -1,6 +1,6 @@
 // src/App.tsx
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
-import { AuthProvider } from "./context/AuthContext";
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 import { ProductProvider } from "./context/ProductContext";
 import { BlogProvider } from "./context/BlogContext";
@@ -29,7 +29,6 @@ import Profile from "./pages/Profile";
 // ✅ Admin pages
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminLayout from "./pages/admin/AdminLayout";
-// import AdminEnquiryList from "./pages/admin/AdminEnquiryList";
 import BlogAdmin from "./pages/admin/BlogAdmin";
 import ServicesAdmin from "./pages/admin/ServicesAdmin";
 import ProductsAdmin from "./pages/admin/ProductsAdmin";
@@ -38,6 +37,7 @@ import InteriorWorksAdmin from "./pages/admin/InteriorWorksAdmin";
 import OrdersAdmin from "./pages/admin/OrdersAdmin";
 import ChatsAdmin from "./pages/admin/ChatsAdmin";
 import ReturnGiftsAdmin from "./pages/admin/ReturnGiftsAdmin";
+import DiscountAdmin from "./pages/admin/DiscountAdmin";
 
 import ChatBot from "./components/ChatBot/ChatBot";
 
@@ -48,14 +48,60 @@ import ReturnGifts from "./pages/ReturnGifts";
 
 const AppLayout = () => {
   const location = useLocation();
+  const { user, loading } = useAuth();
+
+  const isUserAdmin = Boolean(
+    user && (
+      (user.role && user.role.toLowerCase() === "admin") ||
+      (user.email && user.email.toLowerCase() === "gharsansarshop@gmail.com")
+    )
+  );
+
+  const isAdminRoute = location.pathname.startsWith("/admin");
   const isHomePage = location.pathname === "/";
 
+  // 1. If logged in as admin, prevent access to customer store pages and auto-redirect to /admin
+  if (!loading && isUserAdmin && !isAdminRoute) {
+    return <Navigate to="/admin" replace />;
+  }
+
+  // 2. If navigating on admin routes, render clean dedicated admin view without customer Header/Footer
+  if (isAdminRoute) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Routes>
+          <Route
+            path="/admin/*"
+            element={
+              <ProtectedRoute role="admin">
+                <AdminLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<AdminDashboard />} />
+            <Route path="blog-admin" element={<BlogAdmin />} />
+            <Route path="services-admin" element={<ServicesAdmin />} />
+            <Route path="products-admin" element={<ProductsAdmin />} />
+            <Route path="products-bulk" element={<ProductAdminBulk />} />
+            <Route path="discounts" element={<DiscountAdmin />} />
+            <Route path="interior-works" element={<InteriorWorksAdmin />} />
+            <Route path="orders" element={<OrdersAdmin />} />
+            <Route path="chats" element={<ChatsAdmin />} />
+            <Route path="return-gifts" element={<ReturnGiftsAdmin />} />
+          </Route>
+          <Route path="*" element={<Navigate to="/admin" replace />} />
+        </Routes>
+      </div>
+    );
+  }
+
+  // 3. Regular customer view
   return (
     <div className="min-h-screen bg-[#F7F6F0]">
       <Header />
       <main className={isHomePage ? "" : "pt-20 sm:pt-24"}>
         <Routes>
-          {/* ---------- Public routes ---------- */}
+          {/* ---------- Public customer routes ---------- */}
           <Route path="/" element={<Home />} />
           <Route path="/products" element={<ProductsPage />} />
           <Route path="/product/:id" element={<ProductDetail />} />
@@ -69,7 +115,7 @@ const AppLayout = () => {
           {/* Public Interior Design page */}
           <Route path="/interior-design" element={<InteriorDesignPage />} />
 
-          {/* ---------- Protected routes ---------- */}
+          {/* ---------- Protected customer routes ---------- */}
           <Route
             path="/checkout"
             element={
@@ -106,10 +152,10 @@ const AppLayout = () => {
           >
             <Route index element={<AdminDashboard />} />
             <Route path="blog-admin" element={<BlogAdmin />} />
-            {/* <Route path="enquiries" element={<AdminEnquiryList />} /> */}
             <Route path="services-admin" element={<ServicesAdmin />} />
             <Route path="products-admin" element={<ProductsAdmin />} />
             <Route path="products-bulk" element={<ProductAdminBulk />} />
+            <Route path="discounts" element={<DiscountAdmin />} />
             <Route path="interior-works" element={<InteriorWorksAdmin />} />
             <Route path="orders" element={<OrdersAdmin />} />
             <Route path="chats" element={<ChatsAdmin />} />

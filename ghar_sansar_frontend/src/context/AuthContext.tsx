@@ -113,7 +113,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Refresh user state from MongoDB Atlas
     if (storedToken) {
       axios
-        .get(`${BACKEND_URL}/auth/me`)
+        .get(`${BACKEND_URL}/auth/me`, {
+          headers: { Authorization: `Bearer ${storedToken}` }
+        })
         .then((res) => {
           if (res.data.success && res.data.user) {
             setUser(res.data.user);
@@ -122,8 +124,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             syncUserShippingPincode(res.data.user);
           }
         })
-        .catch(() => {
-          // Token expired or server unreachable, fallback remains
+        .catch((err) => {
+          // Stale or expired token: purge from localStorage and revert cleanly to guest mode
+          if (err?.response?.status === 401 || err?.response?.status === 403) {
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            delete axios.defaults.headers.common["Authorization"];
+            setUser(null);
+            setIsAuthenticated(false);
+          }
         })
         .finally(() => {
           setLoading(false);

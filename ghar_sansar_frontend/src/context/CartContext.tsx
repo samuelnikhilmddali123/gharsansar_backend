@@ -123,8 +123,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         setItems(backendItems);
       }
-    } catch (err) {
-      console.warn("Could not fetch remote cart, using local cache:", err);
+    } catch (err: any) {
+      if (err?.response?.status === 401 || err?.response?.status === 403) {
+        localStorage.removeItem('token');
+      }
       const savedCart = localStorage.getItem('cart');
       if (savedCart) {
         try {

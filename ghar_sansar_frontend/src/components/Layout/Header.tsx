@@ -401,7 +401,7 @@ const Header: React.FC = () => {
                       <Link to="/profile" className="block px-4 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 rounded-none transition-colors" onClick={() => setUserMenuOpen(false)}>
                         Profile
                       </Link>
-                      {user.role === "admin" && location.pathname.startsWith('/admin') && (
+                      {((user.role && user.role.toLowerCase() === "admin") || user.email?.toLowerCase() === "gharsansarshop@gmail.com") && (
                         <Link to="/admin" className="block px-4 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 rounded-none transition-colors" onClick={() => setUserMenuOpen(false)}>
                           Admin Dashboard
                         </Link>

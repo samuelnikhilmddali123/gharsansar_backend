@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Package, PenBox, Hammer, Mail, Settings, TrendingUp, Users, Clock, BarChart3, Activity, Globe, Server, Database, Zap, AlertCircle, CheckCircle2, TrendingDown, DollarSign, Eye, Share2, Gift } from "lucide-react";
+import { Package, PenBox, Hammer, Mail, Settings, TrendingUp, Users, Clock, BarChart3, Activity, Globe, Server, Database, Zap, AlertCircle, CheckCircle2, TrendingDown, DollarSign, Eye, Share2, Gift, Percent, Tag, ArrowRight, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import axios from "axios";
 import { useProducts } from "../context/ProductContext";
 import { useServices } from "../context/ServiceContext";
 import { useBlogs } from "../context/BlogContext";
@@ -9,10 +10,10 @@ import { useInterior } from "../context/InteriorContext";
 
 const stats = [
   { name: "Products", icon: Package, link: "/admin/products-admin", color: "bg-blue-500", gradient: "from-blue-500 to-blue-600" },
+  { name: "Discounts & Pricing", icon: Percent, link: "/admin/discounts", color: "bg-indigo-500", gradient: "from-indigo-500 to-indigo-600" },
   { name: "Blogs", icon: PenBox, link: "/admin/blog-admin", color: "bg-green-500", gradient: "from-green-500 to-green-600" },
   { name: "Services", icon: Settings, link: "/admin/services-admin", color: "bg-purple-500", gradient: "from-purple-500 to-purple-600" },
   { name: "Interior Works", icon: Hammer, link: "/admin/interior-works", color: "bg-yellow-500", gradient: "from-yellow-500 to-yellow-600" },
-  { name: "Enquiries", icon: Mail, link: "/admin/enquiries", color: "bg-red-500", gradient: "from-red-500 to-red-600" },
   { name: "Return Gifts", icon: Gift, link: "/admin/return-gifts", color: "bg-pink-500", gradient: "from-pink-500 to-pink-600" },
 ];
 
@@ -24,6 +25,13 @@ const AdminDashboard: React.FC = () => {
 
   const [currentTime, setCurrentTime] = useState<string>("Loading...");
   const [mounted, setMounted] = useState(false);
+  const [discountStats, setDiscountStats] = useState({
+    totalProducts: 0,
+    activeDiscounts: 0,
+    discountedProducts: 0,
+    averageDiscount: 0,
+    productsOnSale: 0,
+  });
 
   useEffect(() => {
     setMounted(true);
@@ -32,6 +40,30 @@ const AdminDashboard: React.FC = () => {
     }, 1000);
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    const fetchDiscountStats = async () => {
+      try {
+        const res = await axios.get("/api/v1/discounts/stats");
+        if (res.data?.success && res.data.stats) {
+          setDiscountStats(res.data.stats);
+        }
+      } catch (err) {
+        const discounted = products.filter(p => p.isOnSale || (p.discountPercentage && p.discountPercentage > 0));
+        const avg = discounted.length > 0
+          ? Math.round(discounted.reduce((s, p) => s + (p.discountPercentage || 0), 0) / discounted.length)
+          : 0;
+        setDiscountStats({
+          totalProducts: products.length,
+          activeDiscounts: 0,
+          discountedProducts: discounted.length,
+          averageDiscount: avg,
+          productsOnSale: discounted.length,
+        });
+      }
+    };
+    fetchDiscountStats();
+  }, [products]);
 
   const totalItems = products.length + services.length + blogs.length + works.length;
   
@@ -225,6 +257,95 @@ const AdminDashboard: React.FC = () => {
             </div>
           </div>
         </motion.div>
+      </motion.div>
+
+      {/* Pricing & Discount Summary */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.15 }}
+        className="mb-8 bg-gradient-to-br from-indigo-900 via-indigo-800 to-purple-900 rounded-2xl shadow-xl p-6 text-white relative overflow-hidden"
+      >
+        <div className="absolute -top-12 -right-12 w-48 h-48 bg-white/5 rounded-full blur-2xl pointer-events-none" />
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 relative z-10 border-b border-indigo-700/50 pb-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="p-2 bg-indigo-500/30 rounded-lg backdrop-blur-sm">
+                <Percent className="w-5 h-5 text-indigo-300" />
+              </span>
+              <h2 className="text-xl sm:text-2xl font-bold text-white">Pricing & Discount Management</h2>
+              <span className="bg-emerald-500/20 text-emerald-300 text-xs px-2.5 py-0.5 rounded-full font-semibold border border-emerald-500/30">
+                Live Engine
+              </span>
+            </div>
+            <p className="text-indigo-200 text-sm mt-1">
+              Active category promotions, product sales rules, and discount statistics
+            </p>
+          </div>
+          <Link
+            to="/admin/discounts"
+            className="inline-flex items-center gap-2 bg-white text-indigo-900 px-4 py-2.5 rounded-xl font-bold text-sm shadow hover:bg-indigo-50 transition-colors self-start md:self-auto group"
+          >
+            <span>Manage Discounts</span>
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 relative z-10">
+          <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/10">
+            <p className="text-xs uppercase tracking-wider text-indigo-200 font-semibold mb-1">
+              Active Discounts
+            </p>
+            <div className="flex items-baseline justify-between">
+              <span className="text-3xl font-extrabold text-white">
+                {discountStats.activeDiscounts}
+              </span>
+              <Tag className="w-5 h-5 text-indigo-300 opacity-80" />
+            </div>
+            <p className="text-xs text-indigo-200/80 mt-1">Live category campaigns</p>
+          </div>
+
+          <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/10">
+            <p className="text-xs uppercase tracking-wider text-indigo-200 font-semibold mb-1">
+              Discounted Products
+            </p>
+            <div className="flex items-baseline justify-between">
+              <span className="text-3xl font-extrabold text-white">
+                {discountStats.discountedProducts || products.filter(p => p.isOnSale).length}
+              </span>
+              <Sparkles className="w-5 h-5 text-amber-300 opacity-80" />
+            </div>
+            <p className="text-xs text-indigo-200/80 mt-1">
+              of {discountStats.totalProducts || products.length} catalog items
+            </p>
+          </div>
+
+          <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/10">
+            <p className="text-xs uppercase tracking-wider text-indigo-200 font-semibold mb-1">
+              Average Discount
+            </p>
+            <div className="flex items-baseline justify-between">
+              <span className="text-3xl font-extrabold text-emerald-300">
+                {discountStats.averageDiscount}%
+              </span>
+              <TrendingDown className="w-5 h-5 text-emerald-400 opacity-80" />
+            </div>
+            <p className="text-xs text-indigo-200/80 mt-1">Across all running promotions</p>
+          </div>
+
+          <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/10">
+            <p className="text-xs uppercase tracking-wider text-indigo-200 font-semibold mb-1">
+              Products On Sale
+            </p>
+            <div className="flex items-baseline justify-between">
+              <span className="text-3xl font-extrabold text-amber-300">
+                {discountStats.productsOnSale || products.filter(p => p.isOnSale).length}
+              </span>
+              <Package className="w-5 h-5 text-amber-300 opacity-80" />
+            </div>
+            <p className="text-xs text-indigo-200/80 mt-1">Available at discounted price</p>
+          </div>
+        </div>
       </motion.div>
 
       {/* Quick Actions */}

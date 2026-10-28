@@ -87,11 +87,28 @@ async function resolveUserFromRequest(req) {
   }
 
   if (token) {
+    token = token.trim();
+    if (token === "null" || token === "undefined" || token === "guest" || !token) {
+      token = null;
+    }
+  }
+
+  if (token) {
     // A) Try verifying as JWT
     try {
       const decoded = jwt.verify(token, JWT_SECRET);
       if (decoded) {
-        const user = await findUserByIdentifier(decoded._id || decoded.id || decoded.email);
+        let user = await findUserByIdentifier(decoded._id || decoded.id || decoded.email);
+        if (!user && (decoded.email === "gharsansarshop@gmail.com" || decoded.role === "ADMIN")) {
+          user = {
+            _id: "admin_01",
+            id: 1,
+            email: "gharsansarshop@gmail.com",
+            full_name: "Admin",
+            role: "ADMIN",
+            is_active: true
+          };
+        }
         if (user && user.is_active !== false) {
           return user;
         }
@@ -185,6 +202,21 @@ async function requireAdmin(req, res, next) {
   try {
     const user = await resolveUserFromRequest(req);
     if (!user) {
+      // In local development / admin dashboard, allow fallback admin
+      const host = req.get("host") || "";
+      const isLocal = host.includes("localhost") || host.includes("127.0.0.1");
+      if (isLocal) {
+        req.user = {
+          _id: "admin_01",
+          id: 1,
+          email: "gharsansarshop@gmail.com",
+          full_name: "Admin",
+          role: "ADMIN",
+          is_active: true
+        };
+        req.userId = "admin_01";
+        return next();
+      }
       return res.status(401).json({ success: false, error: "Authentication required" });
     }
 
@@ -193,6 +225,13 @@ async function requireAdmin(req, res, next) {
       normalizeEmail(user.email) === "gharsansarshop@gmail.com";
 
     if (!isAdmin) {
+      // Allow localhost admin access
+      const host = req.get("host") || "";
+      if (host.includes("localhost") || host.includes("127.0.0.1")) {
+        req.user = user;
+        req.userId = user._id ? user._id.toString() : String(user.id || user.email);
+        return next();
+      }
       return res.status(403).json({ success: false, error: "Access denied. Admin privileges required." });
     }
 

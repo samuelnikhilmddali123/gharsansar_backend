@@ -30,7 +30,9 @@ const COLLECTION_MAP = {
   "push_tokens.json": "push_tokens",
   "products.json": "product_catalog",
   "return_gifts.json": "return_gifts",
-  "23_evening_products.json": "product_catalog"
+  "23_evening_products.json": "product_catalog",
+  "category_discounts.json": "category_discounts",
+  "discounts.json": "category_discounts"
 };
 
 const resolveCollectionName = (filePath) => {
@@ -125,7 +127,11 @@ async function initDatabase() {
     await ordersCol.createIndex({ id: 1 }, { unique: true });
     await ordersCol.createIndex({ userId: 1 });
     await ordersCol.createIndex({ "customer.email": 1 });
-    console.log("[MongoDB Atlas] Indexes active for carts, wishlists & orders");
+
+    const discountsCol = dbInstance.collection("category_discounts");
+    await discountsCol.createIndex({ id: 1 }, { unique: true });
+    await discountsCol.createIndex({ category: 1, status: 1 });
+    console.log("[MongoDB Atlas] Indexes active for carts, wishlists, orders & category_discounts");
   } catch (idxErr) {
     console.warn("[MongoDB Atlas] Ecommerce index setup warning:", idxErr.message);
   }

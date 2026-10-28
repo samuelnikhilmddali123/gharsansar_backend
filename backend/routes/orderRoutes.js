@@ -4,6 +4,7 @@ const Order = require("../models/Order");
 const Cart = require("../models/Cart");
 const { authenticate, optionalAuth, requireAdmin } = require("../middleware/auth");
 const { readData, writeData } = require("../db");
+const { getActiveDiscounts, calculateProductPricing, extractAllProducts } = require("../services/pricingService");
 const path = require("path");
 const fs = require("fs");
 
@@ -118,6 +119,13 @@ router.get("/:id", authenticate, async (req, res) => {
 router.post("/", optionalAuth, async (req, res) => {
   try {
     const user = req.user;
+    if (user && ((user.role && user.role.toUpperCase() === "ADMIN") || (user.email && user.email.toLowerCase() === "gharsansarshop@gmail.com"))) {
+      return res.status(403).json({
+        success: false,
+        error: "Admin accounts are restricted from placing customer orders. Please use a customer account."
+      });
+    }
+
     const {
       customer,
       items,
@@ -137,11 +145,41 @@ router.post("/", optionalAuth, async (req, res) => {
 
     const effectiveUserId = req.userId || (user ? String(user.id || user._id) : (customer && customer.email) || "guest");
 
-    const calculatedSubtotal = parseFloat(subtotal) || 0;
+    // Server-side source of truth: load active discounts and catalog
+    const activeDiscounts = await getActiveDiscounts();
+    const catalogData = readData("products.json", []);
+    const catalogProducts = extractAllProducts(catalogData);
+
+    const verifiedItems = (Array.isArray(items) ? items : []).map((itm) => {
+      const pid = String(itm.productId || itm.id || "");
+      const matched = catalogProducts.find(
+        (p) => String(p.id) === pid || String(p.prod_id) === pid || (p.title && itm.name && p.title.toLowerCase() === itm.name.toLowerCase())
+      );
+
+      let finalVerifiedPrice = parseFloat(itm.price) || 0;
+      if (matched) {
+        const pricing = calculateProductPricing(matched, activeDiscounts);
+        finalVerifiedPrice = pricing.actualPrice;
+      }
+
+      return {
+        id: String(itm.id || itm.productId || `item_${Date.now()}`),
+        productId: pid,
+        name: itm.name || (matched ? matched.title : "Product"),
+        price: finalVerifiedPrice,
+        quantity: parseInt(itm.quantity, 10) || 1,
+        image: itm.image || (matched ? matched.image : ""),
+        selectedSize: itm.selectedSize || "",
+        selectedColor: itm.selectedColor || "",
+        isReturnGift: Boolean(itm.isReturnGift)
+      };
+    });
+
+    const calculatedSubtotal = verifiedItems.reduce((acc, itm) => acc + (itm.price * itm.quantity), 0);
     const calculatedShipping = shipping !== undefined ? parseFloat(shipping) : (calculatedSubtotal > 1000 ? 0 : 99);
-    const calculatedTax = tax !== undefined ? parseFloat(tax) : (calculatedSubtotal * 0.18);
+    const calculatedTax = tax !== undefined ? parseFloat(tax) : Math.round(calculatedSubtotal * 0.18);
     const calculatedDiscount = parseFloat(discount) || 0;
-    const grandTotal = total !== undefined ? parseFloat(total) : (calculatedSubtotal + calculatedShipping + calculatedTax - calculatedDiscount);
+    const grandTotal = Math.max(0, calculatedSubtotal + calculatedShipping + calculatedTax - calculatedDiscount);
 
     const now = new Date();
 
@@ -162,19 +200,7 @@ router.post("/", optionalAuth, async (req, res) => {
         country: (customer && customer.country) || "India",
         notes: (customer && customer.notes) || notes || ""
       },
-      items: Array.isArray(items)
-        ? items.map((itm) => ({
-            id: String(itm.id || itm.productId || `item_${Date.now()}`),
-            productId: String(itm.productId || itm.id || ""),
-            name: itm.name || "Product",
-            price: parseFloat(itm.price) || 0,
-            quantity: parseInt(itm.quantity, 10) || 1,
-            image: itm.image || "",
-            selectedSize: itm.selectedSize || "",
-            selectedColor: itm.selectedColor || "",
-            isReturnGift: Boolean(itm.isReturnGift)
-          }))
-        : [],
+      items: verifiedItems,
       subtotal: calculatedSubtotal,
       shipping: calculatedShipping,
       tax: calculatedTax,

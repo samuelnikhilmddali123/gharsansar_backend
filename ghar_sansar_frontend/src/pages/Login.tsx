@@ -142,6 +142,23 @@ const Login: React.FC = () => {
     const res = await verifyOtp(otpEmail.trim(), cleanCode);
     setLoading(false);
     if (res.success) {
+      const stored = localStorage.getItem("user");
+      let loggedUser: any = null;
+      try {
+        loggedUser = stored ? JSON.parse(stored) : null;
+      } catch (e) {}
+
+      const isUserAdmin = Boolean(
+        (loggedUser?.role && loggedUser.role.toLowerCase() === "admin") ||
+        (loggedUser?.email && loggedUser.email.toLowerCase() === "gharsansarshop@gmail.com") ||
+        otpEmail.trim().toLowerCase() === "gharsansarshop@gmail.com"
+      );
+
+      if (isUserAdmin) {
+        navigate("/admin", { replace: true });
+        return;
+      }
+
       if (res.isProfileIncomplete) {
         setShowAddressModal(true);
       } else {
@@ -193,19 +210,25 @@ const Login: React.FC = () => {
 
   useEffect(() => {
     if (user && !showAddressModal) {
-      if (user.role?.toLowerCase() === "admin") {
-        navigate("/admin");
+      const isUserAdmin = Boolean(
+        (user.role && user.role.toLowerCase() === "admin") ||
+        (user.email && user.email.toLowerCase() === "gharsansarshop@gmail.com")
+      );
+
+      if (isUserAdmin) {
+        navigate("/admin", { replace: true });
+        return;
+      }
+
+      const hasPhone = Boolean(user.phone && String(user.phone).trim().length >= 10);
+      const hasAddress = Boolean(
+        (user.street_address && String(user.street_address).trim().length > 0) ||
+        (user.addresses && user.addresses.length > 0 && (user.addresses[0].address || user.addresses[0].street_address))
+      );
+      if (!hasPhone || !hasAddress) {
+        setShowAddressModal(true);
       } else {
-        const hasPhone = Boolean(user.phone && String(user.phone).trim().length >= 10);
-        const hasAddress = Boolean(
-          (user.street_address && String(user.street_address).trim().length > 0) ||
-          (user.addresses && user.addresses.length > 0 && (user.addresses[0].address || user.addresses[0].street_address))
-        );
-        if (!hasPhone || !hasAddress) {
-          setShowAddressModal(true);
-        } else {
-          navigate(from || "/");
-        }
+        navigate(from || "/");
       }
     }
   }, [user, navigate, from, showAddressModal]);
@@ -234,7 +257,23 @@ const Login: React.FC = () => {
         
         const success = await login(email || phone, formData.password);
         if (success) {
-          navigate(from || "/", { replace: true });
+          const stored = localStorage.getItem("user");
+          let loggedUser: any = null;
+          try {
+            loggedUser = stored ? JSON.parse(stored) : null;
+          } catch (e) {}
+
+          const isUserAdmin = Boolean(
+            (loggedUser?.role && loggedUser.role.toLowerCase() === "admin") ||
+            (loggedUser?.email && loggedUser.email.toLowerCase() === "gharsansarshop@gmail.com") ||
+            (email && email.toLowerCase() === "gharsansarshop@gmail.com")
+          );
+
+          if (isUserAdmin) {
+            navigate("/admin", { replace: true });
+          } else {
+            navigate(from || "/", { replace: true });
+          }
         } else {
           setError("Invalid credentials");
         }
