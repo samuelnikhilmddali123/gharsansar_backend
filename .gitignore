@@ -49,3 +49,5 @@ captures/
 backend/public/products.zip
 backend_update.zip
 tmp/
+bin/
+*.exe
