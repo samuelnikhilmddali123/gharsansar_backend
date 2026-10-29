@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Heart, ShoppingCart, Star, Plus, Minus } from "lucide-react";
+import { Heart, ShoppingCart, Star, Plus, Minus, Check } from "lucide-react";
 import { motion } from "framer-motion";
 import { Product } from "../context/ProductContext";
 import { useCart } from "../context/CartContext";
@@ -15,7 +15,7 @@ interface ProductCardProps {
 
 /**
  * Generates an intelligent, product-specific factual description derived strictly
- * from the product's actual database details.
+ * from the product's actual database details. Clamped to 2 lines max.
  */
 function getProductDescription(product: Product): string {
   if (product.description && product.description.trim()) {
@@ -38,7 +38,7 @@ function getProductDescription(product: Product): string {
   return `Quality ${cleanTitle.toLowerCase()} crafted for durable everyday use and reliable dining.`;
 }
 
-// Simple hash for deterministic ratings based on product id
+// Deterministic ratings based on product id
 function getProductRating(id: string): { rating: string; count: number } {
   let hash = 0;
   for (let i = 0; i < id.length; i++) {
@@ -57,6 +57,7 @@ function getProductRating(id: string): { rating: string; count: number } {
 const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
   const navigate = useNavigate();
   const { items, addToCart, updateQuantity, removeFromCart } = useCart();
+  const [isAdded, setIsAdded] = useState(false);
 
   const productId = String(product.id || (product as any)._id || "");
   const cartItem = items.find(
@@ -64,30 +65,33 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
   );
   const quantityInCart = cartItem ? cartItem.quantity : 0;
 
-  // Controlled Two-Price Architecture (Section 1, 4, 9, 16)
-  // Actual Price: Current price entered manually by admin (e.g., ₹2,500). Never reduced by category discount!
+  // 1. Actual Selling Price (Customer purchase price entered by admin)
   const actualPrice = Number(
     product.actualPrice !== undefined ? product.actualPrice :
     product.price !== undefined ? product.price :
     product.sellingPrice || 0
   ) || 0;
 
-  // Strike Price: Reference price displayed with strikethrough (e.g., ₹3,000)
+  // 2. Strike/MRP Price (Reference price shown crossed out)
   const strikePrice = Number(
     product.strikePrice !== undefined ? product.strikePrice :
     (product as any)["act-price"] !== undefined ? (product as any)["act-price"] :
+    (product as any)["actPrice"] !== undefined ? (product as any)["actPrice"] :
     actualPrice
   ) || actualPrice;
 
-  // Category Promotional Discount %
+  // 3. Category Promotional Discount % or Strike vs Actual discount
   const categoryDiscount = Number(
     product.categoryDiscountPercentage !== undefined ? product.categoryDiscountPercentage :
     product.discountPercentage || 0
   );
 
-  const displayDiscountBadge = categoryDiscount > 0
-    ? `${categoryDiscount}% OFF`
-    : (strikePrice > actualPrice ? `${Math.round(((strikePrice - actualPrice) / strikePrice) * 100)}% OFF` : null);
+  const discountPct = categoryDiscount > 0
+    ? categoryDiscount
+    : (strikePrice > actualPrice ? Math.round(((strikePrice - actualPrice) / strikePrice) * 100) : 0);
+
+  // Single top-left discount badge (Never duplicated beside price)
+  const displayDiscountBadge = discountPct > 0 ? `${discountPct}% OFF` : null;
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -102,6 +106,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
       image: product.image,
       stock: product.stock,
     });
+    setIsAdded(true);
+    setTimeout(() => setIsAdded(false), 1200);
     toast.success(`Added ${product.title?.replace(/_/g, " ")} to cart!`);
   };
 
@@ -165,30 +171,41 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-40px" }}
       transition={{ duration: 0.35, delay: (index % 12) * 0.03 }}
-      className="group relative bg-white rounded-xl border border-[#E8E5DC] hover:border-[#D6D0C2] hover:shadow-md transition-all duration-300 flex flex-col justify-between p-3.5 sm:p-4 cursor-pointer h-full"
+      className="group relative bg-white rounded-xl border border-[#E7E5E1] shadow-[0_4px_16px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:-translate-y-1 hover:border-[#004D40]/30 transition-all duration-300 flex flex-col justify-between p-3.5 sm:p-4 cursor-pointer h-full select-none"
       onClick={() =>
         navigate(`/product/${encodeURIComponent(product.id)}`, { state: product })
       }
     >
-      {/* Wishlist Heart Button top-right */}
-      <button
-        onClick={handleWishlist}
-        className={`absolute top-3.5 right-3.5 z-10 transition-colors p-1.5 rounded-full hover:bg-white/80 active:scale-90 ${
-          isWishlisted ? "text-red-500" : "text-gray-400 hover:text-red-500"
-        }`}
-        aria-label="Add to wishlist"
-      >
-        <Heart size={18} strokeWidth={1.8} className={isWishlisted ? "fill-current" : ""} />
-      </button>
-
-      <div>
-        {/* Product Image Container */}
-        <div className="relative w-full aspect-square rounded-none overflow-hidden flex items-center justify-center p-3 mb-3 bg-[#FAF8F5] border border-[#F0ECE1]">
+      {/* Top Section: Image + Badges + Info */}
+      <div className="flex flex-col flex-1">
+        {/* Product Image Container (Consistent 1:1 Aspect Ratio) */}
+        <div className="relative w-full aspect-square rounded-lg overflow-hidden flex items-center justify-center p-3 sm:p-4 mb-3.5 bg-[#FAF9F7] border border-[#F0ECE1]">
+          {/* Main Discount Badge (ONLY Top-Left) */}
           {displayDiscountBadge && (
-            <div className="absolute top-2 left-2 z-10 bg-[#004e38] text-white text-[10px] sm:text-[11px] font-black uppercase tracking-wider px-2 py-0.5 shadow-sm">
+            <div className="absolute top-2.5 left-2.5 z-10 bg-[#004D40] text-white text-[11px] sm:text-xs font-bold tracking-wider uppercase px-2.5 py-1 rounded-md shadow-xs pointer-events-none">
               {displayDiscountBadge}
             </div>
           )}
+
+          {/* Wishlist Heart Button (Top-Right) */}
+          <button
+            type="button"
+            onClick={handleWishlist}
+            className={`absolute top-2.5 right-2.5 z-10 w-8 h-8 rounded-full bg-white/90 backdrop-blur-xs border border-gray-200/70 shadow-2xs flex items-center justify-center transition-all duration-200 hover:bg-white hover:scale-105 active:scale-95 cursor-pointer ${
+              isWishlisted
+                ? "text-[#004D40] bg-white border-[#004D40]/30"
+                : "text-gray-400 hover:text-[#004D40]"
+            }`}
+            aria-label="Add to wishlist"
+          >
+            <Heart
+              size={15}
+              strokeWidth={2}
+              className={isWishlisted ? "fill-current text-[#004D40]" : ""}
+            />
+          </button>
+
+          {/* Product Image */}
           {product.image ? (
             <StudioImage
               src={product.image}
@@ -201,97 +218,103 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
           )}
         </div>
 
-        {/* Product Title */}
-        <h3 className="text-sm sm:text-[15px] font-bold text-gray-900 leading-snug line-clamp-2 min-h-[38px] mb-1.5 group-hover:text-[#004e38] transition-colors">
+        {/* Product Title (Strict 2-line clamp with fixed height for row alignment) */}
+        <h3 className="text-[15px] sm:text-base font-semibold text-[#171717] leading-[22px] line-clamp-2 min-h-[44px] h-[44px] mb-1.5 group-hover:text-[#004D40] transition-colors">
           {product.title?.replace(/_/g, " ")}
         </h3>
 
-        {/* Rating row: ★ 4.8 (120) */}
-        <div className="flex items-center gap-1.5 text-xs mb-1.5">
-          <div className="flex items-center text-amber-500">
-            <Star size={13} className="fill-amber-400 text-amber-400 mr-1" />
-            <span className="font-bold text-gray-900 text-[11px] sm:text-xs">{rating}</span>
-          </div>
-          <span className="text-gray-400 font-normal text-[11px] sm:text-xs">({count})</span>
+        {/* Rating row: ★ 4.5 (191) with warm gold star */}
+        <div className="flex items-center gap-1.5 text-xs mb-2">
+          <Star size={13} className="fill-[#F4B740] text-[#F4B740] shrink-0" />
+          <span className="font-semibold text-[#171717] text-xs">{rating}</span>
+          <span className="text-[#6B7280] text-xs font-normal">({count})</span>
         </div>
 
-        {/* Product Description */}
-        <p className="text-xs text-gray-500 font-normal leading-relaxed line-clamp-2 min-h-[32px] mb-3">
+        {/* Product Description (Strict 2-line clamp with fixed height for row alignment) */}
+        <p className="text-[13px] sm:text-sm text-[#6B7280] leading-[20px] line-clamp-2 min-h-[40px] h-[40px] mb-3.5 font-normal">
           {description}
         </p>
       </div>
 
-      <div>
-        {/* Price Row: Strike Price crossed out + Dominant Actual Price + Category Discount Badge (Section 4, 9, 16) */}
-        <div className="mb-3">
+      {/* Bottom Section: Pricing + Actions (Pinned to bottom) */}
+      <div className="pt-2 border-t border-[#F3F1EC]">
+        {/* Pricing Hierarchy: Actual Price dominant + Strike/MRP Price crossed out (No duplicate green badge) */}
+        <div className="flex items-baseline gap-2 mb-3.5">
           {actualPrice > 0 ? (
-            <div className="flex items-baseline gap-2 flex-wrap">
-              <span className="text-lg sm:text-xl font-black text-gray-950 tracking-tight">
+            <>
+              <span className="text-[21px] sm:text-[23px] font-bold text-[#171717] tracking-tight">
                 ₹{actualPrice.toLocaleString("en-IN")}
               </span>
               {strikePrice > actualPrice && (
-                <span className="text-xs sm:text-sm text-gray-400 line-through font-normal">
+                <span className="text-sm text-[#9CA3AF] line-through font-normal">
                   ₹{strikePrice.toLocaleString("en-IN")}
                 </span>
               )}
-              {displayDiscountBadge && (
-                <span className="text-[11px] font-extrabold text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-1.5 py-0.5 rounded-sm tracking-wide">
-                  {displayDiscountBadge}
-                </span>
-              )}
-            </div>
+            </>
           ) : (
-            <span className="text-xs font-semibold text-gray-600">Price on Request</span>
+            <span className="text-sm font-semibold text-gray-600">Price on Request</span>
           )}
         </div>
 
-        {/* Dual Action Buttons (Add to Cart / Stepper + Buy Now) */}
-        <div className="flex items-center gap-2">
-          {product.price ? (
+        {/* Action Buttons: Add to Cart (Secondary) & Buy Now (Primary) */}
+        <div className="flex items-center gap-2 w-full">
+          {actualPrice > 0 ? (
             <>
               {quantityInCart > 0 ? (
+                /* Quantity Stepper matching button height */
                 <div
                   onClick={(e) => e.stopPropagation()}
-                  className="flex-1 h-[32px] sm:h-[34px] border border-[#0a2e22] bg-[#f2f7f4] rounded-lg flex items-center justify-between px-1.5 shadow-2xs"
+                  className="flex-1 h-[38px] sm:h-[40px] border border-[#004D40] bg-[#E8F5F1] rounded-lg flex items-center justify-between px-2 shadow-2xs"
                 >
                   <button
                     type="button"
                     onClick={handleDecrement}
-                    className="w-6 h-6 flex items-center justify-center bg-white hover:bg-gray-100 text-[#0a2e22] border border-[#c4d6cc] rounded-md active:scale-90 transition font-bold"
+                    className="w-6 h-6 flex items-center justify-center bg-white hover:bg-gray-100 text-[#004D40] border border-[#004D40]/30 rounded-md active:scale-90 transition font-bold cursor-pointer"
                     aria-label="Decrease quantity"
                   >
                     <Minus size={12} strokeWidth={2.5} />
                   </button>
 
-                  <span className="font-bold text-[#0a2e22] text-xs sm:text-sm px-1 select-none">
+                  <span className="font-bold text-[#004D40] text-xs sm:text-sm px-1 select-none">
                     {quantityInCart}
                   </span>
 
                   <button
                     type="button"
                     onClick={handleIncrement}
-                    className="w-6 h-6 flex items-center justify-center bg-[#0a2e22] hover:bg-[#061d15] text-white rounded-md active:scale-90 transition font-bold"
+                    className="w-6 h-6 flex items-center justify-center bg-[#004D40] hover:bg-[#00382E] text-white rounded-md active:scale-90 transition font-bold cursor-pointer"
                     aria-label="Increase quantity"
                   >
                     <Plus size={12} strokeWidth={2.5} />
                   </button>
                 </div>
               ) : (
+                /* Add to Cart Secondary Button */
                 <button
                   type="button"
                   onClick={handleAddToCart}
-                  className="flex-1 py-1.5 px-2 border border-gray-300 hover:border-gray-400 bg-white hover:bg-gray-50 text-gray-800 text-[11px] sm:text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-all shadow-2xs active:scale-95 shrink-0"
+                  className="flex-1 h-[38px] sm:h-[40px] px-2.5 bg-white hover:bg-[#E8F5F1] border border-[#004D40] text-[#004D40] text-xs sm:text-[13px] font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-all duration-150 active:scale-95 shadow-2xs shrink-0 cursor-pointer"
                   aria-label="Add to cart"
                 >
-                  <ShoppingCart size={13} className="stroke-[2]" />
-                  <span>Add to Cart</span>
+                  {isAdded ? (
+                    <>
+                      <Check size={14} className="stroke-[2.5] text-[#004D40]" />
+                      <span>Added!</span>
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingCart size={14} className="stroke-[2]" />
+                      <span>Add to Cart</span>
+                    </>
+                  )}
                 </button>
               )}
 
+              {/* Buy Now Primary Button */}
               <button
                 type="button"
                 onClick={handleBuyNow}
-                className="flex-1 py-1.5 px-2 bg-[#0a2e22] hover:bg-[#061d15] text-white text-[11px] sm:text-xs font-semibold rounded-lg flex items-center justify-center transition-all shadow-2xs active:scale-95 shrink-0"
+                className="flex-1 h-[38px] sm:h-[40px] px-2.5 bg-[#004D40] hover:bg-[#00382E] text-white text-xs sm:text-[13px] font-semibold rounded-lg flex items-center justify-center transition-all duration-150 active:scale-95 shadow-2xs shrink-0 cursor-pointer"
                 aria-label="Buy now"
               >
                 <span>Buy Now</span>
@@ -299,8 +322,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
             </>
           ) : (
             <button
+              type="button"
               onClick={() => navigate(`/product/${encodeURIComponent(product.id)}`, { state: product })}
-              className="w-full py-1.5 px-3 bg-[#0a2e22] text-white text-xs font-semibold rounded-lg transition"
+              className="w-full h-[38px] sm:h-[40px] bg-[#004D40] hover:bg-[#00382E] text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer"
             >
               Enquire
             </button>

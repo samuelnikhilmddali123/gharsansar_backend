@@ -68,13 +68,13 @@ const Home: React.FC = () => {
       link: "/interior-design?category=wallpaper",
     },
     {
-      title: "3d wallpapers",
+      title: "3D Wallpapers",
       count: "12+ Designs",
       image: "/images/3d wallapapers.jpg",
       link: "/interior-design?category=3dbokka",
     },
     {
-      title: "WALLART AFFECTS",
+      title: "Wall Art Affects",
       count: "5+ Designs",
       image: "/images/wall art effect.jpg",
       link: "/interior-design?category=wallart",
@@ -350,15 +350,15 @@ const Home: React.FC = () => {
       </section>
 
       {/* 4. Recent Products Section matching Reference Design */}
-      <section className="py-14 sm:py-18 bg-[#FAF8F5]">
+      <section className="py-14 sm:py-20 bg-[#FAF8F5]">
         <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header Row with Title & Controls */}
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 sm:mb-10">
             <div>
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-gray-900 font-normal tracking-tight">
+              <h2 className="text-3xl sm:text-4xl lg:text-[44px] font-serif text-[#171717] font-normal tracking-tight leading-tight">
                 Recent Products
               </h2>
-              <p className="text-xs sm:text-sm text-gray-500 mt-1 font-normal">
+              <p className="text-sm sm:text-[15px] text-[#6B7280] mt-1.5 font-normal">
                 — Check out our latest arrivals for your home.
               </p>
             </div>
@@ -367,32 +367,32 @@ const Home: React.FC = () => {
             <div className="flex items-center gap-2.5 self-start sm:self-auto shrink-0">
               <Link
                 to="/products"
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-800 bg-white border border-[#E8E5DC] hover:border-gray-400 px-4 py-2 rounded-full shadow-2xs transition-colors cursor-pointer"
+                className="inline-flex items-center gap-2 text-xs sm:text-[13px] font-semibold text-[#171717] bg-white border border-[#E7E5E1] hover:border-[#004D40] hover:text-[#004D40] px-4 sm:px-5 py-2 sm:py-2.5 rounded-full shadow-2xs transition-all duration-200 cursor-pointer"
               >
                 <span>View all Products</span>
-                <ArrowRight size={13} />
+                <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" />
               </Link>
               <button
                 type="button"
                 onClick={prevProductPage}
                 aria-label="Previous products"
-                className="w-8 h-8 rounded-full border border-[#E8E5DC] bg-white hover:bg-gray-100 text-gray-700 flex items-center justify-center transition-colors shadow-2xs cursor-pointer"
+                className="w-9 h-9 rounded-full border border-[#E7E5E1] bg-white hover:border-[#004D40] hover:text-[#004D40] hover:bg-[#E8F5F1] text-gray-700 flex items-center justify-center transition-all duration-200 shadow-2xs cursor-pointer active:scale-95"
               >
-                <ChevronLeft size={16} />
+                <ChevronLeft size={17} />
               </button>
               <button
                 type="button"
                 onClick={nextProductPage}
                 aria-label="Next products"
-                className="w-8 h-8 rounded-full border border-[#E8E5DC] bg-white hover:bg-gray-100 text-gray-700 flex items-center justify-center transition-colors shadow-2xs cursor-pointer"
+                className="w-9 h-9 rounded-full border border-[#E7E5E1] bg-white hover:border-[#004D40] hover:text-[#004D40] hover:bg-[#E8F5F1] text-gray-700 flex items-center justify-center transition-all duration-200 shadow-2xs cursor-pointer active:scale-95"
               >
-                <ChevronRight size={16} />
+                <ChevronRight size={17} />
               </button>
             </div>
           </div>
 
-          {/* 4 Product Cards in a row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+          {/* 4 Product Cards in a row with 24-28px gap */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-7 items-stretch">
             {currentRecentProducts.map((product, idx) => (
               <ProductCard key={product.id || idx} product={product} index={idx} />
             ))}

@@ -1710,7 +1710,12 @@ app.delete("/api/storage/uploads/products", (req, res) => {
 app.get("/api/storage/upload/interior", (req, res) => {
   try {
     const categoriesPath = path.join(__dirname, "public", "categories.json");
-    const rawData = readJsonFile(categoriesPath, []);
+    let rawData = readJsonFile(categoriesPath, []);
+    if (!Array.isArray(rawData) || rawData.length === 0) {
+      if (fs.existsSync(categoriesPath)) {
+        rawData = JSON.parse(fs.readFileSync(categoriesPath, "utf-8"));
+      }
+    }
     res.json({ success: true, data: rawData });
   } catch (error) {
     console.error("Fetch interior works error:", error);
@@ -3494,14 +3499,24 @@ app.get("/api/health", (req, res) => {
 });
 
 initDatabase().then(() => {
-  app.listen(PORT, () => {
+  const server = app.listen(PORT, () => {
     console.log(`Ghar Sansar backend server is running on http://localhost:${PORT}`);
     console.log(`Swagger documentation: http://localhost:${PORT}/api-docs`);
   });
+  server.on("error", (err) => {
+    console.error("Server error:", err);
+  });
 }).catch(err => {
   console.error("Failed to connect to MongoDB Atlas on startup:", err);
-  app.listen(PORT, () => {
+  const server = app.listen(PORT, () => {
     console.log(`Ghar Sansar backend server running in fallback mode on http://localhost:${PORT}`);
   });
+  server.on("error", (err) => {
+    console.error("Fallback server error:", err);
+  });
+});
+
+process.on("exit", (code) => {
+  console.log(`[SERVER] Process exit event with code: ${code}`);
 });
 

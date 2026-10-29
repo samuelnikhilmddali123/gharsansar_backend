@@ -92,29 +92,46 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Restore user from localStorage and verify session with MongoDB Atlas
   useEffect(() => {
-    const storedToken = localStorage.getItem("token");
-    const storedUser = localStorage.getItem("user");
+    const rawToken = localStorage.getItem("token");
+    const rawUser = localStorage.getItem("user");
 
-    if (storedToken) {
-      axios.defaults.headers.common["Authorization"] = `Bearer ${storedToken}`;
+    const isValidToken = Boolean(
+      rawToken &&
+      rawToken !== "null" &&
+      rawToken !== "undefined" &&
+      rawToken.trim() !== ""
+    );
+    const isValidUser = Boolean(
+      rawUser &&
+      rawUser !== "null" &&
+      rawUser !== "undefined" &&
+      rawUser.trim() !== ""
+    );
+
+    if (!isValidToken) {
+      if (rawToken) localStorage.removeItem("token");
+      delete axios.defaults.headers.common["Authorization"];
+    } else {
+      axios.defaults.headers.common["Authorization"] = `Bearer ${rawToken}`;
     }
 
-    if (storedUser) {
+    if (isValidUser && rawUser) {
       try {
-        const parsed = JSON.parse(storedUser);
+        const parsed = JSON.parse(rawUser);
         setUser(parsed);
         setIsAuthenticated(true);
         syncUserShippingPincode(parsed);
       } catch (e) {
         console.error("Failed to restore user", e);
+        localStorage.removeItem("user");
       }
     }
 
-    // Refresh user state from MongoDB Atlas
-    if (storedToken) {
+    // Refresh user state from MongoDB Atlas ONLY if a valid token exists
+    if (isValidToken && rawToken) {
       axios
         .get(`${BACKEND_URL}/auth/me`, {
-          headers: { Authorization: `Bearer ${storedToken}` }
+          headers: { Authorization: `Bearer ${rawToken}` }
         })
         .then((res) => {
           if (res.data.success && res.data.user) {

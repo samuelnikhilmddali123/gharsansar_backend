@@ -268,11 +268,16 @@ const InteriorDesignPage: React.FC = () => {
         let data = categoriesData;
         try {
           const res = await axios.get(`${API_BASE}/storage/upload/interior`);
-          if (res.data && res.data.success && res.data.data) {
+          if (
+            res.data &&
+            res.data.success &&
+            Array.isArray(res.data.data) &&
+            res.data.data.length > 0
+          ) {
             data = res.data.data;
           }
         } catch (e) {
-          // Fallback to static data
+          // Fallback cleanly to static categoriesData
         }
 
         const dataArr = Array.isArray(data) ? data : (data as any).data || [];
@@ -297,7 +302,7 @@ const InteriorDesignPage: React.FC = () => {
 
         setCategories(apiCategories);
       } catch (err) {
-        setCategories([]);
+        setCategories(categoriesData as any);
       } finally {
         setLoading(false);
       }
@@ -305,15 +310,30 @@ const InteriorDesignPage: React.FC = () => {
     fetchCategories();
   }, []);
 
-  // Handle URL category param
+  // Handle URL category param flexibly (e.g. wallpaper_rolls -> Wallpaper Rolls)
   useEffect(() => {
     if (urlCategory && categories.length) {
-      const match = categories.find(
-        (c) => c.name.toLowerCase() === urlCategory.toLowerCase()
-      );
+      const cleanUrl = urlCategory.toLowerCase().replace(/_/g, " ").trim();
+      const match = categories.find((c) => {
+        const cLower = c.name.toLowerCase().trim();
+        return (
+          cLower === cleanUrl ||
+          cLower.replace(/_/g, " ") === cleanUrl ||
+          cLower.includes(cleanUrl) ||
+          cleanUrl.includes(cLower) ||
+          (urlCategory.includes("wallpaper_roll") && cLower.includes("wallpaper roll")) ||
+          (urlCategory.includes("3d") && cLower.includes("3d")) ||
+          (urlCategory.includes("wallart") && cLower.includes("wall art")) ||
+          (urlCategory.includes("vinyl") && cLower.includes("vinyl")) ||
+          (urlCategory.includes("vertical_garden") && (cLower.includes("vertical garden") || cLower.includes("wall garden")))
+        );
+      });
+
       if (match) {
         setSelectedCategory(match.name);
-        setActiveCategory(null);
+        setActiveCategory(match.name);
+      } else {
+        setSelectedCategory("All Categories");
       }
     }
   }, [urlCategory, categories]);
@@ -467,25 +487,28 @@ Looking forward to your response!`;
 
   return (
     <div className="bg-[#F7F6F0] min-h-screen font-sans pb-20 flex flex-col">
-      {/* 1. Hero Inset Banner matching reference screenshot */}
+      {/* 1. Hero Inset Banner */}
       <div className="w-full bg-[#F7F6F0] -mt-20 sm:-mt-24 pt-[60px] sm:pt-[74px] pb-3 sm:pb-4">
         <div className="w-full max-w-[1880px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10">
           <div
-            className="relative w-full rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm border border-[#ece6dc] bg-[#1a2e22] group select-none aspect-[2171/724] min-h-[170px] sm:min-h-[220px]"
-            style={{ aspectRatio: "2171 / 724" }}
+            className="relative w-full rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm border border-[#ece6dc] bg-[#1a2e22] group select-none aspect-[2172/724] min-h-[170px] sm:min-h-[220px]"
+            style={{ aspectRatio: "2172 / 724" }}
           >
             {/* Banner Background Image */}
             <img
-              src="/images/interior_hero_banner_hd.png"
+              src="/images/interior banner.png"
               alt="Interior Design - Transform Your Space Into A Beautiful Home"
-              className="w-full h-full object-cover block"
+              className="w-full h-full object-cover block cursor-pointer"
+              onClick={scrollToCollection}
             />
 
-            {/* Clickable Overlay to explore collection on banner button area */}
+            {/* Clickable Overlay specifically on the 'Explore Collection' button area */}
             <button
+              type="button"
               onClick={scrollToCollection}
-              className="absolute left-[7%] sm:left-[8%] bottom-[12%] sm:bottom-[15%] w-36 sm:w-44 h-8 sm:h-10 cursor-pointer opacity-0 z-20"
+              className="absolute left-[3.5%] sm:left-[4.2%] bottom-[13%] sm:bottom-[15%] w-36 sm:w-44 md:w-48 h-8 sm:h-10 md:h-11 rounded-full cursor-pointer z-20 opacity-0 hover:opacity-100 hover:ring-2 hover:ring-[#D4AF37]/50 active:scale-95 transition-all"
               aria-label="Explore Collection"
+              title="Explore Collection"
             />
           </div>
         </div>

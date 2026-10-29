@@ -99,6 +99,22 @@ async function initDatabase() {
     }
   }
 
+  // Seed categories cache from public/categories.json if empty
+  if (!Array.isArray(atlasCache["categories"]) || atlasCache["categories"].length === 0) {
+    const catFile = path.join(__dirname, "public", "categories.json");
+    if (fs.existsSync(catFile)) {
+      try {
+        const seeded = JSON.parse(fs.readFileSync(catFile, "utf-8"));
+        if (Array.isArray(seeded) && seeded.length > 0) {
+          atlasCache["categories"] = seeded;
+          console.log(`[MongoDB Atlas] Loaded ${seeded.length} interior categories from public/categories.json`);
+        }
+      } catch (e) {
+        console.warn("[MongoDB Atlas] Could not seed categories:", e.message);
+      }
+    }
+  }
+
   // Ensure unique indexes on users collection for email and phone
   try {
     const usersCol = dbInstance.collection("users");
