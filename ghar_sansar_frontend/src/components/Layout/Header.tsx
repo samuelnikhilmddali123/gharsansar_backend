@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Menu, X, Search, ShoppingCart, User, LogOut, Heart } from "lucide-react";
+import { Menu, X, Search, ShoppingCart, User, LogOut, Heart, ArrowUpRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
@@ -45,7 +45,6 @@ const searchList = [
   "Basket Fruit Packings",
   "Brass Idols",
   "Sofa Cover",
-  // Add product names or other keywords you want searchable
   "Designer Sofa",
   "Luxury Table",
   "Curtain Rods",
@@ -68,10 +67,9 @@ const Header: React.FC = () => {
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      setIsScrolled(currentScrollY > 20);
+      setIsScrolled(currentScrollY > 24);
 
-      // Hide on scroll down, show on scroll up/top
-      if (currentScrollY > lastScrollY.current && currentScrollY > 80) {
+      if (currentScrollY > lastScrollY.current && currentScrollY > 90) {
         setIsVisible(false);
       } else {
         setIsVisible(true);
@@ -79,13 +77,14 @@ const Header: React.FC = () => {
       
       lastScrollY.current = currentScrollY;
     };
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const location = useLocation();
   const isActive = (path: string) => {
-    if (path === '/') {
-      return location.pathname === '/';
+    if (path === "/") {
+      return location.pathname === "/";
     }
     return location.pathname.startsWith(path);
   };
@@ -94,14 +93,12 @@ const Header: React.FC = () => {
   const { totalItems } = useCart();
   const { wishlist } = useWishlist();
   const navigate = useNavigate();
-  const location = useLocation();
 
   const desktopSearchRef = useRef<HTMLFormElement>(null);
   const mobileSearchRef = useRef<HTMLFormElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
-  // Close menus on page navigation
   useEffect(() => {
     setMenuOpen(false);
     setUserMenuOpen(false);
@@ -187,98 +184,118 @@ const Header: React.FC = () => {
   const isHomePage = location.pathname === "/";
   const isTransparent = isHomePage && !isScrolled;
 
+  const navLinks = [
+    { path: "/", label: "Home" },
+    { path: "/interior-design", label: "Interior Design" },
+    { path: "/products", label: "Products" },
+    { path: "/return-gifts", label: "Return Gifts" },
+    { path: "/services", label: "Services" },
+    { path: "/blog", label: "Blog" },
+  ];
+
   return (
     <>
-      <header className={`fixed top-0 left-0 right-0 z-50 pointer-events-none transition-all duration-300 transform ${
-        isVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"
-      }`}>
-        <div className={`w-full pointer-events-auto transition-all duration-300 ${
-          isTransparent 
-            ? "bg-transparent border-b border-transparent" 
-            : "bg-[#F7F6F0]/95 backdrop-blur-md shadow-xs border-b border-[#e8e5dc]"
-        }`}>
-          <div className="relative w-full max-w-[1880px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10 h-14 sm:h-[60px] flex items-center justify-between">
-            
-            {/* Brand Logo - Balanced size */}
-            <Link to="/" aria-label="Go to home" className="flex items-center shrink-0 hover:opacity-90 transition-opacity pr-2 sm:pr-4">
-              <img 
-                src="/ghar_sansar_logo_nav.png" 
-                alt="Ghar Sansar" 
-                className={`h-8 sm:h-9 md:h-10 w-auto object-contain transition-all duration-300 ${
-                  isTransparent ? "drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]" : ""
-                }`} 
-                style={{ minWidth: 0, width: "auto" }} 
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-out ${
+          isVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"
+        }`}
+      >
+        <div
+          className={`w-full transition-all duration-500 ease-out ${
+            isTransparent
+              ? "bg-gradient-to-b from-black/75 via-black/35 to-transparent border-b border-white/10"
+              : "bg-[#FAF8F5]/92 backdrop-blur-md border-b border-[#E8E2D5] shadow-[0_4px_20px_rgba(11,21,17,0.04)]"
+          }`}
+        >
+          <div className="w-full max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-10 h-16 sm:h-[70px] flex items-center justify-between">
+            {/* Brand Logo with Architectural Refinement */}
+            <Link
+              to="/"
+              aria-label="Gharsansar Home"
+              className="flex items-center gap-3 shrink-0 group transition-transform duration-300 hover:opacity-95"
+            >
+              <img
+                src={isTransparent ? "/ghar_sansar_logo_white.png" : "/ghar_sansar_logo_nav.png"}
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = "/ghar_sansar_logo_nav.png";
+                }}
+                alt="Ghar Sansar"
+                className={`h-9 sm:h-10 md:h-11 w-auto object-contain transition-all duration-300 ${
+                  isTransparent ? "drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)] brightness-110" : ""
+                }`}
               />
             </Link>
 
-            {/* Desktop Navigation Links - Centered horizontally and nudged slightly down */}
-            <nav className="hidden lg:flex items-center space-x-1 xl:space-x-3 uppercase tracking-wider text-xs lg:text-[13px] font-bold absolute left-1/2 top-[calc(50%+4px)] -translate-x-1/2 -translate-y-1/2" role="navigation">
-              {[
-                { path: "/", label: "Home" },
-                { path: "/interior-design", label: "Interior Design" },
-                { path: "/products", label: "Products" },
-                { path: "/return-gifts", label: "Return Gifts" },
-                { path: "/services", label: "Services" },
-                { path: "/blog", label: "Blog" },
-              ].map((link) => (
-                <Link
-                  key={link.path}
-                  to={link.path}
-                  className={`relative py-1 px-2.5 transition-colors duration-200 group ${
-                    isTransparent
-                      ? isActive(link.path)
-                        ? "text-white font-bold"
-                        : "text-white/80 hover:text-white"
-                      : isActive(link.path)
-                        ? "text-black font-bold"
-                        : "text-[#26372c] hover:text-black"
-                  }`}
-                >
-                  <span>{link.label}</span>
-                  {/* Clean underline on selected heading */}
-                  <span
-                    className={`absolute bottom-0 left-2.5 right-2.5 h-[2px] rounded-full transition-all duration-300 ${
+            {/* Desktop Navigation Links */}
+            <nav className="hidden lg:flex items-center space-x-1 xl:space-x-2" role="navigation">
+              {navLinks.map((link) => {
+                const active = isActive(link.path);
+                return (
+                  <Link
+                    key={link.path}
+                    to={link.path}
+                    className={`relative px-3.5 py-2 text-[12px] font-semibold tracking-[0.16em] uppercase transition-colors duration-200 group ${
                       isTransparent
-                        ? isActive(link.path)
-                          ? "bg-white opacity-100 scale-x-100 shadow-[0_0_8px_rgba(255,255,255,0.7)]"
-                          : "bg-white opacity-0 scale-x-0 group-hover:opacity-50 group-hover:scale-x-100"
-                        : isActive(link.path)
-                          ? "bg-black opacity-100 scale-x-100"
-                          : "bg-black opacity-0 scale-x-0 group-hover:opacity-40 group-hover:scale-x-100"
+                        ? active
+                          ? "text-white"
+                          : "text-white/75 hover:text-white"
+                        : active
+                          ? "text-[#0F1F18]"
+                          : "text-[#58625C] hover:text-[#0F1F18]"
                     }`}
-                  />
-                </Link>
-              ))}
+                  >
+                    <span>{link.label}</span>
+                    {/* Architectural hairline active indicator */}
+                    <span
+                      className={`absolute bottom-0.5 left-3.5 right-3.5 h-[1.5px] rounded-full transition-all duration-300 ${
+                        active
+                          ? isTransparent
+                            ? "bg-[#C5A059] opacity-100 scale-x-100 shadow-[0_0_8px_rgba(197,160,89,0.7)]"
+                            : "bg-[#0F1F18] opacity-100 scale-x-100"
+                          : "bg-current opacity-0 scale-x-0 group-hover:opacity-40 group-hover:scale-x-75"
+                      }`}
+                    />
+                  </Link>
+                );
+              })}
             </nav>
 
-            {/* Right side action icons */}
-            <div className="flex items-center space-x-1.5 sm:space-x-2.5 shrink-0">
-              
+            {/* Right Action Controls: Search, Wishlist, Cart, Profile, Mobile Menu */}
+            <div className="flex items-center space-x-2 sm:space-x-3 shrink-0">
               {/* Desktop Search Bar */}
-              <div className="relative hidden sm:flex items-center">
-                <form ref={desktopSearchRef} onSubmit={onSearchSubmit} className="flex items-center relative" role="search">
-                  <div className={`flex items-center w-36 md:w-44 lg:w-48 xl:w-56 h-8 sm:h-[34px] px-3 rounded-md transition-all ${
-                    isTransparent
-                      ? "bg-white/10 hover:bg-white/20 border border-white/30 focus-within:border-white focus-within:bg-black/40 focus-within:ring-2 focus-within:ring-white/20 backdrop-blur-md"
-                      : "bg-white/80 hover:bg-white border border-[#ded5c5] hover:border-gray-400 focus-within:border-black focus-within:bg-white focus-within:ring-2 focus-within:ring-black/5 shadow-2xs"
-                  }`}>
-                    <Search className={`w-3.5 h-3.5 shrink-0 mr-2 transition-colors ${
-                      isTransparent ? "text-white/80" : "text-gray-500"
-                    }`} />
+              <div className="relative hidden sm:block">
+                <form
+                  ref={desktopSearchRef}
+                  onSubmit={onSearchSubmit}
+                  className="flex items-center relative"
+                  role="search"
+                >
+                  <div
+                    className={`flex items-center w-40 md:w-48 lg:w-56 h-9 px-3.5 rounded-full transition-all duration-300 ${
+                      isTransparent
+                        ? "bg-white/10 hover:bg-white/15 border border-white/25 focus-within:border-[#C5A059] focus-within:bg-black/50 backdrop-blur-md"
+                        : "bg-white border border-[#DFD9CD] hover:border-[#B3ABA0] focus-within:border-[#0F1F18] shadow-xs"
+                    }`}
+                  >
+                    <Search
+                      className={`w-3.5 h-3.5 shrink-0 mr-2 transition-colors ${
+                        isTransparent ? "text-white/70" : "text-gray-400"
+                      }`}
+                    />
                     <input
                       ref={inputRef}
                       type="search"
                       aria-label="Search products or categories"
-                      placeholder="Search products..."
+                      placeholder="Search designs..."
                       value={searchTerm}
                       onChange={(e) => updateSearchTerm(e.target.value)}
                       onFocus={() => {
                         if (suggestions.length > 0) setShowSuggestions(true);
                       }}
-                      className={`w-full bg-transparent py-1 text-xs font-medium focus:outline-none transition-colors ${
-                        isTransparent 
-                          ? "text-white placeholder:text-white/60" 
-                          : "text-gray-800 placeholder:text-gray-400"
+                      className={`w-full bg-transparent text-xs font-medium focus:outline-none placeholder:text-xs transition-colors ${
+                        isTransparent
+                          ? "text-white placeholder:text-white/60"
+                          : "text-gray-900 placeholder:text-gray-400"
                       }`}
                       autoComplete="off"
                     />
@@ -289,26 +306,35 @@ const Header: React.FC = () => {
                           setSearchTerm("");
                           setShowSuggestions(false);
                         }}
-                        className={`ml-1 text-xs shrink-0 cursor-pointer transition-colors ${
+                        className={`ml-1 text-sm shrink-0 cursor-pointer transition-colors ${
                           isTransparent ? "text-white/70 hover:text-white" : "text-gray-400 hover:text-black"
                         }`}
+                        aria-label="Clear search"
                       >
                         ×
                       </button>
                     )}
                   </div>
+
+                  {/* Autocomplete Dropdown */}
                   {showSuggestions && suggestions.length > 0 && (
-                    <div className="absolute top-full right-0 mt-2 w-64 bg-white/95 backdrop-blur-md border border-gray-100 rounded-md shadow-xl py-2 z-50 overflow-hidden">
-                      {suggestions.map((s, idx) => (
-                        <button
-                          key={idx}
-                          type="button"
-                          className="w-full text-left px-4 py-2 text-xs font-semibold text-gray-650 hover:bg-gray-50 hover:text-gray-950 transition-colors cursor-pointer"
-                          onClick={() => onSuggestionSelect(s)}
-                        >
-                          {s}
-                        </button>
-                      ))}
+                    <div className="absolute top-full right-0 mt-2.5 w-72 bg-white/98 backdrop-blur-md border border-[#E8E2D5] rounded-xl shadow-[0_12px_36px_rgba(11,21,17,0.12)] py-2 z-50 overflow-hidden">
+                      <div className="px-3.5 py-1.5 text-[10px] uppercase font-bold tracking-widest text-[#8F897F] border-b border-[#F0ECE1]">
+                        Suggested Collections
+                      </div>
+                      <div className="max-h-64 overflow-y-auto">
+                        {suggestions.map((s, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            className="w-full text-left px-4 py-2.5 text-xs font-medium text-gray-800 hover:bg-[#FAF8F5] hover:text-[#0F1F18] flex items-center justify-between transition-colors cursor-pointer group"
+                            onClick={() => onSuggestionSelect(s)}
+                          >
+                            <span>{s}</span>
+                            <ArrowUpRight className="w-3 h-3 text-gray-400 group-hover:text-[#0F1F18] opacity-0 group-hover:opacity-100 transition-opacity" />
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </form>
@@ -318,31 +344,29 @@ const Header: React.FC = () => {
               <button
                 type="button"
                 aria-label="Open search"
-                className={`sm:hidden w-8 h-8 rounded-md flex items-center justify-center transition-all ${
+                className={`sm:hidden w-9 h-9 rounded-full flex items-center justify-center transition-all ${
                   isTransparent
-                    ? "border border-white/30 bg-white/10 hover:bg-white/20 text-white backdrop-blur-md"
-                    : "border border-[#ded5c5] bg-white/80 hover:bg-white text-gray-650 hover:text-gray-950 shadow-2xs"
+                    ? "border border-white/20 bg-white/10 hover:bg-white/20 text-white backdrop-blur-md"
+                    : "border border-[#E2DCD1] bg-white text-gray-700 hover:text-black shadow-xs"
                 }`}
                 onClick={() => setMobileSearchOpen(true)}
               >
                 <Search size={15} />
               </button>
 
-              {/* Wishlist Heart Button */}
+              {/* Wishlist Button */}
               <Link
                 to="/products"
                 aria-label="Wishlist"
-                className={`w-8 h-8 sm:w-[34px] sm:h-[34px] rounded-md flex items-center justify-center transition-all relative group ${
+                className={`w-9 h-9 rounded-full flex items-center justify-center transition-all relative group ${
                   isTransparent
-                    ? "border border-white/30 bg-white/10 hover:bg-white/20 hover:border-white text-white backdrop-blur-md"
-                    : "border border-[#e5dfd5] bg-white/80 hover:bg-white hover:border-gray-400 text-gray-700 hover:text-black shadow-2xs"
+                    ? "border border-white/20 bg-white/10 hover:bg-white/20 text-white backdrop-blur-md"
+                    : "border border-[#E2DCD1] bg-white hover:border-[#12241C] text-gray-700 hover:text-[#12241C] shadow-xs"
                 }`}
               >
-                <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:scale-105 transition-transform" />
+                <Heart className="w-4 h-4 group-hover:scale-105 transition-transform" />
                 {wishlist.length > 0 && (
-                  <span className={`absolute -top-1 -right-1 text-[8.5px] rounded-full w-3.5 h-3.5 flex items-center justify-center font-bold shadow-xs ${
-                    isTransparent ? "bg-[#C89A65] text-black" : "bg-red-500 text-white"
-                  }`}>
+                  <span className="absolute -top-1 -right-1 text-[9px] rounded-full w-4 h-4 bg-[#C5A059] text-white flex items-center justify-center font-bold shadow-xs">
                     {wishlist.length}
                   </span>
                 )}
@@ -352,61 +376,76 @@ const Header: React.FC = () => {
               <Link
                 to="/cart"
                 aria-label="Cart"
-                className={`w-8 h-8 sm:w-[34px] sm:h-[34px] rounded-md flex items-center justify-center transition-all relative group ${
+                className={`w-9 h-9 rounded-full flex items-center justify-center transition-all relative group ${
                   isTransparent
-                    ? "border border-white/30 bg-white/10 hover:bg-white/20 hover:border-white text-white backdrop-blur-md"
-                    : "border border-[#e5dfd5] bg-white/80 hover:bg-white hover:border-gray-400 text-gray-700 hover:text-black shadow-2xs"
+                    ? "border border-white/20 bg-white/10 hover:bg-white/20 text-white backdrop-blur-md"
+                    : "border border-[#E2DCD1] bg-white hover:border-[#12241C] text-gray-700 hover:text-[#12241C] shadow-xs"
                 }`}
               >
-                <ShoppingCart className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:scale-105 transition-transform" />
+                <ShoppingCart className="w-4 h-4 group-hover:scale-105 transition-transform" />
                 {totalItems > 0 && (
-                  <span className={`absolute -top-1 -right-1 text-[8.5px] rounded-full w-3.5 h-3.5 flex items-center justify-center font-bold shadow-xs ${
-                    isTransparent ? "bg-[#C89A65] text-black" : "bg-[#004e38] text-white"
-                  }`}>
+                  <span className="absolute -top-1 -right-1 text-[9px] rounded-full w-4 h-4 bg-[#12241C] text-[#FAF8F5] flex items-center justify-center font-bold shadow-xs">
                     {totalItems}
                   </span>
                 )}
               </Link>
 
-              {/* User Button */}
+              {/* User Account Button */}
               {user ? (
                 <div className="relative" ref={userMenuRef}>
                   <button
                     aria-haspopup="true"
                     aria-expanded={isUserMenuOpen}
                     onClick={() => setUserMenuOpen((v) => !v)}
-                    className={`w-8 h-8 sm:w-[34px] sm:h-[34px] rounded-md flex items-center justify-center transition-all overflow-hidden cursor-pointer group ${
+                    className={`w-9 h-9 rounded-full flex items-center justify-center transition-all overflow-hidden cursor-pointer group ${
                       isTransparent
-                        ? "bg-white/15 hover:bg-white/25 text-white border border-white/30 backdrop-blur-md"
-                        : "bg-[#1c2921] hover:bg-[#2c3f33] text-white border border-[#1c2921] shadow-xs"
+                        ? "bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-md"
+                        : "bg-[#12241C] hover:bg-[#1A3327] text-white shadow-xs"
                     }`}
-                    aria-label="User menu"
+                    aria-label="User account"
                   >
                     {user.profilePicture ? (
-                      <img 
-                        src={user.profilePicture} 
-                        alt="User avatar" 
-                        className="w-full h-full object-cover" 
+                      <img
+                        src={user.profilePicture}
+                        alt="User avatar"
+                        className="w-full h-full object-cover"
                       />
                     ) : (
-                      <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white group-hover:scale-105 transition-transform" />
+                      <User className="w-4 h-4 text-white group-hover:scale-105 transition-transform" />
                     )}
                   </button>
+
                   {isUserMenuOpen && (
-                    <div className="absolute right-0 mt-3 w-52 bg-white/95 backdrop-blur-md border border-gray-100 rounded-md shadow-xl shadow-gray-200/40 p-1.5 z-50 animate-fadeIn">
-                      <div className="px-4 py-2 border-b border-gray-100 mb-1">
-                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Signed in as</p>
-                        <p className="text-xs font-bold text-gray-900 truncate">{user.email || user.name}</p>
+                    <div className="absolute right-0 mt-3 w-56 bg-white/98 backdrop-blur-md border border-[#E8E2D5] rounded-xl shadow-[0_16px_40px_rgba(11,21,17,0.12)] p-2 z-50">
+                      <div className="px-3.5 py-2 border-b border-[#F0ECE1] mb-1">
+                        <p className="text-[10px] text-[#8F897F] font-bold uppercase tracking-widest">
+                          Signed in as
+                        </p>
+                        <p className="text-xs font-semibold text-gray-900 truncate">
+                          {user.email || user.name}
+                        </p>
                       </div>
-                      <Link to="/profile" className="block px-4 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 rounded-none transition-colors" onClick={() => setUserMenuOpen(false)}>
+                      <Link
+                        to="/profile"
+                        className="block px-3.5 py-2 text-xs font-medium text-gray-700 hover:bg-[#FAF8F5] rounded-lg transition-colors"
+                        onClick={() => setUserMenuOpen(false)}
+                      >
                         Profile
                       </Link>
-                      {((user.role && user.role.toLowerCase() === "admin") || user.email?.toLowerCase() === "gharsansarshop@gmail.com") && (
-                        <Link to="/admin" className="block px-4 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 rounded-none transition-colors" onClick={() => setUserMenuOpen(false)}>
+                      {((user.role && user.role.toLowerCase() === "admin") ||
+                        user.email?.toLowerCase() === "gharsansarshop@gmail.com") && (
+                        <Link
+                          to="/admin"
+                          className="block px-3.5 py-2 text-xs font-medium text-gray-700 hover:bg-[#FAF8F5] rounded-lg transition-colors"
+                          onClick={() => setUserMenuOpen(false)}
+                        >
                           Admin Dashboard
                         </Link>
                       )}
-                      <button onClick={handleLogout} className="w-full flex items-center px-4 py-2 text-xs font-bold text-red-650 hover:bg-red-50 rounded-none transition-colors mt-0.5 cursor-pointer">
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center px-3.5 py-2 text-xs font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors mt-0.5 cursor-pointer"
+                      >
                         <LogOut className="mr-2 w-3.5 h-3.5" />
                         Logout
                       </button>
@@ -417,34 +456,67 @@ const Header: React.FC = () => {
                 <Link
                   to="/login"
                   aria-label="Sign In"
-                  className={`w-8 h-8 sm:w-[34px] sm:h-[34px] rounded-md flex items-center justify-center transition-all cursor-pointer group ${
+                  className={`w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer group ${
                     isTransparent
-                      ? "bg-white/15 hover:bg-white/25 text-white border border-white/30 backdrop-blur-md"
-                      : "bg-[#1c2921] hover:bg-[#2c3f33] text-white shadow-xs"
+                      ? "bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-md"
+                      : "bg-[#12241C] hover:bg-[#1A3327] text-white shadow-xs"
                   }`}
                 >
-                  <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white group-hover:scale-105 transition-transform" />
+                  <User className="w-4 h-4 text-white group-hover:scale-105 transition-transform" />
                 </Link>
               )}
 
               {/* Mobile Menu Toggle Button */}
               <button
-                aria-label="Toggle menu"
-                className={`lg:hidden w-8 h-8 sm:w-[34px] sm:h-[34px] rounded-md flex items-center justify-center transition-all cursor-pointer ${
+                aria-label="Toggle navigation menu"
+                className={`lg:hidden w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer ${
                   isTransparent
-                    ? "border border-white/30 bg-white/10 hover:bg-white/20 text-white backdrop-blur-md"
-                    : "border border-[#e5dfd5] bg-white/80 hover:bg-white text-gray-700 hover:text-black shadow-2xs"
+                    ? "border border-white/20 bg-white/10 hover:bg-white/20 text-white backdrop-blur-md"
+                    : "border border-[#E2DCD1] bg-white text-gray-800 shadow-xs"
                 }`}
                 onClick={() => setMenuOpen((v) => !v)}
               >
-                {isMenuOpen ? <X size={16} /> : <Menu size={16} />}
+                {isMenuOpen ? <X size={17} /> : <Menu size={17} />}
               </button>
-
             </div>
           </div>
         </div>
       </header>
-      {/* Mobile Drawer Menu */}
+
+      {/* Mobile Search Overlay Bar */}
+      <AnimatePresence>
+        {isMobileSearchOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="fixed top-16 inset-x-0 bg-white/98 backdrop-blur-md border-b border-[#E8E2D5] p-3 z-40 sm:hidden shadow-lg"
+          >
+            <form ref={mobileSearchRef} onSubmit={onSearchSubmit} className="flex items-center gap-2">
+              <div className="flex-1 flex items-center h-10 px-3 bg-[#FAF8F5] border border-[#DFD9CD] rounded-full">
+                <Search size={15} className="text-gray-400 mr-2 shrink-0" />
+                <input
+                  ref={inputRef}
+                  type="search"
+                  placeholder="Search products or categories..."
+                  value={searchTerm}
+                  onChange={(e) => updateSearchTerm(e.target.value)}
+                  className="w-full bg-transparent text-xs focus:outline-none"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => setMobileSearchOpen(false)}
+                className="text-xs font-semibold px-3 py-2 text-gray-600"
+              >
+                Cancel
+              </button>
+            </form>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Architectural Mobile Drawer Menu */}
       <AnimatePresence>
         {isMenuOpen && (
           <>
@@ -454,120 +526,119 @@ const Header: React.FC = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setMenuOpen(false)}
-              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[998] md:hidden"
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[998] lg:hidden"
             />
-            
+
             {/* Drawer */}
             <motion.div
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed right-0 top-0 bottom-0 w-[80%] max-w-sm bg-white shadow-2xl border-l border-gray-100 z-[999] p-6 flex flex-col md:hidden"
+              transition={{ type: "spring", damping: 28, stiffness: 240 }}
+              className="fixed right-0 top-0 bottom-0 w-[84%] max-w-sm bg-[#FAF8F5] border-l border-[#E8E2D5] shadow-2xl z-[999] p-6 sm:p-8 flex flex-col justify-between overflow-y-auto lg:hidden"
             >
-              <div className="flex items-center justify-between mb-8">
-                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Navigation</span>
-                <button
-                  onClick={() => setMenuOpen(false)}
-                  className="p-1.5 hover:bg-gray-100 rounded-none text-gray-500 hover:text-gray-900 transition-colors"
-                >
-                  <X size={18} />
-                </button>
+              <div>
+                {/* Drawer Header */}
+                <div className="flex items-center justify-between pb-6 border-b border-[#E8E2D5] mb-6">
+                  <div>
+                    <span className="text-[10px] font-bold text-[#8F897F] uppercase tracking-[0.25em] block">
+                      GHAR SANSAR
+                    </span>
+                    <span className="text-xs text-gray-500 font-light">Interior & Decor</span>
+                  </div>
+                  <button
+                    onClick={() => setMenuOpen(false)}
+                    aria-label="Close menu"
+                    className="w-8 h-8 rounded-full border border-[#DFD9CD] bg-white flex items-center justify-center text-gray-600 hover:text-black transition-colors"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+
+                {/* Editorial Navigation Links */}
+                <nav className="flex flex-col space-y-1">
+                  {navLinks.map((link, idx) => {
+                    const active = isActive(link.path);
+                    return (
+                      <motion.div
+                        key={link.path}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: idx * 0.04 }}
+                      >
+                        <Link
+                          to={link.path}
+                          onClick={() => setMenuOpen(false)}
+                          className={`flex items-center justify-between py-3 px-3 rounded-lg text-sm font-semibold tracking-wide transition-all ${
+                            active
+                              ? "bg-[#12241C] text-[#FAF8F5]"
+                              : "text-gray-700 hover:bg-white hover:text-black"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className="text-[10px] opacity-40 font-mono">0{idx + 1}</span>
+                            <span>{link.label}</span>
+                          </div>
+                          <ArrowUpRight className="w-3.5 h-3.5 opacity-40" />
+                        </Link>
+                      </motion.div>
+                    );
+                  })}
+                </nav>
               </div>
 
-              <nav className="flex flex-col space-y-4">
-                {[
-                  { path: "/", label: "Home" },
-                  { path: "/interior-design", label: "Interior Design" },
-                  { path: "/products", label: "Products" },
-                  { path: "/return-gifts", label: "Return Gifts" },
-                  { path: "/services", label: "Services" },
-                  { path: "/blog", label: "Blog" }
-                ].map((link, idx) => (
-                  <motion.div
-                    key={link.path}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: idx * 0.05 }}
-                  >
-                    <Link
-                      to={link.path}
-                      onClick={() => setMenuOpen(false)}
-                      className={`block py-2 text-base font-bold transition-colors ${
-                        isActive(link.path) ? "text-gray-950" : "text-gray-500 hover:text-gray-950"
-                      }`}
-                    >
-                      {link.label}
-                    </Link>
-                  </motion.div>
-                ))}
-                
-                <hr className="my-2 border-gray-100" />
-                
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 }}
+              {/* Bottom Quick Actions */}
+              <div className="pt-6 border-t border-[#E8E2D5] space-y-3">
+                <Link
+                  to="/cart"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center justify-between py-2.5 px-3 rounded-lg text-xs font-semibold text-gray-700 bg-white border border-[#DFD9CD]"
                 >
-                  <Link
-                    to="/cart"
-                    onClick={() => setMenuOpen(false)}
-                    className="flex items-center justify-between py-2 text-base font-bold text-gray-500 hover:text-gray-950"
-                  >
-                    <span className="flex items-center gap-2">
-                      <ShoppingCart size={18} />
-                      Cart
+                  <span className="flex items-center gap-2">
+                    <ShoppingCart size={15} />
+                    Cart
+                  </span>
+                  {totalItems > 0 && (
+                    <span className="bg-[#12241C] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                      {totalItems}
                     </span>
-                    {totalItems > 0 && (
-                      <span className="bg-gray-900 text-white text-xs font-bold px-2 py-0.5 rounded-none">
-                        {totalItems}
-                      </span>
-                    )}
-                  </Link>
-                </motion.div>
+                  )}
+                </Link>
 
                 {user ? (
-                  <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.35 }}
-                    className="pt-2"
-                  >
+                  <div className="space-y-2">
                     <Link
                       to="/profile"
                       onClick={() => setMenuOpen(false)}
-                      className="block py-2 text-base font-bold text-gray-500 hover:text-gray-900 mb-4"
+                      className="block text-center py-2.5 text-xs font-semibold text-gray-700 bg-white border border-[#DFD9CD] rounded-lg"
                     >
-                      Profile
+                      Profile ({user.name || user.email})
                     </Link>
                     <button
                       onClick={() => {
                         handleLogout();
                         setMenuOpen(false);
                       }}
-                      className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-red-50 hover:bg-red-100 text-red-650 rounded-none text-sm font-bold transition-colors"
+                      className="w-full flex items-center justify-center gap-2 py-2.5 bg-red-50 text-red-600 rounded-lg text-xs font-semibold"
                     >
-                      <LogOut size={16} />
+                      <LogOut size={14} />
                       Logout
                     </button>
-                  </motion.div>
+                  </div>
                 ) : (
-                  <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.35 }}
-                    className="pt-4"
+                  <Link
+                    to="/login"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center justify-center py-2.5 bg-[#12241C] text-white rounded-lg text-xs font-semibold tracking-wider uppercase shadow-xs"
                   >
-                    <Link
-                      to="/login"
-                      onClick={() => setMenuOpen(false)}
-                      className="flex items-center justify-center py-2.5 px-4 bg-gray-950 hover:bg-gray-800 text-white rounded-none text-sm font-bold transition-all shadow-sm"
-                    >
-                      Login
-                    </Link>
-                  </motion.div>
+                    Login / Register
+                  </Link>
                 )}
-              </nav>
+
+                <p className="text-[10px] text-center text-gray-400 pt-2">
+                  Call us: +91-8121135980
+                </p>
+              </div>
             </motion.div>
           </>
         )}
