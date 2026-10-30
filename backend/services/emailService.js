@@ -28,9 +28,19 @@ function getTransporter() {
  * @param {string} otp - 6-digit OTP code
  * @returns {Promise<{ sent: boolean, messageId?: string, error?: string }>}
  */
-async function sendOtpEmail(toEmail, otp) {
+async function sendOtpEmail(toEmail, otp, purpose = "login") {
   const user = (process.env.EMAIL_USER || process.env.GMAIL_USER || process.env.SMTP_EMAIL || "").trim();
   const transporter = getTransporter();
+
+  const isRegistration = String(purpose).toLowerCase() === "registration";
+  const emailTitle = isRegistration ? "Verify Your Email for Registration" : "Your Login Verification Code";
+  const emailHeadline = isRegistration ? "Confirm Your Registration" : "Your Login Verification Code";
+  const emailSubject = isRegistration
+    ? `[${otp}] Your Ghar Sansar Registration Verification Code`
+    : `[${otp}] Your Ghar Sansar Login Verification Code`;
+  const emailIntro = isRegistration
+    ? `Welcome to <strong>Ghar Sansar</strong>!<br>Use the 6-digit verification code below to verify your email and complete your account registration.`
+    : `Hello,<br>Use the 6-digit verification code below to securely log into your <strong>Ghar Sansar</strong> account.`;
 
   if (!transporter) {
     console.warn(`\n⚠️ [EMAIL SERVICE] Gmail SMTP credentials not fully set in .env!`);
@@ -49,7 +59,7 @@ async function sendOtpEmail(toEmail, otp) {
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Ghar Sansar Login Verification Code</title>
+        <title>${emailTitle}</title>
       </head>
       <body style="margin: 0; padding: 0; background-color: #f7f6f2; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #2D3748;">
         <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f7f6f2; padding: 40px 15px;">
@@ -72,11 +82,11 @@ async function sendOtpEmail(toEmail, otp) {
                 <tr>
                   <td style="padding: 36px 32px 28px;">
                     <h2 style="margin: 0 0 16px; color: #111827; font-size: 19px; font-weight: 700;">
-                      Your Login Verification Code
+                      ${emailHeadline}
                     </h2>
                     <p style="margin: 0 0 24px; color: #4B5563; font-size: 14px; line-height: 1.6;">
-                      Hello,<br>
-                      Use the 6-digit verification code below to securely log into your <strong>Ghar Sansar</strong> account.
+                      ${emailIntro}
+
                     </p>
 
                     <!-- OTP Code Box -->
@@ -124,8 +134,8 @@ async function sendOtpEmail(toEmail, otp) {
     const info = await transporter.sendMail({
       from: `"Ghar Sansar" <${user}>`,
       to: toEmail,
-      subject: `[${otp}] Your Ghar Sansar Login Verification Code`,
-      text: `Your Ghar Sansar login verification code is: ${otp}. This code is valid for 10 minutes. Do not share it with anyone.`,
+      subject: emailSubject,
+      text: `${emailTitle}: ${otp}. This code is valid for 10 minutes. Do not share it with anyone.`,
       html: htmlContent
     });
 

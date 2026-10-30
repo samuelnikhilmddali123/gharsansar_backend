@@ -135,13 +135,25 @@ const Footer: React.FC = () => {
             © 2026 Gharsansar. All rights reserved.
           </p>
           <div className="flex flex-wrap gap-4 sm:gap-6 font-light">
-            <span className="hover:text-white transition-colors cursor-pointer">Privacy Policy</span>
+            <Link to="/privacy-policy" className="hover:text-white transition-colors cursor-pointer">
+              Privacy Policy
+            </Link>
             <span>|</span>
-            <span className="hover:text-white transition-colors cursor-pointer">Terms & Conditions</span>
+            <Link to="/terms" className="hover:text-white transition-colors cursor-pointer">
+              Terms & Conditions
+            </Link>
             <span>|</span>
-            <span className="hover:text-white transition-colors cursor-pointer">Shipping Policy</span>
+            <Link to="/shipping-policy" className="hover:text-white transition-colors cursor-pointer">
+              Shipping Policy
+            </Link>
             <span>|</span>
-            <span className="hover:text-white transition-colors cursor-pointer">Return Policy</span>
+            <Link to="/return-policy" className="hover:text-white transition-colors cursor-pointer">
+              Return Policy
+            </Link>
+            <span>|</span>
+            <Link to="/delete-account" className="hover:text-white transition-colors cursor-pointer text-red-300 hover:text-red-200">
+              Delete Account
+            </Link>
           </div>
         </div>
       </div>

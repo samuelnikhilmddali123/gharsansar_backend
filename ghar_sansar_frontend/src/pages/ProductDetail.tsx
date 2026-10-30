@@ -439,11 +439,11 @@ const ProductDetail: React.FC = () => {
 
   const handleAddToCart = () => {
     if (!product) return;
-    const effectivePrice = Number(
-      product.actualPrice !== undefined ? product.actualPrice :
-      product.price !== undefined ? product.price :
-      product.sellingPrice || 0
-    );
+    const catDisc = Number(product.categoryDiscountPercentage || product.discountPercentage || 0);
+    const actP = Number(product.actualPrice !== undefined ? product.actualPrice : (product.price || 0)) || 0;
+    const discP = Number(product.discountedPrice !== undefined ? product.discountedPrice : (catDisc > 0 ? Math.round((actP - (actP * (catDisc / 100))) * 100) / 100 : actP));
+    const effectivePrice = Number(product.finalPrice !== undefined ? product.finalPrice : (catDisc > 0 ? discP : actP));
+
     addToCart({
       id: product.id || product._id,
       name: product.title || product.name,
@@ -523,34 +523,46 @@ const ProductDetail: React.FC = () => {
     );
   }
 
-  // Controlled Two-Price Architecture (Section 1, 3, 10, 16)
-  // Actual Price: Current price entered manually by admin (e.g. ₹2,500). Never reduced by category discount!
+  // Controlled Pricing Architecture: Strike Price (MRP), Actual Price (Base), Discounted Price (Final Customer Price)
   const actualPrice = Number(
     product.actualPrice !== undefined ? product.actualPrice :
     product.price !== undefined ? product.price :
     product.sellingPrice || 0
   ) || 0;
 
-  // Strike Price: Reference price displayed with strikethrough (e.g. ₹3,000)
+  // Strike Price: Reference price displayed with strikethrough (e.g. ₹2,150)
   const strikePrice = Number(
     product.strikePrice !== undefined ? product.strikePrice :
     (product as any)["act-price"] !== undefined ? (product as any)["act-price"] :
     actualPrice
   ) || actualPrice;
 
-  // Category promotional discount % (e.g. 10%)
+  // Category promotional discount % (e.g. 99%)
   const categoryDiscount = Number(
     product.categoryDiscountPercentage !== undefined ? product.categoryDiscountPercentage :
     product.discountPercentage || 0
   );
+  const hasCategoryDiscount = categoryDiscount > 0;
 
-  // Discount Amount calculated based on STRIKE PRICE: ₹3,000 × 10% = ₹300
-  const categoryDiscountAmount = strikePrice > 0 && categoryDiscount > 0
+  // Category Discount Amount calculated based on STRIKE PRICE: e.g. ₹2,150 × 99% = ₹2,129
+  const categoryDiscountAmount = strikePrice > 0 && hasCategoryDiscount
     ? Math.round(strikePrice * (categoryDiscount / 100))
     : 0;
 
-  // Current Difference between Strike Price and Actual Price: ₹3,000 - ₹2,500 = ₹500
-  const currentDifference = Math.max(0, strikePrice - actualPrice);
+  // Discounted Price calculated dynamically from ACTUAL PRICE: e.g. ₹1,650 - (₹1,650 × 99 / 100) = ₹16.50
+  const discountedPrice = Number(
+    product.discountedPrice !== undefined ? product.discountedPrice :
+    (hasCategoryDiscount ? Math.round((actualPrice - (actualPrice * (categoryDiscount / 100))) * 100) / 100 : actualPrice)
+  );
+
+  // Final Customer Price: discountedPrice when category discount ON, actualPrice when OFF
+  const finalPrice = Number(
+    product.finalPrice !== undefined ? product.finalPrice :
+    (hasCategoryDiscount ? discountedPrice : actualPrice)
+  );
+
+  // Current Difference between Strike Price and Customer Price
+  const currentDifference = Math.max(0, strikePrice - finalPrice);
 
   const displayDiscountBadge = categoryDiscount > 0
     ? `${categoryDiscount}% OFF`
@@ -575,7 +587,7 @@ const ProductDetail: React.FC = () => {
       <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200/80 p-3.5 z-40 flex items-center justify-between shadow-2xl">
         <div>
           <span className="text-[10px] text-gray-500 block uppercase font-bold tracking-wider">Total Price</span>
-          <span className="text-lg font-black text-gray-900">₹{(actualPrice * quantity) + (deliveryFee || 0)}</span>
+          <span className="text-lg font-black text-gray-900">₹{(finalPrice * quantity) + (deliveryFee || 0)}</span>
         </div>
         <div className="flex gap-2 items-center">
           {quantityInCart > 0 ? (
@@ -851,16 +863,16 @@ const ProductDetail: React.FC = () => {
               {/* Pricing Section (Strike Price crossed out, Actual Price dominant, Category Discount Badge) */}
               <div className="space-y-2.5 pb-5 border-b border-gray-100 mb-5">
                 <div className="flex items-center gap-3 flex-wrap">
-                  {strikePrice > actualPrice && (
-                    <span className="text-base sm:text-lg text-gray-400 line-through font-medium">
+                  {strikePrice > finalPrice && (
+                    <span className="text-base sm:text-lg text-gray-400 line-through font-medium" title="MRP / Strike Price">
                       ₹{strikePrice.toLocaleString("en-IN")}
                     </span>
                   )}
                   <span className="text-3xl sm:text-4xl font-black text-gray-950 tracking-tight">
-                    ₹{actualPrice.toLocaleString("en-IN")}
+                    ₹{finalPrice.toLocaleString("en-IN")}
                   </span>
                   {displayDiscountBadge && (
-                    <span className="text-xs sm:text-sm font-black text-emerald-800 bg-emerald-100 border border-emerald-300/80 px-2.5 py-1 rounded-sm uppercase tracking-wider">
+                    <span className="text-xs sm:text-sm font-bold text-white bg-red-600 px-2.5 py-1 rounded-md uppercase tracking-wider shadow-xs">
                       {displayDiscountBadge}
                     </span>
                   )}

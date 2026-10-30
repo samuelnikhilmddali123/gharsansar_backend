@@ -183,8 +183,15 @@ const ProductsAdmin: React.FC = () => {
             const rawActual = p.actualPrice !== undefined ? parseFloat(p.actualPrice) : (parseFloat(p.actual_price) || parseFloat(p.price) || 0);
             const rawStrike = p.strikePrice !== undefined ? parseFloat(p.strikePrice) : (parseFloat(p.strike_price) || parseFloat(p["act-price"]) || rawActual);
             const catDiscountPct = parseFloat(p.categoryDiscountPercentage || p.category_discount_percentage || p.discount_percentage || 0);
-            const catDiscountAmt = parseFloat(p.categoryDiscountAmount || p.category_discount_amount || (rawStrike > 0 && catDiscountPct > 0 ? Math.round(rawStrike * (catDiscountPct / 100)) : 0));
-            const diff = Math.max(0, rawStrike - rawActual);
+            const hasCatDisc = catDiscountPct > 0;
+            const catDiscountAmt = parseFloat(p.categoryDiscountAmount || p.category_discount_amount || (rawStrike > 0 && hasCatDisc ? Math.round(rawStrike * (catDiscountPct / 100)) : 0));
+            const discountedPrice = p.discountedPrice !== undefined ? parseFloat(p.discountedPrice) : (
+              hasCatDisc ? Math.round((rawActual - (rawActual * (catDiscountPct / 100))) * 100) / 100 : rawActual
+            );
+            const finalPrice = p.finalPrice !== undefined ? parseFloat(p.finalPrice) : (
+              hasCatDisc ? discountedPrice : rawActual
+            );
+            const diff = Math.max(0, rawStrike - finalPrice);
 
             allProducts.push({
               id: p.prod_id || p.id,
@@ -192,14 +199,16 @@ const ProductsAdmin: React.FC = () => {
               description: p.description || "No description",
               strikePrice: rawStrike,
               actualPrice: rawActual,
+              discountedPrice: discountedPrice,
+              finalPrice: finalPrice,
               categoryDiscountPercentage: catDiscountPct,
               categoryDiscountAmount: catDiscountAmt,
               currentDifference: diff,
-              hasCategoryDiscount: catDiscountPct > 0,
-              price: rawActual.toString(),
+              hasCategoryDiscount: hasCatDisc,
+              price: finalPrice.toString(),
               actual_price: rawActual.toString(),
               strike_price: rawStrike,
-              final_price: rawActual, // Customer pays actualPrice (₹2,500)
+              final_price: finalPrice,
               image: fixImageUrl(p.image),
               category: category.name,
               subCategory: sub.name,
@@ -241,11 +250,8 @@ const ProductsAdmin: React.FC = () => {
   };
 
   // Section 7: Real-time form pricing calculations
-  const formStrikePrice = parseFloat(form.actual_price) || 0; // Strike Price (e.g. ₹3,000)
-  const formActualPrice = parseFloat(form.price) || 0; // Actual Price (e.g. ₹2,500)
-
-  // Current Difference: Strike Price - Actual Price (e.g. ₹500)
-  const formCurrentDifference = Math.max(0, formStrikePrice - formActualPrice);
+  const formStrikePrice = parseFloat(form.actual_price) || 0; // Strike Price / MRP (e.g. ₹2,150)
+  const formActualPrice = parseFloat(form.price) || 0; // Actual Price before discount (e.g. ₹1,650)
 
   // Check if selected category has an active category discount
   const activeCategoryDiscount = useMemo(() => {
@@ -259,11 +265,23 @@ const ProductsAdmin: React.FC = () => {
   }, [form.category, categoryDiscounts]);
 
   const formCategoryDiscountPct = activeCategoryDiscount ? activeCategoryDiscount.discountPercentage : 0;
+  const hasFormCategoryDiscount = formCategoryDiscountPct > 0;
 
-  // Formula: Discount calculated from Strike Price = Strike Price × Category Discount %
-  const formCategoryDiscountAmount = formStrikePrice > 0 && formCategoryDiscountPct > 0
+  // Formula 1: Discount calculated from Strike Price = Strike Price × Category Discount % (e.g. ₹2,129)
+  const formCategoryDiscountAmount = formStrikePrice > 0 && hasFormCategoryDiscount
     ? Math.round(formStrikePrice * (formCategoryDiscountPct / 100))
     : 0;
+
+  // Formula 2: Discounted Customer Price calculated dynamically from Actual Price (e.g. ₹16.50)
+  const formDiscountedPrice = hasFormCategoryDiscount
+    ? Math.round((formActualPrice - (formActualPrice * (formCategoryDiscountPct / 100))) * 100) / 100
+    : formActualPrice;
+
+  // Final Price: discountedPrice if category discount ON, actualPrice if OFF
+  const formFinalPrice = hasFormCategoryDiscount ? formDiscountedPrice : formActualPrice;
+
+  // Current Difference: Strike Price - Customer Final Price
+  const formCurrentDifference = Math.max(0, formStrikePrice - formFinalPrice);
 
   // Validation: Actual Price should normally not exceed Strike Price
   const isPriceHigherThanStrike = formStrikePrice > 0 && formActualPrice > formStrikePrice;
@@ -845,7 +863,7 @@ const ProductsAdmin: React.FC = () => {
                   <h4 className="text-xs font-bold uppercase tracking-wider text-gray-500 border-b border-gray-100 pb-2">
                     Current Product Pricing Preview
                   </h4>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
                     <div>
                       <span className="text-[11px] uppercase tracking-wider text-gray-400 font-bold block">
                         Strike Price
@@ -856,26 +874,14 @@ const ProductsAdmin: React.FC = () => {
                     </div>
 
                     <div>
-                      <span className="text-[11px] uppercase tracking-wider text-emerald-600 font-bold block">
+                      <span className="text-[11px] uppercase tracking-wider text-gray-700 font-bold block">
                         Actual Price
                       </span>
-                      <span className="text-2xl font-black text-emerald-700">
+                      <span className="text-lg font-bold text-gray-900">
                         ₹{formActualPrice.toLocaleString("en-IN")}
                       </span>
                       <span className="text-[10px] text-gray-400 block mt-0.5">
-                        (Unchanged customer price)
-                      </span>
-                    </div>
-
-                    <div>
-                      <span className="text-[11px] uppercase tracking-wider text-gray-400 font-bold block">
-                        Current Difference
-                      </span>
-                      <span className="text-lg font-extrabold text-gray-900">
-                        ₹{formCurrentDifference.toLocaleString("en-IN")}
-                      </span>
-                      <span className="text-[10px] text-gray-400 block mt-0.5">
-                        (Strike Price - Actual Price)
+                        (before discount)
                       </span>
                     </div>
 
@@ -883,18 +889,43 @@ const ProductsAdmin: React.FC = () => {
                       <span className="text-[11px] uppercase tracking-wider text-amber-600 font-bold block">
                         Category Discount
                       </span>
-                      {formCategoryDiscountPct > 0 ? (
+                      {hasFormCategoryDiscount ? (
+                        <span className="text-lg font-extrabold text-amber-600">
+                          {formCategoryDiscountPct}% OFF
+                        </span>
+                      ) : (
+                        <span className="text-sm font-semibold text-gray-400">OFF</span>
+                      )}
+                    </div>
+
+                    <div>
+                      <span className="text-[11px] uppercase tracking-wider text-indigo-600 font-bold block">
+                        Discount Amount
+                      </span>
+                      {hasFormCategoryDiscount && formCategoryDiscountAmount > 0 ? (
                         <div>
-                          <span className="text-lg font-extrabold text-amber-600">
-                            {formCategoryDiscountPct}% OFF
+                          <span className="text-lg font-bold text-indigo-700">
+                            ₹{formCategoryDiscountAmount.toLocaleString("en-IN")}
                           </span>
-                          <span className="text-[11px] font-bold text-indigo-700 block mt-0.5">
-                            ₹{formCategoryDiscountAmount.toLocaleString("en-IN")} from Strike Price
+                          <span className="text-[10px] text-indigo-500 block">
+                            (from Strike Price)
                           </span>
                         </div>
                       ) : (
-                        <span className="text-sm font-semibold text-gray-400">None</span>
+                        <span className="text-sm font-semibold text-gray-400">—</span>
                       )}
+                    </div>
+
+                    <div>
+                      <span className="text-[11px] uppercase tracking-wider text-emerald-700 font-bold block">
+                        Final Customer Price
+                      </span>
+                      <span className="text-2xl font-black text-emerald-700">
+                        ₹{formFinalPrice.toLocaleString("en-IN")}
+                      </span>
+                      <span className="text-[10px] text-emerald-600 font-semibold block mt-0.5">
+                        {hasFormCategoryDiscount ? "(customer pays this)" : "(discount OFF)"}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -989,6 +1020,7 @@ const ProductsAdmin: React.FC = () => {
                     <th className="py-3.5 px-4 text-right">Actual Price</th>
                     <th className="py-3.5 px-4 text-center">Category Discount</th>
                     <th className="py-3.5 px-4 text-right">Discount Amount</th>
+                    <th className="py-3.5 px-4 text-right">Final / Discounted Price</th>
                     <th className="py-3.5 px-4 text-center">Status</th>
                     <th className="py-3.5 px-4 text-right">Actions</th>
                   </tr>
@@ -998,9 +1030,16 @@ const ProductsAdmin: React.FC = () => {
                     const strikeVal = p.strikePrice || p.strike_price || parseFloat(p.actual_price || p.price);
                     const actualVal = p.actualPrice || parseFloat(p.price);
                     const catDiscountPct = p.categoryDiscountPercentage || 0;
+                    const hasDiscount = catDiscountPct > 0;
                     const discountAmt = p.categoryDiscountAmount !== undefined
                       ? p.categoryDiscountAmount
-                      : (strikeVal > 0 && catDiscountPct > 0 ? Math.round(strikeVal * (catDiscountPct / 100)) : 0);
+                      : (strikeVal > 0 && hasDiscount ? Math.round(strikeVal * (catDiscountPct / 100)) : 0);
+                    const discountedVal = p.discountedPrice !== undefined
+                      ? p.discountedPrice
+                      : (hasDiscount ? Math.round((actualVal - (actualVal * (catDiscountPct / 100))) * 100) / 100 : actualVal);
+                    const finalVal = p.finalPrice !== undefined
+                      ? p.finalPrice
+                      : (hasDiscount ? discountedVal : actualVal);
                     const stock = p.stock !== undefined ? p.stock : 50;
 
                     return (
@@ -1040,9 +1079,14 @@ const ProductsAdmin: React.FC = () => {
                           </span>
                         </td>
 
-                        {/* Actual Price Column (bold, customer pays this) */}
-                        <td className="py-3.5 px-4 text-right font-black text-gray-900 text-base">
-                          ₹{actualVal.toLocaleString("en-IN")}
+                        {/* Actual Price Column */}
+                        <td className="py-3.5 px-4 text-right">
+                          <span className="font-bold text-gray-800 text-sm">
+                            ₹{actualVal.toLocaleString("en-IN")}
+                          </span>
+                          <span className="block text-[10px] text-gray-400 font-normal">
+                            (before discount)
+                          </span>
                         </td>
 
                         {/* Category Discount Column */}
@@ -1058,7 +1102,37 @@ const ProductsAdmin: React.FC = () => {
 
                         {/* Discount Amount Column (calculated from Strike Price) */}
                         <td className="py-3.5 px-4 text-right font-semibold text-indigo-700">
-                          {discountAmt > 0 ? `₹${discountAmt.toLocaleString("en-IN")}` : "—"}
+                          {discountAmt > 0 ? (
+                            <div>
+                              <span>₹{discountAmt.toLocaleString("en-IN")}</span>
+                              <span className="block text-[10px] text-indigo-400 font-normal">(from Strike)</span>
+                            </div>
+                          ) : (
+                            <span className="text-gray-400">—</span>
+                          )}
+                        </td>
+
+                        {/* Final / Discounted Price Column (Customer price) */}
+                        <td className="py-3.5 px-4 text-right">
+                          {hasDiscount ? (
+                            <div>
+                              <span className="font-black text-emerald-700 text-base">
+                                ₹{finalVal.toLocaleString("en-IN")}
+                              </span>
+                              <span className="block text-[10px] text-emerald-600 font-semibold">
+                                (customer pays)
+                              </span>
+                            </div>
+                          ) : (
+                            <div>
+                              <span className="font-bold text-gray-900 text-base">
+                                ₹{actualVal.toLocaleString("en-IN")}
+                              </span>
+                              <span className="block text-[10px] text-gray-400 font-normal">
+                                (Final Price)
+                              </span>
+                            </div>
+                          )}
                         </td>
 
                         {/* Status Column */}
@@ -1238,22 +1312,49 @@ const ProductsAdmin: React.FC = () => {
                                             </div>
 
                                             <div>
-                                              {/* Strike Price & Actual Price */}
-                                              <div className="flex items-baseline gap-2 mb-1">
-                                                <span className="text-base font-extrabold text-gray-950">
-                                                  ₹{actualVal.toLocaleString("en-IN")}
-                                                </span>
-                                                {strikeVal > actualVal && (
-                                                  <span className="text-xs text-gray-400 line-through">
-                                                    ₹{strikeVal.toLocaleString("en-IN")}
-                                                  </span>
+                                              {/* Pricing Architecture: Strike Price, Actual Price, Final Price */}
+                                              <div className="space-y-1 mb-2">
+                                                <div className="flex items-baseline gap-2 flex-wrap">
+                                                  {hasDiscount ? (
+                                                    <>
+                                                      <span className="text-base font-extrabold text-emerald-700">
+                                                        ₹{finalVal.toLocaleString("en-IN")}
+                                                      </span>
+                                                      <span className="text-xs text-gray-500 line-through font-medium" title="Actual Price before discount">
+                                                        ₹{actualVal.toLocaleString("en-IN")}
+                                                      </span>
+                                                      {strikeVal > actualVal && (
+                                                        <span className="text-xs text-gray-400 line-through font-normal" title="MRP / Strike Price">
+                                                          ₹{strikeVal.toLocaleString("en-IN")}
+                                                        </span>
+                                                      )}
+                                                    </>
+                                                  ) : (
+                                                    <>
+                                                      <span className="text-base font-extrabold text-gray-950">
+                                                        ₹{actualVal.toLocaleString("en-IN")}
+                                                      </span>
+                                                      {strikeVal > actualVal && (
+                                                        <span className="text-xs text-gray-400 line-through">
+                                                          ₹{strikeVal.toLocaleString("en-IN")}
+                                                        </span>
+                                                      )}
+                                                    </>
+                                                  )}
+                                                </div>
+                                                {hasDiscount && (
+                                                  <div className="flex flex-col gap-0.5 text-[11px]">
+                                                    <span className="text-emerald-700 font-bold">
+                                                      Final Price: ₹{finalVal.toLocaleString("en-IN")} ({catDiscountPct}% OFF Actual)
+                                                    </span>
+                                                    {discountAmt > 0 && (
+                                                      <span className="text-indigo-600 font-medium">
+                                                        Discount Amount: ₹{discountAmt.toLocaleString("en-IN")} from Strike Price
+                                                      </span>
+                                                    )}
+                                                  </div>
                                                 )}
                                               </div>
-                                              {discountAmt > 0 && (
-                                                <p className="text-[11px] font-semibold text-indigo-600 mb-2">
-                                                  Discount: ₹{discountAmt.toLocaleString("en-IN")} from Strike Price
-                                                </p>
-                                              )}
 
                                               <div className="flex gap-2 pt-2 border-t border-gray-100">
                                                 <button

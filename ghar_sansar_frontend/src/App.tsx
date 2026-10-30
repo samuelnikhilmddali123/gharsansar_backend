@@ -45,6 +45,9 @@ import ChatBot from "./components/ChatBot/ChatBot";
 import ProductsPage from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
 import ReturnGifts from "./pages/ReturnGifts";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import MobileAuth from "./pages/MobileAuth";
+import DeleteAccount from "./pages/DeleteAccount";
 
 const AppLayout = () => {
   const location = useLocation();
@@ -58,7 +61,13 @@ const AppLayout = () => {
   );
 
   const isAdminRoute = location.pathname.startsWith("/admin");
+  const isMobileAuthRoute = location.pathname.startsWith("/mobile-auth");
   const isHomePage = location.pathname === "/";
+
+  // Dedicated Mobile Auth Bridge view (clean, focused, standalone)
+  if (isMobileAuthRoute) {
+    return <MobileAuth />;
+  }
 
   // 1. If logged in as admin, prevent access to customer store pages and auto-redirect to /admin
   if (!loading && isUserAdmin && !isAdminRoute) {
@@ -114,6 +123,18 @@ const AppLayout = () => {
 
           {/* Public Interior Design page */}
           <Route path="/interior-design" element={<InteriorDesignPage />} />
+
+          {/* Mobile App Google Authentication Bridge */}
+          <Route path="/mobile-auth" element={<MobileAuth />} />
+
+          {/* Legal and Policy pages */}
+          <Route path="/privacy-policy" element={<PrivacyPolicy initialTab="privacy" />} />
+          <Route path="/privacy" element={<PrivacyPolicy initialTab="privacy" />} />
+          <Route path="/terms" element={<PrivacyPolicy initialTab="terms" />} />
+          <Route path="/shipping-policy" element={<PrivacyPolicy initialTab="shipping" />} />
+          <Route path="/return-policy" element={<PrivacyPolicy initialTab="returns" />} />
+          <Route path="/delete-account" element={<DeleteAccount />} />
+          <Route path="/account-deletion" element={<DeleteAccount />} />
 
           {/* ---------- Protected customer routes ---------- */}
           <Route

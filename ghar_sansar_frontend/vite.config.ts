@@ -18,26 +18,34 @@ export default defineConfig({
     }
   ],
   server: {
+    port: 5173,
+    strictPort: true,
+    host: '0.0.0.0',
     proxy: {
       '/api': {
-        target: 'http://localhost:5001',
-        changeOrigin: true
+        target: 'http://127.0.0.1:5001',
+        changeOrigin: true,
+        secure: false
       },
       '^/products/.+': {
-        target: 'http://localhost:5001',
-        changeOrigin: true
+        target: 'http://127.0.0.1:5001',
+        changeOrigin: true,
+        secure: false
       },
       '^/blogs/.+': {
-        target: 'http://localhost:5001',
-        changeOrigin: true
+        target: 'http://127.0.0.1:5001',
+        changeOrigin: true,
+        secure: false
       },
       '^/profile_pictures/.+': {
-        target: 'http://localhost:5001',
-        changeOrigin: true
+        target: 'http://127.0.0.1:5001',
+        changeOrigin: true,
+        secure: false
       },
       '^/return%20gifts/.+': {
-        target: 'http://localhost:5001',
-        changeOrigin: true
+        target: 'http://127.0.0.1:5001',
+        changeOrigin: true,
+        secure: false
       }
     }
   },

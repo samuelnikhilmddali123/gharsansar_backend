@@ -159,7 +159,7 @@ router.post("/", optionalAuth, async (req, res) => {
       let finalVerifiedPrice = parseFloat(itm.price) || 0;
       if (matched) {
         const pricing = calculateProductPricing(matched, activeDiscounts);
-        finalVerifiedPrice = pricing.actualPrice;
+        finalVerifiedPrice = pricing.finalPrice;
       }
 
       return {

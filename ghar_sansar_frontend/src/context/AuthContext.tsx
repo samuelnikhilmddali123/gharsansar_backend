@@ -31,8 +31,8 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (emailOrPhone: string, password?: string) => Promise<boolean>;
-  register: (name: string, email: string, password: string, phone?: string) => Promise<boolean>;
-  sendOtp: (email: string) => Promise<{ success: boolean; message?: string; error?: string; expiresInSeconds?: number }>;
+  register: (name: string, email: string, password: string, phone?: string, otp?: string) => Promise<{ success: boolean; error?: string }>;
+  sendOtp: (email: string, purpose?: string) => Promise<{ success: boolean; message?: string; error?: string; expiresInSeconds?: number }>;
   verifyOtp: (email: string, otp: string) => Promise<{ success: boolean; message?: string; error?: string; isProfileIncomplete?: boolean }>;
   loginWithGoogle: () => Promise<{ success: boolean; isProfileIncomplete?: boolean; user?: User }>;
   logout: () => void;
@@ -188,14 +188,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const register = async (name: string, email: string, password: string, phone?: string): Promise<boolean> => {
+  const register = async (
+    name: string,
+    email: string,
+    password: string,
+    phone?: string,
+    otp?: string
+  ): Promise<{ success: boolean; error?: string }> => {
     try {
       const res = await axios.post(`${BACKEND_URL}/auth/register`, {
         name,
         full_name: name,
         email,
         phone: phone || "",
-        password
+        password,
+        otp: otp || ""
       });
 
       if (res.data.success && res.data.user) {
@@ -209,21 +216,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.setItem("user", JSON.stringify(res.data.user));
         syncUserShippingPincode(res.data.user);
         window.dispatchEvent(new Event("auth_login"));
-        alert("Registration successful! Welcome to Ghar Sansar.");
-        return true;
+        return { success: true };
       }
-      return false;
+      return { success: false, error: "Registration failed. Please try again." };
     } catch (err: any) {
       console.error("Registration error:", err);
       const errMsg = err.response?.data?.error || "Registration failed. Try a different email.";
-      alert(errMsg);
-      return false;
+      return { success: false, error: errMsg };
     }
   };
 
-  const sendOtp = async (email: string): Promise<{ success: boolean; message?: string; error?: string; expiresInSeconds?: number }> => {
+  const sendOtp = async (
+    email: string,
+    purpose: string = "login"
+  ): Promise<{ success: boolean; message?: string; error?: string; expiresInSeconds?: number }> => {
     try {
-      const res = await axios.post(`${BACKEND_URL}/auth/send-otp`, { email });
+      const res = await axios.post(`${BACKEND_URL}/auth/send-otp`, { email, purpose });
       return {
         success: true,
         message: res.data.message || "Verification code sent to your email.",

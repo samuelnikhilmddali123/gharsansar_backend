@@ -2603,7 +2603,7 @@
           "Discounts & Pricing"
         ],
         "summary": "Create or update a category discount",
-        "description": "Applies a promotional discount percentage to all products in a category based on their Strike Price. If an active discount for the category already exists, it is updated in-place.",
+        "description": "Applies a promotional discount percentage to all products in a category. The Discount Amount is calculated from Strike Price (MRP), while the Customer Final Price is dynamically calculated from Actual Price: discountedPrice = actualPrice - (actualPrice * discountPercentage / 100). The base Actual Price in the catalog remains immutable.",
         "requestBody": {
           "required": true,
           "content": {
@@ -2832,6 +2832,70 @@
         "responses": {
           "200": {
             "description": "Status updated successfully"
+          }
+        }
+      }
+    },
+    "/api/v1/auth/account": {
+      "delete": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Permanently delete authenticated user account",
+        "description": "Permanently removes the user profile, session, and personal credentials in compliance with Google Play Data Safety policies. Mandated tax records are anonymized.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Account successfully deleted"
+          },
+          "403": {
+            "description": "Primary administrator account cannot be deleted"
+          }
+        }
+      }
+    },
+    "/api/v1/auth/delete-account-request": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Submit web account deletion request (Google Play web link)",
+        "description": "Public endpoint for users requesting account and personal data deletion via the website or web link as mandated by Google Play Store policies.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "customer@gmail.com"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "example": "9876543210"
+                  },
+                  "reason": {
+                    "type": "string",
+                    "example": "No longer using service"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Deletion request accepted and processed with reference ID"
           }
         }
       }
@@ -3414,37 +3478,52 @@
       },
       "ProductPricing": {
         "type": "object",
-        "description": "Two separate prices architecture with category discount calculated strictly on Strike Price",
+        "description": "Gharsansar 3-Price Architecture with dynamic Category Discount calculation. Strike Price (MRP) is the reference price (displayed struck-through). Actual Price is the base immutable selling price (never modified in DB). When Category Discount is active, Discounted Price / Final Price is calculated dynamically from Actual Price: actualPrice - (actualPrice * discountPct / 100). The mobile app and frontend should display the single MRP strike price and the finalPrice to the customer, hiding actualPrice when discount is active.",
         "properties": {
           "strikePrice": {
             "type": "number",
-            "example": 3000,
-            "description": "Original reference price displayed crossed out"
+            "example": 2150,
+            "description": "MRP / Reference price. Displayed as single strikethrough price in UI (~~₹2,150~~) whenever strikePrice > finalPrice."
           },
           "actualPrice": {
             "type": "number",
-            "example": 2500,
-            "description": "Current selling price manually controlled by admin (never reduced by category discount)"
+            "example": 1650,
+            "description": "Base selling price before category discount. Stored permanently in DB; never mutated or reduced by promotional discounts."
           },
-          "categoryDiscountPercentage": {
+          "discountedPrice": {
             "type": "number",
-            "example": 10,
-            "description": "Promotional discount percentage calculated from Strike Price"
+            "example": 16.5,
+            "description": "Customer selling price dynamically calculated from Actual Price when category discount is ON: actualPrice - (actualPrice * categoryDiscountPercentage / 100)."
           },
-          "categoryDiscountAmount": {
+          "finalPrice": {
             "type": "number",
-            "example": 300,
-            "description": "Promotional discount amount: Strike Price × Category Discount %"
-          },
-          "currentDifference": {
-            "type": "number",
-            "example": 500,
-            "description": "Difference: Strike Price - Actual Price"
+            "example": 16.5,
+            "description": "Authoritative price customer pays at checkout. Equals discountedPrice when discount is ON; equals actualPrice when discount is OFF."
           },
           "price": {
             "type": "number",
-            "example": 2500,
-            "description": "Customer purchase price = actualPrice (₹2,500, NOT ₹2,250)"
+            "example": 16.5,
+            "description": "Convenience alias for finalPrice. Used in cart, checkout, and order verification."
+          },
+          "categoryDiscountPercentage": {
+            "type": "number",
+            "example": 99,
+            "description": "Active promotional category discount percentage (0-100)."
+          },
+          "categoryDiscountAmount": {
+            "type": "number",
+            "example": 2129,
+            "description": "Discount savings calculated strictly from Strike Price (MRP): round(strikePrice * categoryDiscountPercentage / 100)."
+          },
+          "hasCategoryDiscount": {
+            "type": "boolean",
+            "example": true,
+            "description": "Whether a category discount is currently active for this product."
+          },
+          "currentDifference": {
+            "type": "number",
+            "example": 2133.5,
+            "description": "Total customer savings compared to MRP: max(0, strikePrice - finalPrice)."
           }
         }
       }

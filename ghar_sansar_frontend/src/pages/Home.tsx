@@ -1,5 +1,5 @@
 // src/pages/Home.tsx
-import React, { useState, useMemo } from "react";
+import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
@@ -10,15 +10,10 @@ import {
   Eye,
   MessageSquare,
   Home as HomeIcon,
-  ChevronLeft,
-  ChevronRight,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import { useProducts } from "../context/ProductContext";
-import ProductCard from "../components/ProductCard";
 
 const Home: React.FC = () => {
-  const { products } = useProducts();
   const navigate = useNavigate();
 
   // How We Work steps matching reference image
@@ -116,34 +111,6 @@ const Home: React.FC = () => {
       description: "Product can be returned or exchanged",
     },
   ];
-
-  // Filter products for Recent Products carousel
-  const [productPage, setProductPage] = useState(0);
-
-  const recentProducts = useMemo(() => {
-    // Prioritize Sonu cookware items as shown in reference image
-    const sonuItems = products.filter(
-      (p) =>
-        p.title?.toLowerCase().includes("sonu") ||
-        p.category?.toLowerCase().includes("sonu")
-    );
-    const otherItems = products.filter((p) => !sonuItems.includes(p));
-    return [...sonuItems, ...otherItems];
-  }, [products]);
-
-  const maxPages = Math.max(1, Math.ceil(recentProducts.length / 4));
-  const currentRecentProducts = recentProducts.slice(
-    productPage * 4,
-    productPage * 4 + 4
-  );
-
-  const prevProductPage = () => {
-    setProductPage((prev) => (prev > 0 ? prev - 1 : maxPages - 1));
-  };
-
-  const nextProductPage = () => {
-    setProductPage((prev) => (prev + 1 < maxPages ? prev + 1 : 0));
-  };
 
   return (
     <div className="bg-[#FAF8F5] min-h-screen font-sans text-gray-900 flex flex-col">
@@ -344,57 +311,6 @@ const Home: React.FC = () => {
                   </div>
                 </div>
               </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 4. Recent Products Section matching Reference Design */}
-      <section className="py-14 sm:py-20 bg-[#FAF8F5]">
-        <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Header Row with Title & Controls */}
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 sm:mb-10">
-            <div>
-              <h2 className="text-3xl sm:text-4xl lg:text-[44px] font-serif text-[#171717] font-normal tracking-tight leading-tight">
-                Recent Products
-              </h2>
-              <p className="text-sm sm:text-[15px] text-[#6B7280] mt-1.5 font-normal">
-                — Check out our latest arrivals for your home.
-              </p>
-            </div>
-
-            {/* Right Controls: View All + Prev/Next Arrows */}
-            <div className="flex items-center gap-2.5 self-start sm:self-auto shrink-0">
-              <Link
-                to="/products"
-                className="inline-flex items-center gap-2 text-xs sm:text-[13px] font-semibold text-[#171717] bg-white border border-[#E7E5E1] hover:border-[#004D40] hover:text-[#004D40] px-4 sm:px-5 py-2 sm:py-2.5 rounded-full shadow-2xs transition-all duration-200 cursor-pointer"
-              >
-                <span>View all Products</span>
-                <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" />
-              </Link>
-              <button
-                type="button"
-                onClick={prevProductPage}
-                aria-label="Previous products"
-                className="w-9 h-9 rounded-full border border-[#E7E5E1] bg-white hover:border-[#004D40] hover:text-[#004D40] hover:bg-[#E8F5F1] text-gray-700 flex items-center justify-center transition-all duration-200 shadow-2xs cursor-pointer active:scale-95"
-              >
-                <ChevronLeft size={17} />
-              </button>
-              <button
-                type="button"
-                onClick={nextProductPage}
-                aria-label="Next products"
-                className="w-9 h-9 rounded-full border border-[#E7E5E1] bg-white hover:border-[#004D40] hover:text-[#004D40] hover:bg-[#E8F5F1] text-gray-700 flex items-center justify-center transition-all duration-200 shadow-2xs cursor-pointer active:scale-95"
-              >
-                <ChevronRight size={17} />
-              </button>
-            </div>
-          </div>
-
-          {/* 4 Product Cards in a row with 24-28px gap */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-7 items-stretch">
-            {currentRecentProducts.map((product, idx) => (
-              <ProductCard key={product.id || idx} product={product} index={idx} />
             ))}
           </div>
         </div>

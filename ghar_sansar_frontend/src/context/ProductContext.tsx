@@ -7,15 +7,16 @@ export interface Product {
   title: string;
   name?: string;
   description: string;
-  strikePrice: number; // Original / reference price displayed with strikethrough (e.g. ₹3,000)
-  actualPrice: number; // Current product price entered manually by admin (e.g. ₹2,500)
-  categoryDiscountPercentage: number; // Promotional category discount % (e.g. 10%)
-  categoryDiscountAmount: number; // Calculated from Strike Price: Strike * Discount% (e.g. ₹300)
-  currentDifference?: number; // Strike Price - Actual Price (e.g. ₹500)
+  strikePrice: number; // Original / reference price displayed with strikethrough (e.g. ₹2,150)
+  actualPrice: number; // Product's original base selling price BEFORE category discount (e.g. ₹1,650)
+  discountedPrice: number; // Discounted price calculated dynamically from Actual Price when category discount is ON (e.g. ₹16.50)
+  finalPrice: number; // Price customer actually pays: discountedPrice when ON, actualPrice when OFF
+  categoryDiscountPercentage: number; // Category promotional discount % (e.g. 99%)
+  categoryDiscountAmount: number; // Calculated from STRIKE PRICE: Strike * Discount% (e.g. ₹2,129)
+  currentDifference?: number; // Difference between Strike Price and Customer Price
   hasCategoryDiscount?: boolean;
-  price: number; // Customer purchase price = actualPrice (₹2,500)
-  sellingPrice: number; // alias for actualPrice
-  finalPrice: number; // alias for actualPrice (never reduced below actualPrice)
+  price: number; // Customer purchase price = finalPrice (₹16.50 when 99% discount is active)
+  sellingPrice: number; // alias for finalPrice
   discountPercentage: number; // alias for categoryDiscountPercentage
   isOnSale?: boolean;
   image: string;
@@ -110,13 +111,26 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
           const items = sub.products || sub.images || sub.services || [];
           items.forEach((img: any, index: number) => {
             const imageUrl = fixImageUrl(img.image);
-            const actualPrice = parseInt(img.actualPrice) || parseInt(img.actual_price) || parseInt(img.price) || parseInt(img.selling_price) || 0;
-            const strikePrice = parseInt(img.strikePrice) || parseInt(img.strike_price) || parseInt(img["act-price"]) || (actualPrice > 0 ? actualPrice : 0);
-            const categoryDiscountPercentage = parseFloat(img.categoryDiscountPercentage) || parseFloat(img.category_discount_percentage) || parseFloat(img.discount_percentage) || 0;
-            const categoryDiscountAmount = parseInt(img.categoryDiscountAmount) || parseInt(img.category_discount_amount) || Math.round(strikePrice * (categoryDiscountPercentage / 100));
-            const currentDifference = Math.max(0, strikePrice - actualPrice);
+            const actualPrice = parseFloat(img.actualPrice !== undefined ? img.actualPrice : (img.actual_price !== undefined ? img.actual_price : (img.price || 0))) || 0;
+            const strikePrice = parseFloat(img.strikePrice !== undefined ? img.strikePrice : (img.strike_price !== undefined ? img.strike_price : (img["act-price"] || actualPrice))) || actualPrice;
+            const categoryDiscountPercentage = parseFloat(img.categoryDiscountPercentage || img.category_discount_percentage || img.discount_percentage || 0);
+            const categoryDiscountAmount = parseFloat(img.categoryDiscountAmount !== undefined ? img.categoryDiscountAmount : (img.category_discount_amount !== undefined ? img.category_discount_amount : (strikePrice > 0 && categoryDiscountPercentage > 0 ? Math.round(strikePrice * (categoryDiscountPercentage / 100)) : 0)));
             const hasCategoryDiscount = categoryDiscountPercentage > 0;
-            const isOnSale = hasCategoryDiscount || strikePrice > actualPrice;
+
+            // Discounted price calculated dynamically from Actual Price
+            const discountedPrice = img.discountedPrice !== undefined ? parseFloat(img.discountedPrice) : (
+              hasCategoryDiscount
+                ? Math.round((actualPrice - (actualPrice * (categoryDiscountPercentage / 100))) * 100) / 100
+                : actualPrice
+            );
+
+            // Final price the customer actually pays
+            const finalPrice = img.finalPrice !== undefined ? parseFloat(img.finalPrice) : (
+              hasCategoryDiscount ? discountedPrice : actualPrice
+            );
+
+            const currentDifference = Math.max(0, strikePrice - finalPrice);
+            const isOnSale = hasCategoryDiscount || strikePrice > finalPrice;
 
             catProducts.push({
               id: img.id || `${category.name || category.category}-${sub.name}-${index}`,
@@ -125,13 +139,14 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
               description: img.description || "",
               strikePrice: strikePrice,
               actualPrice: actualPrice,
+              discountedPrice: discountedPrice,
+              finalPrice: finalPrice,
               categoryDiscountPercentage: categoryDiscountPercentage,
               categoryDiscountAmount: categoryDiscountAmount,
               currentDifference: currentDifference,
               hasCategoryDiscount: hasCategoryDiscount,
-              price: actualPrice, // Customer purchase price = actualPrice (₹2,500)
-              sellingPrice: actualPrice,
-              finalPrice: actualPrice,
+              price: finalPrice, // Customer purchase price (₹16.50 when 99% discount is active)
+              sellingPrice: finalPrice,
               discountPercentage: categoryDiscountPercentage,
               isOnSale: isOnSale,
               image: imageUrl,

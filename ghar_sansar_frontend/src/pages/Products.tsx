@@ -372,23 +372,77 @@ const ProductsPage: React.FC = () => {
       return true;
     });
 
-    // Sorting
+    // Sorting & Category Distribution
     if (sortOrder === "price-low") {
       result.sort((a, b) => (a.price || 0) - (b.price || 0));
     } else if (sortOrder === "price-high") {
       result.sort((a, b) => (b.price || 0) - (a.price || 0));
-    } else {
-      // Featured / Default: prioritize Sonu products first when in all categories, then order according to price ascending
+    } else if (categoryFilter === "All") {
+      // Sort within each category first (best images and lowest prices first)
       result.sort((a, b) => {
-        if (categoryFilter === "All") {
-          const aIsSonu = (a.category?.toLowerCase().includes("sonu") || a.title?.toLowerCase().includes("sonu")) ? 1 : 0;
-          const bIsSonu = (b.category?.toLowerCase().includes("sonu") || b.title?.toLowerCase().includes("sonu")) ? 1 : 0;
-          if (aIsSonu !== bIsSonu) return bIsSonu - aIsSonu;
-        }
         const aScore = (a.image ? 10 : 0) + (a.price > 0 ? 5 : 0);
         const bScore = (b.image ? 10 : 0) + (b.price > 0 ? 5 : 0);
         if (bScore !== aScore) return bScore - aScore;
-        // Order products according to price range / price ascending
+        return (a.price || 0) - (b.price || 0);
+      });
+
+      // Group products into category buckets matching allCollectionOptions
+      const categoryOrder = allCollectionOptions
+        .map((c) => c.key)
+        .filter((k) => k !== "All");
+
+      const getCategoryKey = (p: Product) => {
+        const cat = (p.category || "").toLowerCase();
+        for (const opt of categoryOrder) {
+          if (
+            opt.toLowerCase() === cat ||
+            (opt === "German Silver & More" && cat.includes("german")) ||
+            (opt === "sonu_steel_products" && (cat.includes("sonu") || p.title?.toLowerCase().includes("sonu")))
+          ) {
+            return opt;
+          }
+        }
+        return p.category || "Other";
+      };
+
+      const buckets: Record<string, Product[]> = {};
+      categoryOrder.forEach((k) => {
+        buckets[k] = [];
+      });
+      const other: Product[] = [];
+
+      result.forEach((p) => {
+        const key = getCategoryKey(p);
+        if (buckets[key]) {
+          buckets[key].push(p);
+        } else {
+          other.push(p);
+        }
+      });
+
+      // Interleave 4 products per line (row) for each category in order:
+      // Row 1: 4 Sonu products -> Row 2: 4 Cello products -> Row 3: 4 Aquarium products, etc.
+      const interleaved: Product[] = [];
+      let hasMore = true;
+      while (hasMore) {
+        hasMore = false;
+        for (const catKey of categoryOrder) {
+          const bucket = buckets[catKey];
+          if (bucket && bucket.length > 0) {
+            const chunk = bucket.splice(0, 4);
+            interleaved.push(...chunk);
+            hasMore = true;
+          }
+        }
+      }
+      interleaved.push(...other);
+      result = interleaved;
+    } else {
+      // Default / Featured sort when a specific category is selected
+      result.sort((a, b) => {
+        const aScore = (a.image ? 10 : 0) + (a.price > 0 ? 5 : 0);
+        const bScore = (b.image ? 10 : 0) + (b.price > 0 ? 5 : 0);
+        if (bScore !== aScore) return bScore - aScore;
         return (a.price || 0) - (b.price || 0);
       });
     }

@@ -29,6 +29,87 @@ const Login: React.FC = () => {
   const [otpMessage, setOtpMessage] = useState("");
   const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
+  // Registration OTP states
+  const [registerOtpSent, setRegisterOtpSent] = useState(false);
+  const [registerOtpCode, setRegisterOtpCode] = useState("");
+  const [registerOtpCountdown, setRegisterOtpCountdown] = useState(0);
+  const [registerOtpMessage, setRegisterOtpMessage] = useState("");
+  const registerOtpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  // Auto-focus first digit box when registration OTP is sent
+  useEffect(() => {
+    if (registerOtpSent && registerOtpInputRefs.current[0]) {
+      setTimeout(() => {
+        registerOtpInputRefs.current[0]?.focus();
+      }, 100);
+    }
+  }, [registerOtpSent]);
+
+  // Countdown timer for registration OTP resend
+  useEffect(() => {
+    if (registerOtpCountdown <= 0) return;
+    const timer = setInterval(() => {
+      setRegisterOtpCountdown((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [registerOtpCountdown]);
+
+  const handleRegisterOtpDigitChange = (index: number, val: string) => {
+    const cleaned = val.replace(/\D/g, "");
+    if (cleaned.length > 1) {
+      const newFullCode = (cleaned + registerOtpCode.slice(cleaned.length)).slice(0, 6);
+      setRegisterOtpCode(newFullCode);
+      const nextIdx = Math.min(newFullCode.length, 5);
+      registerOtpInputRefs.current[nextIdx]?.focus();
+      return;
+    }
+
+    const currentArr = (registerOtpCode + "      ").slice(0, 6).split("");
+    currentArr[index] = cleaned || " ";
+    const newCode = currentArr.join("").trimEnd();
+    setRegisterOtpCode(newCode);
+
+    if (cleaned && index < 5) {
+      registerOtpInputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleRegisterOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Backspace") {
+      if ((!registerOtpCode[index] || registerOtpCode[index] === " ") && index > 0) {
+        registerOtpInputRefs.current[index - 1]?.focus();
+      }
+    } else if (e.key === "ArrowLeft" && index > 0) {
+      registerOtpInputRefs.current[index - 1]?.focus();
+    } else if (e.key === "ArrowRight" && index < 5) {
+      registerOtpInputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleRegisterOtpPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const pasteData = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    if (pasteData) {
+      setRegisterOtpCode(pasteData);
+      const nextIdx = Math.min(pasteData.length, 5);
+      registerOtpInputRefs.current[nextIdx]?.focus();
+    }
+  };
+
+  const handleResendRegisterOtp = async () => {
+    if (registerOtpCountdown > 0 || loading) return;
+    setError("");
+    setLoading(true);
+    const res = await sendOtp(formData.email.trim(), "registration");
+    setLoading(false);
+    if (res.success) {
+      setRegisterOtpCountdown(45);
+      setRegisterOtpMessage(`A fresh verification code has been sent to ${formData.email.trim()}`);
+    } else {
+      setError(res.error || "Failed to resend verification code.");
+    }
+  };
+
   // Auto-focus first box when OTP is sent
   useEffect(() => {
     if (otpSent && otpInputRefs.current[0]) {
@@ -278,6 +359,46 @@ const Login: React.FC = () => {
           setError("Invalid credentials");
         }
       } else {
+        // REGISTRATION FLOW
+        // 1. If OTP is already sent, verify OTP and complete registration
+        if (registerOtpSent) {
+          const cleanCode = registerOtpCode.trim();
+          if (!cleanCode || cleanCode.length !== 6) {
+            setError("Please enter the complete 6-digit verification code");
+            setLoading(false);
+            return;
+          }
+
+          const res = await register(
+            formData.name.trim(),
+            formData.email.trim(),
+            formData.password,
+            formData.phone.trim(),
+            cleanCode
+          );
+
+          if (res.success) {
+            navigate(from || "/", { replace: true });
+          } else {
+            setError(res.error || "Verification failed. Invalid or expired OTP.");
+          }
+          setLoading(false);
+          return;
+        }
+
+        // 2. Initial registration submit: validate all inputs
+        if (!formData.name.trim()) {
+          setError("Please enter your full name");
+          setLoading(false);
+          return;
+        }
+
+        if (!formData.email.trim() || !isEmail(formData.email.trim())) {
+          setError("Please enter a valid email address");
+          setLoading(false);
+          return;
+        }
+
         if (!isValidPhone(formData.phone)) {
           setError("Phone number must be exactly 10 digits");
           setLoading(false);
@@ -294,14 +415,15 @@ const Login: React.FC = () => {
           return;
         }
 
-        const success = await register(
-          formData.name,
-          formData.email,
-          formData.password,
-          formData.phone
-        );
-        if (success) {
-          navigate(from || "/", { replace: true });
+        // 3. Send 6-digit OTP to user's Gmail address
+        const res = await sendOtp(formData.email.trim(), "registration");
+        if (res.success) {
+          setRegisterOtpSent(true);
+          setRegisterOtpCountdown(45);
+          setRegisterOtpCode("");
+          setRegisterOtpMessage(`Verification code sent to ${formData.email.trim()}`);
+        } else {
+          setError(res.error || "Failed to send verification code to your email. Please try again.");
         }
       }
     } catch (err) {
@@ -337,14 +459,18 @@ const Login: React.FC = () => {
           </div>
           <div className="text-center mb-6">
             <h2 className="text-3xl font-bold text-gray-900">
-              {isLogin ? (loginMethod === "otp" ? "Sign In with OTP" : "Sign In") : "Create Account"}
+              {isLogin
+                ? (loginMethod === "otp" ? "Sign In with OTP" : "Sign In")
+                : (registerOtpSent ? "Verify Email" : "Create Account")}
             </h2>
             <p className="mt-2 text-gray-600 text-sm">
               {isLogin
                 ? (loginMethod === "otp"
                     ? "Passwordless login with a 6-digit code sent to your email"
                     : "Welcome back! Please enter your details")
-                : "Join our community today"}
+                : (registerOtpSent
+                    ? "Enter the 6-digit code sent to your Gmail to complete registration"
+                    : "Join our community today")}
             </p>
           </div>
 
@@ -478,6 +604,114 @@ const Login: React.FC = () => {
                   className="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-full shadow-sm text-xs font-bold uppercase tracking-widest text-white bg-[#0a2e22] hover:bg-[#061d15] focus:outline-none disabled:opacity-50 transition-colors cursor-pointer"
                 >
                   {loading ? "Please wait..." : !otpSent ? "Send Verification Code" : "Verify & Sign In"}
+                </button>
+              </div>
+            </div>
+          ) : (!isLogin && registerOtpSent) ? (
+            <div className="space-y-6">
+              <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-center">
+                <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-emerald-100 text-emerald-800 mb-2">
+                  <Mail className="w-5 h-5 text-emerald-700" />
+                </div>
+                <h3 className="text-base font-bold text-gray-900">Check Your Gmail Inbox</h3>
+                <p className="text-xs text-gray-600 mt-1">
+                  We've sent a 6-digit verification code to:
+                </p>
+                <div className="mt-2 inline-flex items-center gap-2 px-3 py-1 bg-white rounded-lg border border-emerald-200 text-xs font-semibold text-emerald-900">
+                  <span>{formData.email}</span>
+                  <button
+                    type="button"
+                    onClick={() => { setRegisterOtpSent(false); setRegisterOtpCode(""); setError(""); }}
+                    className="text-emerald-700 hover:underline font-bold text-[11px] cursor-pointer ml-1"
+                  >
+                    Change
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Enter 6-Digit Code
+                  </label>
+                  <span className="text-xs text-gray-400 font-mono">10 min validity</span>
+                </div>
+
+                <div className="flex justify-between items-center gap-2 sm:gap-2.5 py-1">
+                  {[0, 1, 2, 3, 4, 5].map((index) => {
+                    const digit = registerOtpCode[index] && registerOtpCode[index] !== " " ? registerOtpCode[index] : "";
+                    return (
+                      <input
+                        key={index}
+                        ref={(el) => (registerOtpInputRefs.current[index] = el)}
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength={1}
+                        value={digit}
+                        onChange={(e) => handleRegisterOtpDigitChange(index, e.target.value)}
+                        onKeyDown={(e) => handleRegisterOtpKeyDown(index, e)}
+                        onPaste={handleRegisterOtpPaste}
+                        placeholder="•"
+                        className={`w-11 h-13 sm:w-12 sm:h-14 text-center text-2xl font-bold rounded-lg border-2 transition-all duration-150 outline-none select-none
+                          placeholder:text-gray-300 placeholder:text-2xl placeholder:font-normal
+                          ${digit
+                            ? "border-[#0a2e22] text-[#0a2e22] bg-[#f0f7f4] shadow-sm"
+                            : "border-gray-200 text-gray-800 bg-white hover:border-gray-300 focus:border-[#0a2e22] focus:ring-2 focus:ring-[#0a2e22]/20"
+                          }`}
+                      />
+                    );
+                  })}
+                </div>
+
+                {registerOtpMessage && (
+                  <p className="mt-2 text-xs text-emerald-800 bg-emerald-50 border border-emerald-200 rounded p-2 text-center">
+                    {registerOtpMessage}
+                  </p>
+                )}
+
+                <div className="mt-3 flex items-center justify-between text-xs">
+                  <span className="text-gray-500">Didn't receive code?</span>
+                  {registerOtpCountdown > 0 ? (
+                    <span className="text-gray-400 font-medium">Resend in {registerOtpCountdown}s</span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleResendRegisterOtp}
+                      disabled={loading}
+                      className="text-[#0a2e22] font-bold hover:underline flex items-center gap-1 cursor-pointer"
+                    >
+                      <RefreshCw className="w-3 h-3" />
+                      Resend Code
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {error && (
+                <div className="text-red-600 text-sm text-center bg-red-50 border border-red-200 rounded p-2">
+                  {error}
+                </div>
+              )}
+
+              <div>
+                <button
+                  type="button"
+                  onClick={handleSubmit}
+                  disabled={loading}
+                  className="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-full shadow-sm text-xs font-bold uppercase tracking-widest text-white bg-luxury-charcoal hover:bg-luxury-gold focus:outline-none disabled:opacity-50 transition-colors cursor-pointer"
+                >
+                  {loading ? "Verifying & Creating..." : "Verify & Create Account"}
+                </button>
+              </div>
+
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => { setRegisterOtpSent(false); setError(""); }}
+                  className="text-xs text-gray-500 hover:text-gray-900 underline cursor-pointer"
+                >
+                  ← Back to Registration Details
                 </button>
               </div>
             </div>
@@ -664,37 +898,41 @@ const Login: React.FC = () => {
             </form>
           )}
 
-          <div className="relative mt-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">Or continue with</span>
-            </div>
-          </div>
+          {(!registerOtpSent || isLogin) && (
+            <>
+              <div className="relative mt-6">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white text-gray-500">Or continue with</span>
+                </div>
+              </div>
 
-          <div className="mt-6 mb-6">
-            <button
-              type="button"
-              onClick={async () => {
-                setLoading(true);
-                const res = await loginWithGoogle();
-                setLoading(false);
-                if (res.success) {
-                  if (res.isProfileIncomplete) {
-                    setShowAddressModal(true);
-                  } else {
-                    navigate(from || "/", { replace: true });
-                  }
-                }
-              }}
-              disabled={loading}
-              className="w-full flex justify-center items-center py-2.5 px-4 border border-gray-300 rounded-full shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none disabled:opacity-50 cursor-pointer"
-            >
-              <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="h-5 w-5 mr-2" />
-              Sign in with Google
-            </button>
-          </div>
+              <div className="mt-6 mb-6">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    setLoading(true);
+                    const res = await loginWithGoogle();
+                    setLoading(false);
+                    if (res.success) {
+                      if (res.isProfileIncomplete) {
+                        setShowAddressModal(true);
+                      } else {
+                        navigate(from || "/", { replace: true });
+                      }
+                    }
+                  }}
+                  disabled={loading}
+                  className="w-full flex justify-center items-center py-2.5 px-4 border border-gray-300 rounded-full shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none disabled:opacity-50 cursor-pointer"
+                >
+                  <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="h-5 w-5 mr-2" />
+                  Sign in with Google
+                </button>
+              </div>
+            </>
+          )}
 
           <div className="text-center">
             <button
@@ -702,6 +940,8 @@ const Login: React.FC = () => {
               onClick={() => {
                 setIsLogin(!isLogin);
                 setError("");
+                setRegisterOtpSent(false);
+                setRegisterOtpCode("");
                 setLoginMethod("password");
               }}
               className="text-xs uppercase tracking-wider text-luxury-gold hover:text-luxury-charcoal font-bold cursor-pointer"

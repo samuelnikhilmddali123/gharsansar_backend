@@ -13,6 +13,7 @@ const Cart = require("./models/Cart");
 const Wishlist = require("./models/Wishlist");
 const Order = require("./models/Order");
 const Otp = require("./models/Otp");
+const AuthCode = require("./models/AuthCode");
 const { sendOtpEmail } = require("./services/emailService");
 const { generateToken, authenticate, optionalAuth, requireAdmin } = require("./middleware/auth");
 const cartRoutes = require("./routes/cartRoutes");
@@ -428,9 +429,13 @@ app.get(["/api/products", "/products"], async (req, res) => {
             "act-price": pricing.strikePrice,
             actualPrice: pricing.actualPrice,
             actual_price: pricing.actualPrice,
-            price: pricing.actualPrice, // Customer pays actualPrice (e.g., ₹2,500)
-            finalPrice: pricing.actualPrice,
-            final_price: pricing.actualPrice,
+            discountedPrice: pricing.discountedPrice,
+            discounted_price: pricing.discountedPrice,
+            price: pricing.finalPrice, // Customer pays finalPrice (e.g. ₹16.50 when 99% discount is active)
+            finalPrice: pricing.finalPrice,
+            final_price: pricing.finalPrice,
+            sellingPrice: pricing.finalPrice,
+            selling_price: pricing.finalPrice,
             categoryDiscountPercentage: pricing.categoryDiscountPercentage,
             category_discount_percentage: pricing.categoryDiscountPercentage,
             categoryDiscountAmount: pricing.categoryDiscountAmount,
@@ -553,8 +558,9 @@ app.get(["/api/auth/check", "/auth/check"], (req, res) => {
 });
 
 
-app.post(["/api/v1/auth/register", "/api/auth/register", "/auth/register"], (req, res) => {
-  const { name, full_name, email, phone, password } = req.body;
+app.post(["/api/v1/auth/register", "/api/auth/register", "/auth/register"], async (req, res) => {
+  try {
+    const { name, full_name, email, phone, password, otp } = req.body;
   const displayName = (full_name || name || "").trim();
 
   if (!email || !password || !displayName) {
@@ -598,6 +604,44 @@ app.post(["/api/v1/auth/register", "/api/auth/register", "/auth/register"], (req
     }
   }
 
+  // 3. Strict Email OTP Verification
+  if (!otp) {
+    return res.status(400).json({
+      error: "Email verification OTP is required. Please check your email for the verification code."
+    });
+  }
+
+  const cleanOtp = String(otp).trim();
+  const otpRecord = await Otp.findOne({
+    email: cleanEmail,
+    expiresAt: { $gt: new Date() }
+  }).sort({ createdAt: -1 });
+
+  if (!otpRecord) {
+    return res.status(400).json({
+      error: "Invalid or expired OTP. Please request a new verification code."
+    });
+  }
+
+  if (otpRecord.attempts >= 5) {
+    await Otp.deleteOne({ _id: otpRecord._id });
+    return res.status(400).json({
+      error: "Too many failed attempts. This verification code has been invalidated."
+    });
+  }
+
+  if (otpRecord.otp !== cleanOtp) {
+    otpRecord.attempts += 1;
+    await otpRecord.save();
+    const remaining = 5 - otpRecord.attempts;
+    return res.status(400).json({
+      error: `Incorrect OTP. ${remaining} attempt${remaining === 1 ? '' : 's'} remaining.`
+    });
+  }
+
+  // OTP verified successfully - clear OTP records for this email
+  await Otp.deleteMany({ email: cleanEmail });
+
   const now = new Date();
   const newUser = {
     id: getNextUserId(users),
@@ -625,10 +669,19 @@ app.post(["/api/v1/auth/register", "/api/auth/register", "/auth/register"], (req
 
   users.push(newUser);
   writeJsonFile(USERS_FILE, users);
+  try {
+    await User.create(newUser);
+  } catch (e) {
+    console.warn("User.create sync error (non-fatal):", e.message);
+  }
 
   const token = generateToken(newUser);
   const legacyToken = `user_token_${newUser.id}_${Date.now()}`;
-  res.status(201).json({ success: true, token, legacyToken, user: formatUserResponse(newUser) });
+  return res.status(201).json({ success: true, token, legacyToken, user: formatUserResponse(newUser) });
+  } catch (err) {
+    console.error("Error in /auth/register:", err);
+    return res.status(500).json({ error: "Failed to register account. Please try again." });
+  }
 });
 
 app.post(["/api/v1/auth/login", "/api/auth/login", "/auth/login"], (req, res) => {
@@ -755,6 +808,226 @@ app.post(["/api/v1/auth/google", "/api/auth/google", "/auth/google"], (req, res)
   });
 });
 
+// ==========================================
+// MOBILE APP GOOGLE AUTHENTICATION BRIDGE
+// ==========================================
+
+// In-memory fallback store for mobile auth codes (guarantees zero-latency & high resilience)
+const memoryAuthCodes = new Map();
+
+/**
+ * Clean up expired authorization codes from in-memory cache periodically (every 5 minutes)
+ */
+setInterval(() => {
+  const now = Date.now();
+  for (const [code, record] of memoryAuthCodes.entries()) {
+    if (record.expiresAt < now || record.used) {
+      memoryAuthCodes.delete(code);
+    }
+  }
+}, 5 * 60 * 1000);
+
+/**
+ * Generate a secure, single-use, short-lived authorization code
+ * for the Gharsansar Mobile App after Google authentication succeeds.
+ */
+app.post(["/api/v1/auth/mobile-code", "/api/auth/mobile-code", "/auth/mobile-code"], async (req, res) => {
+  try {
+    const { email, name, full_name, firebase_uid, photo_url } = req.body;
+    if (!email) {
+      return res.status(400).json({ success: false, error: "Email is required for mobile authentication" });
+    }
+
+    const googleEmail = normalizeEmail(email);
+    const displayName = (full_name || name || "Google User").trim();
+
+    const users = readJsonFile(USERS_FILE, []);
+    let user = users.find((u) => normalizeEmail(u.email) === googleEmail || (firebase_uid && u.firebase_uid === firebase_uid));
+
+    const now = new Date();
+
+    if (!user) {
+      user = {
+        id: getNextUserId(users),
+        email: googleEmail,
+        password_hash: "",
+        full_name: displayName,
+        phone: "",
+        company_name: "",
+        gstin: "",
+        role: "CUSTOMER",
+        is_active: true,
+        firebase_uid: firebase_uid || "",
+        photo_url: photo_url || "",
+        street_address: "",
+        city: "",
+        state: "",
+        pincode: "",
+        created_at: now.toISOString(),
+        __v: 0,
+        createdAt: now,
+        updatedAt: now,
+        addresses: [],
+        name: displayName
+      };
+      users.push(user);
+      writeJsonFile(USERS_FILE, users);
+      try {
+        await User.create(user);
+      } catch (e) {
+        console.warn("User MongoDB sync notice (non-fatal):", e.message);
+      }
+    } else {
+      let changed = false;
+      if (firebase_uid && !user.firebase_uid) {
+        user.firebase_uid = firebase_uid;
+        changed = true;
+      }
+      if (photo_url && !user.photo_url) {
+        user.photo_url = photo_url;
+        changed = true;
+      }
+      if (changed) {
+        user.updatedAt = now;
+        writeJsonFile(USERS_FILE, users);
+        try {
+          await User.updateOne({ id: user.id }, { $set: user });
+        } catch (e) {}
+      }
+    }
+
+    // Generate cryptographically random 32-byte (64 hex characters) authorization code
+    const code = crypto.randomBytes(32).toString("hex");
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes lifetime
+
+    // Save in memory cache
+    memoryAuthCodes.set(code, {
+      code,
+      userId: user.id,
+      email: googleEmail,
+      used: false,
+      expiresAt: expiresAt.getTime()
+    });
+
+    // Save in MongoDB Atlas
+    try {
+      await AuthCode.create({
+        code,
+        userId: user.id,
+        email: googleEmail,
+        used: false,
+        expiresAt
+      });
+    } catch (e) {
+      console.warn("AuthCode MongoDB create fallback:", e.message);
+    }
+
+    console.log(`✅ [MOBILE AUTH BRIDGE] Created one-time authorization code for ${googleEmail} (expires in 5m)`);
+    return res.json({
+      success: true,
+      code
+    });
+  } catch (err) {
+    console.error("Error in /api/v1/auth/mobile-code:", err);
+    return res.status(500).json({ success: false, error: "Failed to generate mobile authorization code" });
+  }
+});
+
+/**
+ * Exchange one-time authorization code for application JWT and user profile.
+ * Endpoint: POST /api/v1/auth/exchange-code
+ */
+app.post(["/api/v1/auth/exchange-code", "/api/auth/exchange-code", "/auth/exchange-code", "/api/v1/auth/mobile-code/exchange", "/api/auth/mobile-code/exchange", "/api/v1/auth/mobile-exchange", "/api/auth/mobile-exchange"], async (req, res) => {
+  try {
+    const { code } = req.body;
+    if (!code || typeof code !== "string" || !code.trim()) {
+      return res.status(400).json({ success: false, error: "Authorization code is required" });
+    }
+
+    const cleanCode = code.trim();
+
+    // 1. Look up code in MongoDB Atlas and memory cache
+    let codeRecord = null;
+    try {
+      codeRecord = await AuthCode.findOne({ code: cleanCode });
+    } catch (e) {}
+
+    const memRecord = memoryAuthCodes.get(cleanCode);
+
+    if (!codeRecord && !memRecord) {
+      return res.status(400).json({ success: false, error: "Invalid authorization code" });
+    }
+
+    // 2. Check if already used
+    const isUsed = Boolean((codeRecord && codeRecord.used) || (memRecord && memRecord.used));
+    if (isUsed) {
+      return res.status(400).json({ success: false, error: "Authorization code has already been used" });
+    }
+
+    // 3. Check expiration
+    const expiryTime = codeRecord ? new Date(codeRecord.expiresAt).getTime() : memRecord.expiresAt;
+    if (Date.now() > expiryTime) {
+      memoryAuthCodes.delete(cleanCode);
+      if (codeRecord) {
+        try { await AuthCode.deleteOne({ _id: codeRecord._id }); } catch (e) {}
+      }
+      return res.status(400).json({ success: false, error: "Authorization code has expired. Please sign in again." });
+    }
+
+    // 4. Mark code as used immediately & invalidate it
+    if (memRecord) {
+      memRecord.used = true;
+      memoryAuthCodes.delete(cleanCode);
+    }
+    if (codeRecord) {
+      codeRecord.used = true;
+      try {
+        await AuthCode.deleteOne({ _id: codeRecord._id });
+      } catch (e) {}
+    }
+
+    // 5. Identify the Gharsansar user
+    const targetUserId = codeRecord ? codeRecord.userId : memRecord.userId;
+    const targetEmail = codeRecord ? codeRecord.email : memRecord.email;
+
+    const users = readJsonFile(USERS_FILE, []);
+    let user = users.find((u) => u.id == targetUserId || normalizeEmail(u.email) === targetEmail);
+
+    if (!user) {
+      try {
+        user = await User.findOne({ $or: [{ id: targetUserId }, { email: targetEmail }] });
+      } catch (e) {}
+    }
+
+    if (!user) {
+      return res.status(404).json({ success: false, error: "User associated with authorization code not found" });
+    }
+
+    // 6. Generate normal application authentication token/session
+    const token = generateToken(user);
+    const legacyToken = `user_token_${user.id}_${Date.now()}`;
+
+    const hasPhone = Boolean(user.phone && String(user.phone).trim().length >= 10);
+    const hasAddress = Boolean(
+      (user.street_address && String(user.street_address).trim().length > 0) ||
+      (user.addresses && user.addresses.length > 0 && (user.addresses[0].address || user.addresses[0].street_address))
+    );
+    const isProfileIncomplete = (!hasPhone || !hasAddress);
+
+    console.log(`✅ [MOBILE AUTH BRIDGE] Code successfully exchanged for user: ${user.email} (ID: ${user.id})`);
+    return res.json({
+      success: true,
+      token,
+      legacyToken,
+      user: formatUserResponse(user),
+      isProfileIncomplete
+    });
+  } catch (err) {
+    console.error("Error in /api/v1/auth/exchange-code:", err);
+    return res.status(500).json({ success: false, error: "Internal server error during authorization code exchange" });
+  }
+});
+
 // Real-time verification of currently authenticated user session from MongoDB Atlas
 app.get(["/api/v1/auth/me", "/api/auth/me"], authenticate, (req, res) => {
   res.json({
@@ -773,13 +1046,28 @@ app.get(["/api/v1/auth/me", "/api/auth/me"], authenticate, (req, res) => {
  */
 app.post(["/api/v1/auth/send-otp", "/api/auth/send-otp", "/auth/send-otp"], async (req, res) => {
   try {
-    const { email } = req.body;
+    const { email, purpose } = req.body;
     if (!email || typeof email !== "string" || !email.includes("@")) {
       return res.status(400).json({ error: "Please provide a valid email address" });
     }
 
     const cleanEmail = normalizeEmail(email);
 
+    // If requesting OTP for registration, prevent sending if email is already registered
+    if (purpose && String(purpose).toLowerCase() === "registration") {
+      const users = readJsonFile(USERS_FILE, []);
+      const existsInJson = users.some((u) => normalizeEmail(u.email) === cleanEmail);
+      let existsInDb = false;
+      try {
+        existsInDb = Boolean(await User.findOne({ email: cleanEmail }));
+      } catch (e) {}
+
+      if (existsInJson || existsInDb) {
+        return res.status(400).json({
+          error: "This email address is already registered. Please sign in instead."
+        });
+      }
+    }
     // Rate-limiting: prevent spamming OTP requests within 45 seconds
     const recentOtp = await Otp.findOne({
       email: cleanEmail,
@@ -807,7 +1095,7 @@ app.post(["/api/v1/auth/send-otp", "/api/auth/send-otp", "/auth/send-otp"], asyn
     });
 
     // Send email via Gmail SMTP
-    const emailResult = await sendOtpEmail(cleanEmail, generatedOtp);
+    const emailResult = await sendOtpEmail(cleanEmail, generatedOtp, purpose || "login");
 
     if (!emailResult.sent) {
       return res.status(500).json({
@@ -959,210 +1247,6 @@ app.post(["/api/v1/auth/verify-otp", "/api/auth/verify-otp", "/auth/verify-otp"]
 // MOBILE APP GOOGLE AUTHENTICATION BRIDGE
 // ==========================================
 // In-memory store for single-use, short-lived mobile authorization codes
-const mobileAuthCodes = new Map();
-
-// Periodic cleanup of expired authorization codes every 60 seconds
-setInterval(() => {
-  const now = Date.now();
-  for (const [code, entry] of mobileAuthCodes.entries()) {
-    if (entry.expiresAt <= now) {
-      mobileAuthCodes.delete(code);
-    }
-  }
-}, 60 * 1000);
-
-// Validate redirect_uri: strictly allow only the expected gharsansar://auth/callback deep link
-const isValidMobileRedirectUri = (uri) => {
-  if (!uri || typeof uri !== "string") return false;
-  const clean = uri.trim();
-  return clean === "gharsansar://auth/callback" || clean.startsWith("gharsansar://auth/callback?");
-};
-
-// 1. Generate Single-Use Short-Lived Authorization Code (or exchange if code passed)
-app.post(["/api/v1/auth/mobile-code", "/api/auth/mobile-code"], (req, res) => {
-  try {
-    const { code, email, redirect_uri, firebase_uid, photo_url, name, full_name } = req.body;
-
-    // A) If a code was supplied without email, treat as exchange request
-    if (code && !email) {
-      const entry = mobileAuthCodes.get(code);
-      if (!entry) {
-        return res.status(400).json({ error: "Invalid or non-existent authorization code" });
-      }
-      if (entry.used) {
-        mobileAuthCodes.delete(code);
-        return res.status(400).json({ error: "Authorization code has already been used" });
-      }
-      if (Date.now() > entry.expiresAt) {
-        mobileAuthCodes.delete(code);
-        return res.status(400).json({ error: "Authorization code has expired. Please initiate login again." });
-      }
-
-      // Single-use: invalidate immediately
-      mobileAuthCodes.delete(code);
-
-      const users = readJsonFile(USERS_FILE, []);
-      const user = users.find(u => normalizeEmail(u.email) === normalizeEmail(entry.email)) || entry.user;
-      const token = `user_token_${user.id}_${Date.now()}`;
-
-      console.log(`[Mobile Auth Bridge] Code exchanged for user ${user.email}`);
-      return res.status(200).json({
-        success: true,
-        token,
-        user: formatUserResponse(user)
-      });
-    }
-
-    // B) Generate new authorization code
-    if (!redirect_uri || !isValidMobileRedirectUri(redirect_uri)) {
-      return res.status(400).json({
-        error: "Invalid mobile redirect URI. Only 'gharsansar://auth/callback' is authorized."
-      });
-    }
-
-    let userEmail = email ? normalizeEmail(email) : "";
-
-    // Check bearer token in Authorization header if email not passed directly
-    if (!userEmail && req.headers.authorization) {
-      const authHeader = req.headers.authorization.replace(/^Bearer\s+/i, "").trim();
-      const match = authHeader.match(/user_token_([^_]+)_/);
-      if (match) {
-        const uId = match[1];
-        const users = readJsonFile(USERS_FILE, []);
-        const found = users.find(u => String(u.id) === uId);
-        if (found) userEmail = normalizeEmail(found.email);
-      }
-    }
-
-    if (!userEmail) {
-      return res.status(400).json({ error: "Authenticated user email is required to generate mobile authorization code." });
-    }
-
-    const users = readJsonFile(USERS_FILE, []);
-    let user = users.find(u => normalizeEmail(u.email) === userEmail || (firebase_uid && u.firebase_uid === firebase_uid));
-
-    const now = new Date();
-    if (!user) {
-      const displayName = (full_name || name || "Google User").trim();
-      user = {
-        id: getNextUserId(users),
-        email: userEmail,
-        password_hash: "",
-        full_name: displayName,
-        phone: "",
-        company_name: "",
-        gstin: "",
-        role: "CUSTOMER",
-        is_active: true,
-        firebase_uid: firebase_uid || "",
-        photo_url: photo_url || "",
-        street_address: "",
-        city: "",
-        state: "",
-        pincode: "",
-        created_at: now.toISOString(),
-        __v: 0,
-        createdAt: now,
-        updatedAt: now,
-        addresses: [],
-        name: displayName
-      };
-      users.push(user);
-      writeJsonFile(USERS_FILE, users);
-    } else {
-      let changed = false;
-      if (firebase_uid && !user.firebase_uid) {
-        user.firebase_uid = firebase_uid;
-        changed = true;
-      }
-      if (photo_url && !user.photo_url) {
-        user.photo_url = photo_url;
-        changed = true;
-      }
-      if (changed) {
-        user.updatedAt = now;
-        writeJsonFile(USERS_FILE, users);
-      }
-    }
-
-    // Cryptographically secure, random 32-byte (64 hex char) single-use code
-    const authCode = crypto.randomBytes(32).toString("hex");
-
-    // Short-lived: 3 minutes validity
-    const expiresAt = Date.now() + 3 * 60 * 1000;
-
-    mobileAuthCodes.set(authCode, {
-      code: authCode,
-      userId: user.id,
-      email: user.email,
-      user: formatUserResponse(user),
-      redirect_uri,
-      expiresAt,
-      used: false
-    });
-
-    console.log(`[Mobile Auth Bridge] Generated one-time code for user ${user.email} (expires in 3 min)`);
-
-    return res.status(200).json({
-      success: true,
-      code: authCode
-    });
-  } catch (err) {
-    console.error("Mobile auth code error:", err);
-    return res.status(500).json({ error: "Failed to process mobile authorization code" });
-  }
-});
-
-// 2. Exchange One-Time Code for Permanent Authentication Token & User Profile
-app.post([
-  "/api/v1/auth/mobile-code/exchange",
-  "/api/auth/mobile-code/exchange",
-  "/api/v1/auth/mobile-exchange",
-  "/api/auth/mobile-exchange"
-], (req, res) => {
-  try {
-    const { code } = req.body;
-
-    if (!code || typeof code !== "string") {
-      return res.status(400).json({ error: "Authorization code is required" });
-    }
-
-    const entry = mobileAuthCodes.get(code);
-
-    if (!entry) {
-      return res.status(400).json({ error: "Invalid or non-existent authorization code" });
-    }
-
-    if (entry.used) {
-      mobileAuthCodes.delete(code);
-      return res.status(400).json({ error: "This authorization code has already been used" });
-    }
-
-    if (Date.now() > entry.expiresAt) {
-      mobileAuthCodes.delete(code);
-      return res.status(400).json({ error: "Authorization code has expired. Please initiate login again." });
-    }
-
-    // Single-use: delete immediately upon exchange
-    mobileAuthCodes.delete(code);
-
-    const users = readJsonFile(USERS_FILE, []);
-    const user = users.find(u => normalizeEmail(u.email) === normalizeEmail(entry.email)) || entry.user;
-    const token = `user_token_${user.id}_${Date.now()}`;
-
-    console.log(`[Mobile Auth Bridge] Code successfully exchanged for user ${user.email}`);
-
-    return res.status(200).json({
-      success: true,
-      token,
-      user: formatUserResponse(user)
-    });
-  } catch (err) {
-    console.error("Mobile code exchange error:", err);
-    return res.status(500).json({ error: "Failed to exchange mobile authorization code" });
-  }
-});
-
 // Profile upload directory setup
 const avatarUploadsDir = path.join(__dirname, "public", "profile_pictures");
 if (!fs.existsSync(avatarUploadsDir)) {
@@ -1340,6 +1424,136 @@ app.put(["/api/v1/auth/profile", "/api/auth/profile"], (req, res) => {
   res.json({ success: true, user: formatUserResponse(users[userIdx]) });
 });
 
+// ==========================================
+// ACCOUNT DELETION (GOOGLE PLAY & DATA SAFETY COMPLIANT)
+// ==========================================
+
+const DELETIONS_FILE = path.join(__dirname, "account_deletions.json");
+
+/**
+ * DELETE /api/v1/auth/account
+ * Authenticated account deletion endpoint
+ */
+app.delete(["/api/v1/auth/account", "/api/auth/account", "/api/v1/auth/profile", "/api/auth/profile"], authenticate, async (req, res) => {
+  try {
+    const userId = req.user.id || req.user._id;
+    const userEmail = normalizeEmail(req.user.email);
+
+    if (userEmail === "gharsansarshop@gmail.com") {
+      return res.status(403).json({ success: false, error: "Primary administrator account cannot be deleted." });
+    }
+
+    // 1. Remove from in-memory / JSON users
+    const users = readJsonFile(USERS_FILE, []);
+    const filteredUsers = users.filter(u => u.id !== userId && normalizeEmail(u.email) !== userEmail);
+    writeJsonFile(USERS_FILE, filteredUsers);
+
+    // 2. Remove from MongoDB Atlas
+    try {
+      await User.deleteOne({ $or: [{ id: userId }, { email: userEmail }, { _id: userId }] });
+    } catch (e) {
+      console.warn("MongoDB User delete sync warning:", e.message);
+    }
+
+    // 3. Log deletion audit record
+    const deletionRecord = {
+      requestId: `del_${Date.now()}`,
+      userId,
+      email: userEmail,
+      deletedAt: new Date().toISOString(),
+      type: "authenticated_self_deletion"
+    };
+    const deletions = readJsonFile(DELETIONS_FILE, []);
+    deletions.push(deletionRecord);
+    writeJsonFile(DELETIONS_FILE, deletions);
+
+    res.json({
+      success: true,
+      message: "Your account and all associated personal data have been permanently deleted.",
+      requestId: deletionRecord.requestId
+    });
+  } catch (err) {
+    console.error("Account deletion error:", err);
+    res.status(500).json({ success: false, error: "Failed to delete account. Please contact support." });
+  }
+});
+
+/**
+ * POST /api/v1/auth/delete-account-request
+ * Public account deletion request endpoint (Google Play compliant web form)
+ */
+app.post(["/api/v1/auth/delete-account-request", "/api/auth/delete-account-request"], optionalAuth, async (req, res) => {
+  try {
+    const { email, phone, reason } = req.body;
+    const targetEmail = normalizeEmail(email || (req.user && req.user.email) || "");
+    const cleanPhone = phone ? String(phone).replace(/\D/g, "") : "";
+
+    if (!targetEmail && !cleanPhone) {
+      return res.status(400).json({
+        success: false,
+        error: "Please provide either the registered email address or phone number."
+      });
+    }
+
+    if (targetEmail === "gharsansarshop@gmail.com") {
+      return res.status(403).json({
+        success: false,
+        error: "Primary administrator account cannot be deleted."
+      });
+    }
+
+    // Find user in users.json or MongoDB
+    const users = readJsonFile(USERS_FILE, []);
+    const foundIdx = users.findIndex(u => {
+      const uEmail = normalizeEmail(u.email);
+      const uPhone = u.phone ? String(u.phone).replace(/\D/g, "") : "";
+      if (targetEmail && uEmail === targetEmail) return true;
+      if (cleanPhone && uPhone && uPhone.includes(cleanPhone)) return true;
+      return false;
+    });
+
+    let deleted = false;
+    if (foundIdx >= 0) {
+      users.splice(foundIdx, 1);
+      writeJsonFile(USERS_FILE, users);
+      deleted = true;
+    }
+
+    if (targetEmail) {
+      try {
+        const mongoRes = await User.deleteOne({ email: targetEmail });
+        if (mongoRes.deletedCount > 0) deleted = true;
+      } catch (e) {
+        console.warn("MongoDB deletion sync warning:", e.message);
+      }
+    }
+
+    const requestId = `req_${Date.now()}`;
+    const deletionRecord = {
+      requestId,
+      email: targetEmail,
+      phone: cleanPhone,
+      reason: reason || "User requested via web portal",
+      accountFoundAndDeleted: deleted,
+      requestedAt: new Date().toISOString(),
+      status: "completed"
+    };
+
+    const deletions = readJsonFile(DELETIONS_FILE, []);
+    deletions.push(deletionRecord);
+    writeJsonFile(DELETIONS_FILE, deletions);
+
+    res.json({
+      success: true,
+      message: "Account deletion request received and processed successfully. Your account and personal data have been scheduled for complete permanent removal.",
+      requestId
+    });
+  } catch (err) {
+    console.error("Delete account request error:", err);
+    res.status(500).json({ success: false, error: "Failed to process deletion request." });
+  }
+});
+
 
 
 // ==========================================
@@ -1410,12 +1624,17 @@ app.get("/api/storage/upload/products", async (req, res) => {
             title: enriched.title,
             name: enriched.title,
             description: enriched.description,
-            price: pricing.actualPrice,
+            price: pricing.finalPrice,
             actualPrice: pricing.actualPrice,
             actual_price: pricing.actualPrice,
+            discountedPrice: pricing.discountedPrice,
+            discounted_price: pricing.discountedPrice,
             strikePrice: pricing.strikePrice,
             strike_price: pricing.strikePrice,
-            final_price: pricing.actualPrice,
+            finalPrice: pricing.finalPrice,
+            final_price: pricing.finalPrice,
+            sellingPrice: pricing.finalPrice,
+            selling_price: pricing.finalPrice,
             categoryDiscountPercentage: pricing.categoryDiscountPercentage,
             category_discount_percentage: pricing.categoryDiscountPercentage,
             categoryDiscountAmount: pricing.categoryDiscountAmount,
@@ -2792,6 +3011,18 @@ const FLASHSALE_FILE = path.join(__dirname, "flashsale.json");
 
 const getFlattenedProducts = () => {
   const rawData = readJsonFile("products.json", []);
+  let activeDiscounts = [];
+  try {
+    const rawDisc = readJsonFile("category_discounts.json", []);
+    activeDiscounts = (Array.isArray(rawDisc) ? rawDisc : []).filter(d => {
+      if (!d || d.status !== "active") return false;
+      const now = new Date();
+      const start = new Date(d.startDate);
+      const end = new Date(d.endDate);
+      end.setHours(23, 59, 59, 999);
+      return now >= start && now <= end;
+    });
+  } catch (e) {}
   if (!rawData || rawData.length === 0) return [];
   const allProducts = [];
   rawData.forEach((category, catIdx) => {
@@ -2807,14 +3038,33 @@ const getFlattenedProducts = () => {
           imageUrl = `/products${imageUrl.replace(/^\/products/, "")}`;
         }
         const enriched = enrichProductData(item, idx);
+        const pricing = calculateProductPricing({
+          price: enriched.price,
+          "act-price": enriched.actualPrice,
+          category: categoryName,
+          product_discount: item.product_discount || item.productDiscount
+        }, activeDiscounts);
         allProducts.push({
           id,
           prod_id: id,
           title: enriched.title,
           name: enriched.title,
           description: enriched.description,
-          price: enriched.price,
-          "act-price": enriched.actualPrice,
+          price: pricing.finalPrice,
+          actualPrice: pricing.actualPrice,
+          actual_price: pricing.actualPrice,
+          discountedPrice: pricing.discountedPrice,
+          discounted_price: pricing.discountedPrice,
+          strikePrice: pricing.strikePrice,
+          strike_price: pricing.strikePrice,
+          finalPrice: pricing.finalPrice,
+          final_price: pricing.finalPrice,
+          sellingPrice: pricing.finalPrice,
+          selling_price: pricing.finalPrice,
+          "act-price": pricing.strikePrice,
+          categoryDiscountPercentage: pricing.categoryDiscountPercentage,
+          categoryDiscountAmount: pricing.categoryDiscountAmount,
+          hasCategoryDiscount: pricing.hasCategoryDiscount,
           image: imageUrl,
           category: categoryName,
           subCategory: subName,
@@ -3498,22 +3748,21 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "healthy", port: PORT });
 });
 
+// Launch HTTP server immediately so port 5001 is listening within milliseconds
+const server = app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Ghar Sansar backend server is running on http://localhost:${PORT}`);
+  console.log(`Swagger documentation: http://localhost:${PORT}/api-docs`);
+});
+
+server.on("error", (err) => {
+  console.error("Server error:", err);
+});
+
+// Connect to MongoDB Atlas in background without delaying HTTP port readiness
 initDatabase().then(() => {
-  const server = app.listen(PORT, () => {
-    console.log(`Ghar Sansar backend server is running on http://localhost:${PORT}`);
-    console.log(`Swagger documentation: http://localhost:${PORT}/api-docs`);
-  });
-  server.on("error", (err) => {
-    console.error("Server error:", err);
-  });
+  console.log("[MongoDB Atlas] Initialized successfully in background.");
 }).catch(err => {
-  console.error("Failed to connect to MongoDB Atlas on startup:", err);
-  const server = app.listen(PORT, () => {
-    console.log(`Ghar Sansar backend server running in fallback mode on http://localhost:${PORT}`);
-  });
-  server.on("error", (err) => {
-    console.error("Fallback server error:", err);
-  });
+  console.error("[MongoDB Atlas] Startup warning (running with local cache):", err.message);
 });
 
 process.on("exit", (code) => {

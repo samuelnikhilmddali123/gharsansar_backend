@@ -65,7 +65,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
   );
   const quantityInCart = cartItem ? cartItem.quantity : 0;
 
-  // 1. Actual Selling Price (Customer purchase price entered by admin)
+  // 1. Actual Selling Price (Product base selling price before category discount)
   const actualPrice = Number(
     product.actualPrice !== undefined ? product.actualPrice :
     product.price !== undefined ? product.price :
@@ -80,10 +80,23 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
     actualPrice
   ) || actualPrice;
 
-  // 3. Category Promotional Discount % or Strike vs Actual discount
+  // 3. Category Promotional Discount %
   const categoryDiscount = Number(
     product.categoryDiscountPercentage !== undefined ? product.categoryDiscountPercentage :
     product.discountPercentage || 0
+  );
+  const hasCategoryDiscount = categoryDiscount > 0;
+
+  // 4. Discounted Price / Final Customer Price (Dynamically calculated from Actual Price when category discount is ON)
+  const discountedPrice = Number(
+    product.discountedPrice !== undefined ? product.discountedPrice :
+    (hasCategoryDiscount ? Math.round((actualPrice - (actualPrice * (categoryDiscount / 100))) * 100) / 100 : actualPrice)
+  );
+
+  // 5. Final Customer Price: discountedPrice if discount ON, actualPrice if OFF
+  const finalPrice = Number(
+    product.finalPrice !== undefined ? product.finalPrice :
+    (hasCategoryDiscount ? discountedPrice : actualPrice)
   );
 
   const discountPct = categoryDiscount > 0
@@ -102,7 +115,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
     addToCart({
       id: product.id,
       name: product.title?.replace(/_/g, " "),
-      price: actualPrice,
+      price: finalPrice,
       image: product.image,
       stock: product.stock,
     });
@@ -120,7 +133,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
       addToCart({
         id: product.id,
         name: product.title?.replace(/_/g, " "),
-        price: actualPrice,
+        price: finalPrice,
         image: product.image,
         stock: product.stock,
       });
@@ -150,7 +163,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
     addToCart({
       id: product.id,
       name: product.title?.replace(/_/g, " "),
-      price: actualPrice,
+      price: finalPrice,
       image: product.image,
       stock: product.stock,
     });
@@ -182,7 +195,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
         <div className="relative w-full aspect-square rounded-lg overflow-hidden flex items-center justify-center p-3 sm:p-4 mb-3.5 bg-[#FAF9F7] border border-[#F0ECE1]">
           {/* Main Discount Badge (ONLY Top-Left) */}
           {displayDiscountBadge && (
-            <div className="absolute top-2.5 left-2.5 z-10 bg-[#004D40] text-white text-[11px] sm:text-xs font-bold tracking-wider uppercase px-2.5 py-1 rounded-md shadow-xs pointer-events-none">
+            <div className="absolute top-2.5 left-2.5 z-10 bg-red-600 text-white text-[11px] sm:text-xs font-bold tracking-wider uppercase px-2.5 py-1 rounded-md shadow-xs pointer-events-none">
               {displayDiscountBadge}
             </div>
           )}
@@ -238,15 +251,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
 
       {/* Bottom Section: Pricing + Actions (Pinned to bottom) */}
       <div className="pt-2 border-t border-[#F3F1EC]">
-        {/* Pricing Hierarchy: Actual Price dominant + Strike/MRP Price crossed out (No duplicate green badge) */}
-        <div className="flex items-baseline gap-2 mb-3.5">
-          {actualPrice > 0 ? (
+        {/* Pricing Hierarchy: Final Customer Price dominant + Single MRP Strike Price reference */}
+        <div className="flex items-baseline gap-2 mb-3.5 flex-wrap">
+          {finalPrice > 0 ? (
             <>
               <span className="text-[21px] sm:text-[23px] font-bold text-[#171717] tracking-tight">
-                ₹{actualPrice.toLocaleString("en-IN")}
+                ₹{finalPrice.toLocaleString("en-IN")}
               </span>
-              {strikePrice > actualPrice && (
-                <span className="text-sm text-[#9CA3AF] line-through font-normal">
+              {strikePrice > finalPrice && (
+                <span className="text-sm text-[#9CA3AF] line-through font-normal" title="MRP / Strike Price">
                   ₹{strikePrice.toLocaleString("en-IN")}
                 </span>
               )}

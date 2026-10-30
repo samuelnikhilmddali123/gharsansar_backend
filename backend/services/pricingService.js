@@ -106,15 +106,22 @@ function countAffectedProducts(categoryName, allProducts = []) {
 }
 
 /**
- * Pure calculation engine for product pricing.
-/**
- * Calculates pricing according to the strict rule:
- * 1. Strike Price (MRP) and Actual Price are two independent prices.
- * 2. Category Discount % is calculated based on STRIKE PRICE:
- *    categoryDiscountAmount = Strike Price * (categoryDiscountPercentage / 100)
- * 3. Actual Price is NEVER reduced by the category discount.
- *    Customer pays actualPrice (e.g., ₹2,500).
- * 4. Current Difference = Strike Price - Actual Price.
+ * Pure calculation engine for product pricing according to the strict architecture:
+ * 1. Strike Price (MRP / reference price): e.g., ₹2,150
+ * 2. Actual Price (product's original base selling price BEFORE category discount): e.g., ₹1,650
+ *    - MUST REMAIN UNCHANGED when category discount is enabled or disabled.
+ *    - Stored in DB / JSON as base selling price (never overwritten).
+ * 3. Category Discount % is calculated based on STRIKE PRICE:
+ *    - categoryDiscountAmount = Strike Price * (categoryDiscountPercentage / 100) -> e.g. ₹2,129
+ * 4. Discounted Price / Final Customer Price:
+ *    - The price the customer actually pays when category discount is enabled.
+ *    - Calculated dynamically from Actual Price:
+ *      When category discount is ON:
+ *        Discounted Price = Actual Price - (Actual Price * categoryDiscountPercentage / 100) -> e.g. ₹16.50
+ *        Final Price = Discounted Price -> ₹16.50
+ *      When category discount is OFF:
+ *        Final Price = Actual Price -> ₹1,650
+ *        No discounted price applied.
  */
 function calculateProductPricing(product, activeDiscounts = []) {
   const rawActualPrice = parseFloat(
@@ -130,7 +137,7 @@ function calculateProductPricing(product, activeDiscounts = []) {
     product["act-price"] !== undefined ? product["act-price"] : 0
   ) || 0;
 
-  // Ensure Strike Price is at least equal to Actual Price if strike price was missing
+  // Ensure Strike Price is at least equal to Actual Price if strike price was missing or lower
   if (rawStrikePrice === 0 && rawActualPrice > 0) {
     rawStrikePrice = rawActualPrice;
   }
@@ -138,40 +145,56 @@ function calculateProductPricing(product, activeDiscounts = []) {
     rawStrikePrice = rawActualPrice;
   }
 
-  const actualPrice = Math.round(rawActualPrice);
-  const strikePrice = Math.round(rawStrikePrice);
+  const actualPrice = Math.round(rawActualPrice * 100) / 100;
+  const strikePrice = Math.round(rawStrikePrice * 100) / 100;
 
   // Check category discount for this category
   const activeCatDiscount = findCategoryDiscount(product.category, activeDiscounts);
   const categoryDiscountPercentage = activeCatDiscount ? parseFloat(activeCatDiscount.discountPercentage || 0) : 0;
+  const hasCategoryDiscount = categoryDiscountPercentage > 0;
 
-  // Formula: Discount Amount = Strike Price * Category Discount %
-  const categoryDiscountAmount = strikePrice > 0 && categoryDiscountPercentage > 0
+  // Formula 1: Category Discount Amount is calculated from STRIKE PRICE (MRP)
+  // Example: ₹2,150 * 99% = ₹2,128.50 ≈ ₹2,129
+  const categoryDiscountAmount = (strikePrice > 0 && hasCategoryDiscount)
     ? Math.round(strikePrice * (categoryDiscountPercentage / 100))
     : 0;
 
-  // Difference between Strike Price and Actual Price
-  const currentDifference = Math.max(0, strikePrice - actualPrice);
+  // Formula 2: Discounted Customer Price is calculated dynamically from ACTUAL PRICE
+  // Example: ₹1,650 - (₹1,650 * 99 / 100) = ₹16.50
+  let discountedPrice = actualPrice;
+  if (hasCategoryDiscount) {
+    discountedPrice = Math.round((actualPrice - (actualPrice * (categoryDiscountPercentage / 100))) * 100) / 100;
+  }
 
-  const hasCategoryDiscount = categoryDiscountPercentage > 0;
+  // The price customer pays: Discounted Price when discount is ON, otherwise Actual Price
+  const finalPrice = hasCategoryDiscount ? discountedPrice : actualPrice;
+
+  // Difference between Strike Price and Customer Price
+  const currentDifference = Math.max(0, strikePrice - finalPrice);
   const isDiscounted = hasCategoryDiscount || strikePrice > actualPrice;
 
   return {
     strikePrice,
-    actualPrice,
+    actualPrice, // Base selling price (STORED VALUE - NEVER OVERWRITTEN)
+    discountedPrice, // Customer discounted price when category discount is ON (e.g. ₹16.50)
+    finalPrice, // Price customer actually pays: discountedPrice when ON, actualPrice when OFF
     categoryDiscountPercentage,
-    categoryDiscountAmount,
+    categoryDiscountAmount, // Calculated from Strike Price (e.g. ₹2,129)
     currentDifference,
     hasCategoryDiscount,
     isDiscounted,
-    // Aliases for compatibility
-    price: actualPrice, // Customer pays actual price (e.g., ₹2,500)
-    finalPrice: actualPrice, // Crucial: NOT ₹2,250, remains ₹2,500
-    sellingPrice: actualPrice,
+    // Aliases for compatibility across frontend, backend, cart, orders, and mobile app
+    price: finalPrice, // Active customer purchasing price
+    sellingPrice: finalPrice,
+    selling_price: finalPrice,
     strike_price: strikePrice,
     actual_price: actualPrice,
+    discounted_price: discountedPrice,
+    final_price: finalPrice,
     discountAmount: categoryDiscountAmount,
-    discountPercentage: categoryDiscountPercentage
+    discount_amount: categoryDiscountAmount,
+    discountPercentage: categoryDiscountPercentage,
+    discount_percentage: categoryDiscountPercentage
   };
 }
 
