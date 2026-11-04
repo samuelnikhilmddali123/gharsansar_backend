@@ -142,7 +142,40 @@ app.use((req, res, next) => {
 });
 
 // Serve static images and files from public folder
-app.use(express.static(path.join(__dirname, "public")));
+// Universal WebP fallback & rewrite middleware for all static assets:
+// 1. Enforces long-lived immutable cache headers: Cache-Control: public, max-age=31536000, immutable
+// 2. Transparently serves optimized WebP even if legacy .png/.jpg/.jpeg/.avif was requested
+app.use((req, res, next) => {
+  if (req.url && /\.(png|jpe?g|avif)$/i.test(req.url)) {
+    try {
+      const decoded = decodeURIComponent(req.url.split("?")[0]);
+      const webpRelative = decoded.replace(/\.(png|jpe?g|avif)$/i, ".webp").replace(/^\/+/, "");
+      const webpPath = path.join(__dirname, "public", webpRelative);
+      if (fs.existsSync(webpPath)) {
+        res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+        res.type("image/webp");
+        return res.sendFile(webpPath);
+      }
+    } catch (err) {
+      // Ignore URI decode errors and fall through
+    }
+  }
+  next();
+});
+
+app.use(
+  express.static(path.join(__dirname, "public"), {
+    maxAge: "1y",
+    immutable: true,
+    setHeaders: (res, filePath) => {
+      if (/\.(webp|png|jpe?g|gif|svg|ico)$/i.test(filePath)) {
+        res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+      } else if (/\.json$/i.test(filePath)) {
+        res.setHeader("Cache-Control", "no-cache");
+      }
+    },
+  })
+);
 
 // Simple in-memory databases (would be a real database in production)
 const USERS_FILE = path.join(__dirname, "users.json");
@@ -3143,10 +3176,16 @@ app.get("/api/products/categories", (req, res) => {
       categoriesMap["sonu_steel_products"].image = "/products/sonu_steel_products/sonu_crysta_pot_14cm_1000_ml.webp";
     }
     if (categoriesMap["Cello"]) {
-      categoriesMap["Cello"].image = "/products/cello_prod/cello_12_pcs_soup_set.webp";
+      categoriesMap["Cello"].image = "/products/cello/Complete Blue Floral Cello Dinnerware Set.webp";
     }
     if (categoriesMap["cello"]) {
-      categoriesMap["cello"].image = "/products/cello_prod/cello_12_pcs_soup_set.webp";
+      categoriesMap["cello"].image = "/products/cello/Complete Blue Floral Cello Dinnerware Set.webp";
+    }
+    if (categoriesMap["God Idols"]) {
+      categoriesMap["God Idols"].image = "/products/God Idols/Antique-Gold Saraswati with Veena.webp";
+    }
+    if (categoriesMap["Pen Stands"]) {
+      categoriesMap["Pen Stands"].image = "/products/pen stand/Modern Black Desk Organizer with Gold Clock.webp";
     }
 
     const categoryList = Object.values(categoriesMap);

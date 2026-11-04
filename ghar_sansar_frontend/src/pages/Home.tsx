@@ -53,37 +53,37 @@ const Home: React.FC = () => {
     {
       title: "Wallpaper Rolls",
       count: "35+ Designs",
-      image: "/images/wallapaper rolls.jpg",
+      image: "/images/wallapaper rolls.webp",
       link: "/interior-design?category=wallpaper_rolls",
     },
     {
       title: "Wallpapers",
       count: "18+ Designs",
-      image: "/images/wallpapers.jpg",
+      image: "/images/wallpapers.webp",
       link: "/interior-design?category=wallpaper",
     },
     {
       title: "3D Wallpapers",
       count: "12+ Designs",
-      image: "/images/3d wallapapers.jpg",
+      image: "/images/3d wallapapers.webp",
       link: "/interior-design?category=3dbokka",
     },
     {
       title: "Wall Art Affects",
       count: "5+ Designs",
-      image: "/images/wall art effect.jpg",
+      image: "/images/wall art effect.webp",
       link: "/interior-design?category=wallart",
     },
     {
       title: "Vinyl Flooring",
       count: "15+ Designs",
-      image: "/images/vinyl flooring.jpg",
+      image: "/images/vinyl flooring.webp",
       link: "/interior-design?category=vinyl_flooring",
     },
     {
       title: "Natural Vertical Garden",
       count: "12+ Designs",
-      image: "/images/natural vertical garden.jpg",
+      image: "/images/natural vertical garden.webp",
       link: "/interior-design?category=artificial_vertical_garden",
     },
   ];
@@ -129,7 +129,7 @@ const Home: React.FC = () => {
         {/* Luxury Background Image with Soft Gaussian Blur & Cinematic Dark Overlay - Full Viewport Cover */}
         <div className="absolute inset-0 z-0 overflow-hidden">
           <img
-            src="/images/sunlit_luxe_temple_lounge.png"
+            src="/images/sunlit_luxe_temple_lounge.webp"
             alt="Interior Design Solutions - Sunlit Luxe Temple Lounge"
             className="w-full h-full object-cover object-center scale-105 filter blur-[4px] brightness-[0.68] contrast-[1.08]"
           />
@@ -323,7 +323,7 @@ const Home: React.FC = () => {
             {/* Left Image */}
             <div className="w-full h-full min-h-[340px] sm:min-h-[420px] lg:min-h-[460px] overflow-hidden bg-gray-100">
               <img
-                src="/images/custom_interior_banner.jpg"
+                src="/images/custom_interior_banner.webp"
                 alt="Custom Interior Design Services"
                 className="w-full h-full object-cover"
               />
@@ -406,7 +406,7 @@ const Home: React.FC = () => {
               {/* Image 1: Dining */}
               <div className="rounded-2xl overflow-hidden aspect-[3/4] shadow-sm border border-black/5 group bg-gray-100">
                 <img
-                  src="/images/gallery_dining.jpg"
+                  src="/images/gallery_dining.webp"
                   alt="Modern Dining Room Interior Design"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
@@ -415,7 +415,7 @@ const Home: React.FC = () => {
               {/* Image 2: Living Room */}
               <div className="rounded-2xl overflow-hidden aspect-[3/4] shadow-sm border border-black/5 group bg-gray-100">
                 <img
-                  src="/images/gallery_living.jpg"
+                  src="/images/gallery_living.webp"
                   alt="Contemporary Living Room Interior Design"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
@@ -424,7 +424,7 @@ const Home: React.FC = () => {
               {/* Image 3: Bedroom */}
               <div className="rounded-2xl overflow-hidden aspect-[3/4] shadow-sm border border-black/5 group bg-gray-100">
                 <img
-                  src="/images/gallery_bedroom.jpg"
+                  src="/images/gallery_bedroom.webp"
                   alt="Luxury Master Bedroom Interior Design"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />

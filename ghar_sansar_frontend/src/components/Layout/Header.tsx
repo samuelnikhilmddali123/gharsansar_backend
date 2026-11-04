@@ -202,7 +202,7 @@ const Header: React.FC = () => {
             {/* Brand Logo - Balanced size */}
             <Link to="/" aria-label="Go to home" className="flex items-center shrink-0 hover:opacity-90 transition-opacity pr-2 sm:pr-4">
               <img 
-                src="/ghar_sansar_logo_nav.png" 
+                src="/ghar_sansar_logo_nav.webp" 
                 alt="Ghar Sansar" 
                 className={`h-8 sm:h-9 md:h-10 w-auto object-contain transition-all duration-300 ${
                   isTransparent ? "drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]" : ""

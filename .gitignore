@@ -51,3 +51,5 @@ backend_update.zip
 tmp/
 bin/
 *.exe
+*backup*/
+convert_all_to_webp.js

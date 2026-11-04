@@ -21,7 +21,7 @@ import axios from "axios";
 import categoriesData from "../data/categories.json";
 
 const itemsPerPage = 12;
-const placeholderImage = "/images/placeholder.jpg";
+const placeholderImage = "/images/placeholder.webp";
 const API_BASE = import.meta.env.VITE_AWS_API_URL || "/api";
 const BACKEND_STATIC_URL = API_BASE.replace(/\/api$/, "");
 
@@ -496,7 +496,7 @@ Looking forward to your response!`;
           >
             {/* Banner Background Image */}
             <img
-              src="/images/interior banner.png"
+              src="/images/interior banner.webp"
               alt="Interior Design - Transform Your Space Into A Beautiful Home"
               className="w-full h-full object-cover block cursor-pointer"
               onClick={scrollToCollection}

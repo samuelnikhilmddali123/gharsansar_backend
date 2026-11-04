@@ -276,11 +276,11 @@ const ProductDetail: React.FC = () => {
     const baseImg = product.image || "/products/waterbottles_and_jars/asian_diamond_insulated_inner_stainless_steel_flask_1_pc.webp";
     return [
       { url: baseImg, label: "Front View", isVideo: false },
-      { url: "/images/diamond_collection_banner.jpg", label: "Product & Lid", isVideo: false },
+      { url: "/images/diamond_collection_banner.webp", label: "Product & Lid", isVideo: false },
       { url: baseImg, label: "Side Angle", transformClass: "scale-x-[-1]", isVideo: false },
-      { url: "/images/flask_lifestyle_banner.jpg", label: "Lifestyle View", isVideo: false },
+      { url: "/images/flask_lifestyle_banner.webp", label: "Lifestyle View", isVideo: false },
       { url: baseImg, label: "Detail View", transformClass: "scale-[1.35]", isVideo: false },
-      { url: "/images/flask_lifestyle_banner.jpg", label: "Product Video", isVideo: true }
+      { url: "/images/flask_lifestyle_banner.webp", label: "Product Video", isVideo: true }
     ];
   }, [product]);
 
@@ -1179,7 +1179,7 @@ const ProductDetail: React.FC = () => {
             <div className="lg:col-span-5">
               <div className="relative rounded-none overflow-hidden aspect-[16/10] shadow-md border border-gray-200 group">
                 <img
-                  src="/images/flask_lifestyle_banner.jpg"
+                  src="/images/flask_lifestyle_banner.webp"
                   alt="Stay Refreshed Anywhere"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 />
@@ -1242,7 +1242,7 @@ const ProductDetail: React.FC = () => {
             <div className="lg:col-span-5">
               <div className="relative rounded-none overflow-hidden aspect-[16/10] shadow-md border border-gray-200 group">
                 <img
-                  src="/images/diamond_collection_banner.jpg"
+                  src="/images/diamond_collection_banner.webp"
                   alt="Diamond Collection"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 />

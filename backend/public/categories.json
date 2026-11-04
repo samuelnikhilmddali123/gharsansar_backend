@@ -1,64 +1,64 @@
 [
   {
     "name": "Wallpaper Rolls",
-    "image": "/interior/wallpaper_rolls/1.jpg",
+    "image": "/interior/wallpaper_rolls/1.webp",
     "subcategories": [
       {
         "name": "Classic Floral",
-        "image": "/interior/wallpaper_rolls/1.jpg",
+        "image": "/interior/wallpaper_rolls/1.webp",
         "description": "Wallpaper Rolls - Updated"
       },
       {
         "name": "Modern Patterns",
-        "image": "/interior/wallpaper_rolls/2.jpg"
+        "image": "/interior/wallpaper_rolls/2.webp"
       },
       {
         "name": "Kids Theme",
-        "image": "/interior/wallpaper_rolls/13.jpg"
+        "image": "/interior/wallpaper_rolls/13.webp"
       },
       {
         "name": "Textured",
-        "image": "/interior/wallpaper_rolls/3.jpeg"
+        "image": "/interior/wallpaper_rolls/3.webp"
       },
       {
         "name": "Geometric",
-        "image": "/interior/wallpaper_rolls/4.jpg"
+        "image": "/interior/wallpaper_rolls/4.webp"
       },
       {
         "name": "Nature Inspired",
-        "image": "/interior/wallpaper_rolls/5.jpg"
+        "image": "/interior/wallpaper_rolls/5.webp"
       },
       {
         "name": "Abstract",
-        "image": "/interior/wallpaper_rolls/6.jpg"
+        "image": "/interior/wallpaper_rolls/6.webp"
       },
       {
         "name": "Metallic Finish",
-        "image": "/interior/wallpaper_rolls/7.jpg"
+        "image": "/interior/wallpaper_rolls/7.webp"
       },
       {
         "name": "Vintage",
-        "image": "/interior/wallpaper_rolls/8.jpg"
+        "image": "/interior/wallpaper_rolls/8.webp"
       },
       {
         "name": "Contemporary",
-        "image": "/interior/wallpaper_rolls/9.jpg"
+        "image": "/interior/wallpaper_rolls/9.webp"
       },
       {
         "name": "Themed Designs",
-        "image": "/interior/wallpaper_rolls/10.jpg"
+        "image": "/interior/wallpaper_rolls/10.webp"
       },
       {
         "name": "Custom Prints",
-        "image": "/interior/wallpaper_rolls/11.jpg"
+        "image": "/interior/wallpaper_rolls/11.webp"
       },
       {
         "name": "3D Effect",
-        "image": "/interior/wallpaper_rolls/12.jpg"
+        "image": "/interior/wallpaper_rolls/12.webp"
       },
       {
         "name": "Striped",
-        "image": "/interior/wallpaper_rolls/13.jpg"
+        "image": "/interior/wallpaper_rolls/13.webp"
       },
       {
         "name": "Damask",
@@ -66,27 +66,27 @@
       },
       {
         "name": "Floral",
-        "image": "/interior/wallpaper_rolls/15.jpg"
+        "image": "/interior/wallpaper_rolls/15.webp"
       },
       {
         "name": "Kids Theme",
-        "image": "/interior/wallpaper_rolls/16.jpg"
+        "image": "/interior/wallpaper_rolls/16.webp"
       },
       {
         "name": "Mural",
-        "image": "/interior/wallpaper_rolls/17.jpg"
+        "image": "/interior/wallpaper_rolls/17.webp"
       },
       {
         "name": "Nature Inspired",
-        "image": "/interior/wallpaper_rolls/18.jpg"
+        "image": "/interior/wallpaper_rolls/18.webp"
       },
       {
         "name": "Patterned",
-        "image": "/interior/wallpaper_rolls/19.jpg"
+        "image": "/interior/wallpaper_rolls/19.webp"
       },
       {
         "name": "Solid Colors",
-        "image": "/interior/wallpaper_rolls/20.jpg"
+        "image": "/interior/wallpaper_rolls/20.webp"
       },
       {
         "name": "Textured",
@@ -98,11 +98,11 @@
       },
       {
         "name": "Vintage",
-        "image": "/interior/wallpaper_rolls/23.jpg"
+        "image": "/interior/wallpaper_rolls/23.webp"
       },
       {
         "name": "Woodland",
-        "image": "/interior/wallpaper_rolls/24.jpg"
+        "image": "/interior/wallpaper_rolls/24.webp"
       }
     ],
     "features": [
@@ -112,59 +112,59 @@
   },
   {
     "name": "Wallpapers",
-    "image": "/interior/wallpaper/bokka.jpg",
+    "image": "/interior/wallpaper/bokka.webp",
     "subcategories": [
       {
         "name": "Floral Wallpapers",
-        "image": "/interior/wallpaper/1.jpeg"
+        "image": "/interior/wallpaper/1.webp"
       },
       {
         "name": "Geometric Wallpapers",
-        "image": "/interior/wallpaper/2.jpeg"
+        "image": "/interior/wallpaper/2.webp"
       },
       {
         "name": "Textured Wallpapers",
-        "image": "/interior/wallpaper/3.jpeg"
+        "image": "/interior/wallpaper/3.webp"
       },
       {
         "name": "Nature Wallpapers",
-        "image": "/interior/wallpaper/4.jpeg"
+        "image": "/interior/wallpaper/4.webp"
       },
       {
         "name": "Abstract Wallpapers",
-        "image": "/interior/wallpaper/5.jpeg"
+        "image": "/interior/wallpaper/5.webp"
       },
       {
         "name": "Metallic Wallpapers",
-        "image": "/interior/wallpaper/6.jpeg"
+        "image": "/interior/wallpaper/6.webp"
       },
       {
         "name": "Vintage Wallpapers",
-        "image": "/interior/wallpaper/7.jpeg"
+        "image": "/interior/wallpaper/7.webp"
       },
       {
         "name": "Contemporary Wallpapers",
-        "image": "/interior/wallpaper/8.jpeg"
+        "image": "/interior/wallpaper/8.webp"
       },
       {
         "name": "Themed Wallpapers",
-        "image": "/interior/wallpaper/9.jpeg"
+        "image": "/interior/wallpaper/9.webp"
       },
       {
         "name": "Custom Wallpapers",
-        "image": "/interior/wallpaper/10.jpeg"
+        "image": "/interior/wallpaper/10.webp"
       },
       {
         "name": "3D Effect Wallpapers",
-        "image": "/interior/wallpaper/11.jpeg"
+        "image": "/interior/wallpaper/11.webp"
       },
       {
         "name": "Striped Wallpapers",
-        "image": "/interior/wallpaper/12.jpeg"
+        "image": "/interior/wallpaper/12.webp"
       },
       {
         "name": "Damask Wallpapers",
-        "image": "/interior/wallpaper/13.jpeg"
+        "image": "/interior/wallpaper/13.webp"
       }
     ],
     "features": [
@@ -174,35 +174,35 @@
   },
   {
     "name": "3d wallpapers",
-    "image": "/interior/3dbokka/2.jpeg",
+    "image": "/interior/3dbokka/2.webp",
     "subcategories": [
       {
         "name": "Kids Animated 3D Murals",
-        "image": "/interior/3dbokka/1.jpg"
+        "image": "/interior/3dbokka/1.webp"
       },
       {
         "name": "Modern Geometric 3D",
-        "image": "/interior/3dbokka/3.jpeg"
+        "image": "/interior/3dbokka/3.webp"
       },
       {
         "name": "Nature & Forest 3D Murals",
-        "image": "/interior/3dbokka/4.jpeg"
+        "image": "/interior/3dbokka/4.webp"
       },
       {
         "name": "Abstract Spatial Depth",
-        "image": "/interior/3dbokka/5.jpeg"
+        "image": "/interior/3dbokka/5.webp"
       },
       {
         "name": "Luxury Marble & Gold 3D",
-        "image": "/interior/3dbokka/6.jpeg"
+        "image": "/interior/3dbokka/6.webp"
       },
       {
         "name": "Celestial Galaxy Murals",
-        "image": "/interior/3dbokka/7.jpeg"
+        "image": "/interior/3dbokka/7.webp"
       },
       {
         "name": "Botanical Floral 3D",
-        "image": "/interior/3dbokka/8.jpeg"
+        "image": "/interior/3dbokka/8.webp"
       },
       {
         "name": "Architectural Cityscape",
@@ -218,11 +218,11 @@
       },
       {
         "name": "Fantasy Mythical Theme",
-        "image": "/interior/3dbokka/12.jpg"
+        "image": "/interior/3dbokka/12.webp"
       },
       {
         "name": "Contemporary Wall Murals",
-        "image": "/interior/3dbokka/13.jpg"
+        "image": "/interior/3dbokka/13.webp"
       }
     ],
     "features": [
@@ -236,19 +236,19 @@
     "subcategories": [
       {
         "name": "Illuminated Wooden Wall Art",
-        "image": "/interior/wallart/11.jpg"
+        "image": "/interior/wallart/11.webp"
       },
       {
         "name": "Backlit Geometric Panel",
-        "image": "/interior/wallart/12.avif"
+        "image": "/interior/wallart/12.webp"
       },
       {
         "name": "Contemporary Acrylic Accent",
-        "image": "/interior/wallart/13.jpg"
+        "image": "/interior/wallart/13.webp"
       },
       {
         "name": "Laser-Cut Floral Silhouette",
-        "image": "/interior/wallart/14.jpeg"
+        "image": "/interior/wallart/14.webp"
       },
       {
         "name": "LED Backlit Mandala Art",
@@ -256,15 +256,15 @@
       },
       {
         "name": "Textured Wooden Lattice Art",
-        "image": "/interior/wallart/16.png"
+        "image": "/interior/wallart/16.webp"
       },
       {
         "name": "Abstract Landscape Panel",
-        "image": "/interior/wallart/17.jpg"
+        "image": "/interior/wallart/17.webp"
       },
       {
         "name": "Metallic Calligraphy Accent",
-        "image": "/interior/wallart/18.jpg"
+        "image": "/interior/wallart/18.webp"
       },
       {
         "name": "Bespoke Focal Wall Feature",
@@ -278,51 +278,51 @@
   },
   {
     "name": "Vinyl Flooring",
-    "image": "/interior/vinyl_flooring/1.jpg",
+    "image": "/interior/vinyl_flooring/1.webp",
     "subcategories": [
       {
         "name": "Wood Finish",
-        "image": "/interior/vinyl_flooring/2.avif"
+        "image": "/interior/vinyl_flooring/2.webp"
       },
       {
         "name": "Stone Finish",
-        "image": "/interior/vinyl_flooring/3.jpg"
+        "image": "/interior/vinyl_flooring/3.webp"
       },
       {
         "name": "Patterned Vinyl",
-        "image": "/interior/vinyl_flooring/4.jpg"
+        "image": "/interior/vinyl_flooring/4.webp"
       },
       {
         "name": "Solid Color",
-        "image": "/interior/vinyl_flooring/5.jpg"
+        "image": "/interior/vinyl_flooring/5.webp"
       },
       {
         "name": "Textured Vinyl",
-        "image": "/interior/vinyl_flooring/6.jpg"
+        "image": "/interior/vinyl_flooring/6.webp"
       },
       {
         "name": "Luxury Vinyl Plank",
-        "image": "/interior/vinyl_flooring/7.jpg"
+        "image": "/interior/vinyl_flooring/7.webp"
       },
       {
         "name": "Waterproof Vinyl",
-        "image": "/interior/vinyl_flooring/8.jpeg"
+        "image": "/interior/vinyl_flooring/8.webp"
       },
       {
         "name": "Commercial Vinyl",
-        "image": "/interior/vinyl_flooring/9.jpg"
+        "image": "/interior/vinyl_flooring/9.webp"
       },
       {
         "name": "Residential Vinyl",
-        "image": "/interior/vinyl_flooring/10.jpg"
+        "image": "/interior/vinyl_flooring/10.webp"
       },
       {
         "name": "Eco-friendly Vinyl",
-        "image": "/interior/vinyl_flooring/11.jpg"
+        "image": "/interior/vinyl_flooring/11.webp"
       },
       {
         "name": "Outdoor Vinyl",
-        "image": "/interior/vinyl_flooring/12.jpg"
+        "image": "/interior/vinyl_flooring/12.webp"
       },
       {
         "name": "Custom Vinyl",
@@ -336,43 +336,43 @@
   },
   {
     "name": "Natural Vertical Garden",
-    "image": "/interior/maddalo_garden/1.jpg",
+    "image": "/interior/maddalo_garden/1.webp",
     "subcategories": [
       {
         "name": "Indoor Vertical Garden",
-        "image": "/interior/maddalo_garden/2.jpg"
+        "image": "/interior/maddalo_garden/2.webp"
       },
       {
         "name": "Outdoor Vertical Garden",
-        "image": "/interior/maddalo_garden/31.jpg"
+        "image": "/interior/maddalo_garden/31.webp"
       },
       {
         "name": "Outdoor Vertical Garden",
-        "image": "/interior/maddalo_garden/4.jpg"
+        "image": "/interior/maddalo_garden/4.webp"
       },
       {
         "name": "Outdoor Vertical Garden",
-        "image": "/interior/maddalo_garden/5.jpg"
+        "image": "/interior/maddalo_garden/5.webp"
       },
       {
         "name": "Outdoor Vertical Garden",
-        "image": "/interior/maddalo_garden/6.jpg"
+        "image": "/interior/maddalo_garden/6.webp"
       },
       {
         "name": "Outdoor Vertical Garden",
-        "image": "/interior/maddalo_garden/7.jpg"
+        "image": "/interior/maddalo_garden/7.webp"
       },
       {
         "name": "Outdoor Vertical Garden",
-        "image": "/interior/maddalo_garden/8.jpg"
+        "image": "/interior/maddalo_garden/8.webp"
       },
       {
         "name": "Outdoor Vertical Garden",
-        "image": "/interior/maddalo_garden/9.jpeg"
+        "image": "/interior/maddalo_garden/9.webp"
       },
       {
         "name": "Outdoor Vertical Garden",
-        "image": "/interior/maddalo_garden/10.jpg"
+        "image": "/interior/maddalo_garden/10.webp"
       },
       {
         "name": "Outdoor Vertical Garden",
@@ -380,11 +380,11 @@
       },
       {
         "name": "Outdoor Vertical Garden",
-        "image": "/interior/maddalo_garden/12.jpg"
+        "image": "/interior/maddalo_garden/12.webp"
       },
       {
         "name": "Outdoor Vertical Garden",
-        "image": "/interior/maddalo_garden/13.jpg"
+        "image": "/interior/maddalo_garden/13.webp"
       }
     ],
     "features": [
@@ -394,51 +394,51 @@
   },
   {
     "name": "Blinds",
-    "image": "/interior/blinds/2.jpg",
+    "image": "/interior/blinds/2.webp",
     "subcategories": [
       {
         "name": "Venetian Blinds",
-        "image": "/interior/blinds/1.jpg"
+        "image": "/interior/blinds/1.webp"
       },
       {
         "name": "Roller Blinds",
-        "image": "/interior/blinds/3.jpeg"
+        "image": "/interior/blinds/3.webp"
       },
       {
         "name": "Vertical Blinds",
-        "image": "/interior/blinds/4.jpeg"
+        "image": "/interior/blinds/4.webp"
       },
       {
         "name": "Roman Blinds",
-        "image": "/interior/blinds/5.jpeg "
+        "image": "/interior/blinds/5.webp "
       },
       {
         "name": "Panel Blinds",
-        "image": "/interior/blinds/6.jpeg"
+        "image": "/interior/blinds/6.webp"
       },
       {
         "name": "Pleated Blinds",
-        "image": "/interior/blinds/7.jpeg"
+        "image": "/interior/blinds/7.webp"
       },
       {
         "name": "Cellular Blinds",
-        "image": "/interior/blinds/8.jpg"
+        "image": "/interior/blinds/8.webp"
       },
       {
         "name": "Sheer Blinds",
-        "image": "/interior/blinds/9.jpg"
+        "image": "/interior/blinds/9.webp"
       },
       {
         "name": "Wooden Blinds",
-        "image": "/interior/blinds/10.jpeg"
+        "image": "/interior/blinds/10.webp"
       },
       {
         "name": "Outdoor Blinds",
-        "image": "/interior/blinds/11.jpg"
+        "image": "/interior/blinds/11.webp"
       },
       {
         "name": "Custom Blinds",
-        "image": "/interior/blinds/12.jpg"
+        "image": "/interior/blinds/12.webp"
       }
     ],
     "features": [
@@ -448,7 +448,7 @@
   },
   {
     "name": "Automation Motorised Blinds",
-    "image": "/interior/automised_blind/1.jpg",
+    "image": "/interior/automised_blind/1.webp",
     "subcategories": [
       {
         "name": "Remote Blinds",
@@ -457,35 +457,35 @@
       },
       {
         "name": "Smart Blinds",
-        "image": "/interior/automised_blind/3.jpg"
+        "image": "/interior/automised_blind/3.webp"
       },
       {
         "name": "Smart Blinds",
-        "image": "/interior/automised_blind/4.jpg"
+        "image": "/interior/automised_blind/4.webp"
       },
       {
         "name": "Smart Blinds",
-        "image": "/interior/automised_blind/5.jpg"
+        "image": "/interior/automised_blind/5.webp"
       },
       {
         "name": "Smart Blinds",
-        "image": "/interior/automised_blind/6.jpg"
+        "image": "/interior/automised_blind/6.webp"
       },
       {
         "name": "Smart Blinds",
-        "image": "/interior/automised_blind/7.jpg"
+        "image": "/interior/automised_blind/7.webp"
       },
       {
         "name": "Smart Blinds",
-        "image": "/interior/automised_blind/8.jpeg"
+        "image": "/interior/automised_blind/8.webp"
       },
       {
         "name": "Smart Blinds",
-        "image": "/interior/automised_blind/9.jpg"
+        "image": "/interior/automised_blind/9.webp"
       },
       {
         "name": "Smart Blinds",
-        "image": "/interior/automised_blind/10.jpeg"
+        "image": "/interior/automised_blind/10.webp"
       }
     ],
     "features": [
@@ -495,71 +495,71 @@
   },
   {
     "name": "Gym Flooring",
-    "image": "/interior/gym flooring/1.jpg",
+    "image": "/interior/gym flooring/1.webp",
     "subcategories": [
       {
         "name": "Rubber Tiles",
-        "image": "/interior/gym flooring/2.png"
+        "image": "/interior/gym flooring/2.webp"
       },
       {
         "name": "Rubber Tiles",
-        "image": "/interior/gym flooring/14.jpeg"
+        "image": "/interior/gym flooring/14.webp"
       },
       {
         "name": "Rubber Tiles",
-        "image": "/interior/gym flooring/15.jpeg"
+        "image": "/interior/gym flooring/15.webp"
       },
       {
         "name": "Puzzle Mats",
-        "image": "/interior/gym flooring/3.jpg"
+        "image": "/interior/gym flooring/3.webp"
       },
       {
         "name": "Puzzle Mats",
-        "image": "/interior/gym flooring/4.jpg"
+        "image": "/interior/gym flooring/4.webp"
       },
       {
         "name": "Puzzle Mats",
-        "image": "/interior/gym flooring/5.jpg"
+        "image": "/interior/gym flooring/5.webp"
       },
       {
         "name": "Puzzle Mats",
-        "image": "/interior/gym flooring/6.jpg"
+        "image": "/interior/gym flooring/6.webp"
       },
       {
         "name": "Puzzle Mats",
-        "image": "/interior/gym flooring/7.jpg"
+        "image": "/interior/gym flooring/7.webp"
       },
       {
         "name": "Puzzle Mats",
-        "image": "/interior/gym flooring/8.jpg"
+        "image": "/interior/gym flooring/8.webp"
       },
       {
         "name": "Puzzle Mats",
-        "image": "/interior/gym flooring/9.jpg"
+        "image": "/interior/gym flooring/9.webp"
       },
       {
         "name": "Puzzle Mats",
-        "image": "/interior/gym flooring/10.jpg"
+        "image": "/interior/gym flooring/10.webp"
       },
       {
         "name": "Puzzle Mats",
-        "image": "/interior/gym flooring/11.jpg"
+        "image": "/interior/gym flooring/11.webp"
       },
       {
         "name": "Puzzle Mats",
-        "image": "/interior/gym flooring/12.jpg"
+        "image": "/interior/gym flooring/12.webp"
       },
       {
         "name": "Puzzle Mats",
-        "image": "/interior/gym flooring/13.jpg"
+        "image": "/interior/gym flooring/13.webp"
       },
       {
         "name": "Rubber Tiles",
-        "image": "/interior/gym flooring/16.jpeg"
+        "image": "/interior/gym flooring/16.webp"
       },
       {
         "name": "Rubber Tiles",
-        "image": "/interior/gym flooring/17.jpeg"
+        "image": "/interior/gym flooring/17.webp"
       }
     ],
     "features": [
@@ -569,55 +569,55 @@
   },
   {
     "name": "Artificial Wall Garden",
-    "image": "/interior/artificial vertical garden/4.jpg",
+    "image": "/interior/artificial vertical garden/4.webp",
     "subcategories": [
       {
         "name": "Low-maintenance",
-        "image": "/interior/artificial vertical garden/2.jpg"
+        "image": "/interior/artificial vertical garden/2.webp"
       },
       {
         "name": "Low-maintenance",
-        "image": "/interior/artificial vertical garden/3.jpg"
+        "image": "/interior/artificial vertical garden/3.webp"
       },
       {
         "name": "Low-maintenance",
-        "image": "/interior/artificial vertical garden/1.jpg"
+        "image": "/interior/artificial vertical garden/1.webp"
       },
       {
         "name": "Low-maintenance",
-        "image": "/interior/artificial vertical garden/5.jpg"
+        "image": "/interior/artificial vertical garden/5.webp"
       },
       {
         "name": "Low-maintenance",
-        "image": "/interior/artificial vertical garden/6.jpg"
+        "image": "/interior/artificial vertical garden/6.webp"
       },
       {
         "name": "Low-maintenance",
-        "image": "/interior/artificial vertical garden/7.jpg"
+        "image": "/interior/artificial vertical garden/7.webp"
       },
       {
         "name": "Low-maintenance",
-        "image": "/interior/artificial vertical garden/8.jpg"
+        "image": "/interior/artificial vertical garden/8.webp"
       },
       {
         "name": "Low-maintenance",
-        "image": "/interior/artificial vertical garden/9.jpg"
+        "image": "/interior/artificial vertical garden/9.webp"
       },
       {
         "name": "Low-maintenance",
-        "image": "/interior/artificial vertical garden/10.jpg"
+        "image": "/interior/artificial vertical garden/10.webp"
       },
       {
         "name": "Low-maintenance",
-        "image": "/interior/artificial vertical garden/11.jpg"
+        "image": "/interior/artificial vertical garden/11.webp"
       },
       {
         "name": "Low-maintenance",
-        "image": "/interior/artificial vertical garden/12.jpg"
+        "image": "/interior/artificial vertical garden/12.webp"
       },
       {
         "name": "Low-maintenance",
-        "image": "/interior/artificial vertical garden/13.jpg"
+        "image": "/interior/artificial vertical garden/13.webp"
       }
     ],
     "features": [
@@ -627,7 +627,7 @@
   },
   {
     "name": "ICU Flooring",
-    "image": "/interior/ICU/9.jpg",
+    "image": "/interior/ICU/9.webp",
     "subcategories": [
       {
         "name": "Clean Room Flooring",
@@ -639,15 +639,15 @@
       },
       {
         "name": "Seamless Flooring",
-        "image": "/interior/ICU/3.jpg"
+        "image": "/interior/ICU/3.webp"
       },
       {
         "name": "Slip-resistant Flooring",
-        "image": "/interior/ICU/4.jpg"
+        "image": "/interior/ICU/4.webp"
       },
       {
         "name": "Chemical-resistant Flooring",
-        "image": "/interior/ICU/5.JPG"
+        "image": "/interior/ICU/5.webp"
       },
       {
         "name": "Durable Flooring",
@@ -655,23 +655,23 @@
       },
       {
         "name": "Easy-to-clean Flooring",
-        "image": "/interior/ICU/7.jpg"
+        "image": "/interior/ICU/7.webp"
       },
       {
         "name": "Hygienic Flooring",
-        "image": "/interior/ICU/8.jpg"
+        "image": "/interior/ICU/8.webp"
       },
       {
         "name": "Shock-absorbent Flooring",
-        "image": "/interior/ICU/10.jpg"
+        "image": "/interior/ICU/10.webp"
       },
       {
         "name": "Waterproof Flooring",
-        "image": "/interior/ICU/11.jpeg"
+        "image": "/interior/ICU/11.webp"
       },
       {
         "name": "Customizable Flooring",
-        "image": "/interior/ICU/12.png"
+        "image": "/interior/ICU/12.webp"
       },
       {
         "name": "Eco-friendly Flooring",
@@ -685,31 +685,31 @@
   },
   {
     "name": "Sliding & Metal Door",
-    "image": "/interior/metaldoor/1.jpg",
+    "image": "/interior/metaldoor/1.webp",
     "subcategories": [
       {
         "name": "Sliding Doors",
-        "image": "/interior/metaldoor/2.jpg"
+        "image": "/interior/metaldoor/2.webp"
       },
       {
         "name": "Metal Doors",
-        "image": "/interior/metaldoor/3.jpg"
+        "image": "/interior/metaldoor/3.webp"
       },
       {
         "name": "Metal Doors",
-        "image": "/interior/metaldoor/4.avif"
+        "image": "/interior/metaldoor/4.webp"
       },
       {
         "name": "Metal Doors",
-        "image": "/interior/metaldoor/5.avif"
+        "image": "/interior/metaldoor/5.webp"
       },
       {
         "name": "Metal Doors",
-        "image": "/interior/metaldoor/6.jpg"
+        "image": "/interior/metaldoor/6.webp"
       },
       {
         "name": "Metal Doors",
-        "image": "/interior/metaldoor/7.jpg"
+        "image": "/interior/metaldoor/7.webp"
       },
       {
         "name": "Metal Doors",
@@ -721,19 +721,19 @@
       },
       {
         "name": "Metal Doors",
-        "image": "/interior/metaldoor/10.avif"
+        "image": "/interior/metaldoor/10.webp"
       },
       {
         "name": "Metal Doors",
-        "image": "/interior/metaldoor/11.jpg"
+        "image": "/interior/metaldoor/11.webp"
       },
       {
         "name": "Metal Doors",
-        "image": "/interior/metaldoor/12.jpg"
+        "image": "/interior/metaldoor/12.webp"
       },
       {
         "name": "Metal Doors",
-        "image": "/interior/metaldoor/13.avif"
+        "image": "/interior/metaldoor/13.webp"
       }
     ],
     "features": [
@@ -743,7 +743,7 @@
   },
   {
     "name": "Invisible Grill",
-    "image": "/interior/invisible_blinds/13.png",
+    "image": "/interior/invisible_blinds/13.webp",
     "subcategories": [
       {
         "name": "Remote Blinds",
@@ -760,19 +760,19 @@
       },
       {
         "name": "Balcony Grill",
-        "image": "/interior/invisible_blinds/3.jpg"
+        "image": "/interior/invisible_blinds/3.webp"
       },
       {
         "name": "Balcony Grill",
-        "image": "/interior/invisible_blinds/4.jpg"
+        "image": "/interior/invisible_blinds/4.webp"
       },
       {
         "name": "Balcony Grill",
-        "image": "/interior/invisible_blinds/6.jpeg"
+        "image": "/interior/invisible_blinds/6.webp"
       },
       {
         "name": "Balcony Grill",
-        "image": "/interior/invisible_blinds/7.jpg"
+        "image": "/interior/invisible_blinds/7.webp"
       },
       {
         "name": "Balcony Grill",
@@ -780,23 +780,23 @@
       },
       {
         "name": "Balcony Grill",
-        "image": "/interior/invisible_blinds/9.jpeg"
+        "image": "/interior/invisible_blinds/9.webp"
       },
       {
         "name": "Balcony Grill",
-        "image": "/interior/invisible_blinds/10.jpg"
+        "image": "/interior/invisible_blinds/10.webp"
       },
       {
         "name": "Balcony Grill",
-        "image": "/interior/invisible_blinds/11.jpg"
+        "image": "/interior/invisible_blinds/11.webp"
       },
       {
         "name": "Balcony Grill",
-        "image": "/interior/invisible_blinds/12.jpg"
+        "image": "/interior/invisible_blinds/12.webp"
       },
       {
         "name": "Balcony Grill",
-        "image": "/interior/invisible_blinds/1.jpg"
+        "image": "/interior/invisible_blinds/1.webp"
       }
     ],
     "features": [
@@ -806,7 +806,7 @@
   },
   {
     "name": "EPDM Flooring",
-    "image": "/interior/EPDM/1.jpg",
+    "image": "/interior/EPDM/1.webp",
     "subcategories": [
       {
         "name": "Colorful EPDM",
@@ -814,27 +814,27 @@
       },
       {
         "name": "Colorful EPDM",
-        "image": "/interior/EPDM/3.jpeg"
+        "image": "/interior/EPDM/3.webp"
       },
       {
         "name": "Colorful EPDM",
-        "image": "/interior/EPDM/4.jpg"
+        "image": "/interior/EPDM/4.webp"
       },
       {
         "name": "Colorful EPDM",
-        "image": "/interior/EPDM/5.jpeg"
+        "image": "/interior/EPDM/5.webp"
       },
       {
         "name": "Colorful EPDM",
-        "image": "/interior/EPDM/6.jpg"
+        "image": "/interior/EPDM/6.webp"
       },
       {
         "name": "Colorful EPDM",
-        "image": "/interior/EPDM/7.jpg"
+        "image": "/interior/EPDM/7.webp"
       },
       {
         "name": "Colorful EPDM",
-        "image": "/interior/EPDM/8.jpeg"
+        "image": "/interior/EPDM/8.webp"
       },
       {
         "name": "Colorful EPDM",
@@ -842,7 +842,7 @@
       },
       {
         "name": "Colorful EPDM",
-        "image": "/interior/EPDM/10.jpg"
+        "image": "/interior/EPDM/10.webp"
       }
     ],
     "features": [
@@ -852,7 +852,7 @@
   },
   {
     "name": "Bubble Fountain",
-    "image": "/interior/buuble fountain/14.jpg",
+    "image": "/interior/buuble fountain/14.webp",
     "subcategories": [
       {
         "name": "Remote Blinds",
@@ -861,51 +861,51 @@
       },
       {
         "name": "Indoor Fountain",
-        "image": "/interior/buuble fountain/3.jpg"
+        "image": "/interior/buuble fountain/3.webp"
       },
       {
         "name": "Indoor Fountain",
-        "image": "/interior/buuble fountain/4.jpg"
+        "image": "/interior/buuble fountain/4.webp"
       },
       {
         "name": "Indoor Fountain",
-        "image": "/interior/buuble fountain/5.jpeg"
+        "image": "/interior/buuble fountain/5.webp"
       },
       {
         "name": "Indoor Fountain",
-        "image": "/interior/buuble fountain/6.jpg"
+        "image": "/interior/buuble fountain/6.webp"
       },
       {
         "name": "Indoor Fountain",
-        "image": "/interior/buuble fountain/7.jpg"
+        "image": "/interior/buuble fountain/7.webp"
       },
       {
         "name": "Indoor Fountain",
-        "image": "/interior/buuble fountain/8.jpg"
+        "image": "/interior/buuble fountain/8.webp"
       },
       {
         "name": "Indoor Fountain",
-        "image": "/interior/buuble fountain/9.jpg"
+        "image": "/interior/buuble fountain/9.webp"
       },
       {
         "name": "Indoor Fountain",
-        "image": "/interior/buuble fountain/10.jpg"
+        "image": "/interior/buuble fountain/10.webp"
       },
       {
         "name": "Indoor Fountain",
-        "image": "/interior/buuble fountain/11.jpg"
+        "image": "/interior/buuble fountain/11.webp"
       },
       {
         "name": "Indoor Fountain",
-        "image": "/interior/buuble fountain/12.jpg"
+        "image": "/interior/buuble fountain/12.webp"
       },
       {
         "name": "Indoor Fountain",
-        "image": "/interior/buuble fountain/13.jpg"
+        "image": "/interior/buuble fountain/13.webp"
       },
       {
         "name": "Indoor Fountain",
-        "image": "/interior/buuble fountain/14.jpg"
+        "image": "/interior/buuble fountain/14.webp"
       },
       {
         "name": "Indoor Fountain",
@@ -913,15 +913,15 @@
       },
       {
         "name": "Indoor Fountain",
-        "image": "/interior/buuble fountain/16.jpg"
+        "image": "/interior/buuble fountain/16.webp"
       },
       {
         "name": "Indoor Fountain",
-        "image": "/interior/buuble fountain/17.jpg"
+        "image": "/interior/buuble fountain/17.webp"
       },
       {
         "name": "Indoor Fountain",
-        "image": "/interior/buuble fountain/18.avif"
+        "image": "/interior/buuble fountain/18.webp"
       }
     ],
     "features": [
@@ -931,11 +931,11 @@
   },
   {
     "name": "Terrace & Outdoor Gardening",
-    "image": "/interior/terrace_garden/1.jpeg",
+    "image": "/interior/terrace_garden/1.webp",
     "subcategories": [
       {
         "name": "Landscaping",
-        "image": "/interior/terrace_garden/2.jpg"
+        "image": "/interior/terrace_garden/2.webp"
       },
       {
         "name": "Patio Design",
@@ -943,7 +943,7 @@
       },
       {
         "name": "Garden Lighting",
-        "image": "/interior/terrace_garden/4.jpg"
+        "image": "/interior/terrace_garden/4.webp"
       },
       {
         "name": "Water Features",
@@ -951,23 +951,23 @@
       },
       {
         "name": "Outdoor Seating",
-        "image": "/interior/terrace_garden/6.jpg"
+        "image": "/interior/terrace_garden/6.webp"
       },
       {
         "name": "Pergolas",
-        "image": "/interior/terrace_garden/7.avif"
+        "image": "/interior/terrace_garden/7.webp"
       },
       {
         "name": "Fire Pits",
-        "image": "/interior/terrace_garden/8.jpg"
+        "image": "/interior/terrace_garden/8.webp"
       },
       {
         "name": "Garden Pathways",
-        "image": "/interior/terrace_garden/9.jpg"
+        "image": "/interior/terrace_garden/9.webp"
       },
       {
         "name": "Vertical Gardens",
-        "image": "/interior/terrace_garden/11.jpeg"
+        "image": "/interior/terrace_garden/11.webp"
       }
     ],
     "features": [
@@ -977,15 +977,15 @@
   },
   {
     "name": "Canopy",
-    "image": "interior/canopy/1.jpg",
+    "image": "interior/canopy/1.webp",
     "subcategories": [
       {
         "name": "Entrance Canopy",
-        "image": "interior/canopy/11.jpg"
+        "image": "interior/canopy/11.webp"
       },
       {
         "name": "Patio Canopy",
-        "image": "interior/canopy/3.jpg"
+        "image": "interior/canopy/3.webp"
       },
       {
         "name": "Carport Canopy",
@@ -993,27 +993,27 @@
       },
       {
         "name": "Poolside Canopy",
-        "image": "interior/canopy/5.jpg"
+        "image": "interior/canopy/5.webp"
       },
       {
         "name": "Garden Canopy",
-        "image": "interior/canopy/6.jpg"
+        "image": "interior/canopy/6.webp"
       },
       {
         "name": "Retractable Canopy",
-        "image": "interior/canopy/12.jpg"
+        "image": "interior/canopy/12.webp"
       },
       {
         "name": "Shade Sail",
-        "image": "interior/canopy/8.jpg"
+        "image": "interior/canopy/8.webp"
       },
       {
         "name": "Outdoor Canopy",
-        "image": "interior/canopy/9.avif"
+        "image": "interior/canopy/9.webp"
       },
       {
         "name": "Custom Canopy",
-        "image": "interior/canopy/10.jpg"
+        "image": "interior/canopy/10.webp"
       }
     ],
     "features": [
@@ -1023,15 +1023,15 @@
   },
   {
     "name": "Wooden Flooring",
-    "image": "interior/woodfloor/1.jpg",
+    "image": "interior/woodfloor/1.webp",
     "subcategories": [
       {
         "name": "Laminate Wood",
-        "image": "interior/woodfloor/2.jpg"
+        "image": "interior/woodfloor/2.webp"
       },
       {
         "name": "Engineered Wood",
-        "image": "interior/woodfloor/3.jpg"
+        "image": "interior/woodfloor/3.webp"
       },
       {
         "name": "Solid Hardwood",
@@ -1039,19 +1039,19 @@
       },
       {
         "name": "Bamboo Flooring",
-        "image": "interior/woodfloor/5.jpg"
+        "image": "interior/woodfloor/5.webp"
       },
       {
         "name": "Cork Flooring",
-        "image": "interior/woodfloor/6.jpg"
+        "image": "interior/woodfloor/6.webp"
       },
       {
         "name": "Reclaimed Wood",
-        "image": "interior/woodfloor/7.jpg"
+        "image": "interior/woodfloor/7.webp"
       },
       {
         "name": "Parquet Flooring",
-        "image": "interior/woodfloor/20.jpg"
+        "image": "interior/woodfloor/20.webp"
       },
       {
         "name": "Wood-look Vinyl",
@@ -1077,19 +1077,19 @@
       },
       {
         "name": "Decorative Pots",
-        "image": "interior/cerpot/3.jpg"
+        "image": "interior/cerpot/3.webp"
       },
       {
         "name": "Decorative Pots",
-        "image": "interior/cerpot/4.jpg"
+        "image": "interior/cerpot/4.webp"
       },
       {
         "name": "Decorative Pots",
-        "image": "interior/cerpot/5.jpg"
+        "image": "interior/cerpot/5.webp"
       },
       {
         "name": "Decorative Pots",
-        "image": "interior/cerpot/6.avif"
+        "image": "interior/cerpot/6.webp"
       },
       {
         "name": "Decorative Pots",
@@ -1101,7 +1101,7 @@
       },
       {
         "name": "Decorative Pots",
-        "image": "interior/cerpot/9.avif"
+        "image": "interior/cerpot/9.webp"
       },
       {
         "name": "Decorative Pots",
@@ -1115,27 +1115,27 @@
   },
   {
     "name": "Artificial Lawn",
-    "image": "interior/lawn/2.jpg",
+    "image": "interior/lawn/2.webp",
     "subcategories": [
       {
         "name": "Decorative Pots",
-        "image": "interior/lawn/1.jpg"
+        "image": "interior/lawn/1.webp"
       },
       {
         "name": "Decorative Pots",
-        "image": "interior/lawn/3.jpg"
+        "image": "interior/lawn/3.webp"
       },
       {
         "name": "Decorative Pots",
-        "image": "interior/lawn/4.jpg"
+        "image": "interior/lawn/4.webp"
       },
       {
         "name": "Decorative Pots",
-        "image": "interior/lawn/12 .jpg"
+        "image": "interior/lawn/12 .webp"
       },
       {
         "name": "Decorative Pots",
-        "image": "interior/lawn/6.jpg"
+        "image": "interior/lawn/6.webp"
       },
       {
         "name": "Decorative Pots",
@@ -1147,7 +1147,7 @@
       },
       {
         "name": "Decorative Pots",
-        "image": "interior/lawn/9.jpg"
+        "image": "interior/lawn/9.webp"
       },
       {
         "name": "Decorative Pots",
@@ -1155,7 +1155,7 @@
       },
       {
         "name": "Decorative Pots",
-        "image": "interior/lawn/5.jpg"
+        "image": "interior/lawn/5.webp"
       },
       {
         "name": "Decorative Pots",
@@ -1163,7 +1163,7 @@
       },
       {
         "name": "Decorative Pots",
-        "image": "interior/lawn/14.jpg"
+        "image": "interior/lawn/14.webp"
       }
     ],
     "features": [
@@ -1173,11 +1173,11 @@
   },
   {
     "name": "Outdoor Deck Benches",
-    "image": "interior/bench/1.jpg",
+    "image": "interior/bench/1.webp",
     "subcategories": [
       {
         "name": "Benches",
-        "image": "interior/bench/2.jpg"
+        "image": "interior/bench/2.webp"
       },
       {
         "name": "Benches",
@@ -1185,15 +1185,15 @@
       },
       {
         "name": "Benches",
-        "image": "interior/bench/4.jpg"
+        "image": "interior/bench/4.webp"
       },
       {
         "name": "Benches",
-        "image": "interior/bench/5.jpg"
+        "image": "interior/bench/5.webp"
       },
       {
         "name": "Benches",
-        "image": "interior/bench/6.jpg"
+        "image": "interior/bench/6.webp"
       },
       {
         "name": "Benches",
@@ -1201,15 +1201,15 @@
       },
       {
         "name": "Benches",
-        "image": "interior/bench/8.png"
+        "image": "interior/bench/8.webp"
       },
       {
         "name": "Benches",
-        "image": "interior/bench/9.jpg"
+        "image": "interior/bench/9.webp"
       },
       {
         "name": "Benches",
-        "image": "interior/bench/10.jpg"
+        "image": "interior/bench/10.webp"
       }
     ],
     "features": [
@@ -1219,23 +1219,23 @@
   },
   {
     "name": "Customised Water Fountain",
-    "image": "interior/fountain/1.jpg",
+    "image": "interior/fountain/1.webp",
     "subcategories": [
       {
         "name": "Designer Fountain",
-        "image": "interior/fountain/14.jpg"
+        "image": "interior/fountain/14.webp"
       },
       {
         "name": "Designer Fountain",
-        "image": "interior/fountain/3.avif"
+        "image": "interior/fountain/3.webp"
       },
       {
         "name": "Designer Fountain",
-        "image": "interior/fountain/4.jpg"
+        "image": "interior/fountain/4.webp"
       },
       {
         "name": "Designer Fountain",
-        "image": "interior/fountain/5.jpg"
+        "image": "interior/fountain/5.webp"
       },
       {
         "name": "Designer Fountain",
@@ -1243,7 +1243,7 @@
       },
       {
         "name": "Designer Fountain",
-        "image": "interior/fountain/7.jpg"
+        "image": "interior/fountain/7.webp"
       },
       {
         "name": "Designer Fountain",
@@ -1251,7 +1251,7 @@
       },
       {
         "name": "Designer Fountain",
-        "image": "interior/fountain/15.jpg"
+        "image": "interior/fountain/15.webp"
       },
       {
         "name": "Designer Fountain",
@@ -1259,11 +1259,11 @@
       },
       {
         "name": "Designer Fountain",
-        "image": "interior/fountain/10.jpg"
+        "image": "interior/fountain/10.webp"
       },
       {
         "name": "Designer Fountain",
-        "image": "interior/fountain/16.avif"
+        "image": "interior/fountain/16.webp"
       }
     ],
     "features": [
@@ -1277,7 +1277,7 @@
     "subcategories": [
       {
         "name": "Weatherproof Pots",
-        "image": "interior/HDP/2.jpg"
+        "image": "interior/HDP/2.webp"
       },
       {
         "name": "Weatherproof Pots",
@@ -1293,7 +1293,7 @@
       },
       {
         "name": "Weatherproof Pots",
-        "image": "interior/HDP/6.avif"
+        "image": "interior/HDP/6.webp"
       },
       {
         "name": "Weatherproof Pots",
@@ -1301,15 +1301,15 @@
       },
       {
         "name": "Weatherproof Pots",
-        "image": "interior/HDP/8.png"
+        "image": "interior/HDP/8.webp"
       },
       {
         "name": "Weatherproof Pots",
-        "image": "interior/HDP/9.avif"
+        "image": "interior/HDP/9.webp"
       },
       {
         "name": "Weatherproof Pots",
-        "image": "interior/HDP/11.jpg"
+        "image": "interior/HDP/11.webp"
       }
     ],
     "features": [
@@ -1319,23 +1319,23 @@
   },
   {
     "name": "Pigeon Net",
-    "image": "interior/net/1.jpg",
+    "image": "interior/net/1.webp",
     "subcategories": [
       {
         "name": "Safety Net",
-        "image": "interior/net/2.jpg"
+        "image": "interior/net/2.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/net/3.jpg"
+        "image": "interior/net/3.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/net/4.jpg"
+        "image": "interior/net/4.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/net/5.jpg"
+        "image": "interior/net/5.webp"
       },
       {
         "name": "Safety Net",
@@ -1343,7 +1343,7 @@
       },
       {
         "name": "Safety Net",
-        "image": "interior/net/7.avif"
+        "image": "interior/net/7.webp"
       },
       {
         "name": "Safety Net",
@@ -1351,11 +1351,11 @@
       },
       {
         "name": "Safety Net",
-        "image": "interior/net/9.jpg"
+        "image": "interior/net/9.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/net/10.jpg"
+        "image": "interior/net/10.webp"
       }
     ],
     "features": [
@@ -1373,7 +1373,7 @@
       },
       {
         "name": "Safety Net",
-        "image": "interior/curtain/2.avif"
+        "image": "interior/curtain/2.webp"
       },
       {
         "name": "Safety Net",
@@ -1381,7 +1381,7 @@
       },
       {
         "name": "Safety Net",
-        "image": "interior/curtain/5.jpg"
+        "image": "interior/curtain/5.webp"
       },
       {
         "name": "Safety Net",
@@ -1389,11 +1389,11 @@
       },
       {
         "name": "Safety Net",
-        "image": "interior/curtain/7.jpg"
+        "image": "interior/curtain/7.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/curtain/8.avif"
+        "image": "interior/curtain/8.webp"
       },
       {
         "name": "Safety Net",
@@ -1415,7 +1415,7 @@
     "subcategories": [
       {
         "name": "Safety Net",
-        "image": "interior/ofc/2.avif"
+        "image": "interior/ofc/2.webp"
       },
       {
         "name": "Safety Net",
@@ -1423,31 +1423,31 @@
       },
       {
         "name": "Safety Net",
-        "image": "interior/ofc/11.jpg"
+        "image": "interior/ofc/11.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/ofc/12.jpeg"
+        "image": "interior/ofc/12.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/ofc/6.png"
+        "image": "interior/ofc/6.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/ofc/7.jpg"
+        "image": "interior/ofc/7.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/ofc/8.jpg"
+        "image": "interior/ofc/8.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/ofc/9.jpg"
+        "image": "interior/ofc/9.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/ofc/10.jpg"
+        "image": "interior/ofc/10.webp"
       }
     ],
     "features": [
@@ -1457,11 +1457,11 @@
   },
   {
     "name": "Cloth Dry Well",
-    "image": "interior/dry/1.jpg",
+    "image": "interior/dry/1.webp",
     "subcategories": [
       {
         "name": "Safety Net",
-        "image": "interior/dry/2.JPG"
+        "image": "interior/dry/2.webp"
       },
       {
         "name": "Safety Net",
@@ -1469,19 +1469,19 @@
       },
       {
         "name": "Safety Net",
-        "image": "interior/dry/4.jpg"
+        "image": "interior/dry/4.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/dry/5.jpg"
+        "image": "interior/dry/5.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/dry/6.jpg"
+        "image": "interior/dry/6.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/dry/7.jpg"
+        "image": "interior/dry/7.webp"
       },
       {
         "name": "Safety Net",
@@ -1495,15 +1495,15 @@
   },
   {
     "name": "Sky Light Blinds",
-    "image": "interior/sky/1.jpg",
+    "image": "interior/sky/1.webp",
     "subcategories": [
       {
         "name": "Safety Net",
-        "image": "interior/sky/2.jpg"
+        "image": "interior/sky/2.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/sky/3.jpeg"
+        "image": "interior/sky/3.webp"
       },
       {
         "name": "Safety Net",
@@ -1515,23 +1515,23 @@
       },
       {
         "name": "Safety Net",
-        "image": "interior/sky/6.jpg"
+        "image": "interior/sky/6.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/sky/7.jpg"
+        "image": "interior/sky/7.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/sky/8.avif"
+        "image": "interior/sky/8.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/sky/9.jpg"
+        "image": "interior/sky/9.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/sky/10.jpg"
+        "image": "interior/sky/10.webp"
       }
     ],
     "features": [
@@ -1542,35 +1542,35 @@
   },
   {
     "name": "PERGOLA",
-    "image": "interior/pergola/1.jpg",
+    "image": "interior/pergola/1.webp",
     "subcategories": [
       {
         "name": "Safety Net",
-        "image": "interior/pergola/2.jpg"
+        "image": "interior/pergola/2.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/pergola/3.jpg"
+        "image": "interior/pergola/3.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/pergola/4.jpg"
+        "image": "interior/pergola/4.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/pergola/5.jpg"
+        "image": "interior/pergola/5.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/pergola/6.jpg"
+        "image": "interior/pergola/6.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/pergola/7.jpg"
+        "image": "interior/pergola/7.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/pergola/8.jpg"
+        "image": "interior/pergola/8.webp"
       },
       {
         "name": "Safety Net",
@@ -1588,15 +1588,15 @@
   },
   {
     "name": "Wall and Ceiling Panels",
-    "image": "interior/wall/1.avif",
+    "image": "interior/wall/1.webp",
     "subcategories": [
       {
         "name": "Safety Net",
-        "image": "interior/wall/2.jpg"
+        "image": "interior/wall/2.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/wall/3.jpg"
+        "image": "interior/wall/3.webp"
       },
       {
         "name": "Safety Net",
@@ -1604,7 +1604,7 @@
       },
       {
         "name": "Safety Net",
-        "image": "interior/wall/5.jpg"
+        "image": "interior/wall/5.webp"
       },
       {
         "name": "Safety Net",
@@ -1612,19 +1612,19 @@
       },
       {
         "name": "Safety Net",
-        "image": "interior/wall/7.jpg"
+        "image": "interior/wall/7.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/wall/11.avif"
+        "image": "interior/wall/11.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/wall/9.jpg"
+        "image": "interior/wall/9.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/wall/10.jpg"
+        "image": "interior/wall/10.webp"
       },
       {
         "name": "Safety Net",
@@ -1640,7 +1640,7 @@
       },
       {
         "name": "Safety Net",
-        "image": "interior/wall/15.jpg"
+        "image": "interior/wall/15.webp"
       },
       {
         "name": "Safety Net",
@@ -1662,15 +1662,15 @@
   },
   {
     "name": "Mosquito Doors & Windows",
-    "image": "interior/mos/1.jpeg",
+    "image": "interior/mos/1.webp",
     "subcategories": [
       {
         "name": "Safety Net",
-        "image": "interior/mos/2.jpg"
+        "image": "interior/mos/2.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/mos/3.jpg"
+        "image": "interior/mos/3.webp"
       },
       {
         "name": "Safety Net",
@@ -1678,27 +1678,27 @@
       },
       {
         "name": "Safety Net",
-        "image": "interior/mos/5.jpg"
+        "image": "interior/mos/5.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/mos/6.jpg"
+        "image": "interior/mos/6.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/mos/7.avif"
+        "image": "interior/mos/7.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/mos/8.jpg"
+        "image": "interior/mos/8.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/mos/9.jpg"
+        "image": "interior/mos/9.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/mos/10.jpg"
+        "image": "interior/mos/10.webp"
       }
     ],
     "features": [
@@ -1709,39 +1709,39 @@
   },
   {
     "name": "Hospital Curtains",
-    "image": "interior/hosp/1.jpg",
+    "image": "interior/hosp/1.webp",
     "subcategories": [
       {
         "name": "Safety Net",
-        "image": "interior/hosp/2.avif"
+        "image": "interior/hosp/2.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/hosp/3.jpg"
+        "image": "interior/hosp/3.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/hosp/4.jpg"
+        "image": "interior/hosp/4.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/hosp/5.jpg"
+        "image": "interior/hosp/5.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/hosp/6.jpg"
+        "image": "interior/hosp/6.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/hosp/7.jpg"
+        "image": "interior/hosp/7.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/hosp/8.jpg"
+        "image": "interior/hosp/8.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/hosp/9.jpg"
+        "image": "interior/hosp/9.webp"
       },
       {
         "name": "Safety Net",
@@ -1759,15 +1759,15 @@
     "subcategories": [
       {
         "name": "Safety Net",
-        "image": "interior/acq/2.jpg"
+        "image": "interior/acq/2.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/acq/11.jpeg"
+        "image": "interior/acq/11.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/acq/12.jpeg "
+        "image": "interior/acq/12.webp "
       },
       {
         "name": "Safety Net",
@@ -1775,11 +1775,11 @@
       },
       {
         "name": "Safety Net",
-        "image": "interior/acq/6.avif"
+        "image": "interior/acq/6.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/acq/7.jpg"
+        "image": "interior/acq/7.webp"
       },
       {
         "name": "Safety Net",
@@ -1787,7 +1787,7 @@
       },
       {
         "name": "Safety Net",
-        "image": "interior/acq/9.jpg"
+        "image": "interior/acq/9.webp"
       },
       {
         "name": "Safety Net",
@@ -1801,7 +1801,7 @@
   },
   {
     "name": "SOFA COVER",
-    "image": "interior/sofa/1.jpg",
+    "image": "interior/sofa/1.webp",
     "subcategories": [
       {
         "name": "Safety Net",
@@ -1813,43 +1813,43 @@
       },
       {
         "name": "Safety Net",
-        "image": "interior/sofa/4.avif"
+        "image": "interior/sofa/4.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/sofa/5.jpg"
+        "image": "interior/sofa/5.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/sofa/6.jpg"
+        "image": "interior/sofa/6.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/sofa/7.avif"
+        "image": "interior/sofa/7.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/sofa/8.jpeg"
+        "image": "interior/sofa/8.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/sofa/9.avif"
+        "image": "interior/sofa/9.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/sofa/11.jpg"
+        "image": "interior/sofa/11.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/sofa/12.jpg"
+        "image": "interior/sofa/12.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/sofa/13.avif"
+        "image": "interior/sofa/13.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/sofa/14.avif"
+        "image": "interior/sofa/14.webp"
       }
     ],
     "features": [
@@ -1863,51 +1863,51 @@
     "subcategories": [
       {
         "name": "Safety Net",
-        "image": "interior/gif/sai.jpg"
+        "image": "interior/gif/sai.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/gif/ki.jpg"
+        "image": "interior/gif/ki.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/gif/puk.jpg"
+        "image": "interior/gif/puk.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/gif/lan.jpg"
+        "image": "interior/gif/lan.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/gif/koj.jpg"
+        "image": "interior/gif/koj.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/gif/fuck1.jpg"
+        "image": "interior/gif/fuck1.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/gif/fuck2.jpg"
+        "image": "interior/gif/fuck2.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/gif/fuck3.jpg"
+        "image": "interior/gif/fuck3.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/gif/fuck4.jpg"
+        "image": "interior/gif/fuck4.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/gif/fuck5.jpg"
+        "image": "interior/gif/fuck5.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/gif/su.jpg"
+        "image": "interior/gif/su.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/gif/rya.jpg"
+        "image": "interior/gif/rya.webp"
       }
     ],
     "features": [
@@ -1917,11 +1917,11 @@
   },
   {
     "name": "All Types of Doormats",
-    "image": "interior/mats/1.jpg",
+    "image": "interior/mats/1.webp",
     "subcategories": [
       {
         "name": "Safety Net",
-        "image": "interior/mats/2.jpg"
+        "image": "interior/mats/2.webp"
       },
       {
         "name": "Safety Net",
@@ -1929,11 +1929,11 @@
       },
       {
         "name": "Safety Net",
-        "image": "interior/mats/4.jpg"
+        "image": "interior/mats/4.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/mats/5.avif"
+        "image": "interior/mats/5.webp"
       },
       {
         "name": "Safety Net",
@@ -1941,15 +1941,15 @@
       },
       {
         "name": "Safety Net",
-        "image": "interior/mats/7.avif"
+        "image": "interior/mats/7.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/mats/8.jpg"
+        "image": "interior/mats/8.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/mats/9.jpg"
+        "image": "interior/mats/9.webp"
       },
       {
         "name": "Safety Net",
@@ -1971,7 +1971,7 @@
       },
       {
         "name": "Safety Net",
-        "image": "interior/brass/3.jpeg"
+        "image": "interior/brass/3.webp"
       },
       {
         "name": "Safety Net",
@@ -1983,11 +1983,11 @@
       },
       {
         "name": "Safety Net",
-        "image": "interior/brass/6.png"
+        "image": "interior/brass/6.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/brass/7.jpg"
+        "image": "interior/brass/7.webp"
       },
       {
         "name": "Safety Net",
@@ -2009,15 +2009,15 @@
   },
   {
     "name": "Basket Fruit Packings",
-    "image": "interior/bas/1.jpg",
+    "image": "interior/bas/1.webp",
     "subcategories": [
       {
         "name": "Safety Net",
-        "image": "interior/bas/2.jpg"
+        "image": "interior/bas/2.webp"
       },
       {
         "name": "Safety Net",
-        "image": "interior/bas/3.jpg"
+        "image": "interior/bas/3.webp"
       },
       {
         "name": "Safety Net",
@@ -2033,7 +2033,7 @@
       },
       {
         "name": "Safety Net",
-        "image": "interior/bas/7.jpg"
+        "image": "interior/bas/7.webp"
       },
       {
         "name": "Safety Net",
@@ -2041,7 +2041,7 @@
       },
       {
         "name": "Safety Net",
-        "image": "interior/bas/9.jpg"
+        "image": "interior/bas/9.webp"
       },
       {
         "name": "Safety Net",
