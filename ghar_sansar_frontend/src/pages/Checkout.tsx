@@ -2,7 +2,14 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
 import { useOrders } from '../context/OrderContext';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { CreditCard, Lock, ShoppingBag, CheckCircle, Loader, ShieldCheck, Truck, Headphones, Award, Star, RefreshCw } from 'lucide-react';
+import { CreditCard, Lock, ShoppingBag, CheckCircle, Loader, ShieldCheck, Truck, Headphones, Award, Star, RefreshCw, MessageCircle, ExternalLink } from 'lucide-react';
+import {
+  CustomerDetails,
+  generateOrderId,
+  generateFullCartWhatsAppMessage,
+  openWhatsAppOrderUrl
+} from '../utils/whatsappOrder';
+import { OrderSuccessModal } from '../components/OrderSuccessModal';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
@@ -15,6 +22,14 @@ const Checkout: React.FC = () => {
   const [step, setStep] = useState(1);
   const [orderComplete, setOrderComplete] = useState(false);
   const [processingPayment, setProcessingPayment] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<'whatsapp' | 'gateway'>('whatsapp');
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [completedOrderDetails, setCompletedOrderDetails] = useState<{
+    orderNumber: string;
+    grandTotal: number;
+    items: any[];
+    whatsappMessage: string;
+  } | null>(null);
 
   const API_BASE =
     import.meta.env.VITE_AWS_API_URL ||
@@ -164,16 +179,100 @@ const Checkout: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (step === 1) {
+      if (!formData.firstName.trim() || !formData.phone.trim() || !formData.address.trim() || !formData.zipCode.trim()) {
+        toast.error('Please fill in required fields: First Name, Mobile Number, Address, and PIN Code.');
+        return;
+      }
       setStep(2);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
-      handlePayment();
+      if (paymentMethod === 'whatsapp') {
+        handlePlaceWhatsAppOrder();
+      } else {
+        handlePayment();
+      }
     }
   };
 
   const handlePayment = () => {
     setShowDummyGateway(true);
     setDummyStatus('idle');
+  };
+
+  const handlePlaceWhatsAppOrder = async () => {
+    setProcessingPayment(true);
+    try {
+      const fallbackOrderId = generateOrderId();
+      const customerData: CustomerDetails = {
+        name: `${formData.firstName} ${formData.lastName}`.trim(),
+        mobile: formData.phone,
+        email: formData.email,
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        pincode: formData.zipCode,
+        notes: formData.notes
+      };
+
+      const orderItems = items.map(item => ({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        image: item.image,
+        selectedSize: item.selectedSize,
+        selectedColor: item.selectedColor
+      }));
+
+      // 1. Persist order in MongoDB Atlas via OrderContext
+      const order = await createOrder({
+        customer: formData,
+        items: orderItems,
+        subtotal: totalPrice,
+        shipping: calculatedShippingFee,
+        tax: tax,
+        total: grandTotal,
+        paymentStatus: 'pending',
+        paymentId: `wa_${Date.now()}`,
+        paymentMethod: 'whatsapp',
+        notes: formData.notes
+      });
+
+      const effectiveOrderNumber = order?.orderNumber || order?.id || fallbackOrderId;
+
+      // 2. Generate formatted WhatsApp message
+      const rawMessage = generateFullCartWhatsAppMessage(effectiveOrderNumber, customerData, {
+        items: orderItems,
+        totalQuantity: items.reduce((s, it) => s + it.quantity, 0),
+        subtotal: totalPrice,
+        tax: tax,
+        shipping: calculatedShippingFee,
+        grandTotal: grandTotal
+      });
+
+      // 3. Clear shopping cart
+      clearCart();
+      toast.success('Order placed successfully! Opening WhatsApp...');
+
+      // 4. Open WhatsApp Click-to-Chat in new tab/app
+      openWhatsAppOrderUrl(rawMessage);
+
+      // 5. Open celebratory OrderSuccessModal
+      setCompletedOrderDetails({
+        orderNumber: effectiveOrderNumber,
+        grandTotal: grandTotal,
+        items: orderItems,
+        whatsappMessage: rawMessage
+      });
+      setIsSuccessModalOpen(true);
+      setOrderComplete(true);
+    } catch (err) {
+      console.error('Error placing WhatsApp order:', err);
+      toast.error('Could not complete order. Please try again.');
+    } finally {
+      setProcessingPayment(false);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   const simulateSuccess = async () => {
@@ -188,15 +287,19 @@ const Checkout: React.FC = () => {
     
     try {
       const simulatedPaymentId = `pay_sim_${Date.now().toString().slice(-6)}`;
+      const orderItems = items.map(item => ({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        image: item.image,
+        selectedSize: item.selectedSize,
+        selectedColor: item.selectedColor
+      }));
+
       const order = await createOrder({
         customer: formData,
-        items: items.map(item => ({
-          id: item.id,
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity,
-          image: item.image
-        })),
+        items: orderItems,
         subtotal: totalPrice,
         shipping: calculatedShippingFee,
         tax: tax,
@@ -208,7 +311,37 @@ const Checkout: React.FC = () => {
 
       if (order) {
         toast.success('Order placed successfully!');
+        const effectiveOrderNumber = order.orderNumber || order.id || `GS${Date.now().toString().slice(-8)}`;
+        const customerData: CustomerDetails = {
+          name: `${formData.firstName} ${formData.lastName}`.trim(),
+          mobile: formData.phone,
+          email: formData.email,
+          address: formData.address,
+          city: formData.city,
+          state: formData.state,
+          pincode: formData.zipCode,
+          notes: formData.notes
+        };
+
+        const rawMessage = generateFullCartWhatsAppMessage(effectiveOrderNumber, customerData, {
+          items: orderItems,
+          totalQuantity: items.reduce((s, it) => s + it.quantity, 0),
+          subtotal: totalPrice,
+          tax: tax,
+          shipping: calculatedShippingFee,
+          grandTotal: grandTotal
+        });
+
         clearCart();
+        openWhatsAppOrderUrl(rawMessage);
+
+        setCompletedOrderDetails({
+          orderNumber: effectiveOrderNumber,
+          grandTotal: grandTotal,
+          items: orderItems,
+          whatsappMessage: rawMessage
+        });
+        setIsSuccessModalOpen(true);
         setOrderComplete(true);
       } else {
         toast.error('Failed to create order');
@@ -255,6 +388,17 @@ const Checkout: React.FC = () => {
             <span className="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-1">Order Number</span>
             <span className="text-lg font-mono font-bold text-luxury-charcoal">#GS{Date.now().toString().slice(-8)}</span>
           </div>
+          {/* WhatsApp Order Action */}
+          {completedOrderDetails?.whatsappMessage && (
+            <button
+              onClick={() => openWhatsAppOrderUrl(completedOrderDetails.whatsappMessage)}
+              className="w-full mb-3 bg-[#25D366] hover:bg-[#128C7E] text-white px-8 py-4 rounded-full transition-all duration-300 font-bold uppercase tracking-widest text-xs sm:text-sm shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <MessageCircle className="w-5 h-5 fill-current" />
+              <span>SEND / CHAT ON WHATSAPP</span>
+              <ExternalLink className="w-4 h-4 ml-1 opacity-80" />
+            </button>
+          )}
           <button
             onClick={() => navigate('/')}
             className="w-full bg-luxury-charcoal hover:bg-luxury-gold text-white px-8 py-4 rounded-full transition-all duration-300 font-bold uppercase tracking-widest text-base shadow-lg shadow-gray-250/30"
@@ -504,37 +648,85 @@ const Checkout: React.FC = () => {
 
                 {step === 2 && (
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                    <h2 className="text-2xl font-serif font-normal text-luxury-charcoal mb-8 flex items-center tracking-wide">
+                    <h2 className="text-2xl font-serif font-normal text-luxury-charcoal mb-6 flex items-center tracking-wide">
                       <CreditCard className="w-6 h-6 mr-3 text-luxury-gold" />
-                      Payment Method
+                      Choose Payment & Order Method
                     </h2>
-                    
-                    <div className="p-8 bg-luxury-warmGray/50 rounded-2xl mb-8 border border-gray-200/50">
-                      <div className="flex items-center justify-between mb-6">
-                        <p className="text-luxury-charcoal font-bold text-lg font-serif">
-                          Secure Payment
-                        </p>
-                        <img src="https://razorpay.com/assets/razorpay-logo.svg" alt="Razorpay" className="h-5 opacity-70 filter grayscale contrast-200" />
-                      </div>
-                      <p className="text-gray-500 text-sm mb-6 leading-relaxed">
-                        All transactions are secure and encrypted. You will be redirected to the Razorpay secure gateway to complete your purchase.
-                      </p>
-                      <div className="flex flex-wrap gap-3">
-                        <span className="bg-white px-4 py-2 rounded-lg text-xs font-bold text-gray-700 shadow-sm border border-gray-100 uppercase tracking-wider">Credit Card</span>
-                        <span className="bg-white px-4 py-2 rounded-lg text-xs font-bold text-gray-700 shadow-sm border border-gray-100 uppercase tracking-wider">UPI</span>
-                        <span className="bg-white px-4 py-2 rounded-lg text-xs font-bold text-gray-700 shadow-sm border border-gray-100 uppercase tracking-wider">Netbanking</span>
-                        <span className="bg-white px-4 py-2 rounded-lg text-xs font-bold text-gray-700 shadow-sm border border-gray-100 uppercase tracking-wider">Wallets</span>
+
+                    {/* Method 1: Order via WhatsApp (Recommended) */}
+                    <div
+                      onClick={() => setPaymentMethod('whatsapp')}
+                      className={`p-6 rounded-2xl mb-4 border-2 transition-all cursor-pointer ${
+                        paymentMethod === 'whatsapp'
+                          ? 'border-[#25D366] bg-emerald-50/50 shadow-md ring-2 ring-[#25D366]/20'
+                          : 'border-gray-200 bg-white hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-start gap-4">
+                          <div className={`w-6 h-6 rounded-full flex items-center justify-center border-2 mt-0.5 ${
+                            paymentMethod === 'whatsapp' ? 'border-[#25D366] bg-[#25D366]' : 'border-gray-300'
+                          }`}>
+                            {paymentMethod === 'whatsapp' && <div className="w-2.5 h-2.5 rounded-full bg-white" />}
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <h3 className="font-bold text-gray-900 text-base flex items-center gap-2">
+                                <MessageCircle className="w-5 h-5 text-[#25D366] fill-[#25D366]" />
+                                <span>Order & Confirm via WhatsApp</span>
+                              </h3>
+                              <span className="bg-[#25D366]/15 text-[#128C7E] text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full">
+                                Fastest • Direct Support
+                              </span>
+                            </div>
+                            <p className="text-xs text-gray-600 mt-1 leading-relaxed">
+                              Saves your order in our database and instantly opens WhatsApp with your pre-filled itemized order receipt to confirm directly with Ghar Sansar.
+                            </p>
+                          </div>
+                        </div>
                       </div>
                     </div>
 
-                    <div className="p-5 bg-luxury-warmGray border border-gray-200/50 rounded-2xl flex items-start space-x-4">
-                      <div className="bg-white p-2 rounded-full shadow-sm text-luxury-gold">
-                        <Lock className="w-5 h-5" />
+                    {/* Method 2: Online Payment Gateway */}
+                    <div
+                      onClick={() => setPaymentMethod('gateway')}
+                      className={`p-6 rounded-2xl mb-6 border-2 transition-all cursor-pointer ${
+                        paymentMethod === 'gateway'
+                          ? 'border-luxury-charcoal bg-gray-50 shadow-md ring-2 ring-gray-200'
+                          : 'border-gray-200 bg-white hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-start gap-4">
+                          <div className={`w-6 h-6 rounded-full flex items-center justify-center border-2 mt-0.5 ${
+                            paymentMethod === 'gateway' ? 'border-luxury-charcoal bg-luxury-charcoal' : 'border-gray-300'
+                          }`}>
+                            {paymentMethod === 'gateway' && <div className="w-2.5 h-2.5 rounded-full bg-white" />}
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between">
+                              <h3 className="font-bold text-gray-900 text-base flex items-center gap-2">
+                                <CreditCard className="w-5 h-5 text-luxury-gold" />
+                                <span>Online Payment Gateway</span>
+                              </h3>
+                              <img src="https://razorpay.com/assets/razorpay-logo.svg" alt="Razorpay" className="h-4 opacity-75 filter grayscale contrast-200" />
+                            </div>
+                            <p className="text-xs text-gray-600 mt-1 leading-relaxed">
+                              Pay securely using Credit/Debit Card, UPI, Netbanking, or Wallets via encrypted payment gateway.
+                            </p>
+                            <div className="flex flex-wrap gap-2 mt-3">
+                              <span className="bg-white px-2.5 py-1 rounded-md text-[11px] font-semibold text-gray-700 border border-gray-200">UPI / QR</span>
+                              <span className="bg-white px-2.5 py-1 rounded-md text-[11px] font-semibold text-gray-700 border border-gray-200">Credit / Debit Card</span>
+                              <span className="bg-white px-2.5 py-1 rounded-md text-[11px] font-semibold text-gray-700 border border-gray-200">Netbanking</span>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <h4 className="text-sm font-bold text-luxury-charcoal mb-1">256-Bit Encryption</h4>
-                        <span className="text-xs text-gray-500 leading-relaxed block">Your payment information is handled with bank-level security. We never store your card details.</span>
-                      </div>
+                    </div>
+
+                    <div className="p-4 bg-luxury-warmGray border border-gray-200/50 rounded-2xl flex items-start space-x-3 text-xs text-gray-600">
+                      <Lock className="w-4 h-4 text-luxury-gold shrink-0 mt-0.5" />
+                      <span>All transactions are 100% encrypted & protected with Ghar Sansar buyer guarantee.</span>
                     </div>
                   </motion.div>
                 )}
@@ -554,14 +746,25 @@ const Checkout: React.FC = () => {
                   <button
                     type="submit"
                     disabled={processingPayment}
-                    className={`flex-1 bg-luxury-charcoal hover:bg-luxury-gold text-white py-4 px-6 rounded-full transition-all duration-300 font-bold uppercase tracking-widest text-sm md:text-base disabled:opacity-50 flex items-center justify-center shadow-xl shadow-gray-200/50 hover:-translate-y-0.5 ${step === 1 ? 'w-full' : ''}`}
+                    className={`flex-1 transition-all duration-300 font-bold uppercase tracking-widest text-sm md:text-base disabled:opacity-50 flex items-center justify-center gap-2 shadow-xl hover:-translate-y-0.5 cursor-pointer py-4 px-6 rounded-full ${
+                      step === 1
+                        ? 'bg-luxury-charcoal hover:bg-luxury-gold text-white w-full shadow-gray-200/50'
+                        : paymentMethod === 'whatsapp'
+                        ? 'bg-[#25D366] hover:bg-[#128C7E] text-white shadow-emerald-500/25'
+                        : 'bg-luxury-charcoal hover:bg-luxury-gold text-white shadow-gray-200/50'
+                    }`}
                   >
                     {processingPayment ? (
                       <span className="flex items-center gap-2">
-                        <Loader className="animate-spin" size={18} /> Processing...
+                        <Loader className="animate-spin" size={18} /> {paymentMethod === 'whatsapp' ? 'Placing WhatsApp Order...' : 'Processing...'}
                       </span>
                     ) : step === 1 ? (
                       'Continue to Payment'
+                    ) : paymentMethod === 'whatsapp' ? (
+                      <span className="flex items-center gap-2">
+                        <MessageCircle className="w-5 h-5 fill-current" />
+                        <span>Confirm & Order on WhatsApp (₹${grandTotal.toFixed(2)})</span>
+                      </span>
                     ) : (
                       `Pay ₹${grandTotal.toFixed(2)} Securely`
                     )}
@@ -697,6 +900,21 @@ const Checkout: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Order Success Modal with WhatsApp Action */}
+      <OrderSuccessModal
+        isOpen={isSuccessModalOpen}
+        onClose={() => {
+          setIsSuccessModalOpen(false);
+          navigate('/profile');
+        }}
+        orderNumber={completedOrderDetails?.orderNumber || `GS${Date.now().toString().slice(-8)}`}
+        customerName={`${formData.firstName} ${formData.lastName}`.trim()}
+        customerPhone={formData.phone}
+        grandTotal={completedOrderDetails?.grandTotal || grandTotal}
+        items={completedOrderDetails?.items || items}
+        whatsappMessage={completedOrderDetails?.whatsappMessage}
+      />
 
       {/* Simulated Razorpay Payment Gateway Modal */}
       <AnimatePresence>

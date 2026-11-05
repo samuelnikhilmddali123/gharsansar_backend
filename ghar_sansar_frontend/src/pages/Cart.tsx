@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { Minus, Plus, X, ShoppingBag } from 'lucide-react';
+import { Minus, Plus, X, ShoppingBag, MessageCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 
@@ -48,6 +48,16 @@ const Cart: React.FC = () => {
     e.preventDefault();
     if (!isAuthenticated) {
       toast.error('Please sign in to proceed to checkout!');
+      navigate('/login', { state: { from: { pathname: '/checkout' } } });
+    } else {
+      navigate('/checkout');
+    }
+  };
+
+  const handleWhatsAppOrderCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!isAuthenticated) {
+      toast.error('Please sign in to proceed to checkout and place your order on WhatsApp!');
       navigate('/login', { state: { from: { pathname: '/checkout' } } });
     } else {
       navigate('/checkout');
@@ -182,16 +192,23 @@ const Cart: React.FC = () => {
               </div>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3">
               <button
                 onClick={handleCheckoutClick}
-                className="w-full bg-[#004e38] hover:bg-[#003828] text-white py-4 px-6 rounded-full font-bold uppercase tracking-widest text-xs shadow-md transition duration-300 text-center block active:scale-98"
+                className="w-full bg-[#004e38] hover:bg-[#003828] text-white py-3.5 px-6 rounded-full font-bold uppercase tracking-widest text-xs shadow-md transition duration-300 text-center block active:scale-98 cursor-pointer"
               >
                 Proceed to Checkout
               </button>
+              <button
+                onClick={handleWhatsAppOrderCart}
+                className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white py-3.5 px-6 rounded-full font-bold uppercase tracking-widest text-xs shadow-md transition duration-300 flex items-center justify-center gap-2 active:scale-98 cursor-pointer"
+              >
+                <MessageCircle className="w-4 h-4 fill-current" />
+                <span>Order via WhatsApp</span>
+              </button>
               <Link
                 to="/products"
-                className="w-full border-2 border-gray-300 text-gray-700 py-3.5 px-6 rounded-full hover:bg-luxury-warmGray transition-colors font-bold uppercase tracking-widest text-xs text-center block"
+                className="w-full border-2 border-gray-300 text-gray-700 py-3 px-6 rounded-full hover:bg-luxury-warmGray transition-colors font-bold uppercase tracking-widest text-xs text-center block"
               >
                 Continue Shopping
               </Link>
