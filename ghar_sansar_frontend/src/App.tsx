@@ -1,0 +1,231 @@
+// src/App.tsx
+import { lazy, Suspense } from "react";
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import { CartProvider } from "./context/CartContext";
+import { ProductProvider } from "./context/ProductContext";
+import { BlogProvider } from "./context/BlogContext";
+import { ServiceProvider } from "./context/ServiceContext";
+import { InteriorProvider } from "./context/InteriorContext";
+import { PaymentProvider } from "./context/PaymentContext";
+import { OrderProvider } from "./context/OrderContext";
+import { WishlistProvider } from "./context/WishlistContext";
+
+import ProtectedRoute from "./components/ProtectedRoute";
+import ScrollToTop from "./components/ScrollToTop";
+import Header from "./components/Layout/Header";
+import Footer from "./components/Layout/Footer";
+
+// Critical landing pages (loaded immediately)
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+import Cart from "./pages/Cart";
+
+// Lazy-loaded customer pages (code-split for fast initial page load)
+const Services = lazy(() => import("./pages/Services"));
+const Blog = lazy(() => import("./pages/Blog"));
+const BlogPost = lazy(() => import("./pages/BlogPost"));
+const Checkout = lazy(() => import("./pages/Checkout"));
+const InteriorDesignPage = lazy(() => import("./pages/InteriorDesignPage"));
+const InteriorWorks = lazy(() => import("./pages/InteriorWorks"));
+const Profile = lazy(() => import("./pages/Profile"));
+const ProductsPage = lazy(() => import("./pages/Products"));
+const ProductDetail = lazy(() => import("./pages/ProductDetail"));
+const ReturnGifts = lazy(() => import("./pages/ReturnGifts"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const MobileAuth = lazy(() => import("./pages/MobileAuth"));
+const DeleteAccount = lazy(() => import("./pages/DeleteAccount"));
+
+// Lazy-loaded Admin pages (never block normal customer page loads)
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const AdminLayout = lazy(() => import("./pages/admin/AdminLayout"));
+const BlogAdmin = lazy(() => import("./pages/admin/BlogAdmin"));
+const ServicesAdmin = lazy(() => import("./pages/admin/ServicesAdmin"));
+const ProductsAdmin = lazy(() => import("./pages/admin/ProductsAdmin"));
+const ProductAdminBulk = lazy(() => import("./pages/admin/ProductAdminBulk"));
+const InteriorWorksAdmin = lazy(() => import("./pages/admin/InteriorWorksAdmin"));
+const OrdersAdmin = lazy(() => import("./pages/admin/OrdersAdmin"));
+const ChatsAdmin = lazy(() => import("./pages/admin/ChatsAdmin"));
+const ReturnGiftsAdmin = lazy(() => import("./pages/admin/ReturnGiftsAdmin"));
+const DiscountAdmin = lazy(() => import("./pages/admin/DiscountAdmin"));
+
+const PageLoadingSpinner = () => (
+  <div className="min-h-[50vh] flex items-center justify-center">
+    <div className="w-10 h-10 border-4 border-[#9E472A] border-t-transparent rounded-full animate-spin"></div>
+  </div>
+);
+
+const AppLayout = () => {
+  const location = useLocation();
+  const { user, loading } = useAuth();
+
+  const isUserAdmin = Boolean(
+    user && (
+      (user.role && user.role.toLowerCase() === "admin") ||
+      (user.email && user.email.toLowerCase() === "gharsansarshop@gmail.com")
+    )
+  );
+
+  const isAdminRoute = location.pathname.startsWith("/admin");
+  const isMobileAuthRoute = location.pathname.startsWith("/mobile-auth");
+  const isHomePage = location.pathname === "/";
+
+  // Dedicated Mobile Auth Bridge view (clean, focused, standalone)
+  if (isMobileAuthRoute) {
+    return (
+      <Suspense fallback={<PageLoadingSpinner />}>
+        <MobileAuth />
+      </Suspense>
+    );
+  }
+
+  // 1. If logged in as admin, prevent access to customer store pages and auto-redirect to /admin
+  if (!loading && isUserAdmin && !isAdminRoute) {
+    return <Navigate to="/admin" replace />;
+  }
+
+  // 2. If navigating on admin routes, render clean dedicated admin view without customer Header/Footer
+  if (isAdminRoute) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Suspense fallback={<PageLoadingSpinner />}>
+          <Routes>
+            <Route
+              path="/admin/*"
+              element={
+                <ProtectedRoute role="admin">
+                  <AdminLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<AdminDashboard />} />
+              <Route path="blog-admin" element={<BlogAdmin />} />
+              <Route path="services-admin" element={<ServicesAdmin />} />
+              <Route path="products-admin" element={<ProductsAdmin />} />
+              <Route path="products-bulk" element={<ProductAdminBulk />} />
+              <Route path="discounts" element={<DiscountAdmin />} />
+              <Route path="interior-works" element={<InteriorWorksAdmin />} />
+              <Route path="orders" element={<OrdersAdmin />} />
+              <Route path="chats" element={<ChatsAdmin />} />
+              <Route path="return-gifts" element={<ReturnGiftsAdmin />} />
+            </Route>
+            <Route path="*" element={<Navigate to="/admin" replace />} />
+          </Routes>
+        </Suspense>
+      </div>
+    );
+  }
+
+  // 3. Regular customer view
+  return (
+    <div className="min-h-screen bg-[#F7F6F0]">
+      <Header />
+      <main className={isHomePage ? "" : "pt-20 sm:pt-24"}>
+        <Suspense fallback={<PageLoadingSpinner />}>
+          <Routes>
+            {/* ---------- Public customer routes ---------- */}
+            <Route path="/" element={<Home />} />
+            <Route path="/products" element={<ProductsPage />} />
+            <Route path="/product/:id" element={<ProductDetail />} />
+            <Route path="/return-gifts" element={<ReturnGifts />} />
+            <Route path="/services" element={<Services />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:id" element={<BlogPost />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/cart" element={<Cart />} />
+
+            {/* Public Interior Design page */}
+            <Route path="/interior-design" element={<InteriorDesignPage />} />
+
+            {/* Mobile App Google Authentication Bridge */}
+            <Route path="/mobile-auth" element={<MobileAuth />} />
+
+            {/* Legal and Policy pages */}
+            <Route path="/privacy-policy" element={<PrivacyPolicy initialTab="privacy" />} />
+            <Route path="/privacy" element={<PrivacyPolicy initialTab="privacy" />} />
+            <Route path="/terms" element={<PrivacyPolicy initialTab="terms" />} />
+            <Route path="/shipping-policy" element={<PrivacyPolicy initialTab="shipping" />} />
+            <Route path="/return-policy" element={<PrivacyPolicy initialTab="returns" />} />
+            <Route path="/delete-account" element={<DeleteAccount />} />
+            <Route path="/account-deletion" element={<DeleteAccount />} />
+
+            {/* ---------- Protected customer routes ---------- */}
+            <Route
+              path="/checkout"
+              element={
+                <ProtectedRoute>
+                  <Checkout />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/interior-works"
+              element={
+                <ProtectedRoute>
+                  <InteriorWorks />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* ---------- Admin protected routes ---------- */}
+            <Route
+              path="/admin/*"
+              element={
+                <ProtectedRoute role="admin">
+                  <AdminLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<AdminDashboard />} />
+              <Route path="blog-admin" element={<BlogAdmin />} />
+              <Route path="services-admin" element={<ServicesAdmin />} />
+              <Route path="products-admin" element={<ProductsAdmin />} />
+              <Route path="products-bulk" element={<ProductAdminBulk />} />
+              <Route path="discounts" element={<DiscountAdmin />} />
+              <Route path="interior-works" element={<InteriorWorksAdmin />} />
+              <Route path="orders" element={<OrdersAdmin />} />
+              <Route path="chats" element={<ChatsAdmin />} />
+              <Route path="return-gifts" element={<ReturnGiftsAdmin />} />
+            </Route>
+          </Routes>
+        </Suspense>
+      </main>
+      <Footer />
+    </div>
+  );
+};
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <WishlistProvider>
+        <CartProvider>
+          <ProductProvider>
+            <BlogProvider>
+              <ServiceProvider>
+                <InteriorProvider>
+                  <PaymentProvider>
+                    <OrderProvider>
+                      <BrowserRouter>
+                        <ScrollToTop />
+                        <AppLayout />
+                      </BrowserRouter>
+                    </OrderProvider>
+                  </PaymentProvider>
+                </InteriorProvider>
+              </ServiceProvider>
+            </BlogProvider>
+          </ProductProvider>
+        </CartProvider>
+      </WishlistProvider>
+    </AuthProvider>
+  );
+}
