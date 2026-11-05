@@ -1083,7 +1083,7 @@ const ProductDetail: React.FC = () => {
                   </button>
 
                   <a
-                    href="tel:+918121135980"
+                    href="tel:+919492664870"
                     className="flex items-center justify-center gap-2 py-2.5 px-4 bg-[#F9F7F2] hover:bg-[#F2EEE4] text-[#4A4036] border border-[#EBE6DC] rounded-none font-bold uppercase tracking-wider text-[11px] transition"
                   >
                     <Phone size={15} />

@@ -468,7 +468,7 @@ I would like to inquire about the following Interior Design:
 
 Looking forward to your response!`;
 
-    const phone = "918121135980";
+    const phone = "919492664870";
     const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
     window.open(url, "_blank");
     setEnquirySuccess(true);
@@ -1078,7 +1078,7 @@ Looking forward to your response!`;
                 {/* 3 Contact Columns */}
                 <div className="grid grid-cols-3 gap-2 text-center">
                   <a
-                    href="tel:+918121135980"
+                    href="tel:+919492664870"
                     className="group flex flex-col items-center p-2 rounded-xl hover:bg-[#FAF8F5] transition-colors"
                   >
                     <Phone size={16} className="text-[#0a2e22] mb-1.5" />
