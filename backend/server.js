@@ -1101,14 +1101,14 @@ app.post(["/api/v1/auth/send-otp", "/api/auth/send-otp", "/auth/send-otp"], asyn
         });
       }
     }
-    // Rate-limiting: prevent spamming OTP requests within 45 seconds
+    // Rate-limiting: gentle cooldown (15 seconds)
     const recentOtp = await Otp.findOne({
       email: cleanEmail,
-      createdAt: { $gt: new Date(Date.now() - 45 * 1000) }
+      createdAt: { $gt: new Date(Date.now() - 15 * 1000) }
     }).sort({ createdAt: -1 });
 
     if (recentOtp) {
-      const waitSeconds = Math.ceil(45 - (Date.now() - new Date(recentOtp.createdAt).getTime()) / 1000);
+      const waitSeconds = Math.max(1, Math.ceil(15 - (Date.now() - new Date(recentOtp.createdAt).getTime()) / 1000));
       return res.status(429).json({
         error: `Please wait ${waitSeconds} seconds before requesting a new OTP.`
       });
@@ -1119,7 +1119,7 @@ app.post(["/api/v1/auth/send-otp", "/api/auth/send-otp", "/auth/send-otp"], asyn
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes expiry
 
     // Save in MongoDB Atlas
-    await Otp.create({
+    const newOtpRecord = await Otp.create({
       email: cleanEmail,
       otp: generatedOtp,
       expiresAt: expiresAt,
@@ -1131,6 +1131,7 @@ app.post(["/api/v1/auth/send-otp", "/api/auth/send-otp", "/auth/send-otp"], asyn
     const emailResult = await sendOtpEmail(cleanEmail, generatedOtp, purpose || "login");
 
     if (!emailResult.sent) {
+      await Otp.deleteOne({ _id: newOtpRecord._id }).catch(() => {});
       return res.status(500).json({
         success: false,
         delivered: false,

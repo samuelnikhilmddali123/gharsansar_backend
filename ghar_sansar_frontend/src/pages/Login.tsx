@@ -103,7 +103,7 @@ const Login: React.FC = () => {
     const res = await sendOtp(formData.email.trim(), "registration");
     setLoading(false);
     if (res.success) {
-      setRegisterOtpCountdown(45);
+      setRegisterOtpCountdown(15);
       setRegisterOtpMessage(`A fresh verification code has been sent to ${formData.email.trim()}`);
     } else {
       setError(res.error || "Failed to resend verification code.");
@@ -204,7 +204,7 @@ const Login: React.FC = () => {
     setLoading(false);
     if (res.success) {
       setOtpSent(true);
-      setOtpCountdown(res.expiresInSeconds ? 45 : 45);
+      setOtpCountdown(15);
       setOtpMessage(res.message || "Verification code sent to your email!");
     } else {
       setError(res.error || "Failed to send verification code");

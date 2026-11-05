@@ -1,7 +1,7 @@
 import { getAdminWhatsAppNumber } from '../config/whatsappConfig';
 
 export interface CustomerDetails {
-  name: string;
+  name?: string;
   mobile: string;
   email?: string;
   address?: string;
@@ -93,19 +93,21 @@ export const generateFullCartWhatsAppMessage = (
 ): string => {
   const { items, totalQuantity, subtotal, shipping, grandTotal } = cartOrder;
 
-  let msg = `🛍️ *NEW ORDER - GHAR SANSAR*\n`;
+  let msg = `🛍️ *NEW ORDER BOOKING - GHAR SANSAR*\n`;
   msg += `━━━━━━━━━━━━━━━━━━━━━\n`;
   msg += `📋 *Order ID:* ${orderId}\n`;
-  msg += `📅 *Date:* ${getFormattedDate()}\n\n`;
+  msg += `📅 *Date:* ${getFormattedDate()}\n`;
+  msg += `⚡ *Status:* Order Accepted\n\n`;
 
-  msg += `👤 *CUSTOMER DETAILS*\n`;
+  msg += `📍 *DELIVERY DETAILS*\n`;
   msg += `━━━━━━━━━━━━━━━━━━━━━\n`;
-  msg += `• *Name:* ${customer.name || 'Valued Customer'}\n`;
-  msg += `• *Mobile:* ${customer.mobile || 'Not provided'}\n`;
-  if (customer.email) msg += `• *Email:* ${customer.email}\n`;
-  if (customer.address) msg += `• *Address:* ${customer.address}\n`;
+  msg += `• *Delivery Address:* ${customer.address || 'Address provided at delivery'}\n`;
   if (customer.city || customer.pincode) {
     msg += `• *Location:* ${[customer.city, customer.state, customer.pincode].filter(Boolean).join(', ')}\n`;
+  }
+  msg += `• *Mobile / WhatsApp:* ${customer.mobile || 'Not provided'}\n`;
+  if (customer.name && customer.name.trim() && customer.name !== 'Valued Customer') {
+    msg += `• *Contact Person:* ${customer.name.trim()}\n`;
   }
   if (customer.notes) msg += `• *Special Notes:* ${customer.notes}\n`;
 
@@ -134,7 +136,7 @@ export const generateFullCartWhatsAppMessage = (
   msg += `• Taxes (GST): Included\n\n`;
   msg += `⭐ *GRAND TOTAL: ₹${grandTotal.toLocaleString('en-IN')}*\n`;
   msg += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
-  msg += `Please confirm my order and share tracking / payment updates.\n`;
+  msg += `*Order Accepted!* Please share tracking and dispatch timeline.\n`;
   msg += `Thank you for choosing *Ghar Sansar*!`;
 
   return msg;
@@ -156,16 +158,18 @@ export const generateSingleProductWhatsAppMessage = (
   let msg = `🛍️ *NEW DIRECT ORDER - GHAR SANSAR*\n`;
   msg += `━━━━━━━━━━━━━━━━━━━━━\n`;
   msg += `📋 *Order ID:* ${orderId}\n`;
-  msg += `📅 *Date:* ${getFormattedDate()}\n\n`;
+  msg += `📅 *Date:* ${getFormattedDate()}\n`;
+  msg += `⚡ *Status:* Order Accepted\n\n`;
 
-  msg += `👤 *CUSTOMER DETAILS*\n`;
+  msg += `📍 *DELIVERY DETAILS*\n`;
   msg += `━━━━━━━━━━━━━━━━━━━━━\n`;
-  msg += `• *Name:* ${customer.name || 'Valued Customer'}\n`;
-  msg += `• *Mobile:* ${customer.mobile || 'Not provided'}\n`;
-  if (customer.email) msg += `• *Email:* ${customer.email}\n`;
-  if (customer.address) msg += `• *Address:* ${customer.address}\n`;
+  msg += `• *Delivery Address:* ${customer.address || 'Address provided at delivery'}\n`;
   if (customer.city || customer.pincode) {
     msg += `• *Location:* ${[customer.city, customer.state, customer.pincode].filter(Boolean).join(', ')}\n`;
+  }
+  msg += `• *Mobile / WhatsApp:* ${customer.mobile || 'Not provided'}\n`;
+  if (customer.name && customer.name.trim() && customer.name !== 'Valued Customer') {
+    msg += `• *Contact Person:* ${customer.name.trim()}\n`;
   }
   if (customer.notes) msg += `• *Special Notes:* ${customer.notes}\n`;
 
@@ -185,7 +189,7 @@ export const generateSingleProductWhatsAppMessage = (
   msg += `\n━━━━━━━━━━━━━━━━━━━━━\n`;
   msg += `⭐ *GRAND TOTAL: ₹${grandTotal.toLocaleString('en-IN')}*\n`;
   msg += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
-  msg += `Please confirm availability and dispatch timeline.\n`;
+  msg += `*Order Accepted!* Please share tracking and dispatch timeline.\n`;
   msg += `Thank you for choosing *Ghar Sansar*!`;
 
   return msg;

@@ -107,12 +107,12 @@ export const OrderSuccessModal: React.FC<OrderSuccessModalProps> = ({
 
           <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-emerald-300 flex items-center justify-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>ORDER CONFIRMED & PLACED</span>
+            <span>ORDER ACCEPTED</span>
             <Sparkles className="w-3.5 h-3.5" />
           </span>
 
           <h2 className="text-2xl font-serif font-bold mt-1 text-white">
-            Thank You for Your Order!
+            Order Accepted!
           </h2>
 
           <div className="mt-2 inline-block px-3.5 py-1 bg-white/15 border border-white/20 rounded-full text-xs font-mono font-bold text-emerald-100">
@@ -126,23 +126,23 @@ export const OrderSuccessModal: React.FC<OrderSuccessModalProps> = ({
           <div className="p-4 bg-emerald-50/60 border border-emerald-200/70 rounded-2xl space-y-2 text-xs">
             <div className="flex justify-between items-center">
               <span className="text-gray-600 font-medium">Order Status:</span>
-              <span className="bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full font-bold text-[10px] uppercase tracking-wider flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                <span>Saved & Processing</span>
+              <span className="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full font-bold text-[11px] uppercase tracking-wider flex items-center gap-1.5 border border-emerald-300">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Order Accepted</span>
               </span>
             </div>
 
-            {customerName && (
+            {customerPhone && (
               <div className="flex justify-between items-center border-t border-emerald-100 pt-2">
-                <span className="text-gray-600 font-medium">Customer:</span>
-                <span className="font-bold text-gray-900">{customerName}</span>
+                <span className="text-gray-600 font-medium">Contact Number:</span>
+                <span className="font-semibold text-gray-800">{customerPhone}</span>
               </div>
             )}
 
-            {customerPhone && (
+            {customerName && customerName.trim() && customerName !== 'Valued Customer' && (
               <div className="flex justify-between items-center border-t border-emerald-100 pt-2">
-                <span className="text-gray-600 font-medium">Mobile Number:</span>
-                <span className="font-semibold text-gray-800">{customerPhone}</span>
+                <span className="text-gray-600 font-medium">Customer:</span>
+                <span className="font-bold text-gray-900">{customerName}</span>
               </div>
             )}
 
@@ -211,7 +211,7 @@ export const OrderSuccessModal: React.FC<OrderSuccessModalProps> = ({
                 <span>WhatsApp Order Receipt</span>
               </div>
               <p className="text-[11px] text-emerald-800 leading-relaxed">
-                Click below to send or re-open your pre-filled order receipt directly with Ghar Sansar on WhatsApp for fast dispatch and personal support.
+                Your order is accepted. Click below to view or send your pre-filled receipt on WhatsApp.
               </p>
               <button
                 type="button"
@@ -219,7 +219,7 @@ export const OrderSuccessModal: React.FC<OrderSuccessModalProps> = ({
                 className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white py-3 px-4 rounded-xl font-bold uppercase tracking-wider text-xs shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98"
               >
                 <MessageCircle className="w-5 h-5 fill-current" />
-                <span>SEND / CHAT ON WHATSAPP</span>
+                <span>OPEN ON WHATSAPP</span>
                 <ExternalLink className="w-4 h-4 ml-1 opacity-80" />
               </button>
             </div>
@@ -233,7 +233,7 @@ export const OrderSuccessModal: React.FC<OrderSuccessModalProps> = ({
             className="flex-1 bg-[#1A1918] hover:bg-[#004e38] text-white py-3 rounded-xl text-xs uppercase tracking-wider font-bold shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
             <Package className="w-4 h-4" />
-            <span>View in My Orders</span>
+            <span>View My Orders</span>
           </button>
 
           <button
