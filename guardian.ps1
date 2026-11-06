@@ -90,57 +90,33 @@ while ($true) {
             $lastPowerCheck = $now
         }
 
-        # 1. Check if the Main START_SERVERS window is running
-        $mainProc = Get-CimInstance Win32_Process -Filter "Name='cmd.exe'" -ErrorAction SilentlyContinue | Where-Object {
-            $_.CommandLine -like "*START_SERVERS.bat*"
-        }
-
-        if (-not $mainProc) {
-            if (($now - $lastLauncherStart).TotalSeconds -ge 5) {
-                $lastLauncherStart = $now
-                # Give launcher 15 seconds to initialize services before checking them
+        # 1. Check Backend (Port 5001)
+        $backendPort = Get-NetTCPConnection -LocalPort 5001 -State Listen -ErrorAction SilentlyContinue
+        if (-not $backendPort) {
+            if (($now - $lastBackendStart).TotalSeconds -ge 10) {
                 $lastBackendStart = $now
-                $lastFrontendStart = $now
-                $lastTunnelStart = $now
-
-                Log-Message "START_SERVERS.bat is not running. Launching console window now..."
-                Start-Process -FilePath "cmd.exe" -ArgumentList "/c `"$batPath`"" -WorkingDirectory $rootDir
+                Log-Message "Backend (Port 5001) is down. Restarting backend server..."
+                Start-Process -FilePath "cmd.exe" -ArgumentList "/c `"$backendBat`"" -WorkingDirectory (Join-Path $rootDir "backend")
             }
-            Start-Sleep -Seconds 3
-            continue
         }
 
-        # Only check child services if launcher has had time to boot
-        if (($now - $lastLauncherStart).TotalSeconds -ge 15) {
-
-            # 2. Check Backend (Port 5001)
-            $backendPort = Get-NetTCPConnection -LocalPort 5001 -State Listen -ErrorAction SilentlyContinue
-            if (-not $backendPort) {
-                if (($now - $lastBackendStart).TotalSeconds -ge 10) {
-                    $lastBackendStart = $now
-                    Log-Message "Backend (Port 5001) is down. Restarting backend server..."
-                    Start-Process -FilePath "cmd.exe" -ArgumentList "/c `"$backendBat`"" -WorkingDirectory (Join-Path $rootDir "backend")
-                }
+        # 2. Check Frontend (Port 5173)
+        $frontendPort = Get-NetTCPConnection -LocalPort 5173 -State Listen -ErrorAction SilentlyContinue
+        if (-not $frontendPort) {
+            if (($now - $lastFrontendStart).TotalSeconds -ge 10) {
+                $lastFrontendStart = $now
+                Log-Message "Frontend (Port 5173) is down. Restarting frontend server..."
+                Start-Process -FilePath "cmd.exe" -ArgumentList "/c `"$frontendBat`"" -WorkingDirectory (Join-Path $rootDir "ghar_sansar_frontend")
             }
+        }
 
-            # 3. Check Frontend (Port 5173)
-            $frontendPort = Get-NetTCPConnection -LocalPort 5173 -State Listen -ErrorAction SilentlyContinue
-            if (-not $frontendPort) {
-                if (($now - $lastFrontendStart).TotalSeconds -ge 10) {
-                    $lastFrontendStart = $now
-                    Log-Message "Frontend (Port 5173) is down. Restarting frontend server..."
-                    Start-Process -FilePath "cmd.exe" -ArgumentList "/c `"$frontendBat`"" -WorkingDirectory (Join-Path $rootDir "ghar_sansar_frontend")
-                }
-            }
-
-            # 4. Check Cloudflare Tunnel (cloudflared.exe)
-            $cfProc = Get-Process -Name "cloudflared" -ErrorAction SilentlyContinue
-            if (-not $cfProc) {
-                if (($now - $lastTunnelStart).TotalSeconds -ge 10) {
-                    $lastTunnelStart = $now
-                    Log-Message "Cloudflare Tunnel is down. Restarting tunnel..."
-                    Start-Process -FilePath "cmd.exe" -ArgumentList "/c `"$tunnelBat`"" -WorkingDirectory $rootDir
-                }
+        # 3. Check Cloudflare Tunnel (cloudflared.exe)
+        $cfProc = Get-Process -Name "cloudflared" -ErrorAction SilentlyContinue
+        if (-not $cfProc) {
+            if (($now - $lastTunnelStart).TotalSeconds -ge 10) {
+                $lastTunnelStart = $now
+                Log-Message "Cloudflare Tunnel is down. Restarting tunnel..."
+                Start-Process -FilePath "cmd.exe" -ArgumentList "/c `"$tunnelBat`"" -WorkingDirectory $rootDir
             }
         }
     } catch {

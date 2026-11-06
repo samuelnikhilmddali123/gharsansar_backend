@@ -231,8 +231,9 @@ const Login: React.FC = () => {
 
       const isUserAdmin = Boolean(
         (loggedUser?.role && loggedUser.role.toLowerCase() === "admin") ||
-        (loggedUser?.email && loggedUser.email.toLowerCase() === "gharsansarshop@gmail.com") ||
-        otpEmail.trim().toLowerCase() === "gharsansarshop@gmail.com"
+        (loggedUser?.email && (loggedUser.email.toLowerCase() === "gharsansarshop@gmail.com" || loggedUser.email.toLowerCase() === "gharsansarwebsite@gmail.com")) ||
+        otpEmail.trim().toLowerCase() === "gharsansarshop@gmail.com" ||
+        otpEmail.trim().toLowerCase() === "gharsansarwebsite@gmail.com"
       );
 
       if (isUserAdmin) {
@@ -293,7 +294,7 @@ const Login: React.FC = () => {
     if (user && !showAddressModal) {
       const isUserAdmin = Boolean(
         (user.role && user.role.toLowerCase() === "admin") ||
-        (user.email && user.email.toLowerCase() === "gharsansarshop@gmail.com")
+        (user.email && (user.email.toLowerCase() === "gharsansarshop@gmail.com" || user.email.toLowerCase() === "gharsansarwebsite@gmail.com"))
       );
 
       if (isUserAdmin) {
@@ -344,10 +345,12 @@ const Login: React.FC = () => {
             loggedUser = stored ? JSON.parse(stored) : null;
           } catch (e) {}
 
+          const cleanEnteredEmail = (email || "").trim().toLowerCase();
           const isUserAdmin = Boolean(
             (loggedUser?.role && loggedUser.role.toLowerCase() === "admin") ||
-            (loggedUser?.email && loggedUser.email.toLowerCase() === "gharsansarshop@gmail.com") ||
-            (email && email.toLowerCase() === "gharsansarshop@gmail.com")
+            (loggedUser?.email && (loggedUser.email.toLowerCase() === "gharsansarshop@gmail.com" || loggedUser.email.toLowerCase() === "gharsansarwebsite@gmail.com")) ||
+            cleanEnteredEmail === "gharsansarshop@gmail.com" ||
+            cleanEnteredEmail === "gharsansarwebsite@gmail.com"
           );
 
           if (isUserAdmin) {

@@ -13,6 +13,12 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+// Auto-recover from stale dynamic chunk imports on newly deployed builds
+window.addEventListener('vite:preloadError', (event) => {
+  console.warn('Vite dynamic chunk load failed. Reloading to obtain latest assets...', event);
+  window.location.reload();
+});
+
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const queryClient = new QueryClient({

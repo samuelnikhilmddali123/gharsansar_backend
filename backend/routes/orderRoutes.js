@@ -20,7 +20,7 @@ router.get("/", authenticate, async (req, res) => {
     const user = req.user;
     const isAdmin =
       (user.role && user.role.toUpperCase() === "ADMIN") ||
-      (user.email && user.email.toLowerCase() === "gharsansarshop@gmail.com");
+      (user.email && (user.email.toLowerCase() === "gharsansarshop@gmail.com" || user.email.toLowerCase() === "gharsansarwebsite@gmail.com"));
 
     let orders = [];
 
@@ -77,7 +77,7 @@ router.get("/:id", authenticate, async (req, res) => {
     const user = req.user;
     const isAdmin =
       (user.role && user.role.toUpperCase() === "ADMIN") ||
-      (user.email && user.email.toLowerCase() === "gharsansarshop@gmail.com");
+      (user.email && (user.email.toLowerCase() === "gharsansarshop@gmail.com" || user.email.toLowerCase() === "gharsansarwebsite@gmail.com"));
 
     const query = [
       { id: orderId },
@@ -119,7 +119,7 @@ router.get("/:id", authenticate, async (req, res) => {
 router.post("/", optionalAuth, async (req, res) => {
   try {
     const user = req.user;
-    if (user && ((user.role && user.role.toUpperCase() === "ADMIN") || (user.email && user.email.toLowerCase() === "gharsansarshop@gmail.com"))) {
+    if (user && ((user.role && user.role.toUpperCase() === "ADMIN") || (user.email && (user.email.toLowerCase() === "gharsansarshop@gmail.com" || user.email.toLowerCase() === "gharsansarwebsite@gmail.com")))) {
       return res.status(403).json({
         success: false,
         error: "Admin accounts are restricted from placing customer orders. Please use a customer account."
@@ -405,6 +405,36 @@ router.patch("/:id/shipped", requireAdmin, async (req, res) => {
   } catch (error) {
     console.error("Order shipped update error:", error);
     res.status(500).json({ error: "Failed to update shipment details", success: false });
+  }
+});
+
+/**
+ * DELETE /api/v1/orders/:id
+ * Delete an order (Admin only)
+ */
+router.delete("/:id", requireAdmin, async (req, res) => {
+  try {
+    const orderId = req.params.id;
+    const query = [
+      { id: orderId },
+      { orderNumber: orderId }
+    ];
+    if (/^[0-9a-fA-F]{24}$/.test(orderId)) {
+      query.push({ _id: orderId });
+    }
+
+    await Order.deleteMany({ $or: query });
+
+    try {
+      const rawOrders = readData(ORDERS_FILE, []);
+      const filtered = rawOrders.filter((o) => o.id !== orderId && o.orderNumber !== orderId && (!o._id || o._id.toString() !== orderId));
+      writeData(ORDERS_FILE, filtered);
+    } catch (e) {}
+
+    res.json({ success: true, message: "Order deleted successfully" });
+  } catch (error) {
+    console.error("Delete order error:", error);
+    res.status(500).json({ error: "Failed to delete order", success: false });
   }
 });
 
