@@ -554,7 +554,7 @@ const ProductsPage: React.FC = () => {
               </motion.div>
             </AnimatePresence>
 
-            {/* Left Carousel Arrow - Luxury Frosted Button */}
+            {/* Left Carousel Arrow - Transparent Glass Button */}
             <button
               type="button"
               onClick={(e) => {
@@ -562,12 +562,12 @@ const ProductsPage: React.FC = () => {
                 prevSlide();
               }}
               aria-label="Previous Slide"
-              className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white/90 hover:bg-white text-[#181513] hover:text-black backdrop-blur-md border border-[#E8E2D8] shadow-md flex items-center justify-center transition-all opacity-85 sm:opacity-0 group-hover:opacity-100 hover:scale-105 active:scale-95 z-20 cursor-pointer"
+              className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-black/25 hover:bg-black/50 text-white backdrop-blur-md border border-white/35 hover:border-white shadow-md flex items-center justify-center transition-all opacity-85 sm:opacity-0 group-hover:opacity-100 hover:scale-105 active:scale-95 z-20 cursor-pointer"
             >
               <ChevronLeft size={20} />
             </button>
 
-            {/* Right Carousel Arrow - Luxury Frosted Button */}
+            {/* Right Carousel Arrow - Transparent Glass Button */}
             <button
               type="button"
               onClick={(e) => {
@@ -575,7 +575,7 @@ const ProductsPage: React.FC = () => {
                 nextSlide();
               }}
               aria-label="Next Slide"
-              className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white/90 hover:bg-white text-[#181513] hover:text-black backdrop-blur-md border border-[#E8E2D8] shadow-md flex items-center justify-center transition-all opacity-85 sm:opacity-0 group-hover:opacity-100 hover:scale-105 active:scale-95 z-20 cursor-pointer"
+              className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-black/25 hover:bg-black/50 text-white backdrop-blur-md border border-white/35 hover:border-white shadow-md flex items-center justify-center transition-all opacity-85 sm:opacity-0 group-hover:opacity-100 hover:scale-105 active:scale-95 z-20 cursor-pointer"
             >
               <ChevronRight size={20} />
             </button>
