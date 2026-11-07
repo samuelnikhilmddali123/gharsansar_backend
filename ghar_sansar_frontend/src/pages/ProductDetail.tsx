@@ -46,6 +46,7 @@ import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/WishlistContext";
 import { useAuth } from "../context/AuthContext";
 import { useOrders } from "../context/OrderContext";
+import { generateOrderId, generateSingleProductWhatsAppMessage, openWhatsAppOrderUrl } from "../utils/whatsappOrder";
 import ProductCard from "../components/ProductCard";
 import StudioImage from "../components/StudioImage";
 import toast from "react-hot-toast";
@@ -466,6 +467,33 @@ const ProductDetail: React.FC = () => {
     } else {
       navigate('/checkout');
     }
+  };
+
+  const handleWhatsAppOrderProduct = () => {
+    if (!product) return;
+    const orderId = generateOrderId();
+    const customerInfo = {
+      name: user?.full_name || '',
+      mobile: user?.phone || '',
+      email: user?.email || '',
+      address: user?.addresses?.[0]?.address || ''
+    };
+    const msg = generateSingleProductWhatsAppMessage(orderId, customerInfo, {
+      product: {
+        id: product.id,
+        title: product.title || product.name,
+        name: product.name || product.title,
+        price: product.price,
+        image: product.image,
+        category: product.category,
+        subCategory: product.subCategory
+      },
+      quantity: quantity,
+      unitPrice: product.price,
+      selectedSize: selectedSize,
+      selectedColor: selectedColor
+    });
+    openWhatsAppOrderUrl(msg);
   };
 
   // Related products under the same category (or fallback bottles)
@@ -1039,20 +1067,19 @@ const ProductDetail: React.FC = () => {
                   </button>
                 </div>
 
-                {/* Row 2: WhatsApp Inquiry & Call Support */}
+                {/* Row 2: WhatsApp Order & Call Support */}
                 <div className="grid grid-cols-2 gap-3">
-                  <a
-                    href={`https://wa.me/918121135980?text=Hello, I would like to inquire about: ${product.title || product.name}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 py-2.5 px-4 bg-[#EDF8F1] hover:bg-[#E1F3E7] text-[#1E7E34] border border-[#D1EEDB] rounded-none font-bold uppercase tracking-wider text-[11px] transition"
+                  <button
+                    type="button"
+                    onClick={handleWhatsAppOrderProduct}
+                    className="flex items-center justify-center gap-2 py-2.5 px-4 bg-[#EDF8F1] hover:bg-[#E1F3E7] text-[#1E7E34] border border-[#D1EEDB] rounded-none font-bold uppercase tracking-wider text-[11px] transition cursor-pointer"
                   >
                     <MessageCircle size={15} />
-                    <span>WhatsApp Inquiry</span>
-                  </a>
+                    <span>Order via WhatsApp</span>
+                  </button>
 
                   <a
-                    href="tel:+918121135980"
+                    href="tel:+919492664870"
                     className="flex items-center justify-center gap-2 py-2.5 px-4 bg-[#F9F7F2] hover:bg-[#F2EEE4] text-[#4A4036] border border-[#EBE6DC] rounded-none font-bold uppercase tracking-wider text-[11px] transition"
                   >
                     <Phone size={15} />

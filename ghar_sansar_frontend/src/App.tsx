@@ -196,6 +196,7 @@ const AppLayout = () => {
         </Routes>
       </main>
       {!isLoginPage && <Footer />}
+      {!isLoginPage && <ChatBot />}
     </div>
   );
 };

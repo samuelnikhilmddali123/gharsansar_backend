@@ -2,7 +2,7 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
-import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, Home, ShieldCheck, Truck } from "lucide-react";
+import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, Home, ShieldCheck, Truck, MessageCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 
@@ -56,6 +56,16 @@ const Cart: React.FC = () => {
     e.preventDefault();
     if (!isAuthenticated) {
       toast.error("Please sign in to proceed to checkout!");
+      navigate("/login", { state: { from: { pathname: "/checkout" } } });
+    } else {
+      navigate("/checkout");
+    }
+  };
+
+  const handleWhatsAppOrderCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!isAuthenticated) {
+      toast.error("Please sign in to proceed to checkout and place your order on WhatsApp!");
       navigate("/login", { state: { from: { pathname: "/checkout" } } });
     } else {
       navigate("/checkout");
@@ -285,6 +295,15 @@ const Cart: React.FC = () => {
                 >
                   <span>Proceed to Checkout</span>
                   <ArrowRight size={14} />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleWhatsAppOrderCart}
+                  className="w-full py-3 px-4 bg-[#25D366] hover:bg-[#1ebc59] text-white font-medium text-xs sm:text-sm tracking-wide rounded-md shadow-2xs transition-all active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <MessageCircle size={15} className="fill-current" />
+                  <span>Order via WhatsApp</span>
                 </button>
 
                 <Link

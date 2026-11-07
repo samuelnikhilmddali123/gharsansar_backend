@@ -242,13 +242,14 @@ For details, feel free to reach out to us anytime!
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => setIsOpen(true)}
-        className={`fixed right-6 z-50 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors flex items-center justify-center ${
+        className={`fixed right-6 z-50 w-14 h-14 bg-[#25D366] hover:bg-[#20ba5a] text-white rounded-full shadow-xl transition-all flex items-center justify-center ${
           isProductDetailPage ? "bottom-24" : "bottom-6"
         } ${
           isOpen ? "hidden" : "flex"
         }`}
+        title="Chat with Ghar Sansar Support or Enquire on WhatsApp"
       >
-        <MessageCircle className="w-6 h-6" />
+        <MessageCircle className="w-7 h-7 fill-current" />
       </motion.button>
 
       {/* Chat Window */}
@@ -266,22 +267,34 @@ For details, feel free to reach out to us anytime!
             "
           >
             {/* Header */}
-            <div className="bg-blue-600 text-white p-4 rounded-t-lg flex items-center justify-between">
+            <div className="bg-[#0F2920] text-white p-4 rounded-t-lg flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                <div className="w-8 h-8 bg-[#183E31] rounded-full flex items-center justify-center">
                   <Bot className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-semibold">Ghar Sansar Assistant</h3>
-                  <p className="text-xs text-blue-100">Online now</p>
+                  <h3 className="font-semibold text-sm">Ghar Sansar Assistant</h3>
+                  <p className="text-xs text-gray-300">Live Support & Enquiry</p>
                 </div>
               </div>
-              <button
-                onClick={() => setIsOpen(false)}
-                className="text-white hover:text-gray-200 transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
+              <div className="flex items-center space-x-2">
+                <a
+                  href="https://wa.me/919492664870?text=Hello%20Ghar%20Sansar!%20I%20have%20an%20enquiry."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-[#25D366] hover:bg-[#1ebc59] text-white px-2.5 py-1 rounded-full text-xs font-semibold flex items-center gap-1 shadow-sm transition"
+                  title="Chat directly on WhatsApp"
+                >
+                  <MessageCircle className="w-3.5 h-3.5 fill-current" />
+                  <span>WhatsApp</span>
+                </a>
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="text-white hover:text-gray-200 transition-colors p-1"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
             </div>
 
             {/* Messages */}

@@ -22,7 +22,7 @@ import {
 
   ShieldCheck,
   Phone,
-
+  MessageCircle,
   CheckCircle2,
 
 
@@ -482,8 +482,9 @@ const Home: React.FC = () => {
 
     }
 
-    toast.success("Thank you! Our design expert will contact you shortly.");
-
+    toast.success("Thank you! Connecting you to WhatsApp...");
+    const waText = `Hello Ghar Sansar, I would like to book a free interior consultation.%0A*Name:* ${encodeURIComponent(consultForm.name)}%0A*Phone:* ${encodeURIComponent(consultForm.phone)}%0A*City:* ${encodeURIComponent(consultForm.city)}%0A*Service:* ${encodeURIComponent(consultForm.service)}`;
+    window.open(`https://wa.me/919492664870?text=${waText}`, "_blank");
     setConsultModalOpen(false);
 
     setConsultForm({
@@ -1185,6 +1186,16 @@ const Home: React.FC = () => {
                   <span>Book Free Consultation</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
+
+                <a
+                  href="https://wa.me/919492664870?text=Hello%20Ghar%20Sansar!%20I%20would%20like%20to%20consult%20about%20interior%20services."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-xs text-white transition-colors bg-[#25D366] hover:bg-[#20ba5a] px-4 py-2.5 rounded-full border border-[#25D366] shadow-sm font-medium cursor-pointer"
+                >
+                  <MessageCircle className="w-3.5 h-3.5 fill-current" />
+                  <span>WhatsApp Consultation</span>
+                </a>
 
                 <a
                   href="tel:+919701990090"
