@@ -2058,7 +2058,7 @@ app.delete("/api/storage/uploads/products", (req, res) => {
 });
 
 // Admin & Public: Fetch Interior Works
-app.get("/api/storage/upload/interior", (req, res) => {
+app.get(["/api/storage/upload/interior", "/storage/upload/interior"], (req, res) => {
   try {
     const categoriesPath = path.join(__dirname, "public", "categories.json");
     let rawData = readJsonFile(categoriesPath, []);
@@ -2400,9 +2400,16 @@ const blogStorage = multer.diskStorage({
 const blogUpload = multer({ storage: blogStorage });
 
 // Get all blogs
-app.get("/api/storage/upload/blog", (req, res) => {
+app.get(["/api/storage/upload/blog", "/storage/upload/blog", "/api/blogs", "/blogs"], (req, res) => {
   try {
-    const blogs = readJsonFile(BLOGS_FILE, []);
+    let blogs = readJsonFile(BLOGS_FILE, []);
+    if (!Array.isArray(blogs) || blogs.length === 0) {
+      if (fs.existsSync(BLOGS_FILE)) {
+        try {
+          blogs = JSON.parse(fs.readFileSync(BLOGS_FILE, "utf-8"));
+        } catch (e) {}
+      }
+    }
     res.json({ success: true, data: blogs });
   } catch (error) {
     console.error("Fetch blogs error:", error);
