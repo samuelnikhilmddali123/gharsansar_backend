@@ -495,7 +495,17 @@ Looking forward to your response!`;
           >
             {/* Banner Background Image */}
             <img
-              src="/images/interior banner.png"
+              src="/images/interior_hero_banner_hd.png"
+              onError={(e) => {
+                const target = e.currentTarget;
+                if (!target.dataset.tried) {
+                  target.dataset.tried = "1";
+                  target.src = "/images/interior_hero_banner.jpg";
+                } else if (target.dataset.tried === "1") {
+                  target.dataset.tried = "2";
+                  target.src = "/images/interior%20banner.png";
+                }
+              }}
               alt="Interior Design - Transform Your Space Into A Beautiful Home"
               className="w-full h-full object-cover object-center block cursor-pointer"
               onClick={scrollToCollection}
