@@ -196,298 +196,221 @@
     "stock": 50
   },
   {
-    "cat_id": "cat_cello",
     "name": "Cello",
     "subcategories": [
       {
-        "sub_id": "sub_cello_dinnerware",
         "name": "Dinnerware & Crockery Sets",
         "images": [
           {
-            "id": "cello_0_0_1793771060018",
-            "prod_id": "cello_0_0_1793771060018",
-            "name": "Blue Floral Ceramic Dinnerware Set",
-            "title": "Blue Floral Ceramic Dinnerware Set",
-            "image": "/products/cello/Blue Floral Ceramic Dinnerware Set.webp",
-            "description": "Elegant Cello blue floral ceramic dinnerware set crafted with thermal-resistant opalware for daily and festive dining.",
-            "price": 2499,
-            "act-price": 3199,
-            "stock": 50
+            "name": "Cello 12 Pcs Soup Set",
+            "image": "/products/cello_prod/cello_12_pcs_soup_set.webp",
+            "description": "Elegant 12-piece Cello soup set — perfect for family dining. Includes 6 soup bowls with saucers. Made from high-quality porcelain with a glossy, food-safe finish. Microwave and dishwasher safe.",
+            "price": 749,
+            "act-price": 961
           },
           {
-            "id": "cello_0_1_1793771060018",
-            "prod_id": "cello_0_1_1793771060018",
-            "name": "Blue Floral Scalloped Dinnerware Set",
-            "title": "Blue Floral Scalloped Dinnerware Set",
-            "image": "/products/cello/Blue Floral Scalloped Dinnerware Set.webp",
-            "description": "Premium scalloped rim dinnerware set featuring classic blue botanical motifs, microwave and dishwasher safe.",
-            "price": 2699,
-            "act-price": 3399,
-            "stock": 50
+            "name": "Cello 6Pcs Dinner Plate",
+            "image": "/products/cello_prod/cello_6pcs_dinner_plate.webp",
+            "description": "Premium Cello 6-piece dinner plate set crafted from durable opalware glass. Scratch-resistant, chip-resistant and features an elegant solid finish. Perfect for everyday use and special occasions.",
+            "price": 1050,
+            "act-price": 1550
           },
           {
-            "id": "cello_0_2_1793771060018",
-            "prod_id": "cello_0_2_1793771060018",
-            "name": "Complete Blue Floral Cello Dinnerware Set",
-            "title": "Complete Blue Floral Cello Dinnerware Set",
-            "image": "/products/cello/Complete Blue Floral Cello Dinnerware Set.webp",
-            "description": "Comprehensive family dinner set including dinner plates, quarter plates, veg bowls, and serving platters.",
-            "price": 3499,
-            "act-price": 4299,
-            "stock": 50
+            "name": "Cello Breakfast Set 4 Pcs",
+            "image": "/products/cello_prod/cello_breakfast_set_4_pcs.webp",
+            "description": "Start your mornings in style with the Cello 4-piece breakfast set. Includes plates, bowl and mug. BPA-free, microwave safe, and easy to clean. Ideal for individuals and compact families.",
+            "price": 499,
+            "act-price": 888
           },
           {
-            "id": "cello_0_3_1793771060018",
-            "prod_id": "cello_0_3_1793771060018",
-            "name": "Elegant Floral Dinnerware Collection",
-            "title": "Elegant Floral Dinnerware Collection",
-            "image": "/products/cello/Elegant Floral Dinnerware Collection.webp",
-            "description": "Luxury artisanal floral dinnerware collection with lustrous scratch-resistant glaze and gold-accented styling.",
-            "price": 3999,
-            "act-price": 4899,
-            "stock": 50
+            "name": "Cello Dazzle Fruit 9 Pcs Set",
+            "image": "/products/cello_prod/cello_dazzle_fruit_9_pcs_set.webp",
+            "description": "Vibrant 9-piece Cello Dazzle fruit serving set with eye-catching design. Includes large and small serving bowls in assorted colours. Lightweight, shatter-resistant, and BPA-free.",
+            "price": 759,
+            "act-price": 1107
           },
           {
-            "id": "cello_0_4_1793771060018",
-            "prod_id": "cello_0_4_1793771060018",
-            "name": "Floral Blue Vine Ceramic Tableware",
-            "title": "Floral Blue Vine Ceramic Tableware",
-            "image": "/products/cello/Floral Blue Vine Ceramic Tableware.webp",
-            "description": "Graceful blue vine pattern dinnerware designed to elevate your tablescape for celebrations and family feasts.",
-            "price": 2899,
-            "act-price": 3599,
-            "stock": 50
+            "name": "Cello Dazzle Pudding Set 7 Pcs",
+            "image": "/products/cello_prod/cello_dazzle_pudding_set_7_pcs.webp",
+            "description": "Stunning 7-piece Cello Dazzle pudding set for a premium dessert presentation. Includes individual pudding cups with a large serving bowl. Microwave safe and dishwasher friendly.",
+            "price": 595,
+            "act-price": 862
           },
           {
-            "id": "cello_0_5_1793771060018",
-            "prod_id": "cello_0_5_1793771060018",
-            "name": "Floral Vine Porcelain Dinnerware Set",
-            "title": "Floral Vine Porcelain Dinnerware Set",
-            "image": "/products/cello/Floral Vine Porcelain Dinnerware Set.webp",
-            "description": "High-fired porcelain dinnerware with intricate floral vines, chip-resistant edges, and brilliant white gloss.",
-            "price": 3299,
-            "act-price": 4099,
-            "stock": 50
+            "name": "Cello Designer Crockery Set 10Pcs Set",
+            "image": "/products/cello_prod/cello_designer_crockery_set_10pcs_set.webp",
+            "description": "Elegant 10-piece Cello designer crockery set featuring premium opalware. Comes with dinner plates, side plates, and bowls. Graceful floral patterns make every meal feel special.",
+            "price": 1549,
+            "title": "Cello Designer Crockery Set 10Pcs Set",
+            "act-price": 2049
           },
           {
-            "id": "cello_0_6_1793771060018",
-            "prod_id": "cello_0_6_1793771060018",
-            "name": "Glossy White Serving Set with Floral Bowls",
-            "title": "Glossy White Serving Set with Floral Bowls",
-            "image": "/products/cello/Glossy White Serving Set with Floral Bowls.webp",
-            "description": "Versatile serving ensemble with deep floral bowls and matching serving platters for curries and rice.",
-            "price": 1899,
-            "act-price": 2399,
-            "stock": 50
+            "name": "Cello Designer Crockery Set 31Pcs Set",
+            "image": "/products/cello_prod/cello_designer_crockery_set_31pcs_set.webp",
+            "description": "Comprehensive 31-piece Cello designer crockery set for full table settings. Includes dinner plates, side plates, bowls, cups, and saucers. Premium opalware with an elegant embossed design.",
+            "price": 2750,
+            "title": "Cello Designer Crockery Set 31Pcs Set",
+            "act-price": 3250
           },
           {
-            "id": "cello_0_7_1793771060018",
-            "prod_id": "cello_0_7_1793771060018",
-            "name": "Scalloped Botanical Ceramic Plate Set",
-            "title": "Scalloped Botanical Ceramic Plate Set",
-            "image": "/products/cello/Scalloped Botanical Ceramic Plate Set.webp",
-            "description": "Set of dinner and side plates featuring scalloped silhouettes and delicate botanical leaf illustrations.",
-            "price": 1599,
-            "act-price": 1999,
-            "stock": 50
+            "name": "Cello Designer Crockery Set 65Pcs Set",
+            "image": "/products/cello_prod/cello_designer_crockery_set_65pcs_set.webp",
+            "description": "Royal 65-piece Cello designer crockery set — everything you need for entertaining large gatherings. Complete table service for 8 with dinner plates, dessert plates, bowls, cups and saucers.",
+            "price": 4999,
+            "title": "Cello Designer Crockery Set 65Pcs Set",
+            "act-price": 5499
+          },
+          {
+            "name": "Cello Designer Crockery Set 6Pcs",
+            "image": "/products/cello_prod/cello_designer_crockery_set_6pcs.webp",
+            "description": "Stylish 6-piece Cello opalware dinner plate set with a refined designer pattern. Microwave and dishwasher safe. Perfect as a starter set or a thoughtful housewarming gift.",
+            "price": 949,
+            "title": "Cello Designer Crockery Set 6Pcs",
+            "act-price": 1154
+          },
+          {
+            "name": "Cello Designer Crockery Set 78Pcs Set",
+            "image": "/products/cello_prod/cello_designer_crockery_set_78pcs_set.avif",
+            "description": "Grand 78-piece Cello designer crockery set — the ultimate in-home dining experience. Complete banquet-style service featuring plates, bowls, mugs, cups, and saucers with a matching designer motif.",
+            "price": 6999,
+            "title": "Cello Designer Crockery Set 78Pcs Set",
+            "act-price": 8536
+          },
+          {
+            "name": "Cello Imperial Dessert Set 7 Pcs",
+            "image": "/products/cello_prod/cello_imperial_dessert_set_7_pcs.webp",
+            "description": "Refined 7-piece Cello Imperial dessert set with gold-trim accents. Includes 6 dessert bowls and one large serving bowl. Perfect for puddings, ice cream, and sweet delicacies.",
+            "price": 699,
+            "title": "Cello Imperial Dessert Set 7 Pcs",
+            "act-price": 979
+          },
+          {
+            "name": "Cello Imperial Quick Bite Set 8 Pcs",
+            "image": "/products/cello_prod/cello_imperial_quick_bite_set_8_pcs.avif",
+            "description": "Functional 8-piece Cello Imperial quick-bite set for snacks, starters, and side dishes. Compact size, easy to stack. Great for parties, school tiffins, and quick meal serving.",
+            "price": 749,
+            "title": "Cello Imperial Quick Bite Set 8 Pcs",
+            "act-price": 1067
+          },
+          {
+            "name": "Cello Multi Purpose Bowl Set 2 Pcs",
+            "image": "/products/cello_prod/cello_multi_purpose_bowl_set_2_pcs.webp",
+            "description": "Adaptable 2-piece Cello multi-purpose bowl set suitable for soups, cereals, fruits, and desserts. Deep design with comfortable grip. Non-toxic, food-grade material. Microwave and dishwasher safe.",
+            "price": 249,
+            "title": "Cello Multi Purpose Bowl Set 2 Pcs",
+            "act-price": 482
+          },
+          {
+            "name": "Cello Veg Bowl Set 6Pcs",
+            "image": "/products/cello_prod/cello_veg_bowl_set_6pcs.webp",
+            "description": "Premium 6-piece Cello vegetable serving bowl set. Perfect for side dishes, salads, and curries. Matching design for a unified table look. Microwave safe, dishwasher friendly, and BPA-free.",
+            "price": 485,
+            "title": "Cello Veg Bowl Set 6Pcs",
+            "act-price": 749
           }
         ]
       },
       {
-        "sub_id": "sub_cello_drinkware",
         "name": "Tea & Drinkware",
         "images": [
           {
-            "id": "cello_1_0_1793771060018",
-            "prod_id": "cello_1_0_1793771060018",
-            "name": "Blue Floral Tea Set Display",
-            "title": "Blue Floral Tea Set Display",
-            "image": "/products/cello/Blue Floral Tea Set Display.webp",
-            "description": "Classic tea and saucer set with teapot and creamer featuring ornate blue floral artistry.",
-            "price": 1299,
-            "act-price": 1699,
-            "stock": 50
+            "name": "Cello Cup & Saucer Regular 12 Pcs",
+            "image": "/products/cello_prod/cello_cup_saucer_regular_12_pcs.webp",
+            "description": "Complete 12-piece Cello cup and saucer set for formal and casual tea service. Crafted from durable opalware with a smooth pearlescent finish. Microwave and dishwasher safe.",
+            "price": 1199,
+            "act-price": 1699
           },
           {
-            "id": "cello_1_1_1793771060018",
-            "prod_id": "cello_1_1_1793771060018",
-            "name": "Cello Opalware Tulip Mug Set",
-            "title": "Cello Opalware Tulip Mug Set",
-            "image": "/products/cello/Cello Opalware Tulip Mug Set.webp",
-            "description": "Comfort-grip tulip coffee and tea mugs made with ultra-light, break-resistant Cello opalware.",
-            "price": 599,
-            "act-price": 799,
-            "stock": 50
+            "name": "Cello Dazzle Tea Set 15Pcs",
+            "image": "/products/cello_prod/cello_dazzle_tea_set_15pcs.webp",
+            "description": "Luxurious 15-piece Cello Dazzle tea set for hosting guests in style. Includes teacups, saucers, a teapot, and a sugar bowl. Dazzling floral design on a pure-white opalware base.",
+            "price": 1599,
+            "act-price": 2099
           },
           {
-            "id": "cello_1_2_1793771060018",
-            "prod_id": "cello_1_2_1793771060018",
-            "name": "Floral Rose Porcelain Tea Set",
-            "title": "Floral Rose Porcelain Tea Set",
-            "image": "/products/cello/Floral Rose Porcelain Tea Set.webp",
-            "description": "Charming Victorian rose porcelain tea service, perfect for high tea gatherings and housewarming gifts.",
-            "price": 1499,
-            "act-price": 1899,
-            "stock": 50
+            "name": "Cello Large Mug Set 2Pcs",
+            "image": "/products/cello_prod/cello_large_mug_set_2pcs.avif",
+            "description": "Enjoy your morning beverages in the Cello large mug set. Set of 2 generously-sized mugs crafted from durable opalware. Suitable for tea, coffee, and hot chocolate. Dishwasher safe.",
+            "price": 449,
+            "act-price": 829
           },
           {
-            "id": "cello_1_3_1793771060018",
-            "prod_id": "cello_1_3_1793771060018",
-            "name": "Minimal White Mugs with Teal Swooshes",
-            "title": "Minimal White Mugs with Teal Swooshes",
-            "image": "/products/cello/Minimal White Mugs with Teal Swooshes.webp",
-            "description": "Modern minimalist ceramic mug duo with dynamic teal swooshes, ideal for everyday coffee and tea.",
-            "price": 499,
-            "act-price": 699,
-            "stock": 50
+            "name": "Cello Recca Mug 4 Pcs",
+            "image": "/products/cello_prod/cello_recca_mug_4_pcs.avif",
+            "description": "Sophisticated 4-piece Cello Recca mug set with a sleek contemporary design. Generous capacity for a satisfying hot or cold beverage. Durable opalware construction. Microwave and dishwasher safe.",
+            "price": 799,
+            "act-price": 1134
           },
           {
-            "id": "cello_1_4_1793771060018",
-            "prod_id": "cello_1_4_1793771060018",
-            "name": "White Mugs with Blue Floral Vines",
-            "title": "White Mugs with Blue Floral Vines",
-            "image": "/products/cello/White Mugs with Blue Floral Vines.webp",
-            "description": "Set of elegant white mugs wrapped in gentle blue vine patterns with ergonomic handles.",
-            "price": 549,
-            "act-price": 749,
-            "stock": 50
+            "name": "Cello Ricca Sisley Vogue Mug 6Pcs",
+            "image": "/products/cello_prod/cello_ricca_sisley_vogue_mug_6pcs.webp",
+            "description": "Fashionable 6-piece Cello Ricca Sisley Vogue mug collection — each mug features a distinct trendy pattern. Perfect for gifting or to elevate your kitchen shelf. Microwave and dishwasher safe.",
+            "price": 1099,
+            "act-price": 1599
+          },
+          {
+            "name": "Cello Stella Mug Regular 2 Pcs Set",
+            "image": "/products/cello_prod/cello_stella_mug_regular_2_pcs_set.webp",
+            "description": "Timeless 2-piece Cello Stella mug set in a clean, white opalware finish. Ideal for everyday use. Sturdy handle, smooth rim, and optimal capacity for tea or coffee. Dishwasher safe.",
+            "price": 449,
+            "act-price": 885
           }
         ]
       },
       {
-        "sub_id": "sub_cello_storage",
         "name": "Food Storage & Containers",
         "images": [
           {
-            "id": "cello_2_0_1793771060019",
-            "prod_id": "cello_2_0_1793771060019",
-            "name": "Clear Aqua-Lidded Bowl of Strawberries",
-            "title": "Clear Aqua-Lidded Bowl of Strawberries",
-            "image": "/products/cello/Clear Aqua-Lidded Bowl of Strawberries.webp",
-            "description": "Crystal-clear food storage container with airtight aqua clip-lock lid for refrigerator freshness.",
-            "price": 499,
-            "act-price": 699,
-            "stock": 50
+            "name": "Cello Creeper Storage Container 130M 2Pieces Set",
+            "image": "/products/cello_prod/cello_creeper_storage_container_130m_2pieces_set_.webp",
+            "description": "Compact Cello Creeper airtight storage containers with 130ml capacity each. Set of 2. Transparent body lets you see contents at a glance. Ideal for spices, seeds, and small food items. Leak-proof lids.",
+            "price": 349,
+            "act-price": 789
           },
           {
-            "id": "cello_2_1_1793771060019",
-            "prod_id": "cello_2_1_1793771060019",
-            "name": "Floral Ceramic Food Storage Bowls",
-            "title": "Floral Ceramic Food Storage Bowls",
-            "image": "/products/cello/Floral Ceramic Food Storage Bowls.webp",
-            "description": "Set of ceramic storage bowls with airtight silicone-sealed lids, oven-safe and leakproof.",
-            "price": 799,
-            "act-price": 1099,
-            "stock": 50
+            "name": "Cello Imperial Storage Set With Lid 6Pcs",
+            "image": "/products/cello_prod/cello_imperial_storage_set_with_lid_6pcs.webp",
+            "description": "Practical 6-piece Cello Imperial airtight storage container set with secure lids. Keeps food fresh for longer. Stackable design saves kitchen space. Microwave safe and BPA-free.",
+            "price": 999,
+            "act-price": 1391
           },
           {
-            "id": "cello_2_2_1793771060019",
-            "prod_id": "cello_2_2_1793771060019",
-            "name": "Floral Storage Bowls with Golden Crackers",
-            "title": "Floral Storage Bowls with Golden Crackers",
-            "image": "/products/cello/Floral Storage Bowls with Golden Crackers.webp",
-            "description": "Decorative multi-size ceramic canister bowl set with snug-fit lids for snacks, dry fruits, and leftovers.",
-            "price": 849,
-            "act-price": 1149,
-            "stock": 50
-          },
-          {
-            "id": "cello_2_3_1793771060019",
-            "prod_id": "cello_2_3_1793771060019",
-            "name": "White Floral Airtight Storage Container",
-            "title": "White Floral Airtight Storage Container",
-            "image": "/products/cello/White Floral Airtight Storage Container.webp",
-            "description": "Airtight storage canister designed with subtle white floral prints to keep food fresh and crispy.",
+            "name": "Cello Istorage Container Small 4Pcs",
+            "image": "/products/cello_prod/cello_istorage_container_small_4pcs.webp",
+            "description": "Space-saving 4-piece Cello iStorage small container set. Transparent body for easy identification. Air-tight lids prevent moisture and pests. Perfect for pulses, spices and grains.",
             "price": 649,
-            "act-price": 899,
-            "stock": 50
+            "act-price": 1108
           }
         ]
       },
       {
-        "sub_id": "sub_cello_bowls",
         "name": "Mixing & Prep Bowls",
         "images": [
           {
-            "id": "cello_3_0_1793771060019",
-            "prod_id": "cello_3_0_1793771060019",
-            "name": "Cello Floral Opalware Bowl Set",
-            "title": "Cello Floral Opalware Bowl Set",
-            "image": "/products/cello/Cello Floral Opalware Bowl Set.webp",
-            "description": "Set of deep multipurpose bowls with floral accents, suitable for serving curries, snacks, and salads.",
+            "name": "Cello Mixing Bowl Large With Premium Lid",
+            "image": "/products/cello_prod/cello_mixing_bowl_large_with_premium_lid.webp",
+            "description": "Heavy-duty Cello large mixing bowl with a premium snap-fit lid. Ideal for baking, marinating, and food prep. Shatterproof and scratch-resistant. Wide base for stable mixing.",
             "price": 699,
-            "act-price": 949,
-            "stock": 50
+            "act-price": 1012
           },
           {
-            "id": "cello_3_1_1793771060019",
-            "prod_id": "cello_3_1_1793771060019",
-            "name": "Chello Opalware Blue Floral Mixing Bowls",
-            "title": "Chello Opalware Blue Floral Mixing Bowls",
-            "image": "/products/cello/Chello Opalware Blue Floral Mixing Bowls.webp",
-            "description": "Nesting mixing bowl set engineered for kitchen prep, dough kneading, and serving with floral beauty.",
-            "price": 899,
-            "act-price": 1199,
-            "stock": 50
-          },
-          {
-            "id": "cello_3_2_1793771060019",
-            "prod_id": "cello_3_2_1793771060019",
-            "name": "Elegant Blue Floral Scalloped Bowl Set",
-            "title": "Elegant Blue Floral Scalloped Bowl Set",
-            "image": "/products/cello/Elegant Blue Floral Scalloped Bowl Set.webp",
-            "description": "Scalloped edge ceramic bowls with floral highlights, ideal for desserts, soups, and side dishes.",
-            "price": 749,
-            "act-price": 999,
-            "stock": 50
-          },
-          {
-            "id": "cello_3_3_1793771060019",
-            "prod_id": "cello_3_3_1793771060019",
-            "name": "Floral Scalloped Ceramic Bowl Set",
-            "title": "Floral Scalloped Ceramic Bowl Set",
-            "image": "/products/cello/Floral Scalloped Ceramic Bowl Set.webp",
-            "description": "Artistic scalloped ceramic bowls with botanical garden illustrations and high-gloss glaze.",
-            "price": 799,
-            "act-price": 1049,
-            "stock": 50
-          },
-          {
-            "id": "cello_3_4_1793771060019",
-            "prod_id": "cello_3_4_1793771060019",
-            "name": "Opalware Mixing Bowl Set Display",
-            "title": "Opalware Mixing Bowl Set Display",
-            "image": "/products/cello/Opalware Mixing Bowl Set Display.webp",
-            "description": "Premium heavyweight mixing bowl assortment built to handle whisking, marinating, and table service.",
-            "price": 999,
-            "act-price": 1299,
-            "stock": 50
-          },
-          {
-            "id": "cello_3_5_1793771060019",
-            "prod_id": "cello_3_5_1793771060019",
-            "name": "Scalloped Tulip Bowl and Spoon Set",
-            "title": "Scalloped Tulip Bowl and Spoon Set",
-            "image": "/products/cello/Scalloped Tulip Bowl and Spoon Set.webp",
-            "description": "Delicate tulip-inspired bowl pair with matching ceramic spoons, great for ice creams and puddings.",
-            "price": 649,
-            "act-price": 899,
-            "stock": 50
-          },
-          {
-            "id": "cello_3_6_1793771060019",
-            "prod_id": "cello_3_6_1793771060019",
-            "name": "Twin Blue Floral Ceramic Bowls",
-            "title": "Twin Blue Floral Ceramic Bowls",
-            "image": "/products/cello/Twin Blue Floral Ceramic Bowls.webp",
-            "description": "Pair of everyday ceramic bowls featuring clean blue flora, compact and stackable.",
+            "name": "Cello Mixing Bowl Medium 2Pieces",
+            "image": "/products/cello_prod/cello_mixing_bowl_medium_2pieces.webp",
+            "description": "Versatile 2-piece Cello medium mixing bowl set for everyday kitchen tasks. Lightweight yet durable. Suitable for salads, dough preparation, and marinating. Microwave safe.",
             "price": 549,
-            "act-price": 749,
-            "stock": 50
+            "act-price": 803
+          },
+          {
+            "name": "Cello Mixing Bowl Small 2Pc Set",
+            "image": "/products/cello_prod/cello_mixing_bowl_small_2pc_set.webp",
+            "description": "Compact 2-piece Cello small mixing bowl set for sauces, dips, and portion servings. Stackable design for easy storage. BPA-free, microwave safe, and easy to clean.",
+            "price": 449,
+            "act-price": 689
           }
         ]
       }
-    ]
+    ],
+    "stock": 50
   },
   {
     "name": "Aquarium & Accessories",
@@ -3142,127 +3065,6 @@
             "description": "Beautiful tabletop Tree and Three Pots Polyresin Decorative Table Top Water Fountain. Built from premium quality polyresin and features gentle water flows with integrated LED lighting to create a soothing, calm vibe in any space.",
             "price": 2850,
             "act-price": 3350
-          },
-          {
-            "id": "fountain_medium_1793771060016_0",
-            "prod_id": "fountain_medium_1793771060016_0",
-            "name": "Black and Gold Buddha Grotto Fountain",
-            "title": "Black and Gold Buddha Grotto Fountain",
-            "image": "/products/water_fountains_medium/Black and Gold Buddha Grotto Fountain.webp",
-            "description": "Exquisite Black and Gold Buddha Grotto Fountain with tranquil cascading water flow. Crafted from premium polyresin with warm accent lighting for a serene ambiance.",
-            "price": 2950,
-            "act-price": 3450,
-            "stock": 50
-          },
-          {
-            "id": "fountain_medium_1793771060017_1",
-            "prod_id": "fountain_medium_1793771060017_1",
-            "name": "Cascading Ivory Bowl Stone Fountain",
-            "title": "Cascading Ivory Bowl Stone Fountain",
-            "image": "/products/water_fountains_medium/Cascading Ivory Bowl Stone Fountain.webp",
-            "description": "Contemporary multi-tier cascading ivory bowl stone fountain. Designed with soothing ambient water flow, ideal for home living rooms and office entrances.",
-            "price": 2850,
-            "act-price": 3350,
-            "stock": 50
-          },
-          {
-            "id": "fountain_medium_1793771060017_2",
-            "prod_id": "fountain_medium_1793771060017_2",
-            "name": "Copper Shiva Lingam Fountain Altar",
-            "title": "Copper Shiva Lingam Fountain Altar",
-            "image": "/products/water_fountains_medium/Copper Shiva Lingam Fountain Altar.webp",
-            "description": "Divine Copper Shiva Lingam Fountain Altar featuring gentle waterfall abhishek effect. Perfect for pooja rooms, sacred meditation spaces, and auspicious gifting.",
-            "price": 3200,
-            "act-price": 3800,
-            "stock": 50
-          },
-          {
-            "id": "fountain_medium_1793771060017_3",
-            "prod_id": "fountain_medium_1793771060017_3",
-            "name": "Ganesha Cascading Lotus Bowl Fountain",
-            "title": "Ganesha Cascading Lotus Bowl Fountain",
-            "image": "/products/water_fountains_medium/Ganesha Cascading Lotus Bowl Fountain.webp",
-            "description": "Auspicious Lord Ganesha Cascading Lotus Bowl Fountain. Brings prosperity and positive energy with smooth cascading water and glowing LED illumination.",
-            "price": 2950,
-            "act-price": 3450,
-            "stock": 50
-          },
-          {
-            "id": "fountain_medium_1793771060017_4",
-            "prod_id": "fountain_medium_1793771060017_4",
-            "name": "Golden Buddha Lotus Cascade Fountain",
-            "title": "Golden Buddha Lotus Cascade Fountain",
-            "image": "/products/water_fountains_medium/Golden Buddha Lotus Cascade Fountain.webp",
-            "description": "Majestic Golden Buddha Lotus Cascade Fountain with multi-tiered water flow and illuminated lotus base. High quality durable polyresin finish.",
-            "price": 3100,
-            "act-price": 3600,
-            "stock": 50
-          },
-          {
-            "id": "fountain_medium_1793771060017_5",
-            "prod_id": "fountain_medium_1793771060017_5",
-            "name": "Layered Stone Indoor Water Fountain",
-            "title": "Layered Stone Indoor Water Fountain",
-            "image": "/products/water_fountains_medium/Layered Stone Indoor Water Fountain.webp",
-            "description": "Modern Layered Stone Indoor Water Fountain with rhythmic waterfall sound. Enhances interior decor with natural slate texture and gentle water circulation.",
-            "price": 2850,
-            "act-price": 3350,
-            "stock": 50
-          },
-          {
-            "id": "fountain_medium_1793771060017_6",
-            "prod_id": "fountain_medium_1793771060017_6",
-            "name": "Modern Gray Stone Cascading Fountain",
-            "title": "Modern Gray Stone Cascading Fountain",
-            "image": "/products/water_fountains_medium/Modern Gray Stone Cascading Fountain.webp",
-            "description": "Minimalist Modern Gray Stone Cascading Fountain with architectural tiered spillways. Brings peaceful natural acoustics to balconies, patios, and living areas.",
-            "price": 2750,
-            "act-price": 3250,
-            "stock": 50
-          },
-          {
-            "id": "fountain_medium_1793771060017_7",
-            "prod_id": "fountain_medium_1793771060017_7",
-            "name": "Ribbed Sandstone Sphere Fountain",
-            "title": "Ribbed Sandstone Sphere Fountain",
-            "image": "/products/water_fountains_medium/Ribbed Sandstone Sphere Fountain.webp",
-            "description": "Sculptural Ribbed Sandstone Sphere Fountain with central bubbling water feature. High-grade weather-resistant polyresin construction with soft LED glow.",
-            "price": 2950,
-            "act-price": 3450,
-            "stock": 50
-          },
-          {
-            "id": "fountain_medium_1793771060017_8",
-            "prod_id": "fountain_medium_1793771060017_8",
-            "name": "Sandstone Cascading Tier Fountain",
-            "title": "Sandstone Cascading Tier Fountain",
-            "image": "/products/water_fountains_medium/Sandstone Cascading Tier Fountain.webp",
-            "description": "Elegantly sculpted Sandstone Cascading Tier Fountain with organic rock texture. Creates a calming retreat in any indoor garden or foyer.",
-            "price": 2850,
-            "act-price": 3350,
-            "stock": 50
-          },
-          {
-            "id": "fountain_medium_1793771060017_9",
-            "prod_id": "fountain_medium_1793771060017_9",
-            "name": "Textured Stone Cascading Fountain",
-            "title": "Textured Stone Cascading Fountain",
-            "image": "/products/water_fountains_medium/Textured Stone Cascading Fountain.webp",
-            "description": "Artisan Textured Stone Cascading Fountain featuring stepped rock face water distribution. Durable, lightweight, and low-maintenance indoor fountain.",
-            "price": 2900,
-            "act-price": 3400,
-            "stock": 50
-          },
-          {
-            "id": "fountain_medium_1793771060017_10",
-            "prod_id": "fountain_medium_1793771060017_10",
-            "name": "Three-Tier Cascading Stone Fountain",
-            "title": "Three-Tier Cascading Stone Fountain",
-            "image": "/products/water_fountains_medium/Three-Tier Cascading Stone Fountain.webp",
-            "description": "Classic Three-Tier Cascading Stone Fountain with gentle triple-step water flow. Creates a peaceful visual and acoustic centerpiece for any room.",
-            "price": 2999,
-            "act-price": 3499,
-            "stock": 50
           }
         ]
       }
@@ -7210,217 +7012,6 @@
             "stock": 50,
             "isReturnGift": false,
             "description": "Premium handcrafted decorative garland. Perfect for all festive occasions, pujas, and home decoration."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "cat_id": "cat_god_idols",
-    "name": "God Idols",
-    "subcategories": [
-      {
-        "sub_id": "sub_god_idols_deities",
-        "name": "Handcrafted Spiritual Deities",
-        "images": [
-          {
-            "id": "god_idol_0_1793771060019",
-            "prod_id": "god_idol_0_1793771060019",
-            "name": "Antique-Gold Saraswati with Veena",
-            "title": "Antique-Gold Saraswati with Veena",
-            "image": "/products/God Idols/Antique-Gold Saraswati with Veena.webp",
-            "description": "Handcrafted Antique-Gold Goddess Saraswati Idol playing the sacred Veena. Beautifully detailed brass-finish polyresin idol symbolizing wisdom, art, and learning.",
-            "price": 1850,
-            "act-price": 2350,
-            "stock": 50
-          },
-          {
-            "id": "god_idol_1_1793771060019",
-            "prod_id": "god_idol_1_1793771060019",
-            "name": "Colorful Krishna Companion Figurine Group",
-            "title": "Colorful Krishna Companion Figurine Group",
-            "image": "/products/God Idols/Colorful Krishna Companion Figurine Group.webp",
-            "description": "Vibrant Colorful Krishna Companion Figurine Group. Intricately painted with traditional attire, bringing divine joy and blessings to home mandirs and living spaces.",
-            "price": 2450,
-            "act-price": 2950,
-            "stock": 50
-          },
-          {
-            "id": "god_idol_2_1793771060019",
-            "prod_id": "god_idol_2_1793771060019",
-            "name": "Glossy Lakshmi Statue on Lotus Base",
-            "title": "Glossy Lakshmi Statue on Lotus Base",
-            "image": "/products/God Idols/Glossy Lakshmi Statue on Lotus Base.webp",
-            "description": "Divine Goddess Lakshmi Statue seated gracefully on a blooming lotus pedestal with gold coins. Auspicious idol bringing abundance, peace, and prosperity.",
-            "price": 1750,
-            "act-price": 2250,
-            "stock": 50
-          },
-          {
-            "id": "god_idol_3_1793771060019",
-            "prod_id": "god_idol_3_1793771060019",
-            "name": "Glossy Ram Darbar Statue Group",
-            "title": "Glossy Ram Darbar Statue Group",
-            "image": "/products/God Idols/Glossy Ram Darbar Statue Group.webp",
-            "description": "Complete Glossy Ram Darbar Statue Group with Lord Rama, Sita Mata, Lakshmana, and Lord Hanuman. Exquisite devotional masterpiece for pooja altars.",
-            "price": 2950,
-            "act-price": 3550,
-            "stock": 50
-          },
-          {
-            "id": "god_idol_4_1793771060019",
-            "prod_id": "god_idol_4_1793771060019",
-            "name": "Glossy Saraswati Statue with Veena",
-            "title": "Glossy Saraswati Statue with Veena",
-            "image": "/products/God Idols/Glossy Saraswati Statue with Veena.webp",
-            "description": "Glossy white and gold Goddess Saraswati Statue with Veena on lotus base. Perfect for study tables, music rooms, and educational auspicious gifting.",
-            "price": 1650,
-            "act-price": 2150,
-            "stock": 50
-          },
-          {
-            "id": "god_idol_5_1793771060019",
-            "prod_id": "god_idol_5_1793771060019",
-            "name": "Krishna Playing Flute on Lotus Pedestal",
-            "title": "Krishna Playing Flute on Lotus Pedestal",
-            "image": "/products/God Idols/Krishna Playing Flute on Lotus Pedestal.webp",
-            "description": "Lord Krishna Playing Flute in classic Tribhanga posture atop a carved lotus pedestal. Premium handcrafted devotional figurine.",
-            "price": 1450,
-            "act-price": 1950,
-            "stock": 50
-          },
-          {
-            "id": "god_idol_6_1793771060019",
-            "prod_id": "god_idol_6_1793771060019",
-            "name": "Ornate Balaji Deity Statue on Pedestal",
-            "title": "Ornate Balaji Deity Statue on Pedestal",
-            "image": "/products/God Idols/Ornate Balaji Deity Statue on Pedestal.webp",
-            "description": "Majestic Tirupati Balaji (Lord Venkateswara) Deity Statue adorned with traditional shanku, chakra, and ornate jewelry on an elevated pedestal.",
-            "price": 2250,
-            "act-price": 2750,
-            "stock": 50
-          },
-          {
-            "id": "god_idol_7_1793771060019",
-            "prod_id": "god_idol_7_1793771060019",
-            "name": "Ornate Black-Faced Hindu Deity Statue",
-            "title": "Ornate Black-Faced Hindu Deity Statue",
-            "image": "/products/God Idols/Ornate Black-Faced Hindu Deity Statue.webp",
-            "description": "Sacred Ornate Black-Faced Hindu Deity Idol featuring vibrant ceremonial robes and detailed handcrafted ornaments.",
-            "price": 2100,
-            "act-price": 2600,
-            "stock": 50
-          },
-          {
-            "id": "god_idol_8_1793771060019",
-            "prod_id": "god_idol_8_1793771060019",
-            "name": "Ornate Krishna Figurine with Peacock",
-            "title": "Ornate Krishna Figurine with Peacock",
-            "image": "/products/God Idols/Ornate Krishna Figurine with Peacock.webp",
-            "description": "Lord Krishna Figurine with Holy Cow and dancing Peacock. Captures divine Vrindavan grace with lifelike painting and durable polyresin build.",
-            "price": 1650,
-            "act-price": 2150,
-            "stock": 50
-          },
-          {
-            "id": "god_idol_9_1793771060019",
-            "prod_id": "god_idol_9_1793771060019",
-            "name": "Saraswati with Veena and Lotus Base",
-            "title": "Saraswati with Veena and Lotus Base",
-            "image": "/products/God Idols/Saraswati with Veena and Lotus Base.webp",
-            "description": "Devotional Saraswati Idol seated on double lotus base holding Veena and Vedas. Cast in high-density resin with intricate jewelry accents.",
-            "price": 1750,
-            "act-price": 2250,
-            "stock": 50
-          },
-          {
-            "id": "god_idol_10_1793771060019",
-            "prod_id": "god_idol_10_1793771060019",
-            "name": "White and Gold Krishna Statue with Peacock",
-            "title": "White and Gold Krishna Statue with Peacock",
-            "image": "/products/God Idols/White and Gold Krishna Statue with Peacock.webp",
-            "description": "Serene White and Gold Lord Krishna Statue with dancing Peacock. Elegant, minimalist finish ideal for modern spiritual decor.",
-            "price": 1550,
-            "act-price": 2050,
-            "stock": 50
-          },
-          {
-            "id": "god_idol_11_1793771060019",
-            "prod_id": "god_idol_11_1793771060019",
-            "name": "Yashoda and Krishna Sweets Statue",
-            "title": "Yashoda and Krishna Sweets Statue",
-            "image": "/products/God Idols/Yashoda and Krishna Sweets Statue.webp",
-            "description": "Heartwarming Mother Yashoda feeding little Krishna butter/sweets statue (Vatsalya Bhava). Expressive emotional masterpiece celebrating maternal love.",
-            "price": 1950,
-            "act-price": 2450,
-            "stock": 50
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "cat_id": "cat_pen_stands",
-    "name": "Pen Stands",
-    "subcategories": [
-      {
-        "sub_id": "sub_pen_stands_organizers",
-        "name": "Executive Desk Organizers",
-        "images": [
-          {
-            "id": "pen_stand_0_1793771060019",
-            "prod_id": "pen_stand_0_1793771060019",
-            "name": "Apple Clock Desk Organizer",
-            "title": "Apple Clock Desk Organizer",
-            "image": "/products/pen stand/Apple Clock Desk Organizer.webp",
-            "description": "Unique Apple-shaped Desk Organizer with analog gold-rimmed quartz clock, pen stand, and memo slot. Made with premium wooden finish for executive desks.",
-            "price": 699,
-            "act-price": 999,
-            "stock": 50
-          },
-          {
-            "id": "pen_stand_1_1793771060019",
-            "prod_id": "pen_stand_1_1793771060019",
-            "name": "Black-and-Gold Perpetual Calendar Organizer",
-            "title": "Black-and-Gold Perpetual Calendar Organizer",
-            "image": "/products/pen stand/Black-and-Gold Perpetual Calendar Organizer.webp",
-            "description": "Luxury Black-and-Gold Perpetual Calendar Desk Organizer with multi-slot pen stand and business card holder. Perfect corporate and personal gift.",
-            "price": 899,
-            "act-price": 1299,
-            "stock": 50
-          },
-          {
-            "id": "pen_stand_2_1793771060019",
-            "prod_id": "pen_stand_2_1793771060019",
-            "name": "Charcoal Desk Organizer with Gold Clock",
-            "title": "Charcoal Desk Organizer with Gold Clock",
-            "image": "/products/pen stand/Charcoal Desk Organizer with Gold Clock.webp",
-            "description": "Sleek Charcoal Desk Organizer featuring an embedded gold-toned timepiece, dual pen holders, and smartphone/card dock.",
-            "price": 799,
-            "act-price": 1149,
-            "stock": 50
-          },
-          {
-            "id": "pen_stand_3_1793771060019",
-            "prod_id": "pen_stand_3_1793771060019",
-            "name": "Modern Black Desk Organizer with Gold Clock",
-            "title": "Modern Black Desk Organizer with Gold Clock",
-            "image": "/products/pen stand/Modern Black Desk Organizer with Gold Clock.webp",
-            "description": "Modern matte-black multifunctional desk organizer with quartz clock and deep pen cups. Keeps study tables and office desks clutter-free.",
-            "price": 749,
-            "act-price": 1099,
-            "stock": 50
-          },
-          {
-            "id": "pen_stand_4_1793771060019",
-            "prod_id": "pen_stand_4_1793771060019",
-            "name": "Modern Charcoal Desk Organizer with Gold Clock",
-            "title": "Modern Charcoal Desk Organizer with Gold Clock",
-            "image": "/products/pen stand/Modern Charcoal Desk Organizer with Gold Clock.webp",
-            "description": "Premium charcoal textured desktop organizer with brass-accented clock. Combines functional stationery storage with elegant desktop aesthetics.",
-            "price": 799,
-            "act-price": 1149,
-            "stock": 50
           }
         ]
       }
