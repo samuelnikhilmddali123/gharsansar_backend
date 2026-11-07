@@ -5,11 +5,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
+import GharSansarLogo from "./GharSansarLogo";
 
 const searchList = [
   "Wallpaper Rolls",
   "Wallpapers",
-  "3d Wallpapers",
+  "3D Wallpapers",
   "Wall Art Effect",
   "Vinyl Flooring",
   "Natural Vertical Garden",
@@ -20,75 +21,35 @@ const searchList = [
   "ICU Flooring",
   "Sliding & Metal Door",
   "Invisible Grill",
-  "EPDM Flooring",
-  "Bubble Fountain",
-  "Terrace & Outdoor Gardening",
-  "Outdoor Deck Benches",
-  "Canopy",
-  "Customised Water Fountain",
   "Wooden Flooring",
-  "HDP Planter Pots",
-  "Ceramic Pots",
-  "Pigeon Net",
-  "Artificial Lawn",
   "Curtains",
-  "Office Room Carpets",
-  "Cloth Dry Well",
-  "Sky Light Blinds",
-  "Pergola",
-  "Wall And Ceiling Panels",
-  "Hospital Curtains",
-  "Mosquito Doors",
-  "Customised Aquariums",
-  "Gifting Plants",
-  "All Types Of Doormats",
-  "Basket Fruit Packings",
-  "Brass Idols",
-  "Sofa Cover",
-  // Add product names or other keywords you want searchable
+  "Interior Decor",
+  "Festive Gifts",
+  "Return Gifts",
+  "Pooja Decor",
   "Designer Sofa",
   "Luxury Table",
-  "Curtain Rods",
-  "Planter Pot Set",
-  "LED Floor Lamp",
 ];
 
 const Header: React.FC = () => {
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [isUserMenuOpen, setUserMenuOpen] = useState(false);
-  const [isSearchOpen, setSearchOpen] = useState(false);
-  const [isMobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const lastScrollY = useRef(0);
 
   useEffect(() => {
     const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      setIsScrolled(currentScrollY > 20);
-
-      // Hide on scroll down, show on scroll up/top
-      if (currentScrollY > lastScrollY.current && currentScrollY > 80) {
-        setIsVisible(false);
-      } else {
-        setIsVisible(true);
-      }
-      
-      lastScrollY.current = currentScrollY;
+      setIsScrolled(window.scrollY > 20);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  const isActive = (path: string) => {
-    if (path === '/') {
-      return location.pathname === '/';
-    }
-    return location.pathname.startsWith(path);
-  };
 
   const { user, logout } = useAuth();
   const { totalItems } = useCart();
@@ -97,59 +58,47 @@ const Header: React.FC = () => {
   const location = useLocation();
 
   const desktopSearchRef = useRef<HTMLFormElement>(null);
-  const mobileSearchRef = useRef<HTMLFormElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
-  // Close menus on page navigation
   useEffect(() => {
     setMenuOpen(false);
     setUserMenuOpen(false);
-    setSearchOpen(false);
     setShowSuggestions(false);
-    setMobileSearchOpen(false);
+    setIsSearchOpen(false);
   }, [location.pathname]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (isSearchOpen && desktopSearchRef.current && !desktopSearchRef.current.contains(event.target as Node)) {
-        setSearchOpen(false);
+      if (
+        desktopSearchRef.current &&
+        !desktopSearchRef.current.contains(event.target as Node)
+      ) {
         setShowSuggestions(false);
+        if (!searchTerm.trim()) {
+          setIsSearchOpen(false);
+        }
       }
-      if (isMobileSearchOpen && mobileSearchRef.current && !mobileSearchRef.current.contains(event.target as Node)) {
-        setMobileSearchOpen(false);
-      }
-      if (isUserMenuOpen && userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+      if (
+        userMenuRef.current &&
+        !userMenuRef.current.contains(event.target as Node)
+      ) {
         setUserMenuOpen(false);
       }
     };
-
-    const handleEsc = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setSearchOpen(false);
-        setShowSuggestions(false);
-        setMobileSearchOpen(false);
-      }
-    };
-
     document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("keydown", handleEsc);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("keydown", handleEsc);
-    };
-  }, [isSearchOpen, isMobileSearchOpen, isUserMenuOpen]);
-
-  useEffect(() => {
-    if (isSearchOpen || isMobileSearchOpen) {
-      inputRef.current?.focus();
+  const isActive = (path: string) => {
+    if (path === "/") {
+      return location.pathname === "/";
     }
-  }, [isSearchOpen, isMobileSearchOpen]);
+    return location.pathname.startsWith(path);
+  };
 
   const updateSearchTerm = (value: string) => {
     setSearchTerm(value);
-    if (value.trim() === "") {
+    if (!value.trim()) {
       setSuggestions([]);
       setShowSuggestions(false);
       return;
@@ -164,8 +113,7 @@ const Header: React.FC = () => {
   const onSuggestionSelect = (value: string) => {
     setSearchTerm(value);
     setShowSuggestions(false);
-    setSearchOpen(false);
-    setMobileSearchOpen(false);
+    setIsSearchOpen(false);
     navigate(`/interior-design?category=${encodeURIComponent(value)}`);
   };
 
@@ -175,401 +123,301 @@ const Header: React.FC = () => {
     navigate(`/interior-design?category=${encodeURIComponent(searchTerm.trim())}`);
     setSearchTerm("");
     setShowSuggestions(false);
-    setSearchOpen(false);
-    setMobileSearchOpen(false);
+    setIsSearchOpen(false);
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate("/");
-  };
+  const navLinks = [
+    { path: "/", label: "Home" },
+    { path: "/interior-design", label: "Interior Design" },
+    { path: "/products", label: "Products" },
+    { path: "/return-gifts", label: "Festive Gifts" },
+    { path: "/services", label: "Services" },
+    { path: "/blog", label: "Blog" },
+  ];
 
-  const isHomePage = location.pathname === "/";
-  const isTransparent = isHomePage && !isScrolled;
+  const isHomeTop = false; // Navbar is white everywhere, non-transparent
 
   return (
     <>
-      <header className={`fixed top-0 left-0 right-0 z-50 pointer-events-none transition-all duration-300 transform ${
-        isVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"
-      }`}>
-        <div className={`w-full pointer-events-auto transition-all duration-300 ${
-          isTransparent 
-            ? "bg-transparent border-b border-transparent" 
-            : "bg-[#F7F6F0]/95 backdrop-blur-md shadow-xs border-b border-[#e8e5dc]"
-        }`}>
-          <div className="relative w-full max-w-[1880px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10 h-14 sm:h-[60px] flex items-center justify-between">
-            
-            {/* Brand Logo - Balanced size */}
-            <Link to="/" aria-label="Go to home" className="flex items-center shrink-0 hover:opacity-90 transition-opacity pr-2 sm:pr-4">
-              <img 
-                src="/ghar_sansar_logo_nav.webp" 
-                alt="Ghar Sansar" 
-                className={`h-8 sm:h-9 md:h-10 w-auto object-contain transition-all duration-300 ${
-                  isTransparent ? "drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]" : ""
-                }`} 
-                style={{ minWidth: 0, width: "auto" }} 
-              />
-            </Link>
+      <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+        <div
+          className="w-full transition-all duration-300 bg-[#F6F1E8]/95 backdrop-blur-md"
+        >
+          <div className="relative w-full max-w-[1720px] mx-auto px-5 sm:px-8 lg:px-10 xl:px-12 h-12 flex items-center justify-between">
+            {/* 1. Left: Brand Logo */}
+            <div className="flex items-center shrink-0 z-10">
+              <GharSansarLogo variant="dark" />
+            </div>
 
-            {/* Desktop Navigation Links - Centered horizontally and nudged slightly down */}
-            <nav className="hidden lg:flex items-center space-x-1 xl:space-x-3 uppercase tracking-wider text-xs lg:text-[13px] font-bold absolute left-1/2 top-[calc(50%+4px)] -translate-x-1/2 -translate-y-1/2" role="navigation">
-              {[
-                { path: "/", label: "Home" },
-                { path: "/interior-design", label: "Interior Design" },
-                { path: "/products", label: "Products" },
-                { path: "/return-gifts", label: "Return Gifts" },
-                { path: "/services", label: "Services" },
-                { path: "/blog", label: "Blog" },
-              ].map((link) => (
-                <Link
-                  key={link.path}
-                  to={link.path}
-                  className={`relative py-1 px-2.5 transition-colors duration-200 group ${
-                    isTransparent
-                      ? isActive(link.path)
-                        ? "text-white font-bold"
-                        : "text-white/80 hover:text-white"
-                      : isActive(link.path)
-                        ? "text-black font-bold"
-                        : "text-[#26372c] hover:text-black"
-                  }`}
-                >
-                  <span>{link.label}</span>
-                  {/* Clean underline on selected heading */}
-                  <span
-                    className={`absolute bottom-0 left-2.5 right-2.5 h-[2px] rounded-full transition-all duration-300 ${
-                      isTransparent
-                        ? isActive(link.path)
-                          ? "bg-white opacity-100 scale-x-100 shadow-[0_0_8px_rgba(255,255,255,0.7)]"
-                          : "bg-white opacity-0 scale-x-0 group-hover:opacity-50 group-hover:scale-x-100"
-                        : isActive(link.path)
-                          ? "bg-black opacity-100 scale-x-100"
-                          : "bg-black opacity-0 scale-x-0 group-hover:opacity-40 group-hover:scale-x-100"
+            {/* 2. Center: True Mathematical Center Navigation */}
+            <nav
+              className="hidden lg:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center space-x-6 xl:space-x-8 font-poppins text-[12px] xl:text-[12.5px] font-medium tracking-[0.14em] uppercase"
+              role="navigation"
+            >
+              {navLinks.map((link) => {
+                const active = isActive(link.path);
+                return (
+                  <Link
+                    key={link.path}
+                    to={link.path}
+                    className={`relative py-0.5 px-1 transition-colors duration-200 ${
+                      active
+                        ? "text-gray-950 font-semibold"
+                        : "text-gray-600 hover:text-[#C86B4C]"
                     }`}
-                  />
-                </Link>
-              ))}
+                  >
+                    <span>{link.label}</span>
+                    {active && (
+                      <span className="absolute -bottom-1 left-0 right-0 h-[2px] bg-[#C86B4C] rounded-full" />
+                    )}
+                  </Link>
+                );
+              })}
             </nav>
 
-            {/* Right side action icons */}
-            <div className="flex items-center space-x-1.5 sm:space-x-2.5 shrink-0">
-              
-              {/* Desktop Search Bar */}
-              <div className="relative hidden sm:flex items-center">
-                <form ref={desktopSearchRef} onSubmit={onSearchSubmit} className="flex items-center relative" role="search">
-                  <div className={`flex items-center w-36 md:w-44 lg:w-48 xl:w-56 h-8 sm:h-[34px] px-3 rounded-md transition-all ${
-                    isTransparent
-                      ? "bg-white/10 hover:bg-white/20 border border-white/30 focus-within:border-white focus-within:bg-black/40 focus-within:ring-2 focus-within:ring-white/20 backdrop-blur-md"
-                      : "bg-white/80 hover:bg-white border border-[#ded5c5] hover:border-gray-400 focus-within:border-black focus-within:bg-white focus-within:ring-2 focus-within:ring-black/5 shadow-2xs"
-                  }`}>
-                    <Search className={`w-3.5 h-3.5 shrink-0 mr-2 transition-colors ${
-                      isTransparent ? "text-white/80" : "text-gray-500"
-                    }`} />
-                    <input
-                      ref={inputRef}
-                      type="search"
-                      aria-label="Search products or categories"
-                      placeholder="Search products..."
-                      value={searchTerm}
-                      onChange={(e) => updateSearchTerm(e.target.value)}
-                      onFocus={() => {
-                        if (suggestions.length > 0) setShowSuggestions(true);
-                      }}
-                      className={`w-full bg-transparent py-1 text-xs font-medium focus:outline-none transition-colors ${
-                        isTransparent 
-                          ? "text-white placeholder:text-white/60" 
-                          : "text-gray-800 placeholder:text-gray-400"
-                      }`}
-                      autoComplete="off"
-                    />
-                    {searchTerm && (
+            {/* 3. Right: Refined Search & Action Icons */}
+            <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0 z-10">
+              {/* Expandable Search Bar on Symbol Click */}
+              <div className="relative flex items-center">
+                {!isSearchOpen ? (
+                  <button
+                    type="button"
+                    aria-label="Open search"
+                    onClick={() => {
+                      setIsSearchOpen(true);
+                      setTimeout(() => searchInputRef.current?.focus(), 60);
+                    }}
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-gray-700 hover:text-[#C86B4C] hover:bg-[#F6F1E8] transition-colors cursor-pointer"
+                  >
+                    <Search className="w-[18px] h-[18px]" />
+                  </button>
+                ) : (
+                  <form
+                    ref={desktopSearchRef}
+                    onSubmit={onSearchSubmit}
+                    className="flex items-center relative transition-all duration-300"
+                  >
+                    <div className="flex items-center w-48 sm:w-52 h-[32px] rounded-full px-3 bg-[#F6F1E8] text-gray-800 border border-[#E2DDD5] shadow-xs">
+                      <input
+                        ref={searchInputRef}
+                        type="search"
+                        placeholder="Search products..."
+                        value={searchTerm}
+                        onChange={(e) => updateSearchTerm(e.target.value)}
+                        onFocus={() => {
+                          if (suggestions.length > 0) setShowSuggestions(true);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Escape") {
+                            setIsSearchOpen(false);
+                            setShowSuggestions(false);
+                          }
+                        }}
+                        className="w-full bg-transparent text-xs font-normal text-gray-800 placeholder:text-gray-400 focus:outline-none"
+                      />
+                      <button
+                        type="submit"
+                        aria-label="Submit search"
+                        className="text-gray-500 hover:text-[#C86B4C] ml-1 cursor-pointer transition-colors"
+                      >
+                        <Search className="w-3.5 h-3.5" />
+                      </button>
                       <button
                         type="button"
+                        aria-label="Close search"
                         onClick={() => {
-                          setSearchTerm("");
+                          setIsSearchOpen(false);
                           setShowSuggestions(false);
+                          setSearchTerm("");
                         }}
-                        className={`ml-1 text-xs shrink-0 cursor-pointer transition-colors ${
-                          isTransparent ? "text-white/70 hover:text-white" : "text-gray-400 hover:text-black"
-                        }`}
+                        className="text-gray-400 hover:text-gray-700 ml-1.5 cursor-pointer transition-colors"
                       >
-                        ×
+                        <X className="w-3.5 h-3.5" />
                       </button>
-                    )}
-                  </div>
-                  {showSuggestions && suggestions.length > 0 && (
-                    <div className="absolute top-full right-0 mt-2 w-64 bg-white/95 backdrop-blur-md border border-gray-100 rounded-md shadow-xl py-2 z-50 overflow-hidden">
-                      {suggestions.map((s, idx) => (
-                        <button
-                          key={idx}
-                          type="button"
-                          className="w-full text-left px-4 py-2 text-xs font-semibold text-gray-650 hover:bg-gray-50 hover:text-gray-950 transition-colors cursor-pointer"
-                          onClick={() => onSuggestionSelect(s)}
-                        >
-                          {s}
-                        </button>
-                      ))}
                     </div>
-                  )}
-                </form>
+
+                    {/* Suggestions dropdown */}
+                    {showSuggestions && suggestions.length > 0 && (
+                      <div className="absolute top-full right-0 mt-2 w-56 bg-[#F6F1E8] border border-[#E8E2D5] rounded-xl shadow-xl py-2 z-50 overflow-hidden">
+                        {suggestions.map((s, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            className="w-full text-left px-4 py-1.5 text-xs font-medium text-gray-700 hover:bg-[#F6F1E8] hover:text-[#C86B4C] transition-colors cursor-pointer"
+                            onClick={() => onSuggestionSelect(s)}
+                          >
+                            {s}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </form>
+                )}
               </div>
 
-              {/* Mobile Search Button */}
-              <button
-                type="button"
-                aria-label="Open search"
-                className={`sm:hidden w-8 h-8 rounded-md flex items-center justify-center transition-all ${
-                  isTransparent
-                    ? "border border-white/30 bg-white/10 hover:bg-white/20 text-white backdrop-blur-md"
-                    : "border border-[#ded5c5] bg-white/80 hover:bg-white text-gray-650 hover:text-gray-950 shadow-2xs"
-                }`}
-                onClick={() => setMobileSearchOpen(true)}
-              >
-                <Search size={15} />
-              </button>
-
-              {/* Wishlist Heart Button */}
-              <Link
-                to="/products"
-                aria-label="Wishlist"
-                className={`w-8 h-8 sm:w-[34px] sm:h-[34px] rounded-md flex items-center justify-center transition-all relative group ${
-                  isTransparent
-                    ? "border border-white/30 bg-white/10 hover:bg-white/20 hover:border-white text-white backdrop-blur-md"
-                    : "border border-[#e5dfd5] bg-white/80 hover:bg-white hover:border-gray-400 text-gray-700 hover:text-black shadow-2xs"
-                }`}
-              >
-                <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:scale-105 transition-transform" />
-                {wishlist.length > 0 && (
-                  <span className={`absolute -top-1 -right-1 text-[8.5px] rounded-full w-3.5 h-3.5 flex items-center justify-center font-bold shadow-xs ${
-                    isTransparent ? "bg-[#C89A65] text-black" : "bg-red-500 text-white"
-                  }`}>
-                    {wishlist.length}
-                  </span>
-                )}
-              </Link>
-
-              {/* Cart Button */}
-              <Link
-                to="/cart"
-                aria-label="Cart"
-                className={`w-8 h-8 sm:w-[34px] sm:h-[34px] rounded-md flex items-center justify-center transition-all relative group ${
-                  isTransparent
-                    ? "border border-white/30 bg-white/10 hover:bg-white/20 hover:border-white text-white backdrop-blur-md"
-                    : "border border-[#e5dfd5] bg-white/80 hover:bg-white hover:border-gray-400 text-gray-700 hover:text-black shadow-2xs"
-                }`}
-              >
-                <ShoppingCart className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:scale-105 transition-transform" />
-                {totalItems > 0 && (
-                  <span className={`absolute -top-1 -right-1 text-[8.5px] rounded-full w-3.5 h-3.5 flex items-center justify-center font-bold shadow-xs ${
-                    isTransparent ? "bg-[#C89A65] text-black" : "bg-[#004e38] text-white"
-                  }`}>
-                    {totalItems}
-                  </span>
-                )}
-              </Link>
-
-              {/* User Button */}
+              {/* Profile Icon */}
               {user ? (
                 <div className="relative" ref={userMenuRef}>
                   <button
-                    aria-haspopup="true"
-                    aria-expanded={isUserMenuOpen}
                     onClick={() => setUserMenuOpen((v) => !v)}
-                    className={`w-8 h-8 sm:w-[34px] sm:h-[34px] rounded-md flex items-center justify-center transition-all overflow-hidden cursor-pointer group ${
-                      isTransparent
-                        ? "bg-white/15 hover:bg-white/25 text-white border border-white/30 backdrop-blur-md"
-                        : "bg-[#1c2921] hover:bg-[#2c3f33] text-white border border-[#1c2921] shadow-xs"
-                    }`}
-                    aria-label="User menu"
+                    aria-label="User profile"
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-gray-700 hover:text-[#C86B4C] hover:bg-[#F6F1E8] transition-colors cursor-pointer"
                   >
-                    {user.profilePicture ? (
-                      <img 
-                        src={user.profilePicture} 
-                        alt="User avatar" 
-                        className="w-full h-full object-cover" 
-                      />
-                    ) : (
-                      <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white group-hover:scale-105 transition-transform" />
-                    )}
+                    <User className="w-[18px] h-[18px]" />
                   </button>
-                  {isUserMenuOpen && (
-                    <div className="absolute right-0 mt-3 w-52 bg-white/95 backdrop-blur-md border border-gray-100 rounded-md shadow-xl shadow-gray-200/40 p-1.5 z-50 animate-fadeIn">
-                      <div className="px-4 py-2 border-b border-gray-100 mb-1">
-                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Signed in as</p>
-                        <p className="text-xs font-bold text-gray-900 truncate">{user.email || user.name}</p>
-                      </div>
-                      <Link to="/profile" className="block px-4 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 rounded-none transition-colors" onClick={() => setUserMenuOpen(false)}>
-                        Profile
-                      </Link>
-                      {((user.role && user.role.toLowerCase() === "admin") || user.email?.toLowerCase() === "gharsansarshop@gmail.com") && (
-                        <Link to="/admin" className="block px-4 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 rounded-none transition-colors" onClick={() => setUserMenuOpen(false)}>
-                          Admin Dashboard
-                        </Link>
-                      )}
-                      <button onClick={handleLogout} className="w-full flex items-center px-4 py-2 text-xs font-bold text-red-650 hover:bg-red-50 rounded-none transition-colors mt-0.5 cursor-pointer">
-                        <LogOut className="mr-2 w-3.5 h-3.5" />
-                        Logout
-                      </button>
+                  <div
+                    className={`absolute right-0 mt-2 w-52 bg-[#F6F1E8] border border-[#E8E2D5] rounded-xl shadow-xl p-2 z-50 ${
+                      isUserMenuOpen ? "block" : "hidden"
+                    }`}
+                  >
+                    <div className="px-3 py-2 border-b border-gray-100 mb-1">
+                      <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                        Signed in as
+                      </p>
+                      <p className="text-xs font-bold text-gray-900 truncate">
+                        {user.email || user.name}
+                      </p>
                     </div>
-                  )}
-                </div>
-              ) : (
-                <Link
-                  to="/login"
-                  aria-label="Sign In"
-                  className={`w-8 h-8 sm:w-[34px] sm:h-[34px] rounded-md flex items-center justify-center transition-all cursor-pointer group ${
-                    isTransparent
-                      ? "bg-white/15 hover:bg-white/25 text-white border border-white/30 backdrop-blur-md"
-                      : "bg-[#1c2921] hover:bg-[#2c3f33] text-white shadow-xs"
-                  }`}
-                >
-                  <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white group-hover:scale-105 transition-transform" />
-                </Link>
-              )}
-
-              {/* Mobile Menu Toggle Button */}
-              <button
-                aria-label="Toggle menu"
-                className={`lg:hidden w-8 h-8 sm:w-[34px] sm:h-[34px] rounded-md flex items-center justify-center transition-all cursor-pointer ${
-                  isTransparent
-                    ? "border border-white/30 bg-white/10 hover:bg-white/20 text-white backdrop-blur-md"
-                    : "border border-[#e5dfd5] bg-white/80 hover:bg-white text-gray-700 hover:text-black shadow-2xs"
-                }`}
-                onClick={() => setMenuOpen((v) => !v)}
-              >
-                {isMenuOpen ? <X size={16} /> : <Menu size={16} />}
-              </button>
-
-            </div>
-          </div>
-        </div>
-      </header>
-      {/* Mobile Drawer Menu */}
-      <AnimatePresence>
-        {isMenuOpen && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setMenuOpen(false)}
-              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[998] md:hidden"
-            />
-            
-            {/* Drawer */}
-            <motion.div
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed right-0 top-0 bottom-0 w-[80%] max-w-sm bg-white shadow-2xl border-l border-gray-100 z-[999] p-6 flex flex-col md:hidden"
-            >
-              <div className="flex items-center justify-between mb-8">
-                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Navigation</span>
-                <button
-                  onClick={() => setMenuOpen(false)}
-                  className="p-1.5 hover:bg-gray-100 rounded-none text-gray-500 hover:text-gray-900 transition-colors"
-                >
-                  <X size={18} />
-                </button>
-              </div>
-
-              <nav className="flex flex-col space-y-4">
-                {[
-                  { path: "/", label: "Home" },
-                  { path: "/interior-design", label: "Interior Design" },
-                  { path: "/products", label: "Products" },
-                  { path: "/return-gifts", label: "Return Gifts" },
-                  { path: "/services", label: "Services" },
-                  { path: "/blog", label: "Blog" }
-                ].map((link, idx) => (
-                  <motion.div
-                    key={link.path}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: idx * 0.05 }}
-                  >
-                    <Link
-                      to={link.path}
-                      onClick={() => setMenuOpen(false)}
-                      className={`block py-2 text-base font-bold transition-colors ${
-                        isActive(link.path) ? "text-gray-950" : "text-gray-500 hover:text-gray-950"
-                      }`}
-                    >
-                      {link.label}
-                    </Link>
-                  </motion.div>
-                ))}
-                
-                <hr className="my-2 border-gray-100" />
-                
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 }}
-                >
-                  <Link
-                    to="/cart"
-                    onClick={() => setMenuOpen(false)}
-                    className="flex items-center justify-between py-2 text-base font-bold text-gray-500 hover:text-gray-950"
-                  >
-                    <span className="flex items-center gap-2">
-                      <ShoppingCart size={18} />
-                      Cart
-                    </span>
-                    {totalItems > 0 && (
-                      <span className="bg-gray-900 text-white text-xs font-bold px-2 py-0.5 rounded-none">
-                        {totalItems}
-                      </span>
-                    )}
-                  </Link>
-                </motion.div>
-
-                {user ? (
-                  <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.35 }}
-                    className="pt-2"
-                  >
                     <Link
                       to="/profile"
-                      onClick={() => setMenuOpen(false)}
-                      className="block py-2 text-base font-bold text-gray-500 hover:text-gray-900 mb-4"
+                      className="block px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-[#F6F1E8] hover:text-[#C86B4C] rounded-lg transition-colors"
+                      onClick={() => setUserMenuOpen(false)}
                     >
                       Profile
                     </Link>
                     <button
                       onClick={() => {
-                        handleLogout();
-                        setMenuOpen(false);
+                        logout();
+                        navigate("/");
                       }}
-                      className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-red-50 hover:bg-red-100 text-red-650 rounded-none text-sm font-bold transition-colors"
+                      className="w-full flex items-center px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors mt-1 cursor-pointer"
                     >
-                      <LogOut size={16} />
+                      <LogOut className="mr-2 w-3.5 h-3.5" />
                       Logout
                     </button>
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.35 }}
-                    className="pt-4"
+                  </div>
+                </div>
+              ) : (
+                <Link
+                  to="/login"
+                  aria-label="Sign In"
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-gray-700 hover:text-[#C86B4C] hover:bg-[#F6F1E8] transition-colors cursor-pointer"
+                >
+                  <User className="w-[18px] h-[18px]" />
+                </Link>
+              )}
+
+              {/* Wishlist Heart Icon */}
+              <Link
+                to="/wishlist"
+                aria-label="Wishlist"
+                className="w-8 h-8 rounded-full flex items-center justify-center text-gray-700 hover:text-[#C86B4C] hover:bg-[#F6F1E8] transition-colors cursor-pointer"
+              >
+                <div className="relative flex items-center justify-center">
+                  <Heart className="w-[18px] h-[18px]" />
+                  {wishlist.length > 0 && (
+                    <span className="absolute -top-1 -right-1.5 min-w-[14px] h-[14px] px-0.5 rounded-full bg-[#C86B4C] text-white text-[8.5px] font-bold flex items-center justify-center shadow-xs leading-none">
+                      {wishlist.length}
+                    </span>
+                  )}
+                </div>
+              </Link>
+
+              {/* Cart Icon with Small Terracotta Badge */}
+              <Link
+                to="/cart"
+                aria-label="Shopping Cart"
+                className="w-8 h-8 rounded-full flex items-center justify-center text-gray-700 hover:text-[#C86B4C] hover:bg-[#F6F1E8] transition-colors cursor-pointer"
+              >
+                <div className="relative flex items-center justify-center">
+                  <ShoppingCart className="w-[18px] h-[18px]" />
+                  <span className="absolute -top-1 -right-1.5 min-w-[14px] h-[14px] px-0.5 rounded-full bg-[#C86B4C] text-white text-[8.5px] font-bold flex items-center justify-center shadow-xs leading-none">
+                    {totalItems || 0}
+                  </span>
+                </div>
+              </Link>
+
+              {/* Menu Toggle */}
+              <button
+                aria-label="Toggle navigation menu"
+                onClick={() => setMenuOpen((v) => !v)}
+                className="w-8 h-8 rounded-full flex items-center justify-center text-gray-700 hover:text-[#C86B4C] hover:bg-[#F6F1E8] transition-colors cursor-pointer"
+              >
+                {isMenuOpen ? <X className="w-[18px] h-[18px]" /> : <Menu className="w-[18px] h-[18px]" />}
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Mobile Navigation Drawer */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <div className="fixed inset-0 z-40 lg:hidden">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setMenuOpen(false)}
+              className="fixed inset-0 bg-black/40 backdrop-blur-xs"
+            />
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "tween", duration: 0.3 }}
+              className="fixed top-0 right-0 bottom-0 w-72 bg-[#F6F1E8] p-6 shadow-2xl flex flex-col justify-between border-l border-[#E8E2D8] z-50"
+            >
+              <div>
+                <div className="flex items-center justify-between pb-6 border-b border-[#E8E2D8] mb-6">
+                  <GharSansarLogo variant="dark" />
+                  <button
+                    onClick={() => setMenuOpen(false)}
+                    aria-label="Close menu"
+                    className="p-1 text-gray-500 hover:text-gray-900"
                   >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <nav className="space-y-4">
+                  {navLinks.map((link) => (
                     <Link
-                      to="/login"
+                      key={link.path}
+                      to={link.path}
                       onClick={() => setMenuOpen(false)}
-                      className="flex items-center justify-center py-2.5 px-4 bg-gray-950 hover:bg-gray-800 text-white rounded-none text-sm font-bold transition-all shadow-sm"
+                      className={`block py-2 text-sm uppercase tracking-wider font-medium transition-colors ${
+                        isActive(link.path)
+                          ? "text-[#C57053] font-bold"
+                          : "text-gray-700 hover:text-[#C57053]"
+                      }`}
                     >
-                      Login
+                      {link.label}
                     </Link>
-                  </motion.div>
-                )}
-              </nav>
+                  ))}
+                </nav>
+              </div>
+
+              <div className="pt-6 border-t border-[#E8E2D8] space-y-3">
+                <Link
+                  to="/wishlist"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center justify-between text-xs text-gray-700 hover:text-[#C57053]"
+                >
+                  <span>Wishlist</span>
+                  <span className="font-bold">{wishlist.length}</span>
+                </Link>
+                <Link
+                  to="/cart"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center justify-between text-xs text-gray-700 hover:text-[#C57053]"
+                >
+                  <span>Shopping Cart</span>
+                  <span className="font-bold">{totalItems || 0}</span>
+                </Link>
+              </div>
             </motion.div>
-          </>
+          </div>
         )}
       </AnimatePresence>
     </>

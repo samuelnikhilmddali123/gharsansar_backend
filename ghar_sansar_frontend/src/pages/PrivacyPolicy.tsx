@@ -322,8 +322,8 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ initialTab = "priv
                       <Phone className="w-4 h-4 text-[#a855f7] shrink-0 mt-0.5" />
                       <div>
                         <strong className="block text-gray-900 mb-0.5">Customer Helpline</strong>
-                        <a href="tel:+919492664870" className="text-emerald-700 hover:underline">
-                          +91-9492664870
+                        <a href="tel:+918121135980" className="text-emerald-700 hover:underline">
+                          +91-8121135980
                         </a>
                       </div>
                     </div>
@@ -557,11 +557,11 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ initialTab = "priv
               <span>Email Support</span>
             </a>
             <a
-              href="tel:+919492664870"
+              href="tel:+918121135980"
               className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs transition shadow-sm"
             >
               <Phone className="w-4 h-4" />
-              <span>Call +91-9492664870</span>
+              <span>Call +91-8121135980</span>
             </a>
           </div>
         </div>

@@ -1,5 +1,4 @@
 // src/App.tsx
-import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
@@ -16,44 +15,40 @@ import ScrollToTop from "./components/ScrollToTop";
 import Header from "./components/Layout/Header";
 import Footer from "./components/Layout/Footer";
 
-// Critical landing pages (loaded immediately)
 import Home from "./pages/Home";
+import Services from "./pages/Services";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
 import Login from "./pages/Login";
 import Cart from "./pages/Cart";
+import Wishlist from "./pages/Wishlist";
+import Checkout from "./pages/Checkout";
+import InteriorDesignPage from "./pages/InteriorDesignPage";
+import InteriorWorks from "./pages/InteriorWorks";
+import Profile from "./pages/Profile";
 
-// Lazy-loaded customer pages (code-split for fast initial page load)
-const Services = lazy(() => import("./pages/Services"));
-const Blog = lazy(() => import("./pages/Blog"));
-const BlogPost = lazy(() => import("./pages/BlogPost"));
-const Checkout = lazy(() => import("./pages/Checkout"));
-const InteriorDesignPage = lazy(() => import("./pages/InteriorDesignPage"));
-const InteriorWorks = lazy(() => import("./pages/InteriorWorks"));
-const Profile = lazy(() => import("./pages/Profile"));
-const ProductsPage = lazy(() => import("./pages/Products"));
-const ProductDetail = lazy(() => import("./pages/ProductDetail"));
-const ReturnGifts = lazy(() => import("./pages/ReturnGifts"));
-const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
-const MobileAuth = lazy(() => import("./pages/MobileAuth"));
-const DeleteAccount = lazy(() => import("./pages/DeleteAccount"));
+// ✅ Admin pages
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminLayout from "./pages/admin/AdminLayout";
+import BlogAdmin from "./pages/admin/BlogAdmin";
+import ServicesAdmin from "./pages/admin/ServicesAdmin";
+import ProductsAdmin from "./pages/admin/ProductsAdmin";
+import ProductAdminBulk from "./pages/admin/ProductAdminBulk";
+import InteriorWorksAdmin from "./pages/admin/InteriorWorksAdmin";
+import OrdersAdmin from "./pages/admin/OrdersAdmin";
+import ChatsAdmin from "./pages/admin/ChatsAdmin";
+import ReturnGiftsAdmin from "./pages/admin/ReturnGiftsAdmin";
+import DiscountAdmin from "./pages/admin/DiscountAdmin";
 
-// Lazy-loaded Admin pages (never block normal customer page loads)
-const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
-const AdminLayout = lazy(() => import("./pages/admin/AdminLayout"));
-const BlogAdmin = lazy(() => import("./pages/admin/BlogAdmin"));
-const ServicesAdmin = lazy(() => import("./pages/admin/ServicesAdmin"));
-const ProductsAdmin = lazy(() => import("./pages/admin/ProductsAdmin"));
-const ProductAdminBulk = lazy(() => import("./pages/admin/ProductAdminBulk"));
-const InteriorWorksAdmin = lazy(() => import("./pages/admin/InteriorWorksAdmin"));
-const OrdersAdmin = lazy(() => import("./pages/admin/OrdersAdmin"));
-const ChatsAdmin = lazy(() => import("./pages/admin/ChatsAdmin"));
-const ReturnGiftsAdmin = lazy(() => import("./pages/admin/ReturnGiftsAdmin"));
-const DiscountAdmin = lazy(() => import("./pages/admin/DiscountAdmin"));
+import ChatBot from "./components/ChatBot/ChatBot";
 
-const PageLoadingSpinner = () => (
-  <div className="min-h-[50vh] flex items-center justify-center">
-    <div className="w-10 h-10 border-4 border-[#9E472A] border-t-transparent rounded-full animate-spin"></div>
-  </div>
-);
+// ✅ Updated product pages
+import ProductsPage from "./pages/Products";
+import ProductDetail from "./pages/ProductDetail";
+import ReturnGifts from "./pages/ReturnGifts";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import MobileAuth from "./pages/MobileAuth";
+import DeleteAccount from "./pages/DeleteAccount";
 
 const AppLayout = () => {
   const location = useLocation();
@@ -69,14 +64,18 @@ const AppLayout = () => {
   const isAdminRoute = location.pathname.startsWith("/admin");
   const isMobileAuthRoute = location.pathname.startsWith("/mobile-auth");
   const isHomePage = location.pathname === "/";
+  const isInteriorPage = location.pathname.startsWith("/interior-design");
+  const isProductsPage = location.pathname.startsWith("/products");
+  const isGiftsPage = location.pathname.startsWith("/return-gifts");
+  const isServicesPage = location.pathname.startsWith("/services");
+  const isBlogPage = location.pathname.startsWith("/blog");
+  const isLoginPage = location.pathname.startsWith("/login") || location.pathname.startsWith("/register");
+  const isCartPage = location.pathname.startsWith("/cart");
+  const isWishlistPage = location.pathname.startsWith("/wishlist");
 
   // Dedicated Mobile Auth Bridge view (clean, focused, standalone)
   if (isMobileAuthRoute) {
-    return (
-      <Suspense fallback={<PageLoadingSpinner />}>
-        <MobileAuth />
-      </Suspense>
-    );
+    return <MobileAuth />;
   }
 
   // 1. If logged in as admin, prevent access to customer store pages and auto-redirect to /admin
@@ -88,117 +87,115 @@ const AppLayout = () => {
   if (isAdminRoute) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Suspense fallback={<PageLoadingSpinner />}>
-          <Routes>
-            <Route
-              path="/admin/*"
-              element={
-                <ProtectedRoute role="admin">
-                  <AdminLayout />
-                </ProtectedRoute>
-              }
-            >
-              <Route index element={<AdminDashboard />} />
-              <Route path="blog-admin" element={<BlogAdmin />} />
-              <Route path="services-admin" element={<ServicesAdmin />} />
-              <Route path="products-admin" element={<ProductsAdmin />} />
-              <Route path="products-bulk" element={<ProductAdminBulk />} />
-              <Route path="discounts" element={<DiscountAdmin />} />
-              <Route path="interior-works" element={<InteriorWorksAdmin />} />
-              <Route path="orders" element={<OrdersAdmin />} />
-              <Route path="chats" element={<ChatsAdmin />} />
-              <Route path="return-gifts" element={<ReturnGiftsAdmin />} />
-            </Route>
-            <Route path="*" element={<Navigate to="/admin" replace />} />
-          </Routes>
-        </Suspense>
+        <Routes>
+          <Route
+            path="/admin/*"
+            element={
+              <ProtectedRoute role="admin">
+                <AdminLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<AdminDashboard />} />
+            <Route path="blog-admin" element={<BlogAdmin />} />
+            <Route path="services-admin" element={<ServicesAdmin />} />
+            <Route path="products-admin" element={<ProductsAdmin />} />
+            <Route path="products-bulk" element={<ProductAdminBulk />} />
+            <Route path="discounts" element={<DiscountAdmin />} />
+            <Route path="interior-works" element={<InteriorWorksAdmin />} />
+            <Route path="orders" element={<OrdersAdmin />} />
+            <Route path="chats" element={<ChatsAdmin />} />
+            <Route path="return-gifts" element={<ReturnGiftsAdmin />} />
+          </Route>
+          <Route path="*" element={<Navigate to="/admin" replace />} />
+        </Routes>
       </div>
     );
   }
 
   // 3. Regular customer view
   return (
-    <div className="min-h-screen bg-[#F7F6F0]">
+    <div className="min-h-screen bg-[#FAF7F2]">
       <Header />
-      <main className={isHomePage ? "" : "pt-20 sm:pt-24"}>
-        <Suspense fallback={<PageLoadingSpinner />}>
-          <Routes>
-            {/* ---------- Public customer routes ---------- */}
-            <Route path="/" element={<Home />} />
-            <Route path="/products" element={<ProductsPage />} />
-            <Route path="/product/:id" element={<ProductDetail />} />
-            <Route path="/return-gifts" element={<ReturnGifts />} />
-            <Route path="/services" element={<Services />} />
-            <Route path="/blog" element={<Blog />} />
-            <Route path="/blog/:id" element={<BlogPost />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/cart" element={<Cart />} />
+      <main className={isHomePage || isInteriorPage || isProductsPage || isGiftsPage || isServicesPage || isBlogPage || isLoginPage || isCartPage || isWishlistPage ? "" : "pt-20 sm:pt-24"}>
+        <Routes>
+          {/* ---------- Public customer routes ---------- */}
+          <Route path="/" element={<Home />} />
+          <Route path="/products" element={<ProductsPage />} />
+          <Route path="/product/:id" element={<ProductDetail />} />
+          <Route path="/return-gifts" element={<ReturnGifts />} />
+          <Route path="/services" element={<Services />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:id" element={<BlogPost />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Login initialIsRegister={true} />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/wishlist" element={<Wishlist />} />
 
-            {/* Public Interior Design page */}
-            <Route path="/interior-design" element={<InteriorDesignPage />} />
+          {/* Public Interior Design page */}
+          <Route path="/interior-design" element={<InteriorDesignPage />} />
 
-            {/* Mobile App Google Authentication Bridge */}
-            <Route path="/mobile-auth" element={<MobileAuth />} />
+          {/* Mobile App Google Authentication Bridge */}
+          <Route path="/mobile-auth" element={<MobileAuth />} />
 
-            {/* Legal and Policy pages */}
-            <Route path="/privacy-policy" element={<PrivacyPolicy initialTab="privacy" />} />
-            <Route path="/privacy" element={<PrivacyPolicy initialTab="privacy" />} />
-            <Route path="/terms" element={<PrivacyPolicy initialTab="terms" />} />
-            <Route path="/shipping-policy" element={<PrivacyPolicy initialTab="shipping" />} />
-            <Route path="/return-policy" element={<PrivacyPolicy initialTab="returns" />} />
-            <Route path="/delete-account" element={<DeleteAccount />} />
-            <Route path="/account-deletion" element={<DeleteAccount />} />
+          {/* Legal and Policy pages */}
+          <Route path="/privacy-policy" element={<PrivacyPolicy initialTab="privacy" />} />
+          <Route path="/privacy" element={<PrivacyPolicy initialTab="privacy" />} />
+          <Route path="/terms" element={<PrivacyPolicy initialTab="terms" />} />
+          <Route path="/shipping-policy" element={<PrivacyPolicy initialTab="shipping" />} />
+          <Route path="/return-policy" element={<PrivacyPolicy initialTab="returns" />} />
+          <Route path="/delete-account" element={<DeleteAccount />} />
+          <Route path="/account-deletion" element={<DeleteAccount />} />
 
-            {/* ---------- Protected customer routes ---------- */}
-            <Route
-              path="/checkout"
-              element={
-                <ProtectedRoute>
-                  <Checkout />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/interior-works"
-              element={
-                <ProtectedRoute>
-                  <InteriorWorks />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute>
-                  <Profile />
-                </ProtectedRoute>
-              }
-            />
+          {/* ---------- Protected customer routes ---------- */}
+          <Route
+            path="/checkout"
+            element={
+              <ProtectedRoute>
+                <Checkout />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/interior-works"
+            element={
+              <ProtectedRoute>
+                <InteriorWorks />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
 
-            {/* ---------- Admin protected routes ---------- */}
-            <Route
-              path="/admin/*"
-              element={
-                <ProtectedRoute role="admin">
-                  <AdminLayout />
-                </ProtectedRoute>
-              }
-            >
-              <Route index element={<AdminDashboard />} />
-              <Route path="blog-admin" element={<BlogAdmin />} />
-              <Route path="services-admin" element={<ServicesAdmin />} />
-              <Route path="products-admin" element={<ProductsAdmin />} />
-              <Route path="products-bulk" element={<ProductAdminBulk />} />
-              <Route path="discounts" element={<DiscountAdmin />} />
-              <Route path="interior-works" element={<InteriorWorksAdmin />} />
-              <Route path="orders" element={<OrdersAdmin />} />
-              <Route path="chats" element={<ChatsAdmin />} />
-              <Route path="return-gifts" element={<ReturnGiftsAdmin />} />
-            </Route>
-          </Routes>
-        </Suspense>
+          {/* ---------- Admin protected routes ---------- */}
+          <Route
+            path="/admin/*"
+            element={
+              <ProtectedRoute role="admin">
+                <AdminLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<AdminDashboard />} />
+            <Route path="blog-admin" element={<BlogAdmin />} />
+            <Route path="services-admin" element={<ServicesAdmin />} />
+            <Route path="products-admin" element={<ProductsAdmin />} />
+            <Route path="products-bulk" element={<ProductAdminBulk />} />
+            <Route path="discounts" element={<DiscountAdmin />} />
+            <Route path="interior-works" element={<InteriorWorksAdmin />} />
+            <Route path="orders" element={<OrdersAdmin />} />
+            <Route path="chats" element={<ChatsAdmin />} />
+            <Route path="return-gifts" element={<ReturnGiftsAdmin />} />
+          </Route>
+        </Routes>
       </main>
-      <Footer />
+      {!isLoginPage && <Footer />}
     </div>
   );
 };

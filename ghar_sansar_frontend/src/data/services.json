@@ -11,7 +11,7 @@
                         "description": "End-to-end interior solution for new homes or full renovations. Includes 3D designs, civil works, furniture, and styling.",
                         "price": 150000,
                         "actual_price": 200000,
-                        "image": "/interior/wallpaper/1.webp",
+                        "image": "/interior/wallpaper/1.jpeg",
                         "features": [
                             "Custom Furniture",
                             "Lighting",
@@ -29,7 +29,7 @@
                         "description": "Modern, ergonomic, and stylish kitchen designs with high-quality hardware and space-saving solutions.",
                         "price": 65000,
                         "actual_price": 85000,
-                        "image": "/interior/wallpaper_rolls/2.webp",
+                        "image": "/interior/wallpaper_rolls/2.jpg",
                         "features": [
                             "Waterproof Materials",
                             "Efficient Layout",
@@ -42,7 +42,7 @@
                         "description": "Give your living room a luxury look with custom TV units, wall treatments, and statement furniture pieces.",
                         "price": 45000,
                         "actual_price": 60000,
-                        "image": "/interior/3dbokka/2.webp",
+                        "image": "/interior/3dbokka/2.jpeg",
                         "features": [
                             "Wall Panel",
                             "TV Unit",
@@ -65,7 +65,7 @@
                         "description": "Professional installation of high-end wallpapers with precise alignment and durable finish.",
                         "price": 1500,
                         "actual_price": 2500,
-                        "image": "/interior/wallpaper/4.webp",
+                        "image": "/interior/wallpaper/4.jpeg",
                         "features": [
                             "Smooth Finish",
                             "Quick Install"
@@ -94,7 +94,7 @@
                         "description": "Durable and stylish vinyl flooring solutions for residential and commercial spaces.",
                         "price": 120,
                         "actual_price": 180,
-                        "image": "/interior/vinyl_flooring/1.webp",
+                        "image": "/interior/vinyl_flooring/1.jpg",
                         "features": [
                             "Waterproof",
                             "Easy Maintenance"
@@ -106,7 +106,7 @@
                         "description": "Shock-absorbent rubber flooring designed for safety and durability in gym environments.",
                         "price": 250,
                         "actual_price": 350,
-                        "image": "/interior/gym flooring/1.webp",
+                        "image": "/interior/gym flooring/1.jpg",
                         "features": [
                             "Anti-slip",
                             "Heavy Duty"
@@ -128,7 +128,7 @@
                         "description": "Create a lush green wall with our indoor and outdoor vertical garden solutions.",
                         "price": 12000,
                         "actual_price": 18000,
-                        "image": "/interior/maddalo_garden/1.webp",
+                        "image": "/interior/maddalo_garden/1.jpg",
                         "features": [
                             "Drip Irrigation",
                             "Native Plants"
@@ -145,7 +145,7 @@
                         "description": "Smart window blinds that can be controlled via remote or mobile app.",
                         "price": 15000,
                         "actual_price": 25000,
-                        "image": "/interior/automised_blind/1.webp",
+                        "image": "/interior/automised_blind/1.jpg",
                         "features": [
                             "Remote Control",
                             "Schedule Support"

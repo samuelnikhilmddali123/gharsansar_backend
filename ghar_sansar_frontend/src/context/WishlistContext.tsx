@@ -54,12 +54,19 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const token = getAuthToken();
     if (!token) {
       const saved = localStorage.getItem("wishlist");
+      const savedItems = localStorage.getItem("wishlist_items");
       if (saved) {
         try {
-          const parsed = JSON.parse(saved);
-          setWishlist(parsed);
+          setWishlist(JSON.parse(saved));
         } catch (e) {
           setWishlist([]);
+        }
+      }
+      if (savedItems) {
+        try {
+          setItems(JSON.parse(savedItems));
+        } catch (e) {
+          setItems([]);
         }
       }
       return;
@@ -93,14 +100,21 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             }
           } catch (e) {}
           localStorage.removeItem("wishlist");
+          localStorage.removeItem("wishlist_items");
         }
       }
     } catch (err) {
       console.warn("Could not fetch remote wishlist:", err);
       const saved = localStorage.getItem("wishlist");
+      const savedItems = localStorage.getItem("wishlist_items");
       if (saved) {
         try {
           setWishlist(JSON.parse(saved));
+        } catch (e) {}
+      }
+      if (savedItems) {
+        try {
+          setItems(JSON.parse(savedItems));
         } catch (e) {}
       }
     } finally {
@@ -119,6 +133,7 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setWishlist([]);
       setItems([]);
       localStorage.removeItem("wishlist");
+      localStorage.removeItem("wishlist_items");
     };
 
     window.addEventListener("auth_login", handleLogin);
@@ -135,8 +150,9 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const token = getAuthToken();
     if (!token) {
       localStorage.setItem("wishlist", JSON.stringify(wishlist));
+      localStorage.setItem("wishlist_items", JSON.stringify(items));
     }
-  }, [wishlist]);
+  }, [wishlist, items]);
 
   const isInWishlist = (productId: string): boolean => {
     if (!productId) return false;
@@ -157,6 +173,15 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     const token = getAuthToken();
     const currentlyWishlisted = isInWishlist(targetId);
+
+    const itemObj: WishlistItem = {
+      productId: targetId,
+      name: product.name || product.title || "Product",
+      price: product.price || 0,
+      image: product.image || "",
+      category: product.category || "",
+      addedAt: new Date().toISOString()
+    };
 
     if (token) {
       try {
@@ -190,17 +215,17 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     // Guest fallback
     let nextWishlisted = false;
-    setWishlist(prev => {
-      if (prev.includes(targetId)) {
-        nextWishlisted = false;
-        toast.success("Removed from wishlist");
-        return prev.filter(id => id !== targetId);
-      } else {
-        nextWishlisted = true;
-        toast.success("Saved to wishlist!");
-        return [...prev, targetId];
-      }
-    });
+    if (currentlyWishlisted) {
+      nextWishlisted = false;
+      setWishlist(prev => prev.filter(id => id !== targetId));
+      setItems(prev => prev.filter(it => it.productId !== targetId));
+      toast.success("Removed from wishlist");
+    } else {
+      nextWishlisted = true;
+      setWishlist(prev => [...prev.filter(id => id !== targetId), targetId]);
+      setItems(prev => [...prev.filter(it => it.productId !== targetId), itemObj]);
+      toast.success("Saved to wishlist!");
+    }
 
     return nextWishlisted;
   };
@@ -227,6 +252,7 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
 
     setWishlist(prev => prev.filter(id => id !== targetId));
+    setItems(prev => prev.filter(it => it.productId !== targetId));
     toast.success("Removed from wishlist");
   };
 

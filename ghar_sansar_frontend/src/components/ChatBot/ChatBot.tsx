@@ -169,7 +169,7 @@ const ChatBot: React.FC = () => {
 For details, feel free to reach out to us anytime!
 📞 Contact Us
 
-📱 +91-9492664870
+📱 +91-8121135980
 ✉ gharsansarshop@gmail.com
 `;
     }
@@ -179,7 +179,7 @@ For details, feel free to reach out to us anytime!
 For details, feel free to reach out to us anytime!
 📞 Contact Us
 
-📱 +91-9492664870
+📱 +91-8121135980
 ✉ gharsansarshop@gmail.com
 `;
   };

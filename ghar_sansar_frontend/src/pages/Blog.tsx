@@ -1,220 +1,363 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useBlogs } from "../context/BlogContext";
+import { Link } from "react-router-dom";
+import { Home, Play, X, ExternalLink, Sparkles, Video, Image as ImageIcon } from "lucide-react";
+import { useBlogs, Blog as BlogItem } from "../context/BlogContext";
 
-const API_URL = "https://lx70r6zsef.execute-api.ap-south-1.amazonaws.com/prod/api/storage/upload/blog";
-const YOUTUBE_LINK = "https://www.youtube.com/@gharsansar_shop";
+const YOUTUBE_CHANNEL = "https://www.youtube.com/@gharsansar_shop";
 
-const sanitizeUrl = (url?: string) => {
+// Helper to extract YouTube ID from standard or shorts URLs
+const extractYouTubeId = (url?: string) => {
   if (!url) return "";
-  url = url.trim().replace(/^https?:\/\/https?:\/\//, "https://");
-  const httpsIndex = url.indexOf("://");
-  if (httpsIndex !== -1) {
-    let [prefix, path] = [url.slice(0, httpsIndex + 3), url.slice(httpsIndex + 3)];
-    path = path.replace(/\/{2,}/g, "/");
-    url = prefix + path;
-  }
-  return url;
-};
-
-type BlogItem = {
-  id?: string;
-  title?: string;
-  description?: string;
-  image?: string;
-  video?: string;
-};
-
-const extractYouTubeId = (url: string) => {
-  const regExp = /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{11})/;
-  const match = url.match(regExp);
+  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{11})/);
   return match ? match[1] : "";
 };
 
 const Blog: React.FC = () => {
   const { blogs, loading } = useBlogs();
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalBlog, setModalBlog] = useState<any | null>(null);
+  const [activeTab, setActiveTab] = useState<"all" | "videos" | "photos">("all");
+  const [selectedPost, setSelectedPost] = useState<BlogItem | null>(null);
 
-  // useEffect removed since context handles fetching
+  // Categorize posts
+  const videoPosts = useMemo(() => {
+    return blogs.filter(
+      (p) =>
+        p.video &&
+        (/\.(mp4|webm|ogg)(\?|$)/i.test(p.video) ||
+          p.video.includes("youtube.com") ||
+          p.video.includes("youtu.be"))
+    );
+  }, [blogs]);
 
+  const imagePosts = useMemo(() => {
+    return blogs.filter((p) => !p.video && p.image);
+  }, [blogs]);
 
-  const videoPosts = blogs.filter(
-    (p) =>
-      p.video &&
-      ((/\.(mp4|webm|ogg)(\?|$)/i.test(p.video)) ||
-        p.video.includes("youtube.com") ||
-        p.video.includes("youtu.be"))
-  );
-  const imagePosts = blogs.filter((p) => !videoPosts.includes(p) && p.image);
+  const displayedPosts = useMemo(() => {
+    if (activeTab === "videos") return videoPosts;
+    if (activeTab === "photos") return imagePosts;
+    return blogs;
+  }, [blogs, videoPosts, imagePosts, activeTab]);
 
-  // Hide controls for <video> by using controls={false} and loop/autoplay/muted/playsInline
-  // For YouTube, autoplay, mute, loop—no controls or branding
-  const getYoutubeEmbedUrl = (post: BlogItem) => {
-    const vid = post.video ? extractYouTubeId(post.video) : "";
+  const getYoutubeEmbedUrl = (url?: string, autoplay: boolean = true) => {
+    const vid = extractYouTubeId(url);
     if (!vid) return "";
-    return `https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&loop=1&playlist=${vid}&controls=0&disablekb=1&modestbranding=1&showinfo=0&rel=0`;
+    return `https://www.youtube.com/embed/${vid}?autoplay=${autoplay ? "1" : "0"}&rel=0&modestbranding=1`;
   };
-
-  const handleSubscribe = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    window.open(YOUTUBE_LINK, "_blank", "noopener noreferrer");
-  };
-
-  const handleOpenModal = (post: BlogItem) => {
-    setModalBlog(post);
-    setModalOpen(true);
-  };
-
-  if (loading)
-    return <div className="text-center p-10 text-gray-500">Loading blog posts...</div>;
-  if (!blogs.length)
-    return <div className="text-center p-10 text-gray-500">No blog posts available.</div>;
 
   return (
-    <div className="py-8 bg-gray-50 min-h-screen">
-      <div className="w-full mx-auto px-2 sm:px-4 lg:px-8">
-        <div className="text-center mb-16">
-          <motion.h1
-            initial={{ opacity: 0, y: -30 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6"
-          >
-            Design Inspiration & Tips
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-xl text-gray-600 max-w-3xl mx-auto"
-          >
-            Discover the latest trends, expert tips, and creative ideas to transform your home into a beautiful sanctuary.
-          </motion.p>
-        </div>
-        {/* Header with Subscribe */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center mb-6 space-x-3">
-            {/* Logo Avatar */}
-            <div className="w-24 h-24 rounded-full border border-gray-200 flex items-center justify-center shadow overflow-hidden bg-white">
-              <img
-                src="/images/logo.png"
-                alt="Ghar sansar Logo"
-                className="w-full h-40 object-cover"
-                draggable={false}
-              />
-            </div>
+    <div className="bg-[#FAF7F2] min-h-screen font-poppins pt-20 sm:pt-24 pb-16 sm:pb-20 flex flex-col selection:bg-[#F7EBE4] selection:text-[#7D3219] antialiased">
+      <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* Breadcrumb Navigation */}
+        <nav className="flex items-center space-x-2 text-xs sm:text-[13px] text-gray-500 font-medium mb-4">
+          <Link to="/" className="hover:text-[#7D3219] transition-colors flex items-center gap-1.5 cursor-pointer">
+            <Home size={14} className="shrink-0 text-gray-500" />
+            <span>Home</span>
+          </Link>
+          <span className="text-gray-400 select-none px-0.5">&gt;</span>
+          <span className="text-gray-900 font-semibold">Design Journal</span>
+        </nav>
 
-            {/* Brand Name and Subtitle */}
-            <div>
-              <div className="font-bold text-2xl text-gray-900 flex items-center space-x-2">
-                <span>Ghar sansar</span>
-                <button
-                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-1 rounded text-base font-semibold shadow ml-2"
-                  onClick={handleSubscribe}
-                >
-                  Subscribe
-                </button>
-              </div>
-              <div className="text-sm text-gray-500">Latest on our Social</div>
-            </div>
+        {/* Editorial Text-Only Header (No top banner images, clean and uncluttered) */}
+        <div className="pb-6 border-b border-[#E8E2D8] mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <span className="text-[11px] sm:text-xs font-medium tracking-[0.24em] text-[#7D3219] uppercase font-sans mb-1.5 block">
+              Inspiration & Stories • Studio Journal
+            </span>
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-poppins font-normal text-gray-950 tracking-tight mb-2">
+              Design Inspiration & Ideas
+            </h1>
+            <p className="text-xs sm:text-sm text-[#736B63] max-w-2xl font-normal leading-relaxed">
+              Explore room transformation shorts, creative home styling walkthroughs, and curated design ideas crafted by our studio specialists.
+            </p>
+          </div>
+
+          {/* Social YouTube Channel Badge (Subtle, Not Oversized) */}
+          <div className="shrink-0">
+            <a
+              href={YOUTUBE_CHANNEL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-3.5 py-2 bg-[#F7EBE4] hover:bg-[#EFE0D7] text-[#7D3219] border border-[#D9B4A4] hover:border-[#7D3219] rounded-md text-xs font-medium transition shadow-2xs cursor-pointer"
+            >
+              <svg className="w-4 h-4 fill-current text-[#7D3219]" viewBox="0 0 24 24">
+                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+              </svg>
+              <span>Watch on YouTube @gharsansar_shop</span>
+              <ExternalLink size={12} className="opacity-70" />
+            </a>
           </div>
         </div>
-        {/* Video Reel (all autoplay, loop, no controls, no description) */}
-        {videoPosts.length > 0 && (
-          <div className="flex space-x-8 overflow-x-auto pb-8 hide-scrollbar">
-            {videoPosts.map((post, idx) => {
+
+        {/* Filter Pills */}
+        <div className="flex items-center gap-2 mb-8 overflow-x-auto no-scrollbar pb-1">
+          <button
+            type="button"
+            onClick={() => setActiveTab("all")}
+            className={`shrink-0 px-4 py-1.5 rounded-full text-xs font-medium transition cursor-pointer shadow-2xs ${
+              activeTab === "all"
+                ? "bg-[#F7EBE4] text-[#7D3219] border border-[#D9B4A4] shadow-xs"
+                : "bg-white hover:bg-[#FAF7F2] text-[#4A433D] hover:text-[#7D3219] border border-[#E8E2D8]"
+            }`}
+          >
+            All Stories ({blogs.length})
+          </button>
+
+          {videoPosts.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setActiveTab("videos")}
+              className={`shrink-0 px-4 py-1.5 rounded-full text-xs font-medium transition cursor-pointer shadow-2xs flex items-center gap-1.5 ${
+                activeTab === "videos"
+                  ? "bg-[#F7EBE4] text-[#7D3219] border border-[#D9B4A4] shadow-xs"
+                  : "bg-white hover:bg-[#FAF7F2] text-[#4A433D] hover:text-[#7D3219] border border-[#E8E2D8]"
+              }`}
+            >
+              <Video size={13} />
+              <span>Video Reels ({videoPosts.length})</span>
+            </button>
+          )}
+
+          {imagePosts.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setActiveTab("photos")}
+              className={`shrink-0 px-4 py-1.5 rounded-full text-xs font-medium transition cursor-pointer shadow-2xs flex items-center gap-1.5 ${
+                activeTab === "photos"
+                  ? "bg-[#F7EBE4] text-[#7D3219] border border-[#D9B4A4] shadow-xs"
+                  : "bg-white hover:bg-[#FAF7F2] text-[#4A433D] hover:text-[#7D3219] border border-[#E8E2D8]"
+              }`}
+            >
+              <ImageIcon size={13} />
+              <span>Articles & Photos ({imagePosts.length})</span>
+            </button>
+          )}
+        </div>
+
+        {/* Content State */}
+        {loading ? (
+          <div className="py-20 flex justify-center items-center">
+            <div className="w-8 h-8 rounded-full border-2 border-[#D9B4A4] border-t-[#7D3219] animate-spin"></div>
+          </div>
+        ) : displayedPosts.length === 0 ? (
+          <div className="text-center py-20 bg-white rounded-xl border border-[#E8E2D8] p-8 shadow-2xs">
+            <p className="text-gray-500 text-sm font-normal">No stories currently found in this category.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6 mb-14">
+            {displayedPosts.map((post, index) => {
               const isYouTube = post.video?.includes("youtube") || post.video?.includes("youtu.be");
+              const hasVideo = Boolean(post.video);
+
               return (
                 <motion.div
-                  key={`video-card-${idx}`}
-                  id={`video-card-${idx}`}
-                  className="flex-shrink-0 bg-white rounded-xl shadow p-3 transition-transform cursor-pointer hover:scale-105 w-[280px] md:w-[350px]"
-                  style={{ scrollSnapAlign: "center" }}
-                  onClick={() => handleOpenModal(post)}
+                  key={post.id || `post-${index}`}
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.35, delay: index * 0.04 }}
+                  onClick={() => setSelectedPost(post)}
+                  className="group bg-white rounded-xl border border-[#E8E2D8] hover:border-[#D9B4A4] shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_28px_rgba(125,50,25,0.06)] hover:-translate-y-1 transition-all duration-300 p-3.5 sm:p-4 flex flex-col justify-between cursor-pointer"
                 >
-                  {isYouTube ? (
-                    <iframe
-                      width="100%"
-                      height="440"
-                      src={getYoutubeEmbedUrl(post)}
-                      title="YouTube video"
-                      frameBorder="0"
-                      allow="autoplay; encrypted-media"
-                      allowFullScreen
-                      className="rounded"
-                      style={{ pointerEvents: "none" }}
-                    />
-                  ) : (
-                    <video
-                      src={post.video}
-                      autoPlay
-                      muted
-                      playsInline
-                      loop
-                      controls={false}
-                      className="w-full h-[440px] md:h-[500px] object-cover rounded"
-                      style={{ outline: "none", border: "none", userSelect: "none", pointerEvents: "none" }}
-                    />
-                  )}
+                  <div>
+                    {/* Media Preview Box */}
+                    <div className="relative w-full aspect-[16/10] sm:aspect-[9/13] max-h-[300px] rounded-lg overflow-hidden bg-[#FAF8F5] mb-3 border border-[#E8E2D8]">
+                      {hasVideo ? (
+                        isYouTube ? (
+                          <div className="relative w-full h-full bg-black/5 flex items-center justify-center">
+                            {/* YouTube Thumbnail if available or player */}
+                            <img
+                              src={`https://img.youtube.com/vi/${extractYouTubeId(post.video)}/hqdefault.jpg`}
+                              alt={post.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                              onError={(e) => {
+                                // Fallback if YouTube thumbnail 404s
+                                (e.target as HTMLElement).style.display = "none";
+                              }}
+                            />
+                            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <div className="w-10 h-10 rounded-full bg-white/90 shadow-md flex items-center justify-center group-hover:scale-110 transition-transform">
+                                <Play size={16} className="text-[#7D3219] fill-[#7D3219] ml-0.5" />
+                              </div>
+                            </div>
+                            <span className="absolute bottom-2 right-2 px-2 py-0.5 rounded-md bg-black/60 text-white text-[10px] font-medium backdrop-blur-xs flex items-center gap-1">
+                              <Play size={9} className="fill-white" /> Reel
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="relative w-full h-full bg-black">
+                            <video
+                              src={post.video}
+                              muted
+                              playsInline
+                              loop
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                            />
+                            <span className="absolute bottom-2 right-2 px-2 py-0.5 rounded-md bg-black/60 text-white text-[10px] font-medium backdrop-blur-xs">
+                              Video
+                            </span>
+                          </div>
+                        )
+                      ) : post.image ? (
+                        <img
+                          src={post.image}
+                          alt={post.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-400 bg-[#FAF8F5]">
+                          <Sparkles size={24} className="opacity-40 text-stone-400" />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Features Tag */}
+                    {post.features && post.features[0] && (
+                      <span className="text-[10px] font-medium uppercase tracking-wider text-[#7D3219] bg-[#F7EBE4] border border-[#D9B4A4] px-2 py-0.5 rounded-md mb-2 inline-block">
+                        {post.features[0]}
+                      </span>
+                    )}
+
+                    {/* Title */}
+                    <h3 className="font-poppins text-sm sm:text-[15px] font-normal text-gray-950 mb-1 leading-snug line-clamp-2 group-hover:text-[#7D3219] transition-colors">
+                      {post.title}
+                    </h3>
+
+                    {/* Description */}
+                    {post.description && (
+                      <p className="text-xs text-[#6B7280] font-normal leading-relaxed line-clamp-2 mb-3">
+                        {post.description}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Micro-Curved Secondary Card Action */}
+                  <div className="pt-2.5 border-t border-[#E8E2D8] mt-2">
+                    <button
+                      type="button"
+                      className="w-full py-1.5 px-3 bg-[#FAF7F2] group-hover:bg-[#F7EBE4] text-[#7D3219] border border-[#E8E2D8] group-hover:border-[#D9B4A4] text-xs font-poppins font-medium rounded-md shadow-2xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                    >
+                      {hasVideo ? (
+                        <>
+                          <Play size={11} className="fill-current text-[#7D3219]" />
+                          <span>Watch Story</span>
+                        </>
+                      ) : (
+                        <span>Read Full Story</span>
+                      )}
+                    </button>
+                  </div>
                 </motion.div>
               );
             })}
           </div>
         )}
 
-        {/* Modal for video/image (show description/title here) */}
+        {/* Video / Story Detail Modal */}
         <AnimatePresence>
-          {modalOpen && modalBlog && (
+          {selectedPost && (
             <motion.div
-              className="fixed inset-0 bg-black bg-opacity-70 z-50 flex justify-center items-center"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setModalOpen(false)}
+              onClick={() => setSelectedPost(null)}
+              className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 sm:p-6"
             >
               <motion.div
-                initial={{ scale: 0.96 }}
-                animate={{ scale: 1 }}
-                exit={{ scale: 0.96 }}
-                className="bg-white rounded-xl flex flex-col md:flex-row p-6 max-w-3xl w-full shadow-xl relative"
-                onClick={e => e.stopPropagation()}
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.95, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                onClick={(e) => e.stopPropagation()}
+                className="bg-white rounded-xl border border-[#E8E2D8] shadow-2xl max-w-2xl w-full p-5 sm:p-6 relative max-h-[92vh] overflow-y-auto"
               >
-                {modalBlog.video ? (
-                  modalBlog.video.includes("youtube") ? (
-                    <iframe
-                      width="100%"
-                      height="384"
-                      src={getYoutubeEmbedUrl(modalBlog)}
-                      title="YouTube video"
-                      frameBorder="0"
-                      allow="autoplay; encrypted-media"
-                      allowFullScreen
-                      className="md:w-96 rounded"
+                {/* Close Button */}
+                <button
+                  type="button"
+                  onClick={() => setSelectedPost(null)}
+                  className="absolute right-4 top-4 w-7 h-7 rounded-md border border-[#E8E2D8] bg-[#FAF7F2] hover:bg-white text-gray-500 hover:text-black flex items-center justify-center transition cursor-pointer z-10"
+                  aria-label="Close modal"
+                >
+                  <X size={15} />
+                </button>
+
+                {/* Media Embed */}
+                <div className="w-full aspect-[16/9] sm:aspect-[16/10] rounded-lg overflow-hidden bg-black mb-4 border border-[#E8E2D8]">
+                  {selectedPost.video ? (
+                    selectedPost.video.includes("youtube") || selectedPost.video.includes("youtu.be") ? (
+                      <iframe
+                        width="100%"
+                        height="100%"
+                        src={getYoutubeEmbedUrl(selectedPost.video, true)}
+                        title={selectedPost.title}
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        className="w-full h-full"
+                      />
+                    ) : (
+                      <video
+                        src={selectedPost.video}
+                        controls
+                        autoPlay
+                        className="w-full h-full object-contain"
+                      />
+                    )
+                  ) : selectedPost.image ? (
+                    <img
+                      src={selectedPost.image}
+                      alt={selectedPost.title}
+                      className="w-full h-full object-cover"
                     />
-                  ) : (
-                    <video
-                      src={modalBlog.video}
-                      controls
-                      autoPlay
-                      loop
-                      className="w-full md:w-96 h-96 object-cover rounded"
-                    />
-                  )
-                ) : modalBlog.image ? (
-                  <img
-                    src={modalBlog.image}
-                    alt={modalBlog.title}
-                    className="w-full md:w-96 h-96 object-cover rounded"
-                  />
-                ) : null}
-                <div className="flex-1 px-4 mt-4 md:mt-0">
-                  <div className="font-bold text-lg mb-2">{modalBlog.title}</div>
-                  <div className="whitespace-pre-line text-gray-700">{modalBlog.description}</div>
-                  <button
-                    className="absolute right-2 top-1 text-2xl text-gray-500 hover:text-gray-800"
-                    onClick={() => setModalOpen(false)}
+                  ) : null}
+                </div>
+
+                {/* Features Tag */}
+                {selectedPost.features && selectedPost.features.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mb-2">
+                    {selectedPost.features.map((f, i) => (
+                      <span
+                        key={i}
+                        className="text-[10px] font-medium uppercase tracking-wider text-[#7D3219] bg-[#F7EBE4] border border-[#D9B4A4] px-2 py-0.5 rounded-md"
+                      >
+                        {f}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Title */}
+                <h2 className="font-poppins text-lg sm:text-xl font-normal text-gray-950 mb-2 leading-snug">
+                  {selectedPost.title}
+                </h2>
+
+                {/* Full Description */}
+                {selectedPost.description && (
+                  <p className="text-xs sm:text-[13px] text-[#6B7280] font-normal leading-relaxed whitespace-pre-line mb-4">
+                    {selectedPost.description}
+                  </p>
+                )}
+
+                {/* Modal Footer Link */}
+                <div className="pt-3 border-t border-[#E8E2D8] flex items-center justify-between gap-3">
+                  <a
+                    href={YOUTUBE_CHANNEL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-[#7D3219] hover:underline font-medium inline-flex items-center gap-1 cursor-pointer"
                   >
-                    &times;
+                    <span>More updates on our channel</span>
+                    <ExternalLink size={12} />
+                  </a>
+
+                  <button
+                    type="button"
+                    onClick={() => setSelectedPost(null)}
+                    className="px-4 py-2 bg-[#F7EBE4] hover:bg-[#EFE0D7] text-[#7D3219] border border-[#D9B4A4] rounded-md text-xs font-medium transition cursor-pointer"
+                  >
+                    Done
                   </button>
                 </div>
               </motion.div>
@@ -222,42 +365,7 @@ const Blog: React.FC = () => {
           )}
         </AnimatePresence>
 
-        {/* Images */}
-        {imagePosts.length > 0 && (
-          <>
-            <div className="text-xl font-bold mt-8 mb-4">Photos and Images</div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-              {imagePosts.map((post, idx) => (
-                <div
-                  key={`img-card-${idx}`}
-                  className="bg-white shadow rounded-xl p-4 flex flex-col items-center cursor-pointer"
-                  onClick={() => handleOpenModal(post)}
-                >
-                  <img
-                    src={post.image}
-                    alt={post.title}
-                    className="w-full h-64 object-cover rounded"
-                  />
-                  <div className="mt-3 font-semibold text-base text-center">{post.title}</div>
-                  {post.description && (
-                    <div className="text-gray-600 text-sm mt-1 text-center">{post.description}</div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </>
-        )}
       </div>
-      {/* Hide scrollbar styling */}
-      <style>{`
-        .hide-scrollbar {
-          scrollbar-width: none;
-          -ms-overflow-style: none;
-        }
-        .hide-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-      `}</style>
     </div>
   );
 };

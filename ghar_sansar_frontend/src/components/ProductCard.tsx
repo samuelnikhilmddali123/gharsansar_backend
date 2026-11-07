@@ -184,7 +184,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-40px" }}
       transition={{ duration: 0.35, delay: (index % 12) * 0.03 }}
-      className="group relative bg-white rounded-xl border border-[#E7E5E1] shadow-[0_4px_16px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:-translate-y-1 hover:border-[#004D40]/30 transition-all duration-300 flex flex-col justify-between p-3.5 sm:p-4 cursor-pointer h-full select-none"
+      className="group relative bg-white rounded-2xl border border-[#E8E2D8] shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_18px_36px_rgba(200,107,76,0.12)] hover:-translate-y-1.5 hover:border-[#8E3F24]/60 transition-all duration-300 flex flex-col justify-between p-3.5 sm:p-4 cursor-pointer h-full select-none overflow-hidden font-poppins"
       onClick={() =>
         navigate(`/product/${encodeURIComponent(product.id)}`, { state: product })
       }
@@ -192,10 +192,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
       {/* Top Section: Image + Badges + Info */}
       <div className="flex flex-col flex-1">
         {/* Product Image Container (Consistent 1:1 Aspect Ratio) */}
-        <div className="relative w-full aspect-square rounded-lg overflow-hidden flex items-center justify-center p-3 sm:p-4 mb-3.5 bg-[#FAF9F7] border border-[#F0ECE1]">
+        <div className="relative w-full aspect-square rounded-none overflow-hidden flex items-center justify-center p-3 sm:p-4 mb-3.5 bg-[#FAF8F5] border border-[#E8E2D8] group-hover:border-gray-300 transition-colors">
           {/* Main Discount Badge (ONLY Top-Left) */}
           {displayDiscountBadge && (
-            <div className="absolute top-2.5 left-2.5 z-10 bg-red-600 text-white text-[11px] sm:text-xs font-bold tracking-wider uppercase px-2.5 py-1 rounded-md shadow-xs pointer-events-none">
+            <div className="absolute top-2.5 left-2.5 z-10 bg-[#8E3F24] text-white text-[10.5px] font-poppins font-normal tracking-wider uppercase px-2.5 py-0.5 rounded-full shadow-xs pointer-events-none">
               {displayDiscountBadge}
             </div>
           )}
@@ -206,15 +206,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
             onClick={handleWishlist}
             className={`absolute top-2.5 right-2.5 z-10 w-8 h-8 rounded-full bg-white/90 backdrop-blur-xs border border-gray-200/70 shadow-2xs flex items-center justify-center transition-all duration-200 hover:bg-white hover:scale-105 active:scale-95 cursor-pointer ${
               isWishlisted
-                ? "text-[#004D40] bg-white border-[#004D40]/30"
-                : "text-gray-400 hover:text-[#004D40]"
+                ? "text-rose-600 bg-white border-rose-200"
+                : "text-gray-400 hover:text-black"
             }`}
             aria-label="Add to wishlist"
           >
             <Heart
               size={15}
               strokeWidth={2}
-              className={isWishlisted ? "fill-current text-[#004D40]" : ""}
+              className={isWishlisted ? "fill-current text-rose-600" : ""}
             />
           </button>
 
@@ -232,7 +232,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
         </div>
 
         {/* Product Title (Strict 2-line clamp with fixed height for row alignment) */}
-        <h3 className="text-[15px] sm:text-base font-semibold text-[#171717] leading-[22px] line-clamp-2 min-h-[44px] h-[44px] mb-1.5 group-hover:text-[#004D40] transition-colors">
+        <h3 className="font-poppins text-[15px] sm:text-base font-normal text-[#181513] leading-[22px] line-clamp-2 min-h-[44px] h-[44px] mb-1.5">
           {product.title?.replace(/_/g, " ")}
         </h3>
 
@@ -250,22 +250,22 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
       </div>
 
       {/* Bottom Section: Pricing + Actions (Pinned to bottom) */}
-      <div className="pt-2 border-t border-[#F3F1EC]">
-        {/* Pricing Hierarchy: Final Customer Price dominant + Single MRP Strike Price reference */}
-        <div className="flex items-baseline gap-2 mb-3.5 flex-wrap">
+      <div className="pt-2.5 border-t border-[#F0EAE1] mt-auto">
+        {/* Pricing Hierarchy: Clean unbolded final customer price + subtle strike price reference */}
+        <div className="flex items-baseline gap-2 mb-3 flex-wrap">
           {finalPrice > 0 ? (
             <>
-              <span className="text-[21px] sm:text-[23px] font-bold text-[#171717] tracking-tight">
+              <span className="font-poppins text-lg sm:text-[21px] font-normal text-gray-950 tracking-tight">
                 ₹{finalPrice.toLocaleString("en-IN")}
               </span>
               {strikePrice > finalPrice && (
-                <span className="text-sm text-[#9CA3AF] line-through font-normal" title="MRP / Strike Price">
+                <span className="text-xs sm:text-[13px] text-[#8C827A] line-through font-normal" title="MRP / Strike Price">
                   ₹{strikePrice.toLocaleString("en-IN")}
                 </span>
               )}
             </>
           ) : (
-            <span className="text-sm font-semibold text-gray-600">Price on Request</span>
+            <span className="text-xs sm:text-sm font-normal text-gray-600">Price on Request</span>
           )}
         </div>
 
@@ -277,28 +277,28 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
                 /* Quantity Stepper matching button height */
                 <div
                   onClick={(e) => e.stopPropagation()}
-                  className="flex-1 h-[38px] sm:h-[40px] border border-[#004D40] bg-[#E8F5F1] rounded-lg flex items-center justify-between px-2 shadow-2xs"
+                  className="flex-1 h-[38px] border border-[#E8E2D8] bg-[#FAF7F2] rounded-md flex items-center justify-between px-2 shadow-2xs"
                 >
                   <button
                     type="button"
                     onClick={handleDecrement}
-                    className="w-6 h-6 flex items-center justify-center bg-white hover:bg-gray-100 text-[#004D40] border border-[#004D40]/30 rounded-md active:scale-90 transition font-bold cursor-pointer"
+                    className="w-6 h-6 flex items-center justify-center bg-white hover:bg-gray-100 text-gray-800 border border-[#E8E2D8] rounded-sm active:scale-90 transition font-normal cursor-pointer"
                     aria-label="Decrease quantity"
                   >
-                    <Minus size={12} strokeWidth={2.5} />
+                    <Minus size={11} strokeWidth={2} />
                   </button>
 
-                  <span className="font-bold text-[#004D40] text-xs sm:text-sm px-1 select-none">
+                  <span className="font-normal text-gray-950 text-xs sm:text-sm px-1 select-none">
                     {quantityInCart}
                   </span>
 
                   <button
                     type="button"
                     onClick={handleIncrement}
-                    className="w-6 h-6 flex items-center justify-center bg-[#004D40] hover:bg-[#00382E] text-white rounded-md active:scale-90 transition font-bold cursor-pointer"
+                    className="w-6 h-6 flex items-center justify-center bg-[#F7EBE4] hover:bg-[#EFE0D7] text-[#7D3219] border border-[#D9B4A4] rounded-sm active:scale-90 transition font-medium cursor-pointer"
                     aria-label="Increase quantity"
                   >
-                    <Plus size={12} strokeWidth={2.5} />
+                    <Plus size={11} strokeWidth={2} />
                   </button>
                 </div>
               ) : (
@@ -306,18 +306,19 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
                 <button
                   type="button"
                   onClick={handleAddToCart}
-                  className="flex-1 h-[38px] sm:h-[40px] px-2.5 bg-white hover:bg-[#E8F5F1] border border-[#004D40] text-[#004D40] text-xs sm:text-[13px] font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-all duration-150 active:scale-95 shadow-2xs shrink-0 cursor-pointer"
+                  className="flex-1 h-[38px] px-2 bg-[#FAF7F2] hover:bg-white border border-[#E8E2D8] hover:border-[#8E3F24] text-gray-950 text-xs sm:text-[13px] font-normal rounded-md flex items-center justify-center gap-1.5 transition-all duration-150 active:scale-95 shadow-2xs whitespace-nowrap cursor-pointer"
                   aria-label="Add to cart"
                 >
                   {isAdded ? (
                     <>
-                      <Check size={14} className="stroke-[2.5] text-[#004D40]" />
-                      <span>Added!</span>
+                      <Check size={14} className="stroke-[2.5] text-emerald-600" />
+                      <span className="text-emerald-700">Added</span>
                     </>
                   ) : (
                     <>
-                      <ShoppingCart size={14} className="stroke-[2]" />
-                      <span>Add to Cart</span>
+                      <ShoppingCart size={13} className="stroke-[1.8] text-gray-600 shrink-0" />
+                      <span className="hidden sm:inline">Add to Cart</span>
+                      <span className="sm:hidden">Add</span>
                     </>
                   )}
                 </button>
@@ -327,7 +328,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
               <button
                 type="button"
                 onClick={handleBuyNow}
-                className="flex-1 h-[38px] sm:h-[40px] px-2.5 bg-[#004D40] hover:bg-[#00382E] text-white text-xs sm:text-[13px] font-semibold rounded-lg flex items-center justify-center transition-all duration-150 active:scale-95 shadow-2xs shrink-0 cursor-pointer"
+                className="flex-1 h-[38px] px-2 bg-[#F7EBE4] hover:bg-[#EFE0D7] text-[#7D3219] border border-[#D9B4A4] hover:border-[#7D3219] text-xs sm:text-[13px] font-medium rounded-md flex items-center justify-center transition-all duration-150 active:scale-95 shadow-2xs whitespace-nowrap cursor-pointer"
                 aria-label="Buy now"
               >
                 <span>Buy Now</span>
@@ -337,7 +338,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
             <button
               type="button"
               onClick={() => navigate(`/product/${encodeURIComponent(product.id)}`, { state: product })}
-              className="w-full h-[38px] sm:h-[40px] bg-[#004D40] hover:bg-[#00382E] text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer"
+              className="w-full h-[38px] bg-[#F7EBE4] hover:bg-[#EFE0D7] text-[#7D3219] border border-[#D9B4A4] hover:border-[#7D3219] text-xs font-medium rounded-md transition-colors cursor-pointer"
             >
               Enquire
             </button>

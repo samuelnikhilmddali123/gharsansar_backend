@@ -21,7 +21,7 @@ import axios from "axios";
 import categoriesData from "../data/categories.json";
 
 const itemsPerPage = 12;
-const placeholderImage = "/images/placeholder.webp";
+const placeholderImage = "/images/placeholder.jpg";
 const API_BASE = import.meta.env.VITE_AWS_API_URL || "/api";
 const BACKEND_STATIC_URL = API_BASE.replace(/\/api$/, "");
 
@@ -190,7 +190,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full h-10 flex items-center justify-between bg-white border border-[#D4CBBF] hover:border-gray-500 focus:border-[#0a2e22] rounded-lg px-3.5 text-xs sm:text-[13px] font-medium text-gray-800 focus:outline-none transition-all cursor-pointer shadow-2xs text-left"
+        className="w-full h-10 flex items-center justify-between bg-white border border-[#E8E2D8] hover:border-gray-500 focus:border-[#7D3219] rounded-xl px-4 text-xs sm:text-[13px] font-medium text-gray-800 focus:outline-none transition-all cursor-pointer shadow-2xs text-left"
       >
         <span className="truncate">{value === "All Categories" ? placeholder : formatCategoryTitle(value)}</span>
         <ChevronDown
@@ -207,7 +207,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 4 }}
             transition={{ duration: 0.12 }}
-            className="absolute z-50 right-0 mt-1.5 w-64 max-h-72 overflow-y-auto bg-white border border-[#D4CBBF] rounded-xl shadow-xl py-1.5 focus:outline-none"
+            className="absolute z-50 right-0 mt-1.5 w-64 max-h-72 overflow-y-auto bg-white border border-[#E8E2D8] rounded-xl shadow-xl py-1.5 focus:outline-none"
           >
             {options.map((opt) => (
               <button
@@ -219,12 +219,12 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
                 }}
                 className={`w-full text-left px-4 py-2.5 text-xs sm:text-[13px] transition-colors flex items-center justify-between cursor-pointer ${
                   opt === value
-                    ? "font-bold text-[#0a2e22] bg-[#F7F6F0]"
-                    : "font-medium text-gray-700 hover:bg-[#FAF8F5]"
+                    ? "font-medium text-[#7D3219] bg-[#F7EBE4]"
+                    : "font-normal text-gray-700 hover:bg-[#FAF7F2] hover:text-[#7D3219]"
                 }`}
               >
                 <span className="truncate">{opt === "All Categories" ? placeholder : formatCategoryTitle(opt)}</span>
-                {opt === value && <Check size={14} className="text-[#0a2e22] shrink-0 ml-2" />}
+                {opt === value && <Check size={14} className="text-[#7D3219] shrink-0 ml-2" />}
               </button>
             ))}
           </motion.div>
@@ -468,7 +468,7 @@ I would like to inquire about the following Interior Design:
 
 Looking forward to your response!`;
 
-    const phone = "919492664870";
+    const phone = "918121135980";
     const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
     window.open(url, "_blank");
     setEnquirySuccess(true);
@@ -486,27 +486,26 @@ Looking forward to your response!`;
   };
 
   return (
-    <div className="bg-[#F7F6F0] min-h-screen font-sans pb-20 flex flex-col">
+    <div className="bg-[#FAF7F2] min-h-screen font-poppins pb-20 flex flex-col selection:bg-[#F7EBE4] selection:text-[#7D3219] antialiased">
       {/* 1. Hero Inset Banner */}
-      <div className="w-full bg-[#F7F6F0] -mt-20 sm:-mt-24 pt-[60px] sm:pt-[74px] pb-3 sm:pb-4">
+      <div className="w-full bg-[#FAF7F2] pt-13 sm:pt-14 pb-2 sm:pb-2.5">
         <div className="w-full max-w-[1880px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10">
           <div
-            className="relative w-full rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm border border-[#ece6dc] bg-[#1a2e22] group select-none aspect-[2172/724] min-h-[170px] sm:min-h-[220px]"
-            style={{ aspectRatio: "2172 / 724" }}
+            className="relative w-full rounded-xl sm:rounded-2xl overflow-hidden border-[2.5px] sm:border-[3px] border-[#F6F1E8] shadow-md bg-[#181513] group select-none h-[140px] sm:h-[180px] lg:h-[210px] xl:h-[230px]"
           >
             {/* Banner Background Image */}
             <img
-              src="/images/interior banner.webp"
+              src="/images/interior banner.png"
               alt="Interior Design - Transform Your Space Into A Beautiful Home"
-              className="w-full h-full object-cover block cursor-pointer"
+              className="w-full h-full object-cover object-center block cursor-pointer"
               onClick={scrollToCollection}
             />
 
-            {/* Clickable Overlay specifically on the 'Explore Collection' button area */}
+            {/* Clickable Overlay to explore collection */}
             <button
               type="button"
               onClick={scrollToCollection}
-              className="absolute left-[3.5%] sm:left-[4.2%] bottom-[13%] sm:bottom-[15%] w-36 sm:w-44 md:w-48 h-8 sm:h-10 md:h-11 rounded-full cursor-pointer z-20 opacity-0 hover:opacity-100 hover:ring-2 hover:ring-[#D4AF37]/50 active:scale-95 transition-all"
+              className="absolute inset-0 w-full h-full cursor-pointer z-10 opacity-0"
               aria-label="Explore Collection"
               title="Explore Collection"
             />
@@ -515,10 +514,10 @@ Looking forward to your response!`;
       </div>
 
       {/* 2. Main Content Container */}
-      <div id="collection-section" className="w-full max-w-[1880px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10 pt-4">
+      <div id="collection-section" className="w-full max-w-[1880px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10 pt-2 sm:pt-2.5">
         {/* Breadcrumb: [Home Icon] Home > Interior Design */}
         <nav className="flex items-center space-x-2 text-xs sm:text-[13px] text-gray-500 font-medium mb-3">
-          <Link to="/" className="hover:text-[#0a2e22] transition-colors flex items-center gap-1.5">
+          <Link to="/" className="hover:text-[#7D3219] transition-colors flex items-center gap-1.5">
             <Home size={14} className="shrink-0 text-gray-500" />
             <span>Home</span>
           </Link>
@@ -527,7 +526,7 @@ Looking forward to your response!`;
             <>
               <button
                 onClick={handleBackToCategories}
-                className="hover:text-[#0a2e22] transition-colors cursor-pointer"
+                className="hover:text-[#7D3219] transition-colors cursor-pointer"
               >
                 Interior Design
               </button>
@@ -545,9 +544,12 @@ Looking forward to your response!`;
         {!activeCategory ? (
           <>
             {/* Title & Controls Row */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 border-b border-[#E8E5DC]">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 border-b border-[#E8E2D8]">
               <div>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-serif text-[#1a241e] font-normal tracking-tight">
+                <span className="text-[11px] sm:text-xs font-medium tracking-[0.24em] text-[#7D3219] uppercase font-sans mb-1 block">
+                  Curated Collections
+                </span>
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-poppins text-gray-950 font-normal tracking-tight">
                   Interior Design
                 </h1>
                 <p className="text-xs sm:text-sm text-gray-600 mt-1 font-normal leading-relaxed">
@@ -568,7 +570,7 @@ Looking forward to your response!`;
                       setSearch(e.target.value);
                       setCurrentPage(1);
                     }}
-                    className="w-full h-10 bg-white border border-[#D4CBBF] hover:border-gray-500 focus:border-[#0a2e22] focus:ring-1 focus:ring-[#0a2e22]/20 rounded-lg pl-10 pr-8 text-xs sm:text-[13px] font-normal text-gray-900 placeholder:text-gray-500 focus:outline-none transition-all shadow-2xs"
+                    className="w-full h-10 bg-white border border-[#E8E2D8] hover:border-gray-500 focus:border-[#7D3219] focus:ring-1 focus:ring-[#7D3219]/20 rounded-xl pl-10 pr-8 text-xs sm:text-[13px] font-normal text-gray-900 placeholder:text-gray-500 focus:outline-none transition-all shadow-2xs"
                   />
                   {search && (
                     <button
@@ -600,7 +602,7 @@ Looking forward to your response!`;
                 {[...Array(12)].map((_, i) => (
                   <div
                     key={i}
-                    className="animate-pulse bg-white rounded-2xl p-4 h-[320px] border border-[#E8E5DC]"
+                    className="animate-pulse bg-white rounded-2xl p-4 h-[320px] border border-[#E8E2D8]"
                   >
                     <div className="bg-gray-100 rounded-xl aspect-[4/3] mb-3"></div>
                     <div className="bg-gray-100 h-4 w-3/4 rounded mb-2"></div>
@@ -615,11 +617,11 @@ Looking forward to your response!`;
                   <div
                     key={cat.name}
                     onClick={() => onSelectCategory(cat.name)}
-                    className="group bg-white rounded-2xl border border-[#E8E5DC] hover:border-[#C4BAA9] hover:shadow-lg transition-all duration-300 flex flex-col justify-between p-3.5 sm:p-4 cursor-pointer"
+                    className="group bg-white rounded-2xl border border-[#E8E2D8] hover:border-[#D9B4A4] shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_18px_36px_rgba(125,50,25,0.08)] hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between p-3.5 sm:p-4 cursor-pointer"
                   >
                     <div>
-                      {/* Image container: aspect 4:3 rounded-xl */}
-                      <div className="relative w-full aspect-[4/3] rounded-xl overflow-hidden bg-[#FAF8F5] mb-3 border border-[#ECE7DC]">
+                      {/* Image container: aspect 4:3 rounded-xl clean with no overlay obstruction */}
+                      <div className="relative w-full aspect-[4/3] rounded-none overflow-hidden bg-[#FAF8F5] mb-3.5 border border-[#E8E2D8]">
                         <img
                           src={cat.image || placeholderImage}
                           alt={cat.name}
@@ -629,30 +631,30 @@ Looking forward to your response!`;
                       </div>
 
                       {/* Title */}
-                      <h3 className="text-sm sm:text-[15px] font-bold text-gray-900 group-hover:text-[#0a2e22] transition-colors mb-1.5 line-clamp-1">
+                      <h3 className="font-poppins text-[15px] sm:text-base font-normal text-gray-950 mb-1.5 line-clamp-1 leading-snug">
                         {formatCategoryTitle(cat.name)}
                       </h3>
 
                       {/* Feature snippet - authentic 2-line description */}
-                      <p className="text-xs text-gray-500 font-normal leading-relaxed line-clamp-2 min-h-[34px] mb-3">
+                      <p className="font-poppins text-xs text-gray-500 font-normal leading-relaxed line-clamp-2 min-h-[34px] mb-3">
                         {getFeatureSnippet(cat)}
                       </p>
                     </div>
 
                     {/* Bottom row: XX Designs + Circular Arrow */}
                     <div className="flex items-center justify-between pt-2.5 border-t border-[#F2EFE9] mt-auto">
-                      <span className="text-xs text-gray-500 font-medium">
+                      <span className="font-poppins text-xs text-gray-500 font-medium">
                         {cat.subcategories.length} Designs
                       </span>
-                      <div className="w-8 h-8 rounded-full border border-[#D6C7B2] bg-white group-hover:bg-[#0a2e22] group-hover:border-[#0a2e22] text-[#8C6D4F] group-hover:text-white flex items-center justify-center transition-all duration-200 shadow-2xs">
-                        <ChevronRight size={15} className="stroke-[2.2]" />
+                      <div className="w-7 h-7 rounded-full bg-[#FAF7F2] border border-[#E8E2D8] group-hover:bg-[#F7EBE4] group-hover:border-[#D9B4A4] text-gray-600 group-hover:text-[#7D3219] flex items-center justify-center transition-colors">
+                        <ChevronRight size={14} />
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-24 bg-white rounded-2xl border border-[#E8E5DC] mt-6 shadow-2xs">
+              <div className="text-center py-24 bg-white rounded-2xl border border-[#E8E2D8] mt-6 shadow-2xs">
                 <Search className="w-10 h-10 text-gray-300 mx-auto mb-3" />
                 <h3 className="text-base font-bold text-gray-900 mb-1">No categories found</h3>
                 <p className="text-xs text-gray-500 mb-4">
@@ -664,7 +666,7 @@ Looking forward to your response!`;
                     setSelectedCategory("All Categories");
                     setCurrentPage(1);
                   }}
-                  className="px-5 py-2 bg-[#0a2e22] text-white rounded-full text-xs font-semibold hover:bg-[#061d15] transition cursor-pointer"
+                  className="px-5 py-2 bg-[#F7EBE4] hover:bg-[#EFE0D7] text-[#7D3219] border border-[#D9B4A4] hover:border-[#7D3219] rounded-md text-xs font-medium transition cursor-pointer shadow-2xs"
                 >
                   Reset Filter
                 </button>
@@ -682,7 +684,7 @@ Looking forward to your response!`;
                       setCurrentPage(currentPage - 1);
                       window.scrollTo({ top: 380, behavior: "smooth" });
                     }}
-                    className="px-3.5 py-1.5 flex items-center gap-1 rounded-lg border border-[#E8E5DC] bg-white text-gray-700 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-50 transition cursor-pointer text-xs font-semibold shadow-2xs"
+                    className="px-3.5 py-1.5 flex items-center gap-1 rounded-md border border-[#E8E2D8] bg-white text-gray-700 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-[#FAF7F2] transition cursor-pointer text-xs font-medium shadow-2xs"
                   >
                     <span>&lt;</span>
                     <span>Prev</span>
@@ -696,10 +698,10 @@ Looking forward to your response!`;
                         setCurrentPage(p);
                         window.scrollTo({ top: 380, behavior: "smooth" });
                       }}
-                      className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                      className={`w-8 h-8 flex items-center justify-center rounded-md text-xs font-medium transition-all cursor-pointer ${
                         currentPage === p
-                          ? "bg-[#0a2e22] text-white shadow-xs font-bold"
-                          : "bg-white border border-[#E8E5DC] text-gray-700 hover:bg-gray-50"
+                          ? "bg-[#F7EBE4] text-[#7D3219] border border-[#D9B4A4] shadow-2xs font-medium"
+                          : "bg-white border border-[#E8E2D8] text-gray-700 hover:bg-[#FAF7F2]"
                       }`}
                     >
                       {p}
@@ -713,7 +715,7 @@ Looking forward to your response!`;
                       setCurrentPage(currentPage + 1);
                       window.scrollTo({ top: 380, behavior: "smooth" });
                     }}
-                    className="px-3.5 py-1.5 flex items-center gap-1 rounded-lg border border-[#E8E5DC] bg-white text-gray-700 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-50 transition cursor-pointer text-xs font-semibold shadow-2xs"
+                    className="px-3.5 py-1.5 flex items-center gap-1 rounded-md border border-[#E8E2D8] bg-white text-gray-700 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-[#FAF7F2] transition cursor-pointer text-xs font-medium shadow-2xs"
                   >
                     <span>Next</span>
                     <span>&gt;</span>
@@ -725,16 +727,16 @@ Looking forward to your response!`;
         ) : (
           /* Subcategories / Designs View for chosen category */
           <div className="mt-2">
-            <div className="flex items-center justify-between pb-4 border-b border-[#E8E5DC] mb-6">
+            <div className="flex items-center justify-between pb-4 border-b border-[#E8E2D8] mb-6">
               <div>
                 <button
                   onClick={handleBackToCategories}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-white border border-[#D4CBBF] hover:border-[#0a2e22] rounded-lg text-xs font-semibold text-gray-800 transition-colors shadow-2xs mb-3 cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-white border border-[#E8E2D8] hover:border-[#D9B4A4] hover:bg-[#FAF7F2] rounded-md text-xs font-medium text-gray-800 transition-colors shadow-2xs mb-3 cursor-pointer"
                 >
                   <ChevronLeft size={14} />
                   <span>Back to Categories</span>
                 </button>
-                <h2 className="text-2xl sm:text-3xl font-serif text-[#1a241e] font-normal tracking-tight">
+                <h2 className="text-2xl sm:text-3xl font-poppins text-[#1a241e] font-normal tracking-tight">
                   {formatCategoryTitle(activeCategory)} Designs
                 </h2>
                 <p className="text-xs sm:text-sm text-gray-600 mt-1">
@@ -753,7 +755,7 @@ Looking forward to your response!`;
                     setSearch(e.target.value);
                     setSubCatPage(1);
                   }}
-                  className="w-full h-10 bg-white border border-[#D4CBBF] hover:border-gray-500 focus:border-[#0a2e22] focus:ring-1 focus:ring-[#0a2e22]/20 rounded-lg pl-10 pr-8 text-xs sm:text-[13px] font-normal text-gray-900 placeholder:text-gray-500 focus:outline-none transition-all shadow-2xs"
+                  className="w-full h-10 bg-white border border-[#E8E2D8] hover:border-gray-500 focus:border-[#7D3219] focus:ring-1 focus:ring-[#7D3219]/20 rounded-xl pl-10 pr-8 text-xs sm:text-[13px] font-normal text-gray-900 placeholder:text-gray-500 focus:outline-none transition-all shadow-2xs"
                 />
                 {search && (
                   <button
@@ -773,11 +775,11 @@ Looking forward to your response!`;
                 paginatedSubCategories.map((sub, idx) => (
                   <div
                     key={sub.name + idx}
-                    className="bg-white rounded-2xl border border-[#E8E5DC] hover:border-[#C4BAA9] hover:shadow-lg transition-all duration-300 p-3.5 sm:p-4 flex flex-col justify-between group"
+                    className="group bg-white rounded-2xl border border-[#E8E2D8] hover:border-[#D9B4A4] shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_18px_36px_rgba(125,50,25,0.08)] hover:-translate-y-1.5 transition-all duration-300 p-3.5 sm:p-4 flex flex-col justify-between cursor-pointer"
                   >
                     <div>
-                      {/* Media container */}
-                      <div className="relative w-full aspect-[4/3] rounded-xl overflow-hidden bg-[#FAF8F5] mb-3 border border-[#ECE7DC]">
+                      {/* Media container: clean rounded-xl */}
+                      <div className="relative w-full aspect-[4/3] rounded-none overflow-hidden bg-[#FAF8F5] mb-3.5 border border-[#E8E2D8]">
                         {sub.video ? (
                           <video
                             src={encodeURI(sub.video)}
@@ -802,23 +804,27 @@ Looking forward to your response!`;
 
                       <h3
                         onClick={() => setActiveDesign(sub)}
-                        className="text-sm font-bold text-gray-900 group-hover:text-[#0a2e22] transition-colors cursor-pointer mb-2 line-clamp-2"
+                        className="font-poppins text-[15px] sm:text-base font-normal text-gray-950 cursor-pointer mb-2 line-clamp-2 leading-snug"
                       >
                         {sub.name}
                       </h3>
+
+                      <p className="font-poppins text-xs text-gray-500 font-normal leading-relaxed line-clamp-2 mb-3.5">
+                        {getDesignSubtitle(sub, activeCategory || currentCat?.name)}
+                      </p>
                     </div>
 
                     <button
                       onClick={() => handleEnquiryOpen(sub)}
-                      className="w-full mt-3 py-2 px-3 bg-[#0a2e22] hover:bg-[#061d15] text-white text-xs font-semibold rounded-lg shadow-2xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                      className="w-full mt-auto py-2.5 px-3 bg-[#F7EBE4] hover:bg-[#EFE0D7] text-[#7D3219] border border-[#D9B4A4] hover:border-[#7D3219] text-xs font-poppins font-medium rounded-md shadow-2xs flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-[0.99]"
                     >
-                      <Calendar size={13} />
+                      <Calendar size={13} className="text-[#7D3219] shrink-0" />
                       <span>Book an Enquiry</span>
                     </button>
                   </div>
                 ))
               ) : (
-                <div className="col-span-full text-center py-20 bg-white rounded-2xl border border-[#E8E5DC]">
+                <div className="col-span-full text-center py-20 bg-white rounded-2xl border border-[#E8E2D8]">
                   <p className="text-gray-500 text-xs">
                     {search ? `No designs found matching "${search}"` : "No designs available in this category."}
                   </p>
@@ -836,7 +842,7 @@ Looking forward to your response!`;
                       setSubCatPage(subCatPage - 1);
                       window.scrollTo({ top: 380, behavior: "smooth" });
                     }}
-                    className="px-3.5 py-1.5 flex items-center gap-1 rounded-lg border border-[#E8E5DC] bg-white text-gray-700 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-50 transition cursor-pointer text-xs font-semibold shadow-2xs"
+                    className="px-3.5 py-1.5 flex items-center gap-1 rounded-md border border-[#E8E2D8] bg-white text-gray-700 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-[#FAF7F2] transition cursor-pointer text-xs font-medium shadow-2xs"
                   >
                     <span>&lt;</span>
                     <span>Prev</span>
@@ -849,10 +855,10 @@ Looking forward to your response!`;
                         setSubCatPage(p);
                         window.scrollTo({ top: 380, behavior: "smooth" });
                       }}
-                      className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                      className={`w-8 h-8 flex items-center justify-center rounded-md text-xs font-medium transition-all cursor-pointer ${
                         subCatPage === p
-                          ? "bg-[#0a2e22] text-white shadow-xs font-bold"
-                          : "bg-white border border-[#E8E5DC] text-gray-700 hover:bg-gray-50"
+                          ? "bg-[#F7EBE4] text-[#7D3219] border border-[#D9B4A4] shadow-2xs font-medium"
+                          : "bg-white border border-[#E8E2D8] text-gray-700 hover:bg-[#FAF7F2]"
                       }`}
                     >
                       {p}
@@ -865,7 +871,7 @@ Looking forward to your response!`;
                       setSubCatPage(subCatPage + 1);
                       window.scrollTo({ top: 380, behavior: "smooth" });
                     }}
-                    className="px-3.5 py-1.5 flex items-center gap-1 rounded-lg border border-[#E8E5DC] bg-white text-gray-700 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-50 transition cursor-pointer text-xs font-semibold shadow-2xs"
+                    className="px-3.5 py-1.5 flex items-center gap-1 rounded-md border border-[#E8E2D8] bg-white text-gray-700 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-[#FAF7F2] transition cursor-pointer text-xs font-medium shadow-2xs"
                   >
                     <span>Next</span>
                     <span>&gt;</span>
@@ -891,10 +897,10 @@ Looking forward to your response!`;
             </button>
 
             {/* Left Column: Image Showcase / Carousel */}
-            <div className="w-full lg:w-1/2 p-5 sm:p-6 lg:p-7 flex flex-col justify-between bg-white border-b lg:border-b-0 lg:border-r border-[#F0ECE1]">
+            <div className="w-full lg:w-1/2 p-5 sm:p-6 lg:p-7 flex flex-col justify-between bg-white border-b lg:border-b-0 lg:border-r border-[#E8E2D8]">
               <div>
                 {/* Main Image Container */}
-                <div className="relative w-full aspect-[4/3] sm:aspect-[1.15/1] rounded-2xl overflow-hidden bg-[#FAF8F5] border border-[#ECE7DC] flex items-center justify-center select-none group">
+                <div className="relative w-full aspect-[4/3] sm:aspect-[1.15/1] rounded-2xl overflow-hidden bg-[#FAF8F5] border border-[#E8E2D8] flex items-center justify-center select-none group">
                   {(activeDesign || designForEnquiry)?.video ? (
                     <video
                       src={encodeURI((activeDesign || designForEnquiry)!.video!)}
@@ -949,10 +955,10 @@ Looking forward to your response!`;
                             setActiveDesign(item);
                             setDesignForEnquiry(item);
                           }}
-                          className={`relative w-16 h-14 sm:w-20 sm:h-16 shrink-0 rounded-xl overflow-hidden cursor-pointer transition-all ${
+                          className={`relative w-16 h-14 sm:w-20 sm:h-16 shrink-0 rounded-md overflow-hidden cursor-pointer transition-all ${
                             isSelected
-                              ? "ring-2 ring-[#0a2e22] ring-offset-2 border-transparent scale-102 shadow-xs"
-                              : "border border-[#E8E5DC] opacity-70 hover:opacity-100"
+                              ? "ring-2 ring-[#7D3219] ring-offset-2 border-transparent scale-102 shadow-xs"
+                              : "border border-[#E8E2D8] opacity-70 hover:opacity-100"
                           }`}
                         >
                           <img
@@ -972,12 +978,12 @@ Looking forward to your response!`;
             <div className="w-full lg:w-1/2 p-5 sm:p-6 lg:p-7 flex flex-col justify-between overflow-y-auto">
               <div>
                 {/* Category Badge */}
-                <div className="inline-flex items-center px-2.5 py-1 rounded-md bg-[#E5ECE7] text-[#1E3B2B] text-xs font-semibold tracking-wide mb-2 self-start">
+                <div className="inline-flex items-center px-2.5 py-1 rounded-md bg-[#F7EBE4] border border-[#D9B4A4] text-[#7D3219] text-xs font-medium tracking-wide mb-2 self-start">
                   {formatCategoryTitle(activeCategory || currentCat?.name || "Wallpaper Rolls")}
                 </div>
 
                 {/* Editorial Title */}
-                <h2 className="font-serif text-2xl sm:text-3xl lg:text-[34px] leading-tight text-[#111827] font-normal tracking-tight mb-2">
+                <h2 className="font-poppins text-2xl sm:text-3xl lg:text-[34px] leading-tight text-[#111827] font-normal tracking-tight mb-2">
                   {(activeDesign || designForEnquiry)?.name}
                 </h2>
 
@@ -989,7 +995,7 @@ Looking forward to your response!`;
                 {/* Send an Enquiry Form */}
                 <form onSubmit={handleEnquirySubmit} className="space-y-3">
                   <div className="flex items-center gap-2 text-sm sm:text-[15px] font-bold text-gray-900 mb-2">
-                    <Briefcase size={16} className="text-[#0a2e22]" />
+                    <Briefcase size={16} className="text-[#7D3219]" />
                     <span>Send an Enquiry</span>
                   </div>
 
@@ -1003,13 +1009,13 @@ Looking forward to your response!`;
                         placeholder="Enter your name"
                         value={formName}
                         onChange={(e) => setFormName(e.target.value)}
-                        className="w-full h-10 border border-[#D4CBBF] hover:border-gray-500 rounded-lg px-3 text-xs sm:text-[13px] text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#0a2e22] focus:ring-1 focus:ring-[#0a2e22]/20 transition-all bg-white"
+                        className="w-full h-10 border border-[#E8E2D8] hover:border-gray-500 rounded-lg px-3 text-xs sm:text-[13px] text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#7D3219] focus:ring-1 focus:ring-[#7D3219]/20 transition-all bg-white"
                       />
                     </div>
                     <div>
                       <label className="block text-xs font-semibold text-gray-700 mb-1">Phone Number *</label>
-                      <div className="flex h-10 border border-[#D4CBBF] hover:border-gray-500 rounded-lg overflow-hidden focus-within:border-[#0a2e22] focus-within:ring-1 focus-within:ring-[#0a2e22]/20 bg-white transition-all">
-                        <span className="inline-flex items-center px-2.5 bg-gray-50 border-r border-[#D4CBBF] text-xs font-semibold text-gray-700 select-none">
+                      <div className="flex h-10 border border-[#E8E2D8] hover:border-gray-500 rounded-lg overflow-hidden focus-within:border-[#7D3219] focus-within:ring-1 focus-within:ring-[#7D3219]/20 bg-white transition-all">
+                        <span className="inline-flex items-center px-2.5 bg-gray-50 border-r border-[#E8E2D8] text-xs font-semibold text-gray-700 select-none">
                           +91
                         </span>
                         <input
@@ -1032,7 +1038,7 @@ Looking forward to your response!`;
                       placeholder="Enter your email (optional)"
                       value={formEmail}
                       onChange={(e) => setFormEmail(e.target.value)}
-                      className="w-full h-10 border border-[#D4CBBF] hover:border-gray-500 rounded-lg px-3 text-xs sm:text-[13px] text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#0a2e22] focus:ring-1 focus:ring-[#0a2e22]/20 transition-all bg-white"
+                      className="w-full h-10 border border-[#E8E2D8] hover:border-gray-500 rounded-lg px-3 text-xs sm:text-[13px] text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#7D3219] focus:ring-1 focus:ring-[#7D3219]/20 transition-all bg-white"
                     />
                   </div>
 
@@ -1045,16 +1051,16 @@ Looking forward to your response!`;
                       placeholder="Tell us about your requirements (e.g. quantity, size, location, etc.)"
                       value={formMessage}
                       onChange={(e) => setFormMessage(e.target.value)}
-                      className="w-full border border-[#D4CBBF] hover:border-gray-500 rounded-lg p-2.5 text-xs sm:text-[13px] text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#0a2e22] focus:ring-1 focus:ring-[#0a2e22]/20 resize-none transition-all bg-white"
+                      className="w-full border border-[#E8E2D8] hover:border-gray-500 rounded-lg p-2.5 text-xs sm:text-[13px] text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#7D3219] focus:ring-1 focus:ring-[#7D3219]/20 resize-none transition-all bg-white"
                     ></textarea>
                   </div>
 
                   {/* Submit Button */}
                   <button
                     type="submit"
-                    className="w-full h-10 sm:h-11 bg-[#0a2e22] hover:bg-[#061d15] text-white rounded-lg text-xs sm:text-sm font-semibold transition-all duration-200 shadow-sm flex items-center justify-center gap-2 cursor-pointer mt-1"
+                    className="w-full h-10 sm:h-11 bg-[#F7EBE4] hover:bg-[#EFE0D7] text-[#7D3219] border border-[#D9B4A4] hover:border-[#7D3219] rounded-md text-xs sm:text-sm font-medium transition-all duration-200 shadow-2xs flex items-center justify-center gap-2 cursor-pointer mt-1 active:scale-[0.99]"
                   >
-                    <Send size={15} />
+                    <Send size={15} className="text-[#7D3219]" />
                     <span>Send Enquiry</span>
                   </button>
 
@@ -1068,7 +1074,7 @@ Looking forward to your response!`;
                 {/* Divider: OR CONTACT DIRECTLY */}
                 <div className="relative my-4">
                   <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-[#E8E5DC]"></div>
+                    <div className="w-full border-t border-[#E8E2D8]"></div>
                   </div>
                   <div className="relative flex justify-center text-[10px] sm:text-[11px] font-semibold text-gray-400 uppercase tracking-widest">
                     <span className="bg-white px-3">OR CONTACT DIRECTLY</span>
@@ -1078,11 +1084,11 @@ Looking forward to your response!`;
                 {/* 3 Contact Columns */}
                 <div className="grid grid-cols-3 gap-2 text-center">
                   <a
-                    href="tel:+919492664870"
-                    className="group flex flex-col items-center p-2 rounded-xl hover:bg-[#FAF8F5] transition-colors"
+                    href="tel:+918121135980"
+                    className="group flex flex-col items-center p-2 rounded-xl hover:bg-white hover:text-[#7D3219] transition-colors"
                   >
-                    <Phone size={16} className="text-[#0a2e22] mb-1.5" />
-                    <span className="text-[11px] sm:text-xs font-bold text-gray-900 group-hover:text-[#0a2e22] truncate w-full">
+                    <Phone size={16} className="text-[#7D3219] mb-1.5" />
+                    <span className="text-[11px] sm:text-xs font-medium text-gray-900 group-hover:text-[#7D3219] truncate w-full">
                       +91 81211 35980
                     </span>
                     <span className="text-[10px] text-gray-500 font-medium">Call Now</span>
@@ -1092,12 +1098,12 @@ Looking forward to your response!`;
                     href="https://wa.me/919248344434"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="group flex flex-col items-center p-2 rounded-xl hover:bg-[#FAF8F5] transition-colors"
+                    className="group flex flex-col items-center p-2 rounded-xl hover:bg-white hover:text-[#7D3219] transition-colors"
                   >
                     <svg className="w-4 h-4 text-[#25D366] fill-current mb-1.5" viewBox="0 0 24 24">
                       <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
                     </svg>
-                    <span className="text-[11px] sm:text-xs font-bold text-gray-900 group-hover:text-[#0a2e22] truncate w-full">
+                    <span className="text-[11px] sm:text-xs font-medium text-gray-900 group-hover:text-[#7D3219] truncate w-full">
                       +91 92483 44434
                     </span>
                     <span className="text-[10px] text-gray-500 font-medium">WhatsApp</span>
@@ -1105,10 +1111,10 @@ Looking forward to your response!`;
 
                   <a
                     href="mailto:gharsansarshop@gmail.com"
-                    className="group flex flex-col items-center p-2 rounded-xl hover:bg-[#FAF8F5] transition-colors"
+                    className="group flex flex-col items-center p-2 rounded-xl hover:bg-white hover:text-[#7D3219] transition-colors"
                   >
-                    <Mail size={16} className="text-[#0a2e22] mb-1.5" />
-                    <span className="text-[11px] sm:text-xs font-bold text-gray-900 group-hover:text-[#0a2e22] truncate w-full">
+                    <Mail size={16} className="text-[#7D3219] mb-1.5" />
+                    <span className="text-[11px] sm:text-xs font-medium text-gray-900 group-hover:text-[#7D3219] truncate w-full">
                       gharsansarshop@gmail.com
                     </span>
                     <span className="text-[10px] text-gray-500 font-medium">Email Us</span>
@@ -1116,7 +1122,7 @@ Looking forward to your response!`;
                 </div>
 
                 {/* Physical Address */}
-                <div className="flex items-start gap-2 pt-3 border-t border-[#F2EFE9] text-[11px] text-gray-500 leading-snug mt-3">
+                <div className="flex items-start gap-2 pt-3 border-t border-[#E8E2D8] text-[11px] text-gray-500 leading-snug mt-3">
                   <MapPin size={14} className="text-gray-400 shrink-0 mt-0.5" />
                   <span>
                     D.No. 27-14-60, Rajagopalachari Street, near BuckinghamPet Post Office, Governor Peta, Vijayawada, Andhra Pradesh 520002.

@@ -58,7 +58,7 @@ export default function CtaSection() {
         >
           {/* Main CTA */}
           <a
-            href="tel:+919492664870"
+            href="tel:+918121135980"
             className="w-full sm:w-auto flex items-center justify-center gap-3 px-10 py-5 bg-luxury-gold text-luxury-charcoal hover:bg-white rounded-full font-bold uppercase tracking-widest text-sm transition-all duration-300 shadow-[0_0_20px_rgba(197,168,128,0.3)] hover:shadow-[0_0_30px_rgba(255,255,255,0.5)] hover:-translate-y-1"
           >
             <Phone size={20} />
@@ -67,7 +67,7 @@ export default function CtaSection() {
           
           {/* WhatsApp CTA */}
           <a
-            href="https://wa.me/919492664870?text=Hello%20Ghar%20Sansar!%20I%20would%20like%20to%20book%20a%20free%20interior%20design%20consultation."
+            href="https://wa.me/918121135980?text=Hello%20Ghar%20Sansar!%20I%20would%20like%20to%20book%20a%20free%20interior%20design%20consultation."
             target="_blank"
             rel="noopener noreferrer"
             className="w-full sm:w-auto flex items-center justify-center gap-3 px-10 py-5 bg-green-600/20 border border-green-500/50 text-green-400 hover:bg-green-500 hover:text-white hover:border-green-500 rounded-full font-bold uppercase tracking-widest text-sm transition-all duration-300 hover:-translate-y-1"

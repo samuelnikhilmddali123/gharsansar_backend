@@ -1,27 +1,49 @@
 // src/pages/BlogPost.tsx
 import React from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, Calendar, User, Clock, Share2 } from "lucide-react";
+import { ArrowLeft, Calendar, User, Clock, Share2, Sparkles, Home } from "lucide-react";
 import { motion } from "framer-motion";
 import { useBlogs } from "../context/BlogContext";
+import toast from "react-hot-toast";
 
 const BlogPost: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { blogs, loading, error } = useBlogs();
 
-  if (loading)
-    return <div className="text-center py-20 text-gray-500">Loading blog post...</div>;
-  if (error)
-    return <div className="text-center py-20 text-red-500">Error: {error}</div>;
+  if (loading) {
+    return (
+      <div className="bg-[#FAF7F2] min-h-screen flex items-center justify-center pt-20">
+        <div className="w-8 h-8 rounded-full border-2 border-[#D9B4A4] border-t-[#7D3219] animate-spin" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-[#FAF7F2] min-h-screen pt-24 text-center px-4">
+        <p className="text-red-600 text-sm mb-4">Error loading post: {error}</p>
+        <Link
+          to="/blog"
+          className="px-4 py-2 bg-[#F7EBE4] text-[#7D3219] border border-[#D9B4A4] rounded-md text-xs font-medium"
+        >
+          Back to Journal
+        </Link>
+      </div>
+    );
+  }
 
   const post = blogs.find((p) => p.id === id);
 
   if (!post) {
     return (
-      <div className="text-center py-20 text-gray-500">
-        <p>Oops! The blog post doesn’t exist or has been removed.</p>
-        <Link to="/blog" className="text-blue-600 underline">
-          Go back to Blog
+      <div className="bg-[#FAF7F2] min-h-screen pt-24 text-center px-4">
+        <h2 className="text-xl font-poppins font-normal text-gray-950 mb-2">Post not found</h2>
+        <p className="text-xs text-gray-500 mb-4">The blog story doesn’t exist or has been removed.</p>
+        <Link
+          to="/blog"
+          className="px-4 py-2 bg-[#F7EBE4] hover:bg-[#EFE0D7] text-[#7D3219] border border-[#D9B4A4] rounded-md text-xs font-medium inline-block shadow-2xs"
+        >
+          Back to Journal
         </Link>
       </div>
     );
@@ -29,160 +51,181 @@ const BlogPost: React.FC = () => {
 
   const extractYouTubeId = (url?: string) => {
     if (!url) return "";
-    const match = url.match(/(?:v=|youtu\.be\/)([\w-]+)/);
-    return match ? match[1] : "";
-  };
-
-  const extractInstagramId = (url?: string) => {
-    if (!url) return "";
-    const match = url.match(/instagram\.com\/p\/([\w-]+)/);
+    const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{11})/);
     return match ? match[1] : "";
   };
 
   const isYouTube = post.video?.includes("youtube") || post.video?.includes("youtu.be");
-  const isInstagram = post.video?.includes("instagram.com");
+
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: post.title,
+        text: post.description,
+        url: window.location.href,
+      }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      toast.success("Link copied to clipboard!");
+    }
+  };
 
   return (
-    <div className="bg-gray-50 min-h-screen py-8">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="bg-[#FAF7F2] min-h-screen font-poppins pt-20 sm:pt-24 pb-16 sm:pb-20 flex flex-col selection:bg-[#F7EBE4] selection:text-[#7D3219] antialiased">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        {/* Breadcrumb Navigation */}
+        <nav className="flex items-center space-x-2 text-xs sm:text-[13px] text-gray-500 font-medium mb-4">
+          <Link to="/" className="hover:text-[#7D3219] transition-colors flex items-center gap-1.5 cursor-pointer">
+            <Home size={14} className="shrink-0 text-gray-500" />
+            <span>Home</span>
+          </Link>
+          <span className="text-gray-400 select-none px-0.5">&gt;</span>
+          <Link to="/blog" className="hover:text-[#7D3219] transition-colors cursor-pointer">
+            Design Journal
+          </Link>
+          <span className="text-gray-400 select-none px-0.5">&gt;</span>
+          <span className="text-gray-900 font-semibold truncate max-w-xs">{post.title}</span>
+        </nav>
+
+        {/* Back Button */}
         <Link
           to="/blog"
-          className="inline-flex items-center text-blue-600 hover:text-blue-700 mb-6"
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-600 hover:text-[#7D3219] mb-4 transition cursor-pointer"
         >
-          <ArrowLeft className="w-4 h-4 mr-2" /> Back to Blog
+          <ArrowLeft size={14} />
+          <span>Back to All Stories</span>
         </Link>
 
-        {/* Main Post */}
+        {/* Main Article Container */}
         <motion.article
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-2xl shadow-xl overflow-hidden"
+          transition={{ duration: 0.35 }}
+          className="bg-white rounded-xl border border-[#E8E2D8] shadow-2xs overflow-hidden"
         >
-          {/* Media */}
-          <div className="relative w-full lg:h-[500px] h-80">
-            {post.video && isYouTube && (
+          {/* Media Header */}
+          <div className="relative w-full aspect-[16/9] sm:aspect-[16/10] max-h-[460px] bg-black">
+            {post.video && isYouTube ? (
               <iframe
                 width="100%"
                 height="100%"
-                src={`https://www.youtube.com/embed/${extractYouTubeId(post.video)}`}
-                title="YouTube video"
+                src={`https://www.youtube.com/embed/${extractYouTubeId(post.video)}?autoplay=0&rel=0`}
+                title={post.title}
                 frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
                 className="w-full h-full object-cover"
               />
-            )}
-            {post.video && isInstagram && (
-              <iframe
-                src={`https://www.instagram.com/p/${extractInstagramId(post.video)}/embed`}
-                width="100%"
-                height="100%"
-                frameBorder="0"
-                scrolling="no"
-                allowTransparency={true}
+            ) : post.video ? (
+              <video
+                src={post.video}
+                controls
+                playsInline
+                className="w-full h-full object-contain"
+              />
+            ) : post.image ? (
+              <img
+                src={post.image}
+                alt={post.title}
                 className="w-full h-full object-cover"
               />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-[#FAF8F5] text-stone-400">
+                <Sparkles size={32} />
+              </div>
             )}
-            {!post.video && post.image && (
-              <img src={post.image} alt={post.title} className="w-full h-full object-cover" />
-            )}
-            <div className="absolute inset-0 bg-black bg-opacity-40"></div>
-            <div className="absolute bottom-8 left-8 right-8 text-white">
-              <h1 className="text-4xl font-bold mb-2">{post.title}</h1>
+          </div>
+
+          {/* Metadata Row */}
+          <div className="p-4 sm:p-5 border-b border-[#E8E2D8] flex flex-wrap items-center justify-between gap-3 text-xs text-gray-600">
+            <div className="flex items-center gap-4 flex-wrap">
               {post.features && post.features[0] && (
-                <span className="bg-blue-600 px-3 py-1 rounded-full text-sm">
+                <span className="text-[10.5px] font-medium uppercase tracking-wider text-[#7D3219] bg-[#F7EBE4] border border-[#D9B4A4] px-2.5 py-0.5 rounded-md">
                   {post.features[0]}
                 </span>
               )}
+              <div className="flex items-center gap-1.5">
+                <User size={13} className="text-gray-400" />
+                <span>Ghar Sansar Studio</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Calendar size={13} className="text-gray-400" />
+                <span>{new Date().toLocaleDateString("en-IN", { month: "short", day: "numeric", year: "numeric" })}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Clock size={13} className="text-gray-400" />
+                <span>Quick Read</span>
+              </div>
             </div>
-          </div>
 
-          {/* Metadata */}
-          <div className="p-6 border-b border-gray-200 flex flex-wrap items-center justify-between gap-4 text-gray-600">
-            <div className="flex items-center space-x-2">
-              <User className="w-5 h-5" />
-              <span>{post.author || "Admin"}</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Calendar className="w-5 h-5" />
-              <span>{new Date().toLocaleDateString()}</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Clock className="w-5 h-5" />
-              <span>5 min read</span>
-            </div>
-            <button className="flex items-center space-x-2 text-blue-600 hover:text-blue-700">
-              <Share2 className="w-5 h-5" />
+            <button
+              type="button"
+              onClick={handleShare}
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-[#7D3219] hover:underline cursor-pointer"
+            >
+              <Share2 size={13} />
               <span>Share</span>
             </button>
           </div>
 
-          {/* Full Description */}
-          <div className="p-8 lg:p-12 prose prose-lg prose-blue max-w-none">
-            <p>{post.description}</p>
+          {/* Title & Body */}
+          <div className="p-5 sm:p-8">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-poppins font-normal text-gray-950 leading-tight mb-4">
+              {post.title}
+            </h1>
+            <div className="text-xs sm:text-sm text-gray-700 font-normal leading-relaxed whitespace-pre-line space-y-3">
+              <p>{post.description}</p>
+            </div>
           </div>
         </motion.article>
 
         {/* Related Posts */}
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="mt-12"
-        >
-          <h2 className="text-3xl font-bold mb-6">Related Posts</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="mt-10">
+          <h2 className="text-lg sm:text-xl font-poppins font-normal text-gray-950 mb-4">
+            More Design Stories
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {blogs
               .filter((b) => b.id !== post.id)
-              .slice(0, 4)
-              .map((related) => {
-                const isYt = related.video?.includes("youtube") || related.video?.includes("youtu.be");
-                const isIg = related.video?.includes("instagram.com");
-
-                return (
-                  <Link
-                    key={related.id}
-                    to={`/blog/${related.id}`}
-                    className="block bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition"
-                  >
+              .slice(0, 2)
+              .map((related) => (
+                <Link
+                  key={related.id}
+                  to={`/blog/${related.id}`}
+                  className="group bg-white rounded-xl border border-[#E8E2D8] hover:border-[#D9B4A4] shadow-2xs hover:shadow-[0_12px_28px_rgba(125,50,25,0.06)] hover:-translate-y-0.5 transition-all p-3.5 flex gap-3.5 items-center cursor-pointer"
+                >
+                  <div className="w-20 h-16 sm:w-24 sm:h-20 shrink-0 rounded-lg overflow-hidden bg-[#FAF8F5] border border-[#E8E2D8]">
                     {related.video ? (
-                      isYt ? (
-                        <iframe
-                          width="100%"
-                          height="200"
-                          src={`https://www.youtube.com/embed/${extractYouTubeId(related.video)}`}
-                          title="YouTube video"
-                          frameBorder="0"
-                          allowFullScreen
-                          className="w-full object-cover"
-                        />
-                      ) : isIg ? (
-                        <iframe
-                          src={`https://www.instagram.com/p/${extractInstagramId(related.video)}/embed`}
-                          width="100%"
-                          height="200"
-                          frameBorder="0"
-                          scrolling="no"
-                          allowTransparency={true}
-                          className="w-full object-cover"
-                        />
-                      ) : null
-                    ) : (
+                      <img
+                        src={`https://img.youtube.com/vi/${extractYouTubeId(related.video)}/hqdefault.jpg`}
+                        alt={related.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                      />
+                    ) : related.image ? (
                       <img
                         src={related.image}
                         alt={related.title}
-                        className="w-full h-48 object-cover"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                       />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-stone-300">
+                        <Sparkles size={16} />
+                      </div>
                     )}
-
-                    <div className="p-4">
-                      <h3 className="text-xl font-semibold">{related.title}</h3>
-                      <p className="text-gray-600 line-clamp-2">{related.description}</p>
-                    </div>
-                  </Link>
-                );
-              })}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-poppins text-xs sm:text-[13px] font-normal text-gray-950 line-clamp-2 leading-snug group-hover:text-[#7D3219] transition-colors mb-1">
+                      {related.title}
+                    </h3>
+                    <p className="text-[11px] text-[#6B7280] line-clamp-1 font-normal">
+                      {related.description}
+                    </p>
+                  </div>
+                </Link>
+              ))}
           </div>
-        </motion.div>
+        </div>
+
       </div>
     </div>
   );
