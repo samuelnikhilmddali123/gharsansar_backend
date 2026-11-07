@@ -17,8 +17,12 @@ export const GharSansarIcon: React.FC<{ className?: string; color?: string }> = 
     className={className}
     onError={(e) => {
       const target = e.currentTarget;
-      if (!target.src.endsWith("ghar_sansar_logo_nav.png")) {
+      if (!target.dataset.fallback) {
+        target.dataset.fallback = "1";
         target.src = "/ghar_sansar_logo_nav.png";
+      } else if (target.dataset.fallback === "1") {
+        target.dataset.fallback = "2";
+        target.src = "/ghar sansar logo.svg";
       }
     }}
   />
@@ -41,8 +45,12 @@ export const GharSansarLogo: React.FC<GharSansarLogoProps> = ({
         className={`${imgClassName} transition-transform group-hover:scale-105`}
         onError={(e) => {
           const target = e.currentTarget;
-          if (!target.src.endsWith("ghar_sansar_logo_nav.png")) {
+          if (!target.dataset.fallback) {
+            target.dataset.fallback = "1";
             target.src = "/ghar_sansar_logo_nav.png";
+          } else if (target.dataset.fallback === "1") {
+            target.dataset.fallback = "2";
+            target.src = "/ghar sansar logo.svg";
           }
         }}
       />
