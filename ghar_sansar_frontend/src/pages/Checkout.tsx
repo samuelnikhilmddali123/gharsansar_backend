@@ -1,22 +1,23 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
 import { useOrders } from '../context/OrderContext';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import {
   Lock,
   ShoppingBag,
   CheckCircle,
   Loader,
   Truck,
-  Headphones,
-  Award,
-  Star,
   MessageCircle,
   ExternalLink,
   MapPin,
   Phone,
   User,
-  FileText
+  FileText,
+  Home,
+  ShieldCheck,
+  ChevronRight,
+  ArrowRight
 } from 'lucide-react';
 import {
   CustomerDetails,
@@ -28,6 +29,20 @@ import { OrderSuccessModal } from '../components/OrderSuccessModal';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
+
+// Helper to normalize image paths matching Cart & Wishlist
+const fixImageUrl = (url?: string) => {
+  if (!url) return '';
+  let fixed = url
+    .replace(/^https?:\/\/https?:\/\//, 'https://')
+    .replace(/\s/g, '%20')
+    .replace(/([^:]\/)\/+/g, '$1');
+  fixed = fixed.replace(/^https?:\/\/(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+)(:\d+)?/, '');
+  if (fixed.startsWith('http://backend.gharsansar.website') || fixed.startsWith('http://lx70r6zsef')) {
+    fixed = fixed.replace(/^http:/, 'https:');
+  }
+  return fixed;
+};
 
 const Checkout: React.FC = () => {
   const { items, totalPrice, clearCart } = useCart();
@@ -44,7 +59,7 @@ const Checkout: React.FC = () => {
     whatsappMessage: string;
   } | null>(null);
 
-  const API_BASE = import.meta.env.VITE_AWS_API_URL || "/api";
+  const API_BASE = import.meta.env.VITE_AWS_API_URL || '/api';
 
   const [formData, setFormData] = useState({
     name: '',
@@ -91,9 +106,9 @@ const Checkout: React.FC = () => {
 
     try {
       const response = await fetch(`${API_BASE}/shipping/serviceability?pincode=${pincode}`);
-      if (!response.ok) throw new Error("Serviceability check failed");
+      if (!response.ok) throw new Error('Serviceability check failed');
       const data = await response.json();
-      
+
       setServiceability({
         checked: true,
         serviceable: data.serviceable,
@@ -114,9 +129,9 @@ const Checkout: React.FC = () => {
         loading: false,
         cod: true,
         prepaid: true,
-        city: "Hyderabad (Direct)",
-        state: "TS",
-        provider: "Delhivery"
+        city: 'Direct Delivery',
+        state: 'AP/TS',
+        provider: 'Delhivery'
       });
     }
   };
@@ -168,7 +183,6 @@ const Checkout: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Only address, pincode, and mobile are required!
     if (!formData.address.trim()) {
       toast.error('Please enter your Delivery Address to place order.');
       return;
@@ -195,7 +209,6 @@ const Checkout: React.FC = () => {
         selectedColor: item.selectedColor
       }));
 
-      // Persist order in MongoDB Atlas via OrderContext
       const order = await createOrder({
         customer: {
           firstName: formData.name ? formData.name.split(' ')[0] : 'Customer',
@@ -214,7 +227,7 @@ const Checkout: React.FC = () => {
         shipping: calculatedShippingFee,
         tax: tax,
         total: grandTotal,
-        status: 'confirmed', // Order Accepted
+        status: 'confirmed',
         paymentStatus: 'pending',
         paymentId: `wa_${Date.now()}`,
         paymentMethod: 'whatsapp',
@@ -234,7 +247,6 @@ const Checkout: React.FC = () => {
         notes: formData.notes
       };
 
-      // Generate clean WhatsApp message
       const rawMessage = generateFullCartWhatsAppMessage(effectiveOrderNumber, customerData, {
         items: orderItems,
         totalQuantity: items.reduce((s, it) => s + it.quantity, 0),
@@ -244,14 +256,10 @@ const Checkout: React.FC = () => {
         grandTotal: grandTotal
       });
 
-      // Clear cart
       clearCart();
       toast.success('Order Accepted! Opening WhatsApp...');
-
-      // Open WhatsApp click-to-chat
       openWhatsAppOrderUrl(rawMessage);
 
-      // Open celebratory OrderSuccessModal showing "Order Accepted"
       setCompletedOrderDetails({
         orderNumber: effectiveOrderNumber,
         grandTotal: grandTotal,
@@ -269,58 +277,55 @@ const Checkout: React.FC = () => {
     }
   };
 
-  // Full Page Order Complete State (Shows "Order Accepted")
+  // Full Page Order Complete State (Matching Warm Ivory Luxury Theme)
   if (orderComplete) {
     return (
-      <div className="min-h-screen bg-[#f8f8f7] flex items-center justify-center py-16 px-4 font-sans">
+      <div className="bg-[#FAF7F2] min-h-screen font-poppins pt-20 sm:pt-24 pb-16 flex items-center justify-center px-4 selection:bg-[#F7EBE4] selection:text-[#7D3219] antialiased">
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          className="bg-white p-10 md:p-12 rounded-[32px] shadow-2xl shadow-gray-200/50 text-center max-w-lg mx-auto border border-gray-100"
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="bg-white p-8 sm:p-10 rounded-xl border border-[#E8E2D8] shadow-2xs text-center max-w-lg w-full"
         >
-          <motion.div 
-            initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-            className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-6 border border-emerald-200"
-          >
-            <CheckCircle className="w-10 h-10 text-emerald-600" />
-          </motion.div>
+          <div className="w-14 h-14 rounded-full bg-[#F0FDF4] border border-[#BBF7D0] flex items-center justify-center mx-auto mb-4 text-[#16A34A]">
+            <CheckCircle className="w-7 h-7" />
+          </div>
 
-          <span className="inline-block bg-emerald-100 text-emerald-800 text-xs font-bold uppercase tracking-widest px-3.5 py-1 rounded-full mb-3">
-            Status: Order Accepted
+          <span className="inline-block bg-[#DCFCE7] text-[#15803D] text-[10px] sm:text-xs font-medium uppercase tracking-wider px-3 py-1 rounded-md mb-2 border border-[#BBF7D0]">
+            Order Confirmed & Accepted
           </span>
 
-          <h1 className="text-3xl md:text-4xl font-serif font-bold text-gray-900 mb-3 tracking-wide">
-            Order Accepted!
+          <h1 className="text-2xl sm:text-3xl font-poppins font-normal text-gray-950 mb-2">
+            Order Placed Successfully
           </h1>
-          <p className="text-gray-500 mb-8 text-sm md:text-base leading-relaxed">
-            Your order has been accepted. We will process and ship your items directly to your address.
+          <p className="text-xs sm:text-sm text-[#736B63] font-normal mb-6 leading-relaxed">
+            Thank you! Your order has been registered in our system. We will package and dispatch your artisanal pieces to your delivery address.
           </p>
 
-          <div className="bg-gray-50 py-3.5 px-6 rounded-2xl mb-8 border border-gray-200 inline-block">
-            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-0.5">Order Reference</span>
-            <span className="text-base font-mono font-bold text-gray-900">
+          <div className="bg-[#FAF7F2] py-2.5 px-4 rounded-md border border-[#E8E2D8] mb-6 inline-block">
+            <span className="text-[10px] text-[#736B63] font-normal uppercase tracking-wider block mb-0.5">Order Reference</span>
+            <span className="text-sm sm:text-base font-mono font-medium text-gray-950">
               #{completedOrderDetails?.orderNumber || `GS${Date.now().toString().slice(-8)}`}
             </span>
           </div>
 
-          {/* WhatsApp Direct Action Button */}
           {completedOrderDetails?.whatsappMessage && (
             <button
               onClick={() => openWhatsAppOrderUrl(completedOrderDetails.whatsappMessage)}
-              className="w-full mb-3 bg-[#25D366] hover:bg-[#128C7E] text-white px-8 py-4 rounded-full transition-all duration-300 font-bold uppercase tracking-widest text-xs sm:text-sm shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+              className="w-full mb-3 py-3 px-4 bg-[#25D366] hover:bg-[#1EBE5D] text-white font-medium text-xs sm:text-sm tracking-wide rounded-md shadow-2xs transition-all active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer"
             >
-              <MessageCircle className="w-5 h-5 fill-current" />
-              <span>OPEN ON WHATSAPP</span>
-              <ExternalLink className="w-4 h-4 ml-1 opacity-80" />
+              <MessageCircle className="w-4 h-4 fill-current" />
+              <span>Open on WhatsApp</span>
+              <ExternalLink className="w-3.5 h-3.5 opacity-80" />
             </button>
           )}
 
           <button
             onClick={() => navigate('/products')}
-            className="w-full bg-[#1A1918] hover:bg-[#004e38] text-white px-8 py-3.5 rounded-full transition-all duration-300 font-bold uppercase tracking-widest text-xs shadow-md cursor-pointer"
+            className="w-full py-2.5 px-4 bg-[#FAF7F2] hover:bg-white text-gray-900 border border-[#E8E2D8] hover:border-[#D9B4A4] font-normal text-xs sm:text-sm rounded-md shadow-2xs transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
-            Continue Shopping
+            <span>Continue Shopping</span>
+            <ArrowRight size={14} />
           </button>
         </motion.div>
       </div>
@@ -328,57 +333,79 @@ const Checkout: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f8f7] font-sans pb-20">
-      {/* Header */}
-      <div className="pt-16 sm:pt-20 pb-8 px-4 text-center">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold uppercase tracking-wider mb-3">
-            <MessageCircle className="w-4 h-4 text-[#25D366] fill-[#25D366]" />
-            <span>WhatsApp Order Booking</span>
-          </div>
-          <h1 className="text-3xl md:text-5xl font-serif font-normal text-luxury-charcoal mb-2 tracking-wide">
-            Book Your Order
-          </h1>
-          <p className="text-gray-500 font-medium text-sm md:text-base">
-            Enter your delivery address to place your order directly via WhatsApp
-          </p>
-        </motion.div>
-      </div>
+    <div className="bg-[#FAF7F2] min-h-screen font-poppins pt-20 sm:pt-24 pb-16 sm:pb-20 flex flex-col selection:bg-[#F7EBE4] selection:text-[#7D3219] antialiased">
+      <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* Breadcrumb Navigation */}
+        <nav aria-label="Breadcrumb" className="mb-4 sm:mb-6">
+          <ol className="flex items-center gap-1.5 text-xs text-[#736B63]">
+            <li>
+              <Link to="/" className="hover:text-gray-950 transition-colors flex items-center gap-1">
+                <Home size={12} />
+                <span>Home</span>
+              </Link>
+            </li>
+            <li><ChevronRight size={11} className="text-[#A89F91]" /></li>
+            <li>
+              <Link to="/cart" className="hover:text-gray-950 transition-colors">
+                Cart
+              </Link>
+            </li>
+            <li><ChevronRight size={11} className="text-[#A89F91]" /></li>
+            <li className="text-gray-950 font-normal">WhatsApp Order Booking</li>
+          </ol>
+        </nav>
 
-      {/* Main Checkout Container */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+        {/* Page Header */}
+        <div className="pb-5 border-b border-[#E8E2D8] mb-8 flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-3">
+          <div className="flex items-baseline gap-3">
+            <h1 className="text-2xl sm:text-3xl font-poppins font-normal text-gray-950 tracking-tight">
+              WhatsApp Order Booking
+            </h1>
+            <span className="text-xs text-[#736B63] font-normal">
+              Direct & Instant Booking
+            </span>
+          </div>
+          <div className="inline-flex items-center gap-2 text-xs text-[#736B63]">
+            <Lock size={12} className="text-[#C26847]" />
+            <span>Secure Checkout • Pre-filled WhatsApp Receipt</span>
+          </div>
+        </div>
+
+        {/* 2-Column Checkout Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
           {/* Left Column: Delivery Address Form */}
           <div className="lg:col-span-7">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              className="bg-white rounded-[24px] shadow-sm border border-gray-100 p-6 md:p-8"
+              transition={{ duration: 0.3 }}
+              className="bg-white rounded-xl border border-[#E8E2D8] p-5 sm:p-7 shadow-2xs space-y-6"
             >
               <form onSubmit={handleSubmit} className="space-y-6">
-                <div>
-                  <h2 className="text-xl font-serif font-bold text-gray-900 mb-1 flex items-center gap-2">
-                    <MapPin className="w-5 h-5 text-emerald-600" />
-                    <span>Delivery Address</span>
-                  </h2>
-                  <p className="text-xs text-gray-500">
-                    Fill in your address below. Once filled, your order will be instantly booked and accepted!
-                  </p>
+                {/* Form Header */}
+                <div className="flex items-center gap-3 pb-4 border-b border-[#E8E2D8]">
+                  <div className="w-8 h-8 rounded-md bg-[#F7EBE4] text-[#7D3219] flex items-center justify-center shrink-0">
+                    <MapPin size={16} />
+                  </div>
+                  <div>
+                    <h2 className="text-base sm:text-lg font-poppins font-normal text-gray-950">
+                      Delivery Address
+                    </h2>
+                    <p className="text-xs text-[#736B63] font-normal">
+                      Provide your shipping address to generate and dispatch your WhatsApp order.
+                    </p>
+                  </div>
                 </div>
 
                 {/* Saved Addresses Picker (if available) */}
                 {user && user.addresses && user.addresses.length > 0 && (
-                  <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 space-y-2">
-                    <span className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                  <div className="p-3.5 bg-[#FAF7F2] rounded-lg border border-[#E8E2D8] space-y-2">
+                    <span className="block text-[10px] text-[#736B63] uppercase tracking-wider font-normal">
                       Select From Saved Addresses
                     </span>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                       {user.addresses.map((addr: any) => {
                         const isSelected = formData.address === addr.address && formData.zipCode === addr.zipCode;
                         return (
@@ -398,14 +425,14 @@ const Checkout: React.FC = () => {
                               }));
                               checkServiceability(addr.zipCode);
                             }}
-                            className={`text-left p-3 rounded-xl border text-xs transition-all duration-200 bg-white ${
-                              isSelected 
-                                ? 'border-emerald-600 ring-2 ring-emerald-500/10 shadow-xs' 
-                                : 'border-gray-200 hover:border-gray-300'
+                            className={`text-left p-3 rounded-md border text-xs transition-colors bg-white cursor-pointer ${
+                              isSelected
+                                ? 'border-[#C26847] ring-1 ring-[#C26847]/30 bg-[#F7EBE4]/30'
+                                : 'border-[#E8E2D8] hover:border-[#D9B4A4]'
                             }`}
                           >
-                            <p className="font-bold text-gray-900 truncate">{addr.address}</p>
-                            <p className="text-gray-500 text-[11px] mt-0.5">{addr.city}, {addr.state} - {addr.zipCode}</p>
+                            <p className="font-normal text-gray-950 truncate">{addr.address}</p>
+                            <p className="text-[#736B63] text-[11px] mt-0.5">{addr.city}, {addr.state} - {addr.zipCode}</p>
                           </button>
                         );
                       })}
@@ -413,11 +440,12 @@ const Checkout: React.FC = () => {
                   </div>
                 )}
 
+                {/* Input Fields */}
                 <div className="space-y-4">
                   {/* Delivery Address (Street / Flat / House) */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">
-                      Delivery Address (Flat / House No., Street, Landmark) <span className="text-red-500">*</span>
+                  <div className="space-y-1">
+                    <label className="block text-xs font-normal text-[#736B63]">
+                      Delivery Address (House/Flat No., Street, Landmark) <span className="text-[#C26847]">*</span>
                     </label>
                     <textarea
                       name="address"
@@ -425,16 +453,16 @@ const Checkout: React.FC = () => {
                       rows={3}
                       value={formData.address}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 bg-gray-50/70 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all text-gray-900 text-sm outline-none resize-none"
-                      placeholder="e.g. Flat 402, Sai Residency, 4th Cross Road, Near City Center"
+                      className="w-full px-3.5 py-2.5 bg-[#FAF7F2]/40 border border-[#E8E2D8] focus:bg-white focus:border-[#C26847] focus:ring-1 focus:ring-[#C26847]/20 rounded-md text-sm text-gray-950 placeholder-gray-400 outline-none transition-colors resize-none"
+                      placeholder="e.g. Flat 302, Sri Sai Nivas, MG Road, Near Collector Office"
                     />
                   </div>
 
                   {/* PIN Code & Phone Number in 2 columns */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
-                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">
-                        PIN Code <span className="text-red-500">*</span>
+                    <div className="space-y-1">
+                      <label className="block text-xs font-normal text-[#736B63]">
+                        PIN Code <span className="text-[#C26847]">*</span>
                       </label>
                       <input
                         type="text"
@@ -444,54 +472,54 @@ const Checkout: React.FC = () => {
                         value={formData.zipCode}
                         onChange={handleInputChange}
                         onBlur={handleZipCodeBlur}
-                        className="w-full px-4 py-3 bg-gray-50/70 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all text-gray-900 text-sm outline-none"
-                        placeholder="6-digit PIN Code"
+                        className="w-full px-3.5 py-2.5 bg-[#FAF7F2]/40 border border-[#E8E2D8] focus:bg-white focus:border-[#C26847] focus:ring-1 focus:ring-[#C26847]/20 rounded-md text-sm text-gray-950 placeholder-gray-400 outline-none transition-colors"
+                        placeholder="6-digit PIN code"
                       />
                       {serviceability.loading && (
-                        <div className="text-[11px] text-emerald-700 flex items-center gap-1.5 mt-1 font-medium">
-                          <span className="w-1.5 h-1.5 bg-emerald-600 rounded-full animate-ping"></span>
+                        <div className="text-[11px] text-[#7D3219] flex items-center gap-1.5 mt-1 font-normal">
+                          <span className="w-1.5 h-1.5 bg-[#C26847] rounded-full animate-ping"></span>
                           Checking delivery serviceability...
                         </div>
                       )}
                       {serviceability.checked && (
-                        <div className={`text-[11px] mt-1 font-semibold flex items-center gap-1.5 p-1.5 rounded-lg border ${
+                        <div className={`text-[11px] mt-1 font-normal flex items-center gap-1.5 p-1.5 rounded-md border ${
                           serviceability.serviceable
-                            ? "text-emerald-800 bg-emerald-50 border-emerald-200"
-                            : "text-amber-800 bg-amber-50 border-amber-200"
+                            ? 'text-[#166534] bg-[#F0FDF4] border-[#BBF7D0]'
+                            : 'text-[#854D0E] bg-[#FEFCE8] border-[#FEF08A]'
                         }`}>
                           <Truck className="w-3.5 h-3.5 shrink-0" />
                           <span>
                             {serviceability.serviceable
-                              ? `Delivery available via ${serviceability.provider || "Delhivery"}`
-                              : "Standard shipping available"}
+                              ? `Delivery serviceable via ${serviceability.provider || 'Delhivery'}`
+                              : 'Standard delivery available'}
                           </span>
                         </div>
                       )}
                     </div>
 
-                    <div className="space-y-1.5">
-                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">
-                        Mobile / WhatsApp Number <span className="text-red-500">*</span>
+                    <div className="space-y-1">
+                      <label className="block text-xs font-normal text-[#736B63]">
+                        Mobile / WhatsApp Number <span className="text-[#C26847]">*</span>
                       </label>
                       <div className="relative">
-                        <Phone className="w-4 h-4 text-gray-400 absolute left-3.5 top-3.5" />
+                        <Phone className="w-4 h-4 text-gray-400 absolute left-3 top-3" />
                         <input
                           type="tel"
                           name="phone"
                           required
                           value={formData.phone}
                           onChange={handleInputChange}
-                          className="w-full pl-10 pr-4 py-3 bg-gray-50/70 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all text-gray-900 text-sm outline-none"
+                          className="w-full pl-9 pr-3.5 py-2.5 bg-[#FAF7F2]/40 border border-[#E8E2D8] focus:bg-white focus:border-[#C26847] focus:ring-1 focus:ring-[#C26847]/20 rounded-md text-sm text-gray-950 placeholder-gray-400 outline-none transition-colors"
                           placeholder="10-digit mobile number"
                         />
                       </div>
                     </div>
                   </div>
 
-                  {/* City and State */}
+                  {/* City and State in 2 columns */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
-                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">
+                    <div className="space-y-1">
+                      <label className="block text-xs font-normal text-[#736B63]">
                         City
                       </label>
                       <input
@@ -499,13 +527,13 @@ const Checkout: React.FC = () => {
                         name="city"
                         value={formData.city}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-3 bg-gray-50/70 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all text-gray-900 text-sm outline-none"
-                        placeholder="City"
+                        className="w-full px-3.5 py-2.5 bg-[#FAF7F2]/40 border border-[#E8E2D8] focus:bg-white focus:border-[#C26847] focus:ring-1 focus:ring-[#C26847]/20 rounded-md text-sm text-gray-950 placeholder-gray-400 outline-none transition-colors"
+                        placeholder="e.g. Vijayawada"
                       />
                     </div>
 
-                    <div className="space-y-1.5">
-                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">
+                    <div className="space-y-1">
+                      <label className="block text-xs font-normal text-[#736B63]">
                         State
                       </label>
                       <input
@@ -513,58 +541,58 @@ const Checkout: React.FC = () => {
                         name="state"
                         value={formData.state}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-3 bg-gray-50/70 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all text-gray-900 text-sm outline-none"
-                        placeholder="State"
+                        className="w-full px-3.5 py-2.5 bg-[#FAF7F2]/40 border border-[#E8E2D8] focus:bg-white focus:border-[#C26847] focus:ring-1 focus:ring-[#C26847]/20 rounded-md text-sm text-gray-950 placeholder-gray-400 outline-none transition-colors"
+                        placeholder="e.g. Andhra Pradesh"
                       />
                     </div>
                   </div>
 
-                  {/* Optional Contact Name and Delivery Instructions */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                    <div className="space-y-1.5">
-                      <label className="block text-xs font-bold text-gray-600 uppercase tracking-wider flex items-center justify-between">
-                        <span>Your Name (Optional)</span>
+                  {/* Optional Contact Name and Delivery Notes in 2 columns */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                    <div className="space-y-1">
+                      <label className="block text-xs font-normal text-[#736B63]">
+                        Recipient Name (Optional)
                       </label>
                       <div className="relative">
-                        <User className="w-4 h-4 text-gray-400 absolute left-3.5 top-3.5" />
+                        <User className="w-4 h-4 text-gray-400 absolute left-3 top-3" />
                         <input
                           type="text"
                           name="name"
                           value={formData.name}
                           onChange={handleInputChange}
-                          className="w-full pl-10 pr-4 py-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all text-gray-900 text-sm outline-none"
-                          placeholder="Contact person name (optional)"
+                          className="w-full pl-9 pr-3.5 py-2.5 bg-[#FAF7F2]/40 border border-[#E8E2D8] focus:bg-white focus:border-[#C26847] focus:ring-1 focus:ring-[#C26847]/20 rounded-md text-sm text-gray-950 placeholder-gray-400 outline-none transition-colors"
+                          placeholder="Your name"
                         />
                       </div>
                     </div>
 
-                    <div className="space-y-1.5">
-                      <label className="block text-xs font-bold text-gray-600 uppercase tracking-wider">
-                        Delivery Notes (Optional)
+                    <div className="space-y-1">
+                      <label className="block text-xs font-normal text-[#736B63]">
+                        Special Notes / Instructions (Optional)
                       </label>
                       <div className="relative">
-                        <FileText className="w-4 h-4 text-gray-400 absolute left-3.5 top-3.5" />
+                        <FileText className="w-4 h-4 text-gray-400 absolute left-3 top-3" />
                         <input
                           type="text"
                           name="notes"
                           value={formData.notes}
                           onChange={handleInputChange}
-                          className="w-full pl-10 pr-4 py-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all text-gray-900 text-sm outline-none"
-                          placeholder="Any special instructions"
+                          className="w-full pl-9 pr-3.5 py-2.5 bg-[#FAF7F2]/40 border border-[#E8E2D8] focus:bg-white focus:border-[#C26847] focus:ring-1 focus:ring-[#C26847]/20 rounded-md text-sm text-gray-950 placeholder-gray-400 outline-none transition-colors"
+                          placeholder="e.g. Call before delivery"
                         />
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* WhatsApp Booking Banner & Submit Button */}
-                <div className="pt-4 border-t border-gray-100 space-y-4">
-                  <div className="p-4 bg-emerald-50/60 rounded-2xl border border-emerald-200 flex items-start gap-3 text-xs text-emerald-900">
-                    <MessageCircle className="w-5 h-5 text-[#25D366] fill-[#25D366] shrink-0 mt-0.5" />
+                {/* WhatsApp Order Action Section */}
+                <div className="pt-4 border-t border-[#E8E2D8] space-y-4">
+                  <div className="p-3.5 bg-[#F0FDF4] rounded-lg border border-[#BBF7D0] flex items-start gap-3 text-xs text-[#166534]">
+                    <MessageCircle size={16} className="text-[#25D366] fill-[#25D366] shrink-0 mt-0.5" />
                     <div className="leading-relaxed">
-                      <p className="font-bold text-emerald-950">Instant Order Booking via WhatsApp</p>
-                      <p className="text-emerald-800 text-[11px] mt-0.5">
-                        Your order is saved and automatically accepted. Clicking below launches WhatsApp with your pre-filled order receipt.
+                      <p className="font-medium text-[#14532D]">Direct WhatsApp Order Booking</p>
+                      <p className="text-[#166534] text-[11px] mt-0.5">
+                        Your order is automatically recorded in our system. Clicking below opens WhatsApp with your pre-filled receipt to confirm with our sales desk.
                       </p>
                     </div>
                   </div>
@@ -572,16 +600,16 @@ const Checkout: React.FC = () => {
                   <button
                     type="submit"
                     disabled={processingPayment}
-                    className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white py-4 px-6 rounded-2xl font-bold uppercase tracking-wider text-sm md:text-base shadow-xl shadow-emerald-500/25 flex items-center justify-center gap-2.5 transition-all cursor-pointer active:scale-98 disabled:opacity-50"
+                    className="w-full py-3.5 px-5 bg-[#25D366] hover:bg-[#1EBE5D] text-white font-medium text-xs sm:text-sm tracking-wide rounded-md shadow-2xs transition-all active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                   >
                     {processingPayment ? (
                       <span className="flex items-center gap-2">
-                        <Loader className="animate-spin" size={18} /> Booking Order...
+                        <Loader className="animate-spin" size={15} /> Booking Order...
                       </span>
                     ) : (
                       <span className="flex items-center gap-2">
-                        <MessageCircle className="w-5 h-5 fill-current" />
-                        <span>BOOK ORDER ON WHATSAPP • ₹{grandTotal.toFixed(2)}</span>
+                        <MessageCircle size={16} className="fill-current" />
+                        <span>Book Order on WhatsApp • ₹{grandTotal.toFixed(2)}</span>
                       </span>
                     )}
                   </button>
@@ -593,39 +621,47 @@ const Checkout: React.FC = () => {
           {/* Right Column: Order Summary */}
           <div className="lg:col-span-5 relative">
             <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="bg-white rounded-[24px] shadow-sm border border-gray-100 p-6 md:p-8 sticky top-24 space-y-6"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.1 }}
+              className="bg-white rounded-xl border border-[#E8E2D8] p-5 sm:p-6 shadow-2xs sticky top-24 space-y-5"
             >
-              <h2 className="text-xl font-serif font-bold text-gray-900 flex items-center tracking-wide">
-                <ShoppingBag className="w-5 h-5 mr-3 text-gray-400" />
-                Order Summary ({items.reduce((s, it) => s + it.quantity, 0)} Items)
-              </h2>
+              {/* Header */}
+              <div className="pb-3 border-b border-[#E8E2D8] flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <ShoppingBag size={15} className="text-[#7D3219]" />
+                  <h2 className="text-base font-poppins font-normal text-gray-950">
+                    Order Summary
+                  </h2>
+                </div>
+                <span className="text-xs text-[#736B63] font-normal">
+                  {items.reduce((s, it) => s + it.quantity, 0)} {items.reduce((s, it) => s + it.quantity, 0) === 1 ? 'item' : 'items'}
+                </span>
+              </div>
               
-              <div className="space-y-4 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar divide-y divide-gray-100">
+              {/* Item List */}
+              <div className="space-y-3 max-h-[340px] overflow-y-auto pr-1 custom-scrollbar divide-y divide-[#E8E2D8]/60">
                 {items.map((item) => (
-                  <div key={item.id} className="flex items-center gap-4 pt-3 first:pt-0">
-                    <div className="w-16 h-16 bg-[#f8f8f7] rounded-xl flex items-center justify-center p-1 border border-gray-100 shrink-0">
+                  <div key={item.id} className="flex items-center gap-3 pt-3 first:pt-0">
+                    <div className="w-14 h-14 bg-[#FBF9F6] rounded-md flex items-center justify-center border border-[#E8E2D8] overflow-hidden shrink-0">
                       <img
-                        src={item.image}
+                        src={fixImageUrl(item.image) || '/images/festive_gifts_banner.jpg'}
                         alt={item.name}
-                        className="w-full h-full object-cover rounded-lg"
+                        className="w-full h-full object-cover"
                         onError={(e) => {
                           (e.target as HTMLElement).style.display = 'none';
                         }}
                       />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-gray-900 text-xs truncate">{item.name}</h3>
-                      <p className="text-[11px] text-gray-500 mt-0.5">Qty: {item.quantity}</p>
-                      {item.selectedSize && (
-                        <span className="text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded mr-1">
-                          {item.selectedSize}
-                        </span>
-                      )}
+                      <h3 className="font-normal text-gray-950 text-xs truncate" title={item.name}>
+                        {(item.name || 'Curated Product').replace(/_/g, ' ')}
+                      </h3>
+                      <p className="text-[11px] text-[#736B63] mt-0.5">
+                        Qty: {item.quantity} {item.selectedSize ? `• ${item.selectedSize}` : ''}
+                      </p>
                     </div>
-                    <span className="font-bold text-gray-900 text-xs">
+                    <span className="font-normal text-gray-950 text-xs shrink-0">
                       ₹{(item.price * item.quantity).toFixed(2)}
                     </span>
                   </div>
@@ -633,78 +669,61 @@ const Checkout: React.FC = () => {
               </div>
 
               {/* Price Breakdown */}
-              <div className="border-t border-gray-100 pt-4 space-y-2.5 text-xs">
-                <div className="flex justify-between text-gray-600">
+              <div className="border-t border-[#E8E2D8] pt-4 space-y-2.5 text-xs">
+                <div className="flex justify-between text-[#736B63] font-normal">
                   <span>Subtotal</span>
-                  <span className="font-bold text-gray-900">₹{totalPrice.toFixed(2)}</span>
+                  <span className="text-gray-950">₹{totalPrice.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between text-gray-600">
-                  <span>Delivery Charges</span>
-                  <span className="font-bold text-gray-900">
+                <div className="flex justify-between text-[#736B63] font-normal">
+                  <span>Estimated Shipping</span>
+                  <span className="text-gray-950">
                     {calculatedShippingFee === 0 ? (
-                      <span className="text-emerald-600">FREE</span>
+                      <span className="text-[#16A34A] font-medium">FREE</span>
                     ) : (
                       `₹${calculatedShippingFee.toFixed(2)}`
                     )}
                   </span>
                 </div>
-                <div className="flex justify-between text-gray-600">
+                <div className="flex justify-between text-[#736B63] font-normal">
                   <span>Taxes (18% GST)</span>
-                  <span className="font-bold text-gray-900">₹{tax.toFixed(2)}</span>
+                  <span className="text-gray-950">₹{tax.toFixed(2)}</span>
                 </div>
-                <div className="border-t border-gray-200 pt-3 flex justify-between items-center text-sm">
-                  <span className="font-bold text-gray-900">Grand Total</span>
-                  <span className="font-serif font-black text-xl text-[#004e38]">
+                <div className="border-t border-[#E8E2D8] pt-3 flex justify-between items-baseline">
+                  <span className="font-normal text-sm text-gray-950">Total Amount</span>
+                  <span className="font-poppins font-normal text-lg sm:text-xl text-[#7D3219]">
                     ₹{grandTotal.toFixed(2)}
                   </span>
                 </div>
               </div>
 
-              {/* Trust Badges */}
-              <div className="pt-2 border-t border-gray-100 grid grid-cols-2 gap-3 text-[11px] text-gray-500">
-                <div className="flex items-center gap-2">
-                  <Truck size={14} className="text-emerald-600 shrink-0" />
+              {/* Minimal Trust Assurances */}
+              <div className="pt-2 border-t border-[#E8E2D8] grid grid-cols-2 gap-2 text-[11px] text-[#736B63]">
+                <div className="flex items-center gap-1.5">
+                  <Truck size={13} className="text-[#C26847] shrink-0" />
                   <span>Insured Shipping</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Lock size={14} className="text-emerald-600 shrink-0" />
-                  <span>Order Protected</span>
+                <div className="flex items-center gap-1.5">
+                  <ShieldCheck size={13} className="text-[#C26847] shrink-0" />
+                  <span>Verified Purchase</span>
                 </div>
               </div>
             </motion.div>
           </div>
         </div>
-      </div>
 
-      {/* BEFORE FOOTER: Why Shop With Ghar Sansar */}
-      <div className="border-t border-gray-200 mt-12 bg-white relative overflow-hidden py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center mb-12">
-            <h2 className="text-2xl md:text-3xl font-serif font-bold text-gray-900 mb-2">Why Shop With Ghar Sansar</h2>
-            <p className="text-gray-500 text-sm max-w-xl mx-auto">Experience a new standard of luxury shopping delivered straight to your home.</p>
+        {/* Minimal Footer Trust Bar matching Cart page */}
+        <div className="mt-12 bg-white rounded-xl border border-[#E8E2D8] p-4 sm:p-5 shadow-2xs flex flex-wrap items-center justify-around gap-4 text-xs text-[#736B63]">
+          <div className="flex items-center gap-2">
+            <Truck size={15} className="text-[#C26847]" />
+            <span>Fast insured courier dispatch across AP & Telangana</span>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-[#FAF9F6] border border-gray-100 rounded-2xl p-6 text-center">
-              <Star className="w-6 h-6 text-emerald-600 mx-auto mb-3" />
-              <h3 className="text-sm font-bold text-gray-900 mb-1">Premium Quality</h3>
-              <p className="text-xs text-gray-500">Curated collections of the highest grade materials.</p>
-            </div>
-            <div className="bg-[#FAF9F6] border border-gray-100 rounded-2xl p-6 text-center">
-              <Truck className="w-6 h-6 text-emerald-600 mx-auto mb-3" />
-              <h3 className="text-sm font-bold text-gray-900 mb-1">Fast Delivery</h3>
-              <p className="text-xs text-gray-500">Insured courier dispatch across AP & Telangana.</p>
-            </div>
-            <div className="bg-[#FAF9F6] border border-gray-100 rounded-2xl p-6 text-center">
-              <Award className="w-6 h-6 text-emerald-600 mx-auto mb-3" />
-              <h3 className="text-sm font-bold text-gray-900 mb-1">Trusted Decor</h3>
-              <p className="text-xs text-gray-500">Over a decade of styling premium homes.</p>
-            </div>
-            <div className="bg-[#FAF9F6] border border-gray-100 rounded-2xl p-6 text-center">
-              <Headphones className="w-6 h-6 text-emerald-600 mx-auto mb-3" />
-              <h3 className="text-sm font-bold text-gray-900 mb-1">WhatsApp Assistance</h3>
-              <p className="text-xs text-gray-500">Instant tracking and personal styling support.</p>
-            </div>
+          <div className="flex items-center gap-2">
+            <ShieldCheck size={15} className="text-[#C26847]" />
+            <span>100% Authentic Handcrafted Curations</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <MessageCircle size={15} className="text-[#25D366]" />
+            <span>Direct WhatsApp order support & dispatch updates</span>
           </div>
         </div>
       </div>
