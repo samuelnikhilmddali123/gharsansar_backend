@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Menu, X, Search, ShoppingCart, User, LogOut, Heart } from "lucide-react";
+import { Menu, X, Search, ShoppingCart, User, LogOut, Heart, ChevronRight, MessageCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
@@ -255,9 +255,9 @@ const Header: React.FC = () => {
                 )}
               </div>
 
-              {/* Profile Icon */}
+              {/* Profile Icon (Desktop & Tablet) */}
               {user ? (
-                <div className="relative" ref={userMenuRef}>
+                <div className="relative hidden sm:block" ref={userMenuRef}>
                   <button
                     onClick={() => setUserMenuOpen((v) => !v)}
                     aria-label="User profile"
@@ -301,17 +301,17 @@ const Header: React.FC = () => {
                 <Link
                   to="/login"
                   aria-label="Sign In"
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-gray-700 hover:text-[#C86B4C] hover:bg-[#F6F1E8] transition-colors cursor-pointer"
+                  className="hidden sm:flex w-8 h-8 rounded-full items-center justify-center text-gray-700 hover:text-[#C86B4C] hover:bg-[#F6F1E8] transition-colors cursor-pointer"
                 >
                   <User className="w-[18px] h-[18px]" />
                 </Link>
               )}
 
-              {/* Wishlist Heart Icon */}
+              {/* Wishlist Heart Icon (Desktop & Tablet) */}
               <Link
                 to="/wishlist"
                 aria-label="Wishlist"
-                className="w-8 h-8 rounded-full flex items-center justify-center text-gray-700 hover:text-[#C86B4C] hover:bg-[#F6F1E8] transition-colors cursor-pointer"
+                className="hidden sm:flex w-8 h-8 rounded-full items-center justify-center text-gray-700 hover:text-[#C86B4C] hover:bg-[#F6F1E8] transition-colors cursor-pointer"
               >
                 <div className="relative flex items-center justify-center">
                   <Heart className="w-[18px] h-[18px]" />
@@ -337,11 +337,11 @@ const Header: React.FC = () => {
                 </div>
               </Link>
 
-              {/* Menu Toggle */}
+              {/* Menu Toggle (Mobile & Tablet only) */}
               <button
                 aria-label="Toggle navigation menu"
                 onClick={() => setMenuOpen((v) => !v)}
-                className="w-8 h-8 rounded-full flex items-center justify-center text-gray-700 hover:text-[#C86B4C] hover:bg-[#F6F1E8] transition-colors cursor-pointer"
+                className="lg:hidden w-8 h-8 rounded-full flex items-center justify-center text-gray-700 hover:text-[#C86B4C] hover:bg-[#F6F1E8] transition-colors cursor-pointer"
               >
                 {isMenuOpen ? <X className="w-[18px] h-[18px]" /> : <Menu className="w-[18px] h-[18px]" />}
               </button>
@@ -353,68 +353,155 @@ const Header: React.FC = () => {
       {/* Mobile Navigation Drawer */}
       <AnimatePresence>
         {isMenuOpen && (
-          <div className="fixed inset-0 z-40 lg:hidden">
+          <div className="fixed inset-0 z-[70] lg:hidden">
+            {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setMenuOpen(false)}
-              className="fixed inset-0 bg-black/40 backdrop-blur-xs"
+              className="fixed inset-0 bg-black/60 backdrop-blur-xs"
             />
+
+            {/* Slide-in Drawer */}
             <motion.div
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
-              transition={{ type: "tween", duration: 0.3 }}
-              className="fixed top-0 right-0 bottom-0 w-72 bg-[#F6F1E8] p-6 shadow-2xl flex flex-col justify-between border-l border-[#E8E2D8] z-50"
+              transition={{ type: "tween", duration: 0.25 }}
+              className="fixed top-0 right-0 bottom-0 w-[85%] max-w-[340px] bg-[#FAF7F2] shadow-2xl flex flex-col justify-between border-l border-[#E8E2D8] z-[80] overflow-y-auto"
             >
               <div>
-                <div className="flex items-center justify-between pb-6 border-b border-[#E8E2D8] mb-6">
-                  <GharSansarLogo variant="dark" />
+                {/* Drawer Header */}
+                <div className="h-14 px-5 border-b border-[#E8E2D8] flex items-center justify-between bg-[#F6F1E8] shrink-0">
+                  <div className="flex items-center">
+                    <GharSansarLogo variant="dark" />
+                  </div>
                   <button
                     onClick={() => setMenuOpen(false)}
                     aria-label="Close menu"
-                    className="p-1 text-gray-500 hover:text-gray-900"
+                    className="w-8 h-8 rounded-full bg-white border border-[#E8E2D8] hover:border-[#D9B4A4] flex items-center justify-center text-gray-700 hover:text-black transition-colors cursor-pointer"
                   >
-                    <X className="w-5 h-5" />
+                    <X className="w-4 h-4" />
                   </button>
                 </div>
 
-                <nav className="space-y-4">
-                  {navLinks.map((link) => (
-                    <Link
-                      key={link.path}
-                      to={link.path}
-                      onClick={() => setMenuOpen(false)}
-                      className={`block py-2 text-sm uppercase tracking-wider font-medium transition-colors ${
-                        isActive(link.path)
-                          ? "text-[#C57053] font-bold"
-                          : "text-gray-700 hover:text-[#C57053]"
-                      }`}
-                    >
-                      {link.label}
-                    </Link>
-                  ))}
-                </nav>
+                {/* User Status / Profile Card */}
+                <div className="p-3.5 mx-4 mt-4 bg-white rounded-xl border border-[#E8E2D8] shadow-2xs">
+                  {user ? (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="w-8 h-8 rounded-full bg-[#F7EBE4] text-[#7D3219] flex items-center justify-center shrink-0">
+                          <User size={15} />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-[10px] text-gray-500 font-normal">Signed in</p>
+                          <p className="text-xs font-medium text-gray-950 truncate">
+                            {user.name || user.email}
+                          </p>
+                        </div>
+                      </div>
+                      <Link
+                        to="/profile"
+                        onClick={() => setMenuOpen(false)}
+                        className="px-2.5 py-1 text-xs font-medium text-[#7D3219] bg-[#F7EBE4] rounded-md border border-[#D9B4A4] hover:bg-[#EFE0D7] transition-colors shrink-0"
+                      >
+                        Profile
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-full bg-[#FAF7F2] text-[#736B63] flex items-center justify-center shrink-0">
+                          <User size={15} />
+                        </div>
+                        <div>
+                          <p className="text-xs font-medium text-gray-900">Welcome Guest</p>
+                          <p className="text-[10px] text-[#736B63]">Sign in to track orders</p>
+                        </div>
+                      </div>
+                      <Link
+                        to="/login"
+                        onClick={() => setMenuOpen(false)}
+                        className="px-3 py-1 bg-[#C26847] hover:bg-[#B05B3C] text-white rounded-md text-xs font-medium shadow-2xs transition-colors shrink-0"
+                      >
+                        Sign In
+                      </Link>
+                    </div>
+                  )}
+                </div>
+
+                {/* Quick Action Tiles: Wishlist & Cart */}
+                <div className="grid grid-cols-2 gap-2.5 px-4 mt-3">
+                  <Link
+                    to="/wishlist"
+                    onClick={() => setMenuOpen(false)}
+                    className="p-3 bg-white rounded-xl border border-[#E8E2D8] hover:border-[#D9B4A4] flex items-center justify-between text-xs text-gray-800 transition-colors shadow-2xs"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Heart size={14} className="text-[#C26847]" />
+                      <span className="font-normal text-gray-900">Wishlist</span>
+                    </div>
+                    <span className="px-1.5 py-0.5 rounded-full bg-[#F7EBE4] text-[#7D3219] text-[10px] font-bold">
+                      {wishlist.length}
+                    </span>
+                  </Link>
+
+                  <Link
+                    to="/cart"
+                    onClick={() => setMenuOpen(false)}
+                    className="p-3 bg-white rounded-xl border border-[#E8E2D8] hover:border-[#D9B4A4] flex items-center justify-between text-xs text-gray-800 transition-colors shadow-2xs"
+                  >
+                    <div className="flex items-center gap-2">
+                      <ShoppingCart size={14} className="text-[#C26847]" />
+                      <span className="font-normal text-gray-900">Cart</span>
+                    </div>
+                    <span className="px-1.5 py-0.5 rounded-full bg-[#C26847] text-white text-[10px] font-bold">
+                      {totalItems || 0}
+                    </span>
+                  </Link>
+                </div>
+
+                {/* Navigation Links */}
+                <div className="px-4 mt-5 space-y-1">
+                  <span className="text-[10px] font-semibold tracking-[0.18em] uppercase text-[#736B63] px-2 block mb-2">
+                    Menu Collections
+                  </span>
+                  {navLinks.map((link) => {
+                    const active = isActive(link.path);
+                    return (
+                      <Link
+                        key={link.path}
+                        to={link.path}
+                        onClick={() => setMenuOpen(false)}
+                        className={`flex items-center justify-between px-3.5 py-2.5 rounded-lg text-xs sm:text-sm font-poppins transition-colors ${
+                          active
+                            ? "bg-white text-[#7D3219] font-medium border border-[#E8E2D8] shadow-2xs"
+                            : "text-gray-800 hover:bg-white/60 hover:text-[#C26847]"
+                        }`}
+                      >
+                        <span>{link.label}</span>
+                        <ChevronRight size={13} className={active ? "text-[#C26847]" : "text-gray-400"} />
+                      </Link>
+                    );
+                  })}
+                </div>
               </div>
 
-              <div className="pt-6 border-t border-[#E8E2D8] space-y-3">
-                <Link
-                  to="/wishlist"
-                  onClick={() => setMenuOpen(false)}
-                  className="flex items-center justify-between text-xs text-gray-700 hover:text-[#C57053]"
+              {/* Drawer Footer with safe bottom padding for floating chat */}
+              <div className="p-4 border-t border-[#E8E2D8] bg-[#F6F1E8] space-y-2.5 pb-24 sm:pb-6 mt-6">
+                <a
+                  href="https://wa.me/919492664870"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-2.5 px-3 bg-[#25D366] hover:bg-[#1EBE5D] text-white rounded-lg text-xs font-medium flex items-center justify-center gap-2 shadow-2xs transition-colors"
                 >
-                  <span>Wishlist</span>
-                  <span className="font-bold">{wishlist.length}</span>
-                </Link>
-                <Link
-                  to="/cart"
-                  onClick={() => setMenuOpen(false)}
-                  className="flex items-center justify-between text-xs text-gray-700 hover:text-[#C57053]"
-                >
-                  <span>Shopping Cart</span>
-                  <span className="font-bold">{totalItems || 0}</span>
-                </Link>
+                  <MessageCircle size={15} className="fill-current" />
+                  <span>Chat on WhatsApp</span>
+                </a>
+                <p className="text-[11px] text-[#736B63] text-center">
+                  Ghar Sansar • Home Decor & Curations
+                </p>
               </div>
             </motion.div>
           </div>
