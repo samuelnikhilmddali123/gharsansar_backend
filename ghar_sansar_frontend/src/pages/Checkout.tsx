@@ -357,7 +357,7 @@ const Checkout: React.FC = () => {
         </nav>
 
         {/* Page Header - Tighter margins */}
-        <div className="pb-3 border-b border-[#E8E2D8] mb-5 flex items-center justify-between gap-3">
+        <div className="pb-3 border-b border-[#E8E2D8] mb-4 sm:mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-3">
           <div className="flex items-baseline gap-2.5">
             <h1 className="text-xl sm:text-2xl font-poppins font-normal text-gray-950 tracking-tight">
               WhatsApp Order Booking
@@ -381,7 +381,7 @@ const Checkout: React.FC = () => {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.25 }}
-              className="bg-white rounded-xl border border-[#E8E2D8] p-4 sm:p-5 shadow-2xs space-y-4"
+              className="bg-white rounded-xl border border-[#E8E2D8] p-3.5 sm:p-5 shadow-2xs space-y-4"
             >
               <form onSubmit={handleSubmit} className="space-y-4">
                 
@@ -612,7 +612,7 @@ const Checkout: React.FC = () => {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.25, delay: 0.05 }}
-              className="bg-white rounded-xl border border-[#E8E2D8] p-4 sm:p-5 shadow-2xs sticky top-16 space-y-3.5"
+              className="bg-white rounded-xl border border-[#E8E2D8] p-3.5 sm:p-5 shadow-2xs sticky top-16 space-y-3.5"
             >
               {/* Header */}
               <div className="pb-2.5 border-b border-[#E8E2D8] flex items-center justify-between">

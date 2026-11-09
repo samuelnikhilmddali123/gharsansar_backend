@@ -489,9 +489,9 @@ Looking forward to your response!`;
     <div className="bg-[#FAF7F2] min-h-screen font-poppins pb-20 flex flex-col selection:bg-[#F7EBE4] selection:text-[#7D3219] antialiased">
       {/* 1. Hero Inset Banner */}
       <div className="w-full bg-[#FAF7F2] pt-13 sm:pt-14 pb-2 sm:pb-2.5">
-        <div className="w-full max-w-[1880px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10">
+        <div className="w-full max-w-[1880px] mx-auto px-3 sm:px-6 md:px-8 lg:px-10">
           <div
-            className="relative w-full rounded-xl sm:rounded-2xl overflow-hidden border-[2.5px] sm:border-[3px] border-[#F6F1E8] shadow-md bg-[#181513] group select-none h-[140px] sm:h-[180px] lg:h-[210px] xl:h-[230px]"
+            className="relative w-full rounded-xl sm:rounded-2xl overflow-hidden border-[2px] sm:border-[2.5px] lg:border-[3px] border-[#F6F1E8] shadow-md bg-[#181513] group select-none h-[120px] sm:h-[160px] md:h-[185px] lg:h-[210px] xl:h-[230px]"
           >
             {/* Banner Background Image */}
             <img
@@ -524,7 +524,7 @@ Looking forward to your response!`;
       </div>
 
       {/* 2. Main Content Container */}
-      <div id="collection-section" className="w-full max-w-[1880px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10 pt-2 sm:pt-2.5">
+      <div id="collection-section" className="w-full max-w-[1880px] mx-auto px-3 sm:px-6 md:px-8 lg:px-10 pt-2 sm:pt-2.5">
         {/* Breadcrumb: [Home Icon] Home > Interior Design */}
         <nav className="flex items-center space-x-2 text-xs sm:text-[13px] text-gray-500 font-medium mb-3">
           <Link to="/" className="hover:text-[#7D3219] transition-colors flex items-center gap-1.5">
@@ -554,24 +554,24 @@ Looking forward to your response!`;
         {!activeCategory ? (
           <>
             {/* Title & Controls Row */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 border-b border-[#E8E2D8]">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 sm:gap-4 pb-3 sm:pb-4 border-b border-[#E8E2D8]">
               <div>
-                <span className="text-[11px] sm:text-xs font-medium tracking-[0.24em] text-[#7D3219] uppercase font-sans mb-1 block">
+                <span className="text-[10px] sm:text-xs font-medium tracking-[0.2em] sm:tracking-[0.24em] text-[#7D3219] uppercase font-sans mb-0.5 sm:mb-1 block">
                   Curated Collections
                 </span>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-poppins text-gray-950 font-normal tracking-tight">
+                <h1 className="text-xl sm:text-3xl lg:text-4xl font-poppins text-gray-950 font-normal tracking-tight">
                   Interior Design
                 </h1>
-                <p className="text-xs sm:text-sm text-gray-600 mt-1 font-normal leading-relaxed">
+                <p className="text-xs sm:text-sm text-gray-600 mt-0.5 sm:mt-1 font-normal leading-relaxed">
                   Explore our wide range of interior solutions for a more beautiful home.
                 </p>
               </div>
 
               {/* Right Controls: Search bar + All Categories dropdown */}
-              <div className="flex items-center gap-2.5 flex-wrap shrink-0">
+              <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap sm:flex-nowrap w-full md:w-auto shrink-0">
                 {/* Search Bar */}
-                <div className="relative w-64 sm:w-80 md:w-96">
-                  <Search className="w-4 h-4 text-gray-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <div className="relative flex-1 sm:w-80 md:w-96">
+                  <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-500 absolute left-3 sm:left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <input
                     type="search"
                     placeholder="Search interior products, categories..."
@@ -580,7 +580,7 @@ Looking forward to your response!`;
                       setSearch(e.target.value);
                       setCurrentPage(1);
                     }}
-                    className="w-full h-10 bg-white border border-[#E8E2D8] hover:border-gray-500 focus:border-[#7D3219] focus:ring-1 focus:ring-[#7D3219]/20 rounded-xl pl-10 pr-8 text-xs sm:text-[13px] font-normal text-gray-900 placeholder:text-gray-500 focus:outline-none transition-all shadow-2xs"
+                    className="w-full h-9 sm:h-10 bg-white border border-[#E8E2D8] hover:border-gray-500 focus:border-[#7D3219] focus:ring-1 focus:ring-[#7D3219]/20 rounded-lg sm:rounded-xl pl-9 sm:pl-10 pr-8 text-xs sm:text-[13px] font-normal text-gray-900 placeholder:text-gray-500 focus:outline-none transition-all shadow-2xs"
                   />
                   {search && (
                     <button
@@ -594,44 +594,46 @@ Looking forward to your response!`;
                 </div>
 
                 {/* Dropdown: All Categories [v] */}
-                <CustomSelect
-                  value={selectedCategory}
-                  options={["All Categories", ...categories.map((c) => c.name)]}
-                  onChange={(val) => {
-                    setSelectedCategory(val);
-                    setCurrentPage(1);
-                  }}
-                  placeholder="All Categories"
-                />
+                <div className="shrink-0">
+                  <CustomSelect
+                    value={selectedCategory}
+                    options={["All Categories", ...categories.map((c) => c.name)]}
+                    onChange={(val) => {
+                      setSelectedCategory(val);
+                      setCurrentPage(1);
+                    }}
+                    placeholder="All Categories"
+                  />
+                </div>
               </div>
             </div>
 
-            {/* 4-Column Categories Grid matching mockup */}
+            {/* 4-Column Categories Grid (2-cols on mobile for great browsing, 4-cols on desktop) */}
             {loading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-6 mt-6">
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5 lg:gap-6 mt-4 sm:mt-6">
                 {[...Array(12)].map((_, i) => (
                   <div
                     key={i}
-                    className="animate-pulse bg-white rounded-2xl p-4 h-[320px] border border-[#E8E2D8]"
+                    className="animate-pulse bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 h-[240px] sm:h-[320px] border border-[#E8E2D8]"
                   >
-                    <div className="bg-gray-100 rounded-xl aspect-[4/3] mb-3"></div>
-                    <div className="bg-gray-100 h-4 w-3/4 rounded mb-2"></div>
-                    <div className="bg-gray-100 h-3 w-1/2 rounded mb-3"></div>
-                    <div className="bg-gray-100 h-4 w-1/3 rounded mt-auto"></div>
+                    <div className="bg-gray-100 rounded-lg sm:rounded-xl aspect-[4/3] mb-3"></div>
+                    <div className="bg-gray-100 h-3.5 sm:h-4 w-3/4 rounded mb-2"></div>
+                    <div className="bg-gray-100 h-2.5 sm:h-3 w-1/2 rounded mb-3"></div>
+                    <div className="bg-gray-100 h-3 sm:h-4 w-1/3 rounded mt-auto"></div>
                   </div>
                 ))}
               </div>
             ) : paginatedCategories.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-6 mt-6">
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5 lg:gap-6 mt-4 sm:mt-6">
                 {paginatedCategories.map((cat) => (
                   <div
                     key={cat.name}
                     onClick={() => onSelectCategory(cat.name)}
-                    className="group bg-white rounded-2xl border border-[#E8E2D8] hover:border-[#D9B4A4] shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_18px_36px_rgba(125,50,25,0.08)] hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between p-3.5 sm:p-4 cursor-pointer"
+                    className="group bg-white rounded-xl sm:rounded-2xl border border-[#E8E2D8] hover:border-[#D9B4A4] shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_18px_36px_rgba(125,50,25,0.08)] hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between p-2.5 sm:p-4 cursor-pointer"
                   >
                     <div>
-                      {/* Image container: aspect 4:3 rounded-xl clean with no overlay obstruction */}
-                      <div className="relative w-full aspect-[4/3] rounded-none overflow-hidden bg-[#FAF8F5] mb-3.5 border border-[#E8E2D8]">
+                      {/* Image container: aspect 4:3 rounded clean with no overlay obstruction */}
+                      <div className="relative w-full aspect-[4/3] rounded-md sm:rounded-none overflow-hidden bg-[#FAF8F5] mb-2 sm:mb-3.5 border border-[#E8E2D8]">
                         <img
                           src={cat.image || placeholderImage}
                           alt={cat.name}
@@ -641,12 +643,12 @@ Looking forward to your response!`;
                       </div>
 
                       {/* Title */}
-                      <h3 className="font-poppins text-[15px] sm:text-base font-normal text-gray-950 mb-1.5 line-clamp-1 leading-snug">
+                      <h3 className="font-poppins text-xs sm:text-[15px] lg:text-base font-normal text-gray-950 mb-1 line-clamp-1 leading-snug">
                         {formatCategoryTitle(cat.name)}
                       </h3>
 
-                      {/* Feature snippet - authentic 2-line description */}
-                      <p className="font-poppins text-xs text-gray-500 font-normal leading-relaxed line-clamp-2 min-h-[34px] mb-3">
+                      {/* Feature snippet - authentic description */}
+                      <p className="font-poppins text-[11px] sm:text-xs text-gray-500 font-normal leading-relaxed line-clamp-2 min-h-0 sm:min-h-[34px] mb-2 sm:mb-3">
                         {getFeatureSnippet(cat)}
                       </p>
                     </div>
@@ -737,26 +739,26 @@ Looking forward to your response!`;
         ) : (
           /* Subcategories / Designs View for chosen category */
           <div className="mt-2">
-            <div className="flex items-center justify-between pb-4 border-b border-[#E8E2D8] mb-6">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 sm:gap-4 pb-3 sm:pb-4 border-b border-[#E8E2D8] mb-4 sm:mb-6">
               <div>
                 <button
                   onClick={handleBackToCategories}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-white border border-[#E8E2D8] hover:border-[#D9B4A4] hover:bg-[#FAF7F2] rounded-md text-xs font-medium text-gray-800 transition-colors shadow-2xs mb-3 cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-[#E8E2D8] hover:border-[#D9B4A4] hover:bg-[#FAF7F2] rounded-md text-xs font-medium text-gray-800 transition-colors shadow-2xs mb-2 sm:mb-3 cursor-pointer"
                 >
                   <ChevronLeft size={14} />
                   <span>Back to Categories</span>
                 </button>
-                <h2 className="text-2xl sm:text-3xl font-poppins text-[#1a241e] font-normal tracking-tight">
+                <h2 className="text-xl sm:text-2xl lg:text-3xl font-poppins text-[#1a241e] font-normal tracking-tight">
                   {formatCategoryTitle(activeCategory)} Designs
                 </h2>
-                <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                <p className="text-xs sm:text-sm text-gray-600 mt-0.5 sm:mt-1">
                   {getFeatureSnippet(currentCat || { name: activeCategory })}
                 </p>
               </div>
 
               {/* Search Subcategories */}
-              <div className="relative w-64 sm:w-80 md:w-96">
-                <Search className="w-4 h-4 text-gray-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <div className="relative w-full sm:w-80 md:w-96">
+                <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-500 absolute left-3 sm:left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
                   type="search"
                   placeholder="Search designs..."
@@ -765,7 +767,7 @@ Looking forward to your response!`;
                     setSearch(e.target.value);
                     setSubCatPage(1);
                   }}
-                  className="w-full h-10 bg-white border border-[#E8E2D8] hover:border-gray-500 focus:border-[#7D3219] focus:ring-1 focus:ring-[#7D3219]/20 rounded-xl pl-10 pr-8 text-xs sm:text-[13px] font-normal text-gray-900 placeholder:text-gray-500 focus:outline-none transition-all shadow-2xs"
+                  className="w-full h-9 sm:h-10 bg-white border border-[#E8E2D8] hover:border-gray-500 focus:border-[#7D3219] focus:ring-1 focus:ring-[#7D3219]/20 rounded-lg sm:rounded-xl pl-9 sm:pl-10 pr-8 text-xs sm:text-[13px] font-normal text-gray-900 placeholder:text-gray-500 focus:outline-none transition-all shadow-2xs"
                 />
                 {search && (
                   <button
@@ -779,13 +781,13 @@ Looking forward to your response!`;
               </div>
             </div>
 
-            {/* Designs Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-6">
+            {/* Designs Grid (2-cols on mobile, 4-cols on desktop) */}
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5 lg:gap-6">
               {paginatedSubCategories.length > 0 ? (
                 paginatedSubCategories.map((sub, idx) => (
                   <div
                     key={sub.name + idx}
-                    className="group bg-white rounded-2xl border border-[#E8E2D8] hover:border-[#D9B4A4] shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_18px_36px_rgba(125,50,25,0.08)] hover:-translate-y-1.5 transition-all duration-300 p-3.5 sm:p-4 flex flex-col justify-between cursor-pointer"
+                    className="group bg-white rounded-xl sm:rounded-2xl border border-[#E8E2D8] hover:border-[#D9B4A4] shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_18px_36px_rgba(125,50,25,0.08)] hover:-translate-y-1.5 transition-all duration-300 p-2.5 sm:p-4 flex flex-col justify-between cursor-pointer"
                   >
                     <div>
                       {/* Media container: clean rounded-xl */}
