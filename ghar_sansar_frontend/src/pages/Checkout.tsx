@@ -330,7 +330,7 @@ const Checkout: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#f8f8f7] font-sans pb-20">
       {/* Header */}
-      <div className="pt-14 pb-8 px-4 text-center">
+      <div className="pt-16 sm:pt-20 pb-8 px-4 text-center">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}

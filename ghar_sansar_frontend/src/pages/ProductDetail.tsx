@@ -517,7 +517,7 @@ const ProductDetail: React.FC = () => {
 
   if (loading && !product) {
     return (
-      <div className="min-h-screen bg-[#FAF9F5] pb-16 pt-12 flex items-center justify-center">
+      <div className="min-h-screen bg-[#FAF9F5] pb-16 pt-16 sm:pt-20 flex items-center justify-center">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 animate-pulse">
             <div className="lg:col-span-7 aspect-square bg-[#eae5dc] rounded-none" />
@@ -660,7 +660,7 @@ const ProductDetail: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 relative z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-20 relative z-10">
         
         {/* Luxury Breadcrumb matching screenshot (Home > Shop > Category > Title) */}
         <nav className="flex items-center space-x-1.5 text-xs text-gray-500 mb-6 font-medium">

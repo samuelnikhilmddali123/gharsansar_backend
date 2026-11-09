@@ -143,7 +143,7 @@ const Header: React.FC = () => {
         <div
           className="w-full transition-all duration-300 bg-[#F6F1E8]/95 backdrop-blur-md"
         >
-          <div className="relative w-full max-w-[1720px] mx-auto px-5 sm:px-8 lg:px-10 xl:px-12 h-12 flex items-center justify-between">
+          <div className="relative w-full max-w-[1720px] mx-auto px-3.5 sm:px-8 lg:px-10 xl:px-12 h-12 flex items-center justify-between">
             {/* 1. Left: Brand Logo */}
             <div className="flex items-center shrink-0 z-10">
               <GharSansarLogo variant="dark" />

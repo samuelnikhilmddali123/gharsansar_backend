@@ -500,11 +500,10 @@ const ProductsPage: React.FC = () => {
   return (
     <div className="bg-[#FAF7F2] min-h-screen font-poppins text-[#181513] pb-16 flex flex-col selection:bg-[#8E3F24] selection:text-white antialiased">
       {/* 1. Hero Poster / Carousel */}
-      <div className="w-full bg-[#FAF7F2] pt-13 sm:pt-14 pb-2 sm:pb-3">
-        <div className="w-full max-w-[1880px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10">
+      <div className="w-full bg-[#FAF7F2] pt-16 sm:pt-20 pb-2 sm:pb-3">
+        <div className="w-full max-w-[1880px] mx-auto px-3 sm:px-6 md:px-8 lg:px-10">
           <div
-            className="relative w-full aspect-[2048/472] rounded-2xl overflow-hidden shadow-sm border border-[#E8E2D8] bg-[#181513] group select-none"
-            style={{ aspectRatio: "2048 / 472" }}
+            className="relative w-full aspect-[2048/472] rounded-xl sm:rounded-2xl overflow-hidden shadow-sm border border-[#E8E2D8] bg-[#181513] group select-none"
             onMouseEnter={() => setIsSliderHovered(true)}
             onMouseLeave={() => setIsSliderHovered(false)}
             onTouchStart={(e) => {
@@ -549,12 +548,12 @@ const ProductsPage: React.FC = () => {
                 <img
                   src={bannerSlides[currentSlideIndex].image}
                   alt={bannerSlides[currentSlideIndex].alt}
-                  className="w-full h-full object-fill block mx-auto"
+                  className="w-full h-full object-contain md:object-cover object-center block mx-auto select-none"
                 />
               </motion.div>
             </AnimatePresence>
 
-            {/* Left Carousel Arrow - Transparent Glass Button */}
+            {/* Left Carousel Arrow - Hidden on mobile so it never covers poster text/artwork */}
             <button
               type="button"
               onClick={(e) => {
@@ -562,12 +561,12 @@ const ProductsPage: React.FC = () => {
                 prevSlide();
               }}
               aria-label="Previous Slide"
-              className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-black/25 hover:bg-black/50 text-white backdrop-blur-md border border-white/35 hover:border-white shadow-md flex items-center justify-center transition-all opacity-85 sm:opacity-0 group-hover:opacity-100 hover:scale-105 active:scale-95 z-20 cursor-pointer"
+              className="hidden sm:flex absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-black/35 hover:bg-black/60 text-white backdrop-blur-md border border-white/30 hover:border-white shadow-md items-center justify-center transition-all opacity-0 group-hover:opacity-100 hover:scale-105 active:scale-95 z-20 cursor-pointer"
             >
               <ChevronLeft size={20} />
             </button>
 
-            {/* Right Carousel Arrow - Transparent Glass Button */}
+            {/* Right Carousel Arrow - Hidden on mobile so it never covers poster text/artwork */}
             <button
               type="button"
               onClick={(e) => {
@@ -575,13 +574,13 @@ const ProductsPage: React.FC = () => {
                 nextSlide();
               }}
               aria-label="Next Slide"
-              className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-black/25 hover:bg-black/50 text-white backdrop-blur-md border border-white/35 hover:border-white shadow-md flex items-center justify-center transition-all opacity-85 sm:opacity-0 group-hover:opacity-100 hover:scale-105 active:scale-95 z-20 cursor-pointer"
+              className="hidden sm:flex absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-black/35 hover:bg-black/60 text-white backdrop-blur-md border border-white/30 hover:border-white shadow-md items-center justify-center transition-all opacity-0 group-hover:opacity-100 hover:scale-105 active:scale-95 z-20 cursor-pointer"
             >
               <ChevronRight size={20} />
             </button>
 
-            {/* Dot Indicators */}
-            <div className="absolute bottom-2.5 sm:bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 sm:gap-2 z-20 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
+            {/* Desktop Dot Indicators - Embedded cleanly at bottom inside banner */}
+            <div className="hidden sm:flex absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 items-center gap-1.5 sm:gap-2 z-20 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
               {bannerSlides.map((slide, idx) => (
                 <button
                   key={slide.id}
@@ -591,14 +590,34 @@ const ProductsPage: React.FC = () => {
                     goToSlide(idx);
                   }}
                   aria-label={`Go to slide ${idx + 1}`}
-                  className={`transition-all duration-300 rounded-full h-2 cursor-pointer ${
+                  className={`transition-all duration-300 rounded-full h-1.5 sm:h-2 cursor-pointer ${
                     idx === currentSlideIndex
-                      ? "w-6 sm:w-7 bg-white shadow-sm"
-                      : "w-2 bg-white/50 hover:bg-white/80"
+                      ? "w-6 sm:w-7 bg-white shadow-xs"
+                      : "w-1.5 sm:w-2 bg-white/50 hover:bg-white/80"
                   }`}
                 />
               ))}
             </div>
+          </div>
+
+          {/* Mobile Dot Indicators - Positioned cleanly BELOW poster so zero badges or text are obscured */}
+          <div className="sm:hidden flex items-center justify-center gap-1.5 pt-2 pb-1">
+            {bannerSlides.map((slide, idx) => (
+              <button
+                key={slide.id}
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  goToSlide(idx);
+                }}
+                aria-label={`Go to slide ${idx + 1}`}
+                className={`transition-all duration-300 rounded-full h-1.5 cursor-pointer ${
+                  idx === currentSlideIndex
+                    ? "w-6 bg-[#8E3F24]"
+                    : "w-1.5 bg-[#D5CEC4] hover:bg-gray-400"
+                }`}
+              />
+            ))}
           </div>
         </div>
       </div>
@@ -643,9 +662,9 @@ const ProductsPage: React.FC = () => {
           </div>
 
           {/* Right Action Controls: Search, Categories Dropdown, Sort, Mobile Filters */}
-          <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap shrink-0">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2.5 w-full md:w-auto shrink-0">
             {/* Search Input */}
-            <div className="relative w-44 sm:w-56 md:w-60">
+            <div className="relative w-full sm:w-56 md:w-60">
               <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="search"
@@ -669,46 +688,52 @@ const ProductsPage: React.FC = () => {
               )}
             </div>
 
-            {/* Categories Dropdown */}
-            <div className="w-48 sm:w-60 relative z-30">
-              <CustomSelect
-                value={categoryFilter}
-                options={allCollectionOptions.map((c) => c.key)}
-                onChange={(val) => updateQuery({ category: val, subCategory: "All", page: 1 })}
-                placeholder="All Collections"
-                dropdownClassName="w-60 sm:w-68 max-h-80 overflow-y-auto shadow-xl"
-                formatValue={(val) => {
-                  const found = allCollectionOptions.find((c) => c.key === val);
-                  return found ? found.label : (val === "All" ? "All Collections" : formatName(val));
-                }}
-              />
-            </div>
+            {/* Mobile Controls Row: Sort, Desktop Categories, and Filter */}
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              {/* Categories Dropdown (Desktop / Tablet) */}
+              <div className="hidden sm:block w-48 sm:w-60 relative z-30">
+                <CustomSelect
+                  value={categoryFilter}
+                  options={allCollectionOptions.map((c) => c.key)}
+                  onChange={(val) => updateQuery({ category: val, subCategory: "All", page: 1 })}
+                  placeholder="All Collections"
+                  dropdownClassName="w-60 sm:w-68 max-h-80 overflow-y-auto shadow-xl"
+                  formatValue={(val) => {
+                    const found = allCollectionOptions.find((c) => c.key === val);
+                    return found ? found.label : (val === "All" ? "All Collections" : formatName(val));
+                  }}
+                />
+              </div>
 
-            {/* Sort Dropdown */}
-            <div className="w-40 sm:w-44 relative z-30">
-              <CustomSelect
-                value={sortOrder}
-                options={["featured", "price-low", "price-high"]}
-                onChange={(val) => updateQuery({ sort: val, page: 1 })}
-                placeholder="Sort by: Featured"
-                formatValue={(val) => {
-                  if (val === "featured") return "Sort: Featured";
-                  if (val === "price-low") return "Price: Low to High";
-                  if (val === "price-high") return "Price: High to Low";
-                  return val;
-                }}
-              />
-            </div>
+              {/* Sort Dropdown */}
+              <div className="flex-1 sm:flex-initial sm:w-40 md:w-44 relative z-30">
+                <CustomSelect
+                  value={sortOrder}
+                  options={["featured", "price-low", "price-high"]}
+                  onChange={(val) => updateQuery({ sort: val, page: 1 })}
+                  placeholder="Sort by: Featured"
+                  formatValue={(val) => {
+                    if (val === "featured") return "Sort: Featured";
+                    if (val === "price-low") return "Price: Low to High";
+                    if (val === "price-high") return "Price: High to Low";
+                    return val;
+                  }}
+                />
+              </div>
 
-            {/* Mobile Filter Toggle Button */}
-            <button
-              type="button"
-              onClick={() => setIsMobileFilterOpen(true)}
-              className="lg:hidden flex items-center gap-1.5 bg-white border border-[#E8E2D8] hover:border-black px-3.5 py-2 rounded-xl text-xs font-medium text-gray-800 transition-colors shadow-2xs cursor-pointer h-[38px]"
-            >
-              <SlidersHorizontal size={14} className="text-gray-700" />
-              <span>Filters</span>
-            </button>
+              {/* Mobile Filter Toggle Button */}
+              <button
+                type="button"
+                onClick={() => setIsMobileFilterOpen(true)}
+                className="lg:hidden flex items-center justify-center gap-1.5 bg-white border border-[#E8E2D8] hover:border-black px-3.5 py-2 rounded-xl text-xs font-medium text-gray-800 transition-colors shadow-2xs cursor-pointer h-[38px] shrink-0"
+              >
+                <SlidersHorizontal size={14} className="text-gray-700" />
+                <span>Filters</span>
+                {hasActiveFilters && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#8E3F24]" />
+                )}
+              </button>
+            </div>
           </div>
         </div>
 
