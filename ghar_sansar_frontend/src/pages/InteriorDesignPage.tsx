@@ -491,7 +491,7 @@ Looking forward to your response!`;
       <div className="w-full bg-[#FAF7F2] pt-13 sm:pt-14 pb-2 sm:pb-2.5">
         <div className="w-full max-w-[1880px] mx-auto px-3 sm:px-6 md:px-8 lg:px-10">
           <div
-            className="relative w-full rounded-xl sm:rounded-2xl overflow-hidden border-[2px] sm:border-[2.5px] lg:border-[3px] border-[#F6F1E8] shadow-md bg-[#181513] group select-none h-[120px] sm:h-[160px] md:h-[185px] lg:h-[210px] xl:h-[230px]"
+            className="relative w-full rounded-xl sm:rounded-2xl overflow-hidden border-[2px] sm:border-[2.5px] lg:border-[3px] border-[#F6F1E8] shadow-md bg-[#181513] group select-none aspect-[2172/724] sm:aspect-auto sm:h-[160px] md:h-[185px] lg:h-[210px] xl:h-[230px]"
           >
             {/* Banner Background Image */}
             <img
@@ -507,7 +507,7 @@ Looking forward to your response!`;
                 }
               }}
               alt="Interior Design - Transform Your Space Into A Beautiful Home"
-              className="w-full h-full object-cover object-center block cursor-pointer"
+              className="w-full h-full object-contain sm:object-cover object-center block cursor-pointer"
               onClick={scrollToCollection}
             />
 
