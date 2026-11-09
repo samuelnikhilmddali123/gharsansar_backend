@@ -1088,11 +1088,18 @@ const Home: React.FC = () => {
 
           <div
             id="consultation"
-            className="rounded-2xl bg-gradient-to-br from-[#2D160E] via-[#24120B] to-[#1A0D08] text-white p-5 sm:p-7 lg:p-8 shadow-2xl overflow-hidden relative border border-[#4E2718]"
+            className="rounded-xl sm:rounded-2xl bg-[#542B1B] text-white p-5 sm:p-6 lg:p-7 shadow-xl overflow-hidden relative border border-[#6B3724]"
           >
-            {/* Elegant Ambient Luxury Accents (Pure CSS, No Muddy Photos) */}
-            <div className="absolute -top-24 -right-24 w-80 h-80 bg-[#C86B4C]/15 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-[#C86B4C]/10 rounded-full blur-3xl pointer-events-none" />
+            {/* Integrated Right Architectural Lounge Photo with Smooth Gradient Blend (Desktop only: hidden on mobile) */}
+            <div className="hidden sm:block absolute right-0 top-0 bottom-0 sm:w-[48%] lg:w-[42%] overflow-hidden pointer-events-none select-none">
+              <img
+                src="/images/design/consultation_lounge_right.jpg"
+                alt="Interior Consultation Studio Lounge"
+                className="w-full h-full object-cover object-center"
+              />
+              {/* Desktop horizontal blend */}
+              <div className="absolute inset-0 bg-gradient-to-r from-[#542B1B] via-[#542B1B]/75 sm:via-[#542B1B]/40 to-transparent" />
+            </div>
 
             {/* Content Foreground */}
             <div className="relative z-10 max-w-2xl lg:max-w-3xl flex flex-col">
@@ -1114,7 +1121,7 @@ const Home: React.FC = () => {
 
               {/* 4 Feature Highlights Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 mb-5 max-w-xl">
-                <div className="flex items-start gap-2.5 bg-white/[0.04] hover:bg-white/[0.07] rounded-xl p-2.5 sm:p-3 border border-white/10 backdrop-blur-xs transition-colors">
+                <div className="flex items-start gap-2.5 bg-black/25 hover:bg-black/35 rounded-xl p-2.5 sm:p-3 border border-white/10 backdrop-blur-xs transition-colors">
                   <div className="w-7 h-7 rounded-lg bg-[#C86B4C]/25 border border-[#C86B4C]/50 flex items-center justify-center shrink-0 text-[#E8A588] mt-0.5">
                     <Compass className="w-3.5 h-3.5" />
                   </div>
@@ -1128,7 +1135,7 @@ const Home: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="flex items-start gap-2.5 bg-white/[0.04] hover:bg-white/[0.07] rounded-xl p-2.5 sm:p-3 border border-white/10 backdrop-blur-xs transition-colors">
+                <div className="flex items-start gap-2.5 bg-black/25 hover:bg-black/35 rounded-xl p-2.5 sm:p-3 border border-white/10 backdrop-blur-xs transition-colors">
                   <div className="w-7 h-7 rounded-lg bg-[#C86B4C]/25 border border-[#C86B4C]/50 flex items-center justify-center shrink-0 text-[#E8A588] mt-0.5">
                     <Layers className="w-3.5 h-3.5" />
                   </div>
@@ -1142,7 +1149,7 @@ const Home: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="flex items-start gap-2.5 bg-white/[0.04] hover:bg-white/[0.07] rounded-xl p-2.5 sm:p-3 border border-white/10 backdrop-blur-xs transition-colors">
+                <div className="flex items-start gap-2.5 bg-black/25 hover:bg-black/35 rounded-xl p-2.5 sm:p-3 border border-white/10 backdrop-blur-xs transition-colors">
                   <div className="w-7 h-7 rounded-lg bg-[#C86B4C]/25 border border-[#C86B4C]/50 flex items-center justify-center shrink-0 text-[#E8A588] mt-0.5">
                     <CheckCircle2 className="w-3.5 h-3.5" />
                   </div>
@@ -1156,7 +1163,7 @@ const Home: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="flex items-start gap-2.5 bg-white/[0.04] hover:bg-white/[0.07] rounded-xl p-2.5 sm:p-3 border border-white/10 backdrop-blur-xs transition-colors">
+                <div className="flex items-start gap-2.5 bg-black/25 hover:bg-black/35 rounded-xl p-2.5 sm:p-3 border border-white/10 backdrop-blur-xs transition-colors">
                   <div className="w-7 h-7 rounded-lg bg-[#C86B4C]/25 border border-[#C86B4C]/50 flex items-center justify-center shrink-0 text-[#E8A588] mt-0.5">
                     <ShieldCheck className="w-3.5 h-3.5" />
                   </div>
