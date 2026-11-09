@@ -242,14 +242,14 @@ For details, feel free to reach out to us anytime!
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => setIsOpen(true)}
-        className={`fixed right-6 z-50 w-14 h-14 bg-[#25D366] hover:bg-[#20ba5a] text-white rounded-full shadow-xl transition-all flex items-center justify-center ${
-          isProductDetailPage ? "bottom-24" : "bottom-6"
+        className={`fixed right-4 sm:right-6 z-50 w-12 h-12 sm:w-14 sm:h-14 bg-[#25D366] hover:bg-[#20ba5a] text-white rounded-full shadow-xl transition-all flex items-center justify-center ${
+          isProductDetailPage ? "bottom-20 sm:bottom-24" : "bottom-4 sm:bottom-6"
         } ${
           isOpen ? "hidden" : "flex"
         }`}
         title="Chat with Ghar Sansar Support or Enquire on WhatsApp"
       >
-        <MessageCircle className="w-7 h-7 fill-current" />
+        <MessageCircle className="w-6 h-6 sm:w-7 sm:h-7 fill-current" />
       </motion.button>
 
       {/* Chat Window */}

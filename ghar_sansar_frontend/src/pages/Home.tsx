@@ -585,7 +585,7 @@ const Home: React.FC = () => {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="font-poppins text-4xl sm:text-5xl md:text-6xl lg:text-[62px] xl:text-[66px] leading-[1.08] font-normal text-white mb-5 tracking-tight"
+              className="font-poppins text-[28px] xs:text-3xl sm:text-5xl md:text-6xl lg:text-[62px] xl:text-[66px] leading-[1.12] sm:leading-[1.08] font-normal text-white mb-3.5 sm:mb-5 tracking-tight"
             >
               {heroSlides[currentSlide].titleLine1}
               <br />
@@ -606,24 +606,24 @@ const Home: React.FC = () => {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-xs sm:text-sm md:text-[14.5px] text-gray-200 font-normal leading-relaxed max-w-lg mb-8"
+              className="text-xs sm:text-sm md:text-[14.5px] text-gray-200/90 font-normal leading-relaxed max-w-lg mb-5 sm:mb-8"
             >
               {heroSlides[currentSlide].description}
             </motion.p>
 
             {/* CTA Buttons */}
-            <div className="flex flex-wrap items-center gap-4 sm:gap-5">
+            <div className="flex items-center gap-3 sm:gap-5">
               <Link
                 to={heroSlides[currentSlide].primaryLink}
-                className="bg-[#C86B4C] hover:bg-[#B35E42] text-white px-7 sm:px-8 py-3.5 rounded-full font-medium tracking-wider text-xs uppercase inline-flex items-center space-x-2.5 transition-all shadow-md hover:shadow-lg hover:scale-102"
+                className="bg-[#C86B4C] hover:bg-[#B35E42] text-white px-5 sm:px-8 py-3 sm:py-3.5 rounded-full font-medium tracking-wider text-[11px] sm:text-xs uppercase inline-flex items-center space-x-2 transition-all shadow-md hover:shadow-lg hover:scale-102"
               >
                 <span>{heroSlides[currentSlide].primaryCta}</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+                <ArrowRight className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
               </Link>
 
               <Link
                 to={heroSlides[currentSlide].secondaryLink}
-                className="border border-white/80 hover:border-white text-white hover:bg-white/10 px-7 sm:px-8 py-3.5 rounded-full font-medium tracking-wider text-xs uppercase inline-flex items-center transition-all"
+                className="border border-white/80 hover:border-white text-white hover:bg-white/10 px-5 sm:px-8 py-3 sm:py-3.5 rounded-full font-medium tracking-wider text-[11px] sm:text-xs uppercase inline-flex items-center transition-all"
               >
                 <span>{heroSlides[currentSlide].secondaryCta}</span>
               </Link>
@@ -633,13 +633,13 @@ const Home: React.FC = () => {
 
           {/* Bottom Controls Bar: Left Slider Controls + Right Watermark */}
 
-          <div className="flex items-end justify-between pt-8">
+          <div className="flex items-end justify-between pt-4 sm:pt-8 pb-1 sm:pb-0">
 
             {/* Slider Controls */}
 
-            <div className="flex items-center space-x-4 text-white">
+            <div className="flex items-center space-x-3 sm:space-x-4 text-white bg-black/45 sm:bg-transparent backdrop-blur-md sm:backdrop-blur-none px-3.5 py-1.5 sm:px-0 sm:py-0 rounded-full border border-white/15 sm:border-0 shadow-lg sm:shadow-none">
 
-              <div className="flex items-center space-x-2.5 text-xs font-poppins font-bold">
+              <div className="flex items-center space-x-2 sm:space-x-2.5 text-[11px] sm:text-xs font-poppins font-bold">
 
                 {heroSlides.map((_, idx) => (
 
@@ -669,7 +669,7 @@ const Home: React.FC = () => {
 
               {/* Progress Line */}
 
-              <div className="w-16 h-[2.5px] bg-white/20 rounded-full overflow-hidden">
+              <div className="w-12 sm:w-16 h-[2px] sm:h-[2.5px] bg-white/20 rounded-full overflow-hidden">
 
                 <div
 
@@ -687,7 +687,7 @@ const Home: React.FC = () => {
 
               {/* Arrow Buttons */}
 
-              <div className="flex items-center space-x-2 text-white/80">
+              <div className="flex items-center space-x-1.5 sm:space-x-2 text-white/80">
 
                 <button
 
@@ -695,11 +695,11 @@ const Home: React.FC = () => {
 
                   aria-label="Previous slide"
 
-                  className="w-7 h-7 rounded-full border border-white/30 hover:border-white text-white flex items-center justify-center transition-colors cursor-pointer"
+                  className="w-6 h-6 sm:w-7 sm:h-7 rounded-full border border-white/30 hover:border-white text-white flex items-center justify-center transition-colors cursor-pointer"
 
                 >
 
-                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <ArrowLeft className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
 
                 </button>
 
@@ -709,11 +709,11 @@ const Home: React.FC = () => {
 
                   aria-label="Next slide"
 
-                  className="w-7 h-7 rounded-full border border-white/30 hover:border-white text-white flex items-center justify-center transition-colors cursor-pointer"
+                  className="w-6 h-6 sm:w-7 sm:h-7 rounded-full border border-white/30 hover:border-white text-white flex items-center justify-center transition-colors cursor-pointer"
 
                 >
 
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <ArrowRight className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
 
                 </button>
 
@@ -1086,7 +1086,7 @@ const Home: React.FC = () => {
 
           {/* Interior Consultation Banner (Combined in Same Layout) */}
 
-          <div id="consultation" className="rounded-xl sm:rounded-2xl bg-[#542B1B] text-white p-5 sm:p-6 lg:p-7 shadow-xl overflow-hidden relative border border-[#6B3724]">
+          <div id="consultation" className="rounded-xl sm:rounded-2xl bg-[#542B1B] text-white p-4 sm:p-6 lg:p-7 shadow-xl overflow-hidden relative border border-[#6B3724]">
             {/* Integrated Right Architectural Lounge Photo with Smooth Gradient Blend */}
             <div className="absolute right-0 top-0 bottom-0 w-full sm:w-[48%] lg:w-[42%] overflow-hidden pointer-events-none select-none">
               <img
@@ -1178,34 +1178,38 @@ const Home: React.FC = () => {
               </div>
 
               {/* Bottom Actions & Trust Guarantees */}
-              <div className="flex flex-wrap items-center gap-3 pt-1">
+              <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2.5 sm:gap-3 pt-1">
                 <button
                   onClick={() => setConsultModalOpen(true)}
-                  className="bg-[#C86B4C] hover:bg-[#B35E42] text-white px-5 py-2.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all shadow-md hover:shadow-lg inline-flex items-center gap-2 cursor-pointer"
+                  className="w-full sm:w-auto justify-center bg-[#C86B4C] hover:bg-[#B35E42] text-white px-5 py-3 sm:py-2.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all shadow-md hover:shadow-lg inline-flex items-center gap-2 cursor-pointer"
                 >
                   <span>Book Free Consultation</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
 
-                <a
-                  href="https://wa.me/919492664870?text=Hello%20Ghar%20Sansar!%20I%20would%20like%20to%20consult%20about%20interior%20services."
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 text-xs text-white transition-colors bg-[#25D366] hover:bg-[#20ba5a] px-4 py-2.5 rounded-full border border-[#25D366] shadow-sm font-medium cursor-pointer"
-                >
-                  <MessageCircle className="w-3.5 h-3.5 fill-current" />
-                  <span>WhatsApp Consultation</span>
-                </a>
+                <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center sm:gap-3">
+                  <a
+                    href="https://wa.me/919492664870?text=Hello%20Ghar%20Sansar!%20I%20would%20like%20to%20consult%20about%20interior%20services."
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-1.5 sm:gap-2 text-xs text-white transition-colors bg-[#25D366] hover:bg-[#20ba5a] px-3 sm:px-4 py-2.5 rounded-full border border-[#25D366] shadow-xs font-medium cursor-pointer"
+                  >
+                    <MessageCircle className="w-3.5 h-3.5 fill-current shrink-0" />
+                    <span>WhatsApp</span>
+                    <span className="hidden sm:inline">&nbsp;Consultation</span>
+                  </a>
 
-                <a
-                  href="tel:+919701990090"
-                  className="inline-flex items-center gap-2 text-xs text-stone-200 hover:text-white transition-colors bg-white/10 hover:bg-white/15 px-4 py-2.5 rounded-full border border-white/15 backdrop-blur-xs font-medium"
-                >
-                  <Phone className="w-3.5 h-3.5 text-[#E8A588]" />
-                  <span>+91 9701990090</span>
-                </a>
+                  <a
+                    href="tel:+919701990090"
+                    className="inline-flex items-center justify-center gap-1.5 sm:gap-2 text-xs text-stone-200 hover:text-white transition-colors bg-white/10 hover:bg-white/15 px-3 sm:px-4 py-2.5 rounded-full border border-white/15 backdrop-blur-xs font-medium"
+                  >
+                    <Phone className="w-3.5 h-3.5 text-[#E8A588] shrink-0" />
+                    <span className="sm:hidden">Call Now</span>
+                    <span className="hidden sm:inline">+91 9701990090</span>
+                  </a>
+                </div>
 
-                <span className="text-[11px] text-stone-300/85 font-light flex items-center gap-1.5 ml-1">
+                <span className="text-[11px] text-stone-300/85 font-light flex items-center justify-center sm:justify-start gap-1.5 text-center sm:text-left pt-1 sm:pt-0 sm:ml-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></span>
                   Complete Home Solutions, All Under One Roof
                 </span>
