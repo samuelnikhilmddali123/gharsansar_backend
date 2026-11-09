@@ -57,7 +57,7 @@ const AppLayout = () => {
   const isUserAdmin = Boolean(
     user && (
       (user.role && user.role.toLowerCase() === "admin") ||
-      (user.email && user.email.toLowerCase() === "gharsansarshop@gmail.com")
+      (user.email && (user.email.toLowerCase() === "gharsansarshop@gmail.com" || user.email.toLowerCase() === "gharsansarwebsite@gmail.com"))
     )
   );
 
@@ -196,6 +196,7 @@ const AppLayout = () => {
         </Routes>
       </main>
       {!isLoginPage && <Footer />}
+      {!isLoginPage && <ChatBot />}
     </div>
   );
 };

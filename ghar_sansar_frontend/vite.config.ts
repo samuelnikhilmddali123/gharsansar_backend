@@ -1,6 +1,34 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
+const proxyConfig = {
+  '/api': {
+    target: 'http://127.0.0.1:5001',
+    changeOrigin: true,
+    secure: false
+  },
+  '^/products/.+': {
+    target: 'http://127.0.0.1:5001',
+    changeOrigin: true,
+    secure: false
+  },
+  '^/blogs/.+': {
+    target: 'http://127.0.0.1:5001',
+    changeOrigin: true,
+    secure: false
+  },
+  '^/profile_pictures/.+': {
+    target: 'http://127.0.0.1:5001',
+    changeOrigin: true,
+    secure: false
+  },
+  '^/return%20gifts/.+': {
+    target: 'http://127.0.0.1:5001',
+    changeOrigin: true,
+    secure: false
+  }
+};
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
@@ -21,35 +49,27 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
     host: '0.0.0.0',
-    proxy: {
-      '/api': {
-        target: 'http://127.0.0.1:5001',
-        changeOrigin: true,
-        secure: false
-      },
-      '^/products/.+': {
-        target: 'http://127.0.0.1:5001',
-        changeOrigin: true,
-        secure: false
-      },
-      '^/blogs/.+': {
-        target: 'http://127.0.0.1:5001',
-        changeOrigin: true,
-        secure: false
-      },
-      '^/profile_pictures/.+': {
-        target: 'http://127.0.0.1:5001',
-        changeOrigin: true,
-        secure: false
-      },
-      '^/return%20gifts/.+': {
-        target: 'http://127.0.0.1:5001',
-        changeOrigin: true,
-        secure: false
-      }
-    }
+    proxy: proxyConfig
+  },
+  preview: {
+    port: 5173,
+    strictPort: true,
+    host: '0.0.0.0',
+    proxy: proxyConfig
   },
   optimizeDeps: {
-    exclude: ['lucide-react'],
+    include: ['lucide-react', 'react', 'react-dom', 'react-router-dom', 'axios', 'framer-motion'],
   },
+  build: {
+    chunkSizeWarningLimit: 1200,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-icons': ['lucide-react'],
+          'vendor-motion': ['framer-motion']
+        }
+      }
+    }
+  }
 });

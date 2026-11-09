@@ -115,7 +115,7 @@ async function sendOtpEmail(toEmail, otp, purpose = "login") {
                       Need help? Contact our support team:
                     </p>
                     <p style="margin: 0; color: #0a2e22; font-size: 12px; font-weight: 600;">
-                      📞 +91-8121135980 &nbsp;|&nbsp; ✉️ gharsansarshop@gmail.com
+                      📞 +91-9492664870 &nbsp;|&nbsp; ✉️ gharsansarshop@gmail.com
                     </p>
                     <p style="margin: 12px 0 0; color: #9CA3AF; font-size: 11px;">
                       © ${new Date().getFullYear()} Ghar Sansar. All rights reserved.

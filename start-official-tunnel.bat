@@ -14,7 +14,10 @@ if not defined CF_EXE (
 
 if not defined CF_EXE (
     echo [ERROR] cloudflared.exe not found!
-    echo Run START_SERVERS.bat to auto-download or place cloudflared.exe in bin\
+    echo To install Cloudflare Tunnel, run:
+    echo   winget install Cloudflare.cloudflared
+    echo Or place cloudflared.exe in the bin\ directory.
+    echo.
     pause
     exit /b 1
 )

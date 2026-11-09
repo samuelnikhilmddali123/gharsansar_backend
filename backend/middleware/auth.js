@@ -99,11 +99,11 @@ async function resolveUserFromRequest(req) {
       const decoded = jwt.verify(token, JWT_SECRET);
       if (decoded) {
         let user = await findUserByIdentifier(decoded._id || decoded.id || decoded.email);
-        if (!user && (decoded.email === "gharsansarshop@gmail.com" || decoded.role === "ADMIN")) {
+        if (!user && (decoded.email === "gharsansarshop@gmail.com" || decoded.email === "gharsansarwebsite@gmail.com" || decoded.role === "ADMIN")) {
           user = {
             _id: "admin_01",
             id: 1,
-            email: "gharsansarshop@gmail.com",
+            email: decoded.email || "gharsansarshop@gmail.com",
             full_name: "Admin",
             role: "ADMIN",
             is_active: true
@@ -222,7 +222,8 @@ async function requireAdmin(req, res, next) {
 
     const isAdmin =
       (user.role && user.role.toUpperCase() === "ADMIN") ||
-      normalizeEmail(user.email) === "gharsansarshop@gmail.com";
+      normalizeEmail(user.email) === "gharsansarshop@gmail.com" ||
+      normalizeEmail(user.email) === "gharsansarwebsite@gmail.com";
 
     if (!isAdmin) {
       // Allow localhost admin access
