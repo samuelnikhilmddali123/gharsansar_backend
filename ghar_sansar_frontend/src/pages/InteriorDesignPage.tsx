@@ -488,10 +488,10 @@ Looking forward to your response!`;
   return (
     <div className="bg-[#FAF7F2] min-h-screen font-poppins pb-20 flex flex-col selection:bg-[#F7EBE4] selection:text-[#7D3219] antialiased">
       {/* 1. Hero Inset Banner */}
-      <div className="w-full bg-[#FAF7F2] pt-16 sm:pt-20 pb-2 sm:pb-3">
-        <div className="w-full max-w-[1880px] mx-auto px-3 sm:px-6 md:px-8 lg:px-10">
+      <div className="w-full bg-[#FAF7F2] pt-13 sm:pt-14 pb-2 sm:pb-2.5">
+        <div className="w-full max-w-[1880px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10">
           <div
-            className="relative w-full aspect-[2172/724] rounded-xl sm:rounded-2xl overflow-hidden border-[2.5px] sm:border-[3px] border-[#F6F1E8] shadow-md bg-[#181513] group select-none"
+            className="relative w-full rounded-xl sm:rounded-2xl overflow-hidden border-[2.5px] sm:border-[3px] border-[#F6F1E8] shadow-md bg-[#181513] group select-none h-[140px] sm:h-[180px] lg:h-[210px] xl:h-[230px]"
           >
             {/* Banner Background Image */}
             <img
@@ -507,7 +507,7 @@ Looking forward to your response!`;
                 }
               }}
               alt="Interior Design - Transform Your Space Into A Beautiful Home"
-              className="w-full h-full object-contain md:object-cover object-center block cursor-pointer"
+              className="w-full h-full object-cover object-center block cursor-pointer"
               onClick={scrollToCollection}
             />
 
