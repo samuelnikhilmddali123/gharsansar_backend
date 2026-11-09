@@ -503,7 +503,7 @@ const ProductsPage: React.FC = () => {
       <div className="w-full bg-[#FAF7F2] pt-16 sm:pt-20 pb-2 sm:pb-3">
         <div className="w-full max-w-[1880px] mx-auto px-3 sm:px-6 md:px-8 lg:px-10">
           <div
-            className="relative w-full aspect-[2048/472] rounded-xl sm:rounded-2xl overflow-hidden shadow-sm border border-[#E8E2D8] bg-[#181513] group select-none"
+            className="relative w-full aspect-[2048/472] rounded-xl sm:rounded-2xl overflow-hidden shadow-sm border border-[#E8E2D8] bg-[#FAF7F2] sm:bg-[#181513] group select-none"
             onMouseEnter={() => setIsSliderHovered(true)}
             onMouseLeave={() => setIsSliderHovered(false)}
             onTouchStart={(e) => {
@@ -536,7 +536,7 @@ const ProductsPage: React.FC = () => {
                 animate="center"
                 exit="exit"
                 transition={{ duration: 0.55, ease: [0.32, 0.72, 0, 1] }}
-                className="w-full h-full cursor-pointer relative flex items-center justify-center bg-[#181513]"
+                className="w-full h-full cursor-pointer relative flex items-center justify-center bg-[#FAF7F2] sm:bg-[#181513]"
                 onClick={() =>
                   updateQuery({
                     category: bannerSlides[currentSlideIndex].category,
@@ -548,7 +548,7 @@ const ProductsPage: React.FC = () => {
                 <img
                   src={bannerSlides[currentSlideIndex].image}
                   alt={bannerSlides[currentSlideIndex].alt}
-                  className="w-full h-full object-contain md:object-cover object-center block mx-auto select-none"
+                  className="w-full h-full object-fill sm:object-cover object-center block mx-auto select-none"
                 />
               </motion.div>
             </AnimatePresence>

@@ -243,10 +243,10 @@ export default function ReturnGifts() {
               className="absolute inset-0 w-full h-full object-cover object-[center_35%] pointer-events-none"
             />
             {/* Soft directional gradient only over text area so the gifts remain vibrant & visible */}
-            <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-transparent max-w-[62%] sm:max-w-xl z-[1]" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-transparent max-w-[56%] sm:max-w-xl z-[1]" />
 
             {/* Banner typography */}
-            <div className="relative h-full flex flex-col justify-center px-3.5 sm:px-10 md:px-14 lg:px-16 max-w-[56%] xs:max-w-[58%] sm:max-w-xl z-10">
+            <div className="relative h-full flex flex-col justify-center px-3 sm:px-10 md:px-14 lg:px-16 max-w-[52%] xs:max-w-[54%] sm:max-w-xl z-10">
               <span className="text-[8.5px] xs:text-[9.5px] sm:text-[11px] font-medium tracking-[0.16em] sm:tracking-[0.26em] text-[#E8A588] uppercase font-sans mb-1 sm:mb-2 block drop-shadow-xs line-clamp-1">
                 Artisanal Curations • Favors
               </span>
