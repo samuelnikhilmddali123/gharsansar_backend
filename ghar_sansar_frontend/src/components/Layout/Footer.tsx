@@ -30,19 +30,19 @@ const Footer: React.FC = () => {
 
   return (
     <footer className="bg-[#FAF7F2] text-gray-800 border-t border-[#E8E2D8] font-sans">
-      <div className="w-full max-w-[1600px] mx-auto px-5 sm:px-8 lg:px-12 pt-5 sm:pt-5 pb-5">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-7 sm:gap-8 lg:gap-8 pb-4 border-b border-[#E8E2D8]">
+      <div className="w-full max-w-[1600px] mx-auto px-5 sm:px-8 lg:px-12 pt-4 sm:pt-5 pb-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-8 pb-4 border-b border-[#E8E2D8]">
           
           {/* Column 1: Brand & Socials (Span 4) */}
-          <div className="lg:col-span-3 xl:col-span-3 flex flex-col items-center sm:items-start text-center sm:text-left pr-0 lg:pr-4">
-            <div className="mb-3.5 flex justify-center sm:justify-start w-full">
+          <div className="lg:col-span-3 xl:col-span-3 flex flex-col pr-0 lg:pr-4">
+            <div className="mb-3.5">
               <GharSansarLogo variant="dark" />
             </div>
-            <p className="text-gray-600 text-xs leading-relaxed mb-3 sm:mb-2.5 font-normal max-w-xs mx-auto sm:mx-0">
+            <p className="text-gray-600 text-xs leading-relaxed mb-2.5 font-normal max-w-xs">
               Transforming homes with premium products and professional interior design services.
             </p>
             {/* Social Icons: Minimalist circular outlines */}
-            <div className="flex items-center justify-center sm:justify-start space-x-2.5 w-full">
+            <div className="flex items-center space-x-2.5">
               <a
                 href="https://www.instagram.com/gharsansar_shop/"
                 target="_blank"
@@ -83,11 +83,11 @@ const Footer: React.FC = () => {
           </div>
 
           {/* Column 2: EXPLORE (Span 2) */}
-          <div className="lg:col-span-2 text-center sm:text-left">
-            <h4 className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#C86B4C] mb-3.5 font-sans text-center sm:text-left">
+          <div className="lg:col-span-2">
+            <h4 className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#C86B4C] mb-3.5 font-sans">
               Explore
             </h4>
-            <ul className="space-y-1.5 sm:space-y-1 text-xs sm:text-[13px] text-gray-650 font-normal flex flex-col items-center sm:items-start">
+            <ul className="space-y-1 text-xs sm:text-[13px] text-gray-650 font-normal">
               <li>
                 <Link to="/" className="hover:text-[#C86B4C] transition-colors">
                   Home
@@ -122,11 +122,11 @@ const Footer: React.FC = () => {
           </div>
 
           {/* Column 3: SUPPORT (Span 2) */}
-          <div className="lg:col-span-2 text-center sm:text-left">
-            <h4 className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#C86B4C] mb-3.5 font-sans text-center sm:text-left">
+          <div className="lg:col-span-2">
+            <h4 className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#C86B4C] mb-3.5 font-sans">
               Support
             </h4>
-            <ul className="space-y-1.5 sm:space-y-1 text-xs sm:text-[13px] text-gray-650 font-normal flex flex-col items-center sm:items-start">
+            <ul className="space-y-1 text-xs sm:text-[13px] text-gray-650 font-normal">
               <li>
                 <Link to="/my-orders" className="hover:text-[#C86B4C] transition-colors">
                   Track Order
@@ -161,19 +161,19 @@ const Footer: React.FC = () => {
           </div>
 
           {/* Column 4: CONTACT US (Span 3) */}
-          <div className="lg:col-span-3 text-center sm:text-left">
-            <h4 className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#C86B4C] mb-3.5 font-sans text-center sm:text-left">
+          <div className="lg:col-span-3">
+            <h4 className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#C86B4C] mb-3.5 font-sans">
               Contact Us
             </h4>
-            <ul className="space-y-2.5 text-xs text-gray-650 flex flex-col items-center sm:items-start">
-              <li className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-1.5 sm:gap-2.5 max-w-sm sm:max-w-none">
+            <ul className="space-y-2.5 text-xs text-gray-650">
+              <li className="flex items-start space-x-2.5">
                 <MapPin className="w-4 h-4 text-[#C86B4C] shrink-0 mt-0.5" />
                 <span className="leading-relaxed">
                   D.No. 27-3-68, Near Buckingham Post Office, Rajulakshmi School,
                   Governorpet-520002, Vijayawada, Andhra Pradesh
                 </span>
               </li>
-              <li className="flex items-center justify-center sm:justify-start space-x-2.5">
+              <li className="flex items-center space-x-2.5">
                 <Phone className="w-4 h-4 text-[#C86B4C] shrink-0" />
                 <a
                   href="tel:+919701990090"
@@ -182,7 +182,7 @@ const Footer: React.FC = () => {
                   +91 9701990090
                 </a>
               </li>
-              <li className="flex items-center justify-center sm:justify-start space-x-2.5">
+              <li className="flex items-center space-x-2.5">
                 <Mail className="w-4 h-4 text-[#C86B4C] shrink-0" />
                 <a
                   href="mailto:gharsansarvij@gmail.com"
@@ -195,15 +195,15 @@ const Footer: React.FC = () => {
           </div>
 
           {/* Column 5: Newsletter Subscription (Span 2) */}
-          <div className="lg:col-span-2 flex flex-col justify-between items-center sm:items-start text-center sm:text-left">
-            <div className="w-full">
-              <h4 className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#C86B4C] mb-3.5 font-sans text-center sm:text-left">
+          <div className="lg:col-span-2 flex flex-col justify-between">
+            <div>
+              <h4 className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#C86B4C] mb-3.5 font-sans">
                 Join Our Newsletter
               </h4>
-              <p className="text-xs text-gray-650 mb-3.5 leading-relaxed font-normal text-center sm:text-left max-w-xs mx-auto sm:mx-0">
+              <p className="text-xs text-gray-650 mb-3.5 leading-relaxed font-normal">
                 Get latest updates, offers and interior inspiration.
               </p>
-              <form onSubmit={handleSubscribe} className="relative flex items-center max-w-xs mx-auto sm:mx-0 w-full">
+              <form onSubmit={handleSubscribe} className="relative flex items-center">
                 <input
                   type="email"
                   placeholder="Enter your email"
@@ -229,9 +229,9 @@ const Footer: React.FC = () => {
         </div>
 
         {/* Bottom Sub-bar */}
-        <div className="pt-3.5 flex flex-col sm:flex-row items-center justify-between text-[11px] sm:text-xs text-gray-500 gap-3 text-center sm:text-left">
+        <div className="pt-3 flex flex-col sm:flex-row items-center justify-between text-[11px] sm:text-xs text-gray-500 gap-3">
           <p>© 2026 Ghar Sansar. All rights reserved.</p>
-          <div className="flex flex-wrap items-center justify-center sm:justify-start space-x-3 sm:space-x-6">
+          <div className="flex items-center space-x-4 sm:space-x-6">
             <Link to="/privacy-policy" className="hover:text-[#C86B4C] transition-colors">
               Privacy Policy
             </Link>
