@@ -117,15 +117,20 @@ const ProductDetail: React.FC = () => {
     return "520008";
   };
 
+  const cleanAreaText = (val: string) => {
+    if (!val || /idhe/i.test(val)) return "Vijayawada, Andhra Pradesh";
+    return val;
+  };
+
   const getInitialArea = () => {
     const localArea = localStorage.getItem("user_area");
-    if (localArea && localArea !== "idhe, ah adhe") return localArea;
+    if (localArea && !/idhe/i.test(localArea)) return localArea;
     try {
       const stored = localStorage.getItem("user_shipping_address");
       if (stored) {
         const parsed = JSON.parse(stored);
         const area = [parsed.city, parsed.state].filter(Boolean).join(", ") || parsed.city;
-        if (area) return area;
+        if (area && !/idhe/i.test(area)) return area;
       }
     } catch {}
     return "Vijayawada, Andhra Pradesh";
@@ -165,7 +170,8 @@ const ProductDetail: React.FC = () => {
       if (zip) {
         const code = String(zip).trim();
         if (/^\d{6}$/.test(code)) {
-          const area = [activeAddr.city, activeAddr.state].filter(Boolean).join(", ") || activeAddr.city || "Andhra Pradesh";
+          const rawArea = [activeAddr.city, activeAddr.state].filter(Boolean).join(", ") || activeAddr.city || "Andhra Pradesh";
+          const area = cleanAreaText(rawArea);
           const fee = /^5[0-3]/.test(code) ? 99 : 149;
 
           setPincode(code);
@@ -594,10 +600,10 @@ const ProductDetail: React.FC = () => {
       </div>
 
       {/* ── Main Container ──────────────────────────────────────────────────── */}
-      <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-20">
+      <div className="max-w-[1220px] mx-auto px-4 sm:px-6 lg:px-8 pt-3 sm:pt-4">
 
         {/* ── Editorial Breadcrumb ────────────────────────────────────────── */}
-        <nav className="flex items-center gap-2 text-xs text-[#8C827A] py-4 overflow-x-auto no-scrollbar whitespace-nowrap">
+        <nav className="flex items-center gap-1.5 text-xs text-[#8C827A] py-1 mb-2.5 overflow-x-auto no-scrollbar whitespace-nowrap">
           <span onClick={() => navigate("/")} className="hover:text-[#181513] cursor-pointer transition-colors">Home</span>
           <span className="text-[#D5CEC4]">/</span>
           <span onClick={() => navigate(isReturnGiftItem ? "/return-gifts" : "/products")} className="hover:text-[#181513] cursor-pointer transition-colors">
@@ -617,24 +623,22 @@ const ProductDetail: React.FC = () => {
         </nav>
 
         {/* ── 2-Column Product Showcase ───────────────────────────────────── */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 pb-12 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 pb-8 items-start">
 
-          {/* LEFT: Product Gallery (Lg: col-span-7) */}
-          <div className="lg:col-span-7 flex flex-col gap-4">
+          {/* LEFT: Product Gallery (50% Split, compact, no cutoffs) */}
+          <div className="flex flex-col gap-2.5 w-full max-w-[500px] mx-auto lg:mx-0">
             
-            {/* Gallery Main Card */}
-            <div className="flex flex-col sm:flex-row gap-3 items-start">
-              
-              {/* Vertical Thumbnails (Desktop only when multiple images exist) */}
+            <div className="flex flex-col sm:flex-row gap-2.5 items-start">
+              {/* Vertical Thumbnails */}
               {productImages.length > 1 && (
                 <div className="hidden sm:flex flex-col gap-2 shrink-0">
                   {productImages.map((imgUrl, idx) => (
                     <button
                       key={idx}
                       onClick={() => setActiveImageIndex(idx)}
-                      className={`w-14 h-14 rounded-xl p-1 bg-white border transition-all overflow-hidden flex items-center justify-center cursor-pointer ${
+                      className={`w-12 h-12 rounded-xl p-1 bg-white border transition-all overflow-hidden flex items-center justify-center cursor-pointer ${
                         activeImageIndex === idx
-                          ? "border-[#8E3F24] ring-1 ring-[#8E3F24] shadow-xs"
+                          ? "border-[#8E3F24] ring-1 ring-[#8E3F24]"
                           : "border-[#E8E2D8] hover:border-[#8E3F24]/50 opacity-80 hover:opacity-100"
                       }`}
                     >
@@ -650,62 +654,62 @@ const ProductDetail: React.FC = () => {
 
               {/* Main Image Stage */}
               <div 
-                className="flex-1 w-full relative overflow-hidden rounded-2xl bg-white border border-[#E8E2D8] aspect-square flex items-center justify-center p-4 sm:p-6 select-none group shadow-[0_4px_24px_rgba(0,0,0,0.03)] cursor-zoom-in"
+                className="flex-1 w-full relative overflow-hidden rounded-2xl bg-white border border-[#E8E2D8] aspect-square max-h-[440px] flex items-center justify-center p-4 sm:p-6 select-none group shadow-[0_2px_10px_rgba(0,0,0,0.02)] cursor-zoom-in"
                 onMouseMove={handleMouseMove}
                 onMouseEnter={() => setIsZooming(true)}
                 onMouseLeave={() => setIsZooming(false)}
               >
                 {/* Main Discount Badge (Top-Left) */}
                 {displayDiscountBadge && (
-                  <div className="absolute top-3 left-3 z-20 bg-[#8E3F24] text-white text-[11px] font-poppins font-normal tracking-wider uppercase px-3 py-1 rounded-full shadow-xs pointer-events-none">
+                  <div className="absolute top-2.5 left-2.5 z-20 bg-[#8E3F24] text-white text-[10.5px] font-medium tracking-wider uppercase px-2.5 py-0.5 rounded-full shadow-xs pointer-events-none">
                     {displayDiscountBadge}
                   </div>
                 )}
 
                 {/* Top-Right Interactive Actions */}
-                <div className="absolute top-3 right-3 z-20 flex items-center gap-1.5">
+                <div className="absolute top-2.5 right-2.5 z-20 flex items-center gap-1.5">
                   <button
                     type="button"
                     onClick={() => setIs360Active(!is360Active)}
-                    className={`px-2.5 py-1 rounded-full text-[11px] font-medium border flex items-center gap-1 transition-all cursor-pointer ${
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-medium border flex items-center gap-1 transition-all cursor-pointer ${
                       is360Active 
                         ? "bg-[#8E3F24] text-white border-[#8E3F24]" 
-                        : "bg-white/90 hover:bg-white text-[#4A433D] border-[#E8E2D8] shadow-2xs backdrop-blur-xs"
+                        : "bg-white/90 text-[#4A433D] border-[#E8E2D8] shadow-2xs backdrop-blur-xs"
                     }`}
                     title="Interactive 360 rotation"
                   >
-                    <RotateCw size={12} className={is360Active ? "animate-spin" : ""} />
+                    <RotateCw size={11} className={is360Active ? "animate-spin" : ""} />
                     <span>360°</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setActiveLightboxImage(productImages[activeImageIndex] || product.image)}
-                    className="w-8 h-8 rounded-full bg-white/90 hover:bg-white text-[#4A433D] hover:text-black border border-[#E8E2D8] flex items-center justify-center transition-all shadow-2xs backdrop-blur-xs cursor-pointer"
+                    className="w-7 h-7 rounded-full bg-white/90 hover:bg-white text-[#4A433D] hover:text-black border border-[#E8E2D8] flex items-center justify-center transition-all shadow-2xs backdrop-blur-xs cursor-pointer"
                     title="Expand View"
                   >
-                    <Maximize2 size={13} />
+                    <Maximize2 size={12} />
                   </button>
                 </div>
 
-                {/* Left / Right Nav Arrows (When multiple images exist) */}
+                {/* Left / Right Nav Arrows */}
                 {productImages.length > 1 && (
                   <>
                     <button
                       type="button"
                       onClick={handlePrevImage}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-[#4A433D] hover:text-black shadow-xs border border-[#E8E2D8] flex items-center justify-center transition-all cursor-pointer active:scale-95"
+                      className="absolute left-2 top-1/2 -translate-y-1/2 z-20 w-7 h-7 rounded-full bg-white/90 hover:bg-white text-[#4A433D] shadow-xs border border-[#E8E2D8] flex items-center justify-center cursor-pointer"
                       aria-label="Previous image"
                     >
-                      <ChevronLeft size={16} />
+                      <ChevronLeft size={14} />
                     </button>
                     <button
                       type="button"
                       onClick={handleNextImage}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-[#4A433D] hover:text-black shadow-xs border border-[#E8E2D8] flex items-center justify-center transition-all cursor-pointer active:scale-95"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-7 h-7 rounded-full bg-white/90 hover:bg-white text-[#4A433D] shadow-xs border border-[#E8E2D8] flex items-center justify-center cursor-pointer"
                       aria-label="Next image"
                     >
-                      <ChevronRight size={16} />
+                      <ChevronRight size={14} />
                     </button>
                   </>
                 )}
@@ -715,13 +719,13 @@ const ProductDetail: React.FC = () => {
                   key={activeImageIndex}
                   animate={is360Active ? { rotateY: [0, 360] } : {}}
                   transition={is360Active ? { repeat: Infinity, duration: 4, ease: "linear" } : {}}
-                  className="w-full h-full flex items-center justify-center relative p-2"
+                  className="w-full h-full flex items-center justify-center relative p-1"
                 >
                   <img
                     src={productImages[activeImageIndex] || product.image}
                     alt={cleanTitle}
                     loading="eager"
-                    className="max-w-[92%] max-h-[92%] w-auto h-auto object-contain select-none transition-transform duration-300 ease-out"
+                    className="max-w-[85%] max-h-[85%] w-auto h-auto object-contain select-none transition-transform duration-300 ease-out"
                     style={isZooming ? {
                       transformOrigin: `${zoomPos.x}% ${zoomPos.y}%`,
                       transform: 'scale(1.35)'
@@ -733,22 +737,16 @@ const ProductDetail: React.FC = () => {
 
             {/* Mobile Thumbnails Row */}
             {productImages.length > 1 && (
-              <div className="flex sm:hidden gap-2 overflow-x-auto pb-1 no-scrollbar">
+              <div className="flex sm:hidden gap-1.5 overflow-x-auto pb-1 no-scrollbar">
                 {productImages.map((imgUrl, idx) => (
                   <button
                     key={idx}
                     onClick={() => setActiveImageIndex(idx)}
-                    className={`w-14 h-14 shrink-0 rounded-xl p-1 bg-white border transition-all overflow-hidden flex items-center justify-center ${
-                      activeImageIndex === idx
-                        ? "border-[#8E3F24] ring-1 ring-[#8E3F24]"
-                        : "border-[#E8E2D8]"
+                    className={`w-12 h-12 shrink-0 rounded-lg p-1 bg-white border transition-all overflow-hidden flex items-center justify-center ${
+                      activeImageIndex === idx ? "border-[#8E3F24] ring-1 ring-[#8E3F24]" : "border-[#E8E2D8]"
                     }`}
                   >
-                    <img
-                      src={imgUrl}
-                      alt={`Thumb ${idx + 1}`}
-                      className="w-full h-full object-contain"
-                    />
+                    <img src={imgUrl} alt={`Thumb ${idx + 1}`} className="w-full h-full object-contain" />
                   </button>
                 ))}
               </div>
@@ -756,19 +754,19 @@ const ProductDetail: React.FC = () => {
 
           </div>
 
-          {/* RIGHT: Product Details & Purchase Architecture (Lg: col-span-5) */}
-          <div className="lg:col-span-5 flex flex-col space-y-5">
+          {/* RIGHT: Compact, Minimal, Unified Product Details */}
+          <div className="flex flex-col space-y-3.5">
             
             {/* Header: Category Badge + Stock Status + Wishlist / Share */}
             <div>
-              <div className="flex items-center justify-between mb-2.5">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-[10.5px] font-medium tracking-wider text-[#7D3219] bg-[#F7EBE4] border border-[#D9B4A4] px-3 py-0.5 rounded-full uppercase">
+              <div className="flex items-center justify-between mb-1.5">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-medium tracking-wider text-[#7D3219] bg-[#F7EBE4] border border-[#D9B4A4] px-2.5 py-0.5 rounded-full uppercase">
                     {cleanCategory}
                   </span>
-                  <span className="text-xs text-emerald-700 font-medium flex items-center gap-1.5">
+                  <span className="text-xs text-emerald-700 font-medium flex items-center gap-1">
                     <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping"></span>
-                    In Stock &amp; Ready
+                    In Stock
                   </span>
                 </div>
 
@@ -776,267 +774,199 @@ const ProductDetail: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => toggleWishlist(product)}
-                    className={`w-9 h-9 rounded-full border flex items-center justify-center transition-all cursor-pointer ${
+                    className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all cursor-pointer ${
                       isWishlisted 
                         ? "bg-rose-50 border-rose-200 text-rose-600" 
                         : "bg-white border-[#E8E2D8] text-[#8C827A] hover:text-[#181513] hover:border-[#8E3F24]"
                     }`}
                     title={isWishlisted ? "In Wishlist" : "Add to Wishlist"}
                   >
-                    <Heart size={16} className={isWishlisted ? "fill-current" : ""} />
+                    <Heart size={15} className={isWishlisted ? "fill-current" : ""} />
                   </button>
 
                   <button
                     type="button"
                     onClick={handleShare}
-                    className="w-9 h-9 rounded-full border border-[#E8E2D8] bg-white text-[#8C827A] hover:text-[#181513] hover:border-[#8E3F24] flex items-center justify-center transition-all cursor-pointer"
+                    className="w-8 h-8 rounded-full border border-[#E8E2D8] bg-white text-[#8C827A] hover:text-[#181513] hover:border-[#8E3F24] flex items-center justify-center transition-all cursor-pointer"
                     title="Share Product"
                   >
-                    <Share2 size={16} />
+                    <Share2 size={15} />
                   </button>
                 </div>
               </div>
 
               {/* Product Title */}
-              <h1 className="font-poppins text-2xl sm:text-3xl font-normal text-[#181513] leading-snug tracking-tight mb-2">
+              <h1 className="font-poppins text-xl sm:text-2xl font-normal text-[#181513] leading-snug tracking-tight mb-1.5">
                 {cleanTitle}
               </h1>
 
               {/* Ratings Row */}
-              <div className="flex items-center gap-2 mb-4">
-                <div className="flex items-center gap-0.5">
+              <div className="flex items-center gap-1.5 text-xs text-[#8C827A]">
+                <div className="flex items-center gap-0.5 text-[#F4B740]">
                   {[1, 2, 3, 4, 5].map((star) => (
-                    <Star key={star} size={14} className="fill-[#F4B740] text-[#F4B740]" />
+                    <Star key={star} size={13} className="fill-[#F4B740]" />
                   ))}
                 </div>
-                <span className="text-xs font-semibold text-[#181513]">{avgRating.toFixed(1)}</span>
-                <span className="text-xs text-[#8C827A]">
-                  ({reviews.length > 0 ? reviews.length : 128} Verified Reviews)
-                </span>
+                <span className="font-medium text-[#181513]">{avgRating.toFixed(1)}</span>
+                <span>({reviews.length > 0 ? reviews.length : 128} verified reviews)</span>
               </div>
             </div>
 
-            {/* Pricing Card */}
-            <div className="bg-white rounded-2xl border border-[#E8E2D8] p-5 shadow-[0_2px_12px_rgba(0,0,0,0.02)] space-y-2">
-              <div className="flex items-baseline gap-3 flex-wrap">
-                <span className="font-poppins text-3xl sm:text-4xl font-normal text-gray-950 tracking-tight">
+            {/* Integrated Minimal Price & Delivery Bar (No heavy separate boxes) */}
+            <div className="bg-white rounded-xl border border-[#E8E2D8] p-3.5 space-y-2.5 shadow-2xs">
+              <div className="flex items-baseline gap-2.5 flex-wrap">
+                <span className="font-poppins text-2xl sm:text-3xl font-normal text-gray-950 tracking-tight">
                   ₹{finalPrice.toLocaleString("en-IN")}
                 </span>
                 {strikePrice > finalPrice && (
-                  <span className="text-base sm:text-lg text-[#8C827A] line-through font-normal">
+                  <span className="text-sm text-[#8C827A] line-through font-normal">
                     ₹{strikePrice.toLocaleString("en-IN")}
                   </span>
                 )}
                 {displayDiscountBadge && (
-                  <span className="text-xs font-medium text-[#7D3219] bg-[#F7EBE4] border border-[#D9B4A4] px-2.5 py-0.5 rounded-full">
+                  <span className="text-[11px] font-medium text-[#7D3219] bg-[#F7EBE4] border border-[#D9B4A4] px-2 py-0.5 rounded-full">
                     {displayDiscountBadge}
                   </span>
                 )}
-              </div>
-
-              {strikePrice > finalPrice && (
-                <p className="text-xs text-emerald-700 font-medium">
-                  Direct Savings: ₹{(strikePrice - finalPrice).toLocaleString("en-IN")} below MRP
-                </p>
-              )}
-              <p className="text-[11px] text-[#8C827A]">
-                Inclusive of all taxes · Official Ghar Sansar Quality Guarantee
-              </p>
-            </div>
-
-            {/* Delivery Location Card (Clean & Minimal with Site Colors) */}
-            <div className="bg-white rounded-2xl border border-[#E8E2D8] p-4 shadow-[0_2px_12px_rgba(0,0,0,0.02)] space-y-3">
-              <span className="text-[10.5px] font-medium text-[#8C827A] uppercase tracking-wider block">
-                Delivery Location
-              </span>
-
-              {isEditingPincode ? (
-                <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    placeholder="Enter 6-digit Pincode"
-                    value={pincodeInput}
-                    onChange={(e) => setPincodeInput(e.target.value)}
-                    maxLength={6}
-                    className="flex-1 px-3.5 py-2 text-xs border border-[#E8E2D8] rounded-xl focus:ring-1 focus:ring-[#8E3F24] outline-none bg-[#FAF7F2]"
-                    disabled={isCheckingPincode}
-                  />
-                  <button
-                    onClick={checkPincode}
-                    disabled={isCheckingPincode}
-                    className="px-4 py-2 bg-[#8E3F24] text-white text-xs font-medium rounded-xl hover:bg-[#742F19] transition disabled:opacity-50 cursor-pointer"
-                  >
-                    {isCheckingPincode ? "Checking..." : "Apply"}
-                  </button>
-                  <button
-                    onClick={() => setIsEditingPincode(false)}
-                    className="text-xs text-[#8C827A] hover:text-[#181513] px-1 cursor-pointer"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              ) : (
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-[#F7EBE4] text-[#8E3F24] flex items-center justify-center shrink-0">
-                      <MapPin size={15} />
-                    </div>
-                    <div>
-                      <p className="text-xs font-semibold text-[#181513] leading-tight">{pincode}</p>
-                      <p className="text-[11px] text-[#8C827A] leading-tight mt-0.5">{savedArea}</p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setIsEditingPincode(true)}
-                    className="text-xs font-medium text-[#8E3F24] hover:underline cursor-pointer"
-                  >
-                    Change
-                  </button>
-                </div>
-              )}
-
-              <div className="pt-2.5 border-t border-[#F0EAE1] flex items-center justify-between text-xs font-normal">
-                <div className="flex items-center gap-1.5 text-emerald-700">
-                  <Truck size={14} />
-                  <span>Standard Delivery <strong>₹{deliveryFee}</strong></span>
-                </div>
-                <div className="text-[#8C827A] text-[11px]">
-                  Estimated Delivery: <strong className="text-[#181513] font-medium">{deliveryDateString}</strong>
-                </div>
-              </div>
-            </div>
-
-            {/* Quantity Stepper */}
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-[#8C827A]">Quantity</span>
-                {isReturnGiftItem && (
-                  <span className="text-[10.5px] font-medium text-[#7D3219] bg-[#F7EBE4] px-2 py-0.5 rounded-full">
-                    Bulk Return Gift Pack (Min. 50 units)
+                {strikePrice > finalPrice && (
+                  <span className="text-[11px] text-emerald-700 font-medium ml-auto">
+                    Save ₹{(strikePrice - finalPrice).toLocaleString("en-IN")}
                   </span>
                 )}
               </div>
 
-              <div className="flex items-center gap-3">
-                <div className="h-[42px] border border-[#E8E2D8] bg-white rounded-xl flex items-center justify-between px-2 w-36 shadow-2xs">
+              {/* One-line Delivery Check */}
+              <div className="pt-2 border-t border-[#F0EAE1] flex flex-col gap-1 text-xs">
+                <div className="flex items-center justify-between text-[#736B63]">
+                  <div className="flex items-center gap-1.5 truncate">
+                    <MapPin size={13} className="text-[#8E3F24] shrink-0" />
+                    <span className="truncate">Deliver to <strong className="text-[#181513]">{pincode}</strong> ({savedArea})</span>
+                  </div>
                   <button
                     type="button"
-                    onClick={handleDecreaseQuantity}
-                    className="w-7 h-7 flex items-center justify-center bg-[#FAF7F2] hover:bg-[#F0EAE1] text-gray-800 border border-[#E8E2D8] rounded-lg active:scale-90 transition font-normal cursor-pointer"
-                    aria-label="Decrease quantity"
+                    onClick={() => setIsEditingPincode(!isEditingPincode)}
+                    className="text-[11px] font-medium text-[#8E3F24] hover:underline cursor-pointer ml-2 shrink-0"
                   >
-                    <Minus size={13} />
-                  </button>
-                  <span className="font-normal text-sm text-[#181513] select-none">
-                    {quantity}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={handleIncreaseQuantity}
-                    className="w-7 h-7 flex items-center justify-center bg-[#F7EBE4] hover:bg-[#EFE0D7] text-[#7D3219] border border-[#D9B4A4] rounded-lg active:scale-90 transition font-normal cursor-pointer"
-                    aria-label="Increase quantity"
-                  >
-                    <Plus size={13} />
+                    {isEditingPincode ? "Cancel" : "Change"}
                   </button>
                 </div>
 
-                <div className="text-xs text-emerald-700 flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full inline-block"></span>
-                  <span>{product.stock ? `${product.stock} units available` : "Ready to Dispatch"}</span>
+                {isEditingPincode && (
+                  <div className="flex items-center gap-1.5 pt-1">
+                    <input
+                      type="text"
+                      placeholder="6-digit Pincode"
+                      value={pincodeInput}
+                      onChange={(e) => setPincodeInput(e.target.value)}
+                      maxLength={6}
+                      className="flex-1 px-2.5 py-1 text-xs border border-[#E8E2D8] rounded-lg bg-[#FAF7F2] focus:ring-1 focus:ring-[#8E3F24] outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={checkPincode}
+                      className="px-3 py-1 bg-[#8E3F24] text-white text-xs font-medium rounded-lg hover:bg-[#742F19] cursor-pointer"
+                    >
+                      Apply
+                    </button>
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between text-[11px] text-[#8C827A] pt-0.5">
+                  <span className="flex items-center gap-1 text-emerald-700 font-medium">
+                    <Truck size={12} /> Standard delivery ₹{deliveryFee}
+                  </span>
+                  <span>Est. <strong className="text-[#181513]">{deliveryDateString}</strong></span>
                 </div>
               </div>
             </div>
 
-            {/* Core Action Buttons */}
-            <div className="space-y-2.5 pt-1">
-              {/* Row 1: Add to Cart & Buy Now */}
-              <div className="flex gap-2.5">
+            {/* Quantity & CTA Action Row */}
+            <div className="space-y-2 pt-0.5">
+              <div className="flex items-center gap-2.5">
+                {/* Stepper */}
+                <div className="h-[42px] border border-[#E8E2D8] bg-white rounded-xl flex items-center justify-between px-2 w-28 shrink-0 shadow-2xs">
+                  <button
+                    type="button"
+                    onClick={handleDecreaseQuantity}
+                    className="w-6 h-6 flex items-center justify-center bg-[#FAF7F2] hover:bg-[#F0EAE1] text-gray-800 border border-[#E8E2D8] rounded active:scale-90 transition cursor-pointer"
+                  >
+                    <Minus size={11} />
+                  </button>
+                  <span className="font-normal text-xs text-[#181513] select-none">{quantity}</span>
+                  <button
+                    type="button"
+                    onClick={handleIncreaseQuantity}
+                    className="w-6 h-6 flex items-center justify-center bg-[#F7EBE4] hover:bg-[#EFE0D7] text-[#7D3219] border border-[#D9B4A4] rounded active:scale-90 transition cursor-pointer"
+                  >
+                    <Plus size={11} />
+                  </button>
+                </div>
+
+                {/* Add to Cart */}
                 {quantityInCart > 0 ? (
-                  <div className="flex-1 h-[46px] border border-[#E8E2D8] bg-[#FAF7F2] rounded-xl flex items-center justify-between px-3 shadow-2xs">
+                  <div className="flex-1 h-[42px] border border-[#E8E2D8] bg-[#FAF7F2] rounded-xl flex items-center justify-between px-3 text-xs">
+                    <span className="font-medium text-[#181513]">{quantityInCart} in Cart</span>
                     <button
-                      type="button"
-                      onClick={() => {
-                        if (quantityInCart > 1) updateQuantity(cartItemForProduct!.id, quantityInCart - 1);
-                        else { removeFromCart(cartItemForProduct!.id); toast.success("Removed from cart"); }
-                      }}
-                      className="w-7 h-7 flex items-center justify-center bg-white text-gray-800 border border-[#E8E2D8] rounded-lg active:scale-90 transition font-normal cursor-pointer"
-                    >
-                      <Minus size={13} />
-                    </button>
-                    <div className="text-center select-none">
-                      <span className="font-medium text-[#181513] text-xs block">{quantityInCart} in Cart</span>
-                    </div>
-                    <button
-                      type="button"
                       onClick={() => updateQuantity(cartItemForProduct!.id, quantityInCart + 1)}
-                      className="w-7 h-7 flex items-center justify-center bg-[#8E3F24] text-white rounded-lg active:scale-90 transition font-normal cursor-pointer"
+                      className="text-[#8E3F24] font-medium hover:underline text-[11px]"
                     >
-                      <Plus size={13} />
+                      + Add
                     </button>
                   </div>
                 ) : (
                   <button
                     type="button"
                     onClick={handleAddToCart}
-                    className="flex-1 h-[46px] px-4 bg-white hover:bg-[#FAF7F2] border border-[#E8E2D8] hover:border-[#8E3F24] text-gray-950 text-xs font-medium uppercase tracking-wider rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 shadow-2xs cursor-pointer"
+                    className="flex-1 h-[42px] px-3 bg-white hover:bg-[#FAF7F2] border border-[#E8E2D8] hover:border-[#8E3F24] text-gray-950 text-xs font-medium uppercase tracking-wider rounded-xl flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-2xs cursor-pointer"
                   >
-                    <ShoppingCart size={15} className="text-gray-600" />
+                    <ShoppingCart size={14} className="text-gray-600" />
                     <span>Add to Cart</span>
                   </button>
                 )}
 
+                {/* Buy Now */}
                 <button
                   type="button"
                   onClick={handleBuyNow}
-                  className="flex-1 h-[46px] px-4 bg-[#8E3F24] hover:bg-[#742F19] text-white text-xs font-medium uppercase tracking-wider rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 shadow-xs hover:shadow-md cursor-pointer"
+                  className="flex-1 h-[42px] px-4 bg-[#8E3F24] hover:bg-[#742F19] text-white text-xs font-medium uppercase tracking-wider rounded-xl flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-xs cursor-pointer"
                 >
-                  <Zap size={15} />
+                  <Zap size={14} />
                   <span>Buy Now</span>
                 </button>
               </div>
 
-              {/* Row 2: WhatsApp & Call */}
-              <div className="grid grid-cols-2 gap-2.5">
+              {isReturnGiftItem && (
+                <p className="text-[10.5px] text-[#7D3219] bg-[#F7EBE4] px-2 py-0.5 rounded-md inline-block">
+                  Bulk Return Gift: Minimum order 50 units
+                </p>
+              )}
+
+              {/* WhatsApp & Call Links */}
+              <div className="grid grid-cols-2 gap-2 pt-0.5">
                 <button
                   type="button"
                   onClick={handleWhatsAppOrderProduct}
-                  className="h-[40px] px-3 bg-[#EDF8F1] hover:bg-[#E1F3E7] text-[#1E7E34] border border-[#D1EEDB] rounded-xl font-medium text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                  className="h-[34px] bg-[#EDF8F1] hover:bg-[#E1F3E7] text-[#1E7E34] border border-[#D1EEDB] rounded-lg font-medium text-[11px] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                 >
-                  <MessageCircle size={15} />
-                  <span>Order via WhatsApp</span>
+                  <MessageCircle size={13} />
+                  <span>Order on WhatsApp</span>
                 </button>
 
                 <a
                   href="tel:+919492664870"
-                  className="h-[40px] px-3 bg-white hover:bg-[#FAF7F2] text-[#4A433D] hover:text-black border border-[#E8E2D8] rounded-xl font-medium text-xs flex items-center justify-center gap-2 transition-colors"
+                  className="h-[34px] bg-white hover:bg-[#FAF7F2] text-[#4A433D] hover:text-black border border-[#E8E2D8] rounded-lg font-medium text-[11px] flex items-center justify-center gap-1.5 transition-colors"
                 >
-                  <Phone size={15} />
+                  <Phone size={13} />
                   <span>Call Support</span>
                 </a>
               </div>
-            </div>
 
-            {/* 4 Trust Badges Card */}
-            <div className="bg-white rounded-2xl border border-[#E8E2D8] p-3.5 grid grid-cols-2 sm:grid-cols-4 gap-2 text-center shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
-              <div className="p-2 flex flex-col items-center">
-                <Award size={16} className="text-[#8E3F24] mb-1" />
-                <span className="text-[11px] font-medium text-[#181513] leading-tight">100% Certified</span>
-                <span className="text-[10px] text-[#8C827A] mt-0.5">Authentic Quality</span>
-              </div>
-              <div className="p-2 flex flex-col items-center">
-                <Package size={16} className="text-[#8E3F24] mb-1" />
-                <span className="text-[11px] font-medium text-[#181513] leading-tight">Protected Box</span>
-                <span className="text-[10px] text-[#8C827A] mt-0.5">Secure Packing</span>
-              </div>
-              <div className="p-2 flex flex-col items-center">
-                <Truck size={16} className="text-[#8E3F24] mb-1" />
-                <span className="text-[11px] font-medium text-[#181513] leading-tight">Pan India</span>
-                <span className="text-[10px] text-[#8C827A] mt-0.5">Fast Dispatch</span>
-              </div>
-              <div className="p-2 flex flex-col items-center">
-                <Lock size={16} className="text-[#8E3F24] mb-1" />
-                <span className="text-[11px] font-medium text-[#181513] leading-tight">Secure Pay</span>
-                <span className="text-[10px] text-[#8C827A] mt-0.5">Encrypted Checkout</span>
+              {/* Trust Strip */}
+              <div className="pt-2 border-t border-[#F0EAE1] flex items-center justify-between text-[10.5px] text-[#8C827A]">
+                <span className="flex items-center gap-1"><Award size={11} className="text-[#8E3F24]" /> 100% Certified</span>
+                <span className="flex items-center gap-1"><Package size={11} className="text-[#8E3F24]" /> Box Packing</span>
+                <span className="flex items-center gap-1"><Truck size={11} className="text-[#8E3F24]" /> Fast Dispatch</span>
+                <span className="flex items-center gap-1"><Lock size={11} className="text-[#8E3F24]" /> Secure Pay</span>
               </div>
             </div>
 
