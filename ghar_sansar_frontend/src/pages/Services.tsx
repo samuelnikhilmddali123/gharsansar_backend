@@ -31,28 +31,25 @@ const Services: React.FC = () => {
   };
 
   return (
-    <div className="bg-[#FAF7F2] min-h-screen font-poppins pt-20 sm:pt-24 pb-16 sm:pb-20 flex flex-col selection:bg-[#F7EBE4] selection:text-[#7D3219] antialiased">
+    <div className="bg-[#FAF7F2] min-h-screen font-poppins pt-16 sm:pt-20 pb-16 flex flex-col selection:bg-[#F7EBE4] selection:text-[#7D3219] antialiased">
       <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Breadcrumb Navigation */}
-        <nav className="flex items-center space-x-2 text-xs sm:text-[13px] text-gray-500 font-medium mb-4">
-          <Link to="/" className="hover:text-[#7D3219] transition-colors flex items-center gap-1.5 cursor-pointer">
-            <Home size={14} className="shrink-0 text-gray-500" />
-            <span>Home</span>
-          </Link>
-          <span className="text-gray-400 select-none px-0.5">&gt;</span>
-          <span className="text-gray-900 font-semibold">Services</span>
+        <nav className="flex items-center space-x-2 text-xs text-stone-500 mb-6 font-normal">
+          <Link to="/" className="hover:text-stone-900 transition-colors cursor-pointer">Home</Link>
+          <span className="text-stone-300">/</span>
+          <span className="text-stone-900 font-medium">Services</span>
         </nav>
 
         {/* Editorial Text-Only Header (No top banner images, clean and uncluttered) */}
         <div className="pb-6 border-b border-[#E8E2D8] mb-8">
-          <span className="text-[11px] sm:text-xs font-medium tracking-[0.24em] text-[#7D3219] uppercase font-sans mb-1.5 block">
+          <span className="text-[11px] font-semibold tracking-[0.24em] text-[#C86B4C] uppercase font-sans mb-1.5 block">
             Craftsmanship • Turnkey Execution
           </span>
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-poppins font-normal text-gray-950 tracking-tight mb-2">
             Home & Interior Services
           </h1>
-          <p className="text-xs sm:text-sm text-[#736B63] max-w-2xl font-normal leading-relaxed">
+          <p className="text-xs sm:text-sm text-stone-600 max-w-2xl font-light leading-relaxed">
             From custom modular kitchens to full residential transformations, our in-house specialists bring bespoke design, premium materials, and on-site precision to every project.
           </p>
         </div>
@@ -63,7 +60,7 @@ const Services: React.FC = () => {
             <div className="w-8 h-8 rounded-full border-2 border-[#D9B4A4] border-t-[#7D3219] animate-spin"></div>
           </div>
         ) : !services || services.length === 0 ? (
-          <div className="text-center py-20 bg-white rounded-xl border border-[#E8E2D8] p-8 shadow-2xs">
+          <div className="text-center py-20 bg-white rounded-2xl border border-[#E8E2D8] p-8 shadow-2xs">
             <p className="text-gray-500 text-sm font-normal">No services currently listed. Please contact our team directly.</p>
           </div>
         ) : (
@@ -74,12 +71,12 @@ const Services: React.FC = () => {
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.35, delay: index * 0.05 }}
-                className="group bg-white rounded-xl border border-[#E8E2D8] hover:border-[#D9B4A4] shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_28px_rgba(125,50,25,0.06)] hover:-translate-y-1 transition-all duration-300 p-4 sm:p-5 flex flex-col justify-between cursor-pointer"
+                className="group bg-white rounded-2xl border border-[#E8E2D8] hover:border-[#D9B4A4] shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:shadow-[0_12px_28px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 p-4 sm:p-5 flex flex-col justify-between cursor-pointer"
                 onClick={() => handleEnquire(s.title)}
               >
                 <div>
                   {/* Service Image */}
-                  <div className="relative w-full aspect-[16/10] rounded-lg overflow-hidden bg-[#FAF8F5] mb-3.5 border border-[#E8E2D8]">
+                  <div className="relative w-full aspect-[16/10] rounded-xl overflow-hidden bg-[#FAF7F2] mb-3.5 border border-[#E8E2D8]/80">
                     {s.image ? (
                       <img
                         src={fixImageUrl(s.image)}
@@ -96,7 +93,7 @@ const Services: React.FC = () => {
 
                   {/* Category Pill Tag */}
                   {(s.subcategory_name || s.category_name) && (
-                    <span className="text-[10px] font-medium uppercase tracking-wider text-[#7D3219] bg-[#F7EBE4] border border-[#D9B4A4] px-2 py-0.5 rounded-md mb-2 inline-block">
+                    <span className="text-[10px] font-medium uppercase tracking-wider text-[#7D3219] bg-[#F7EBE4] border border-[#D9B4A4]/80 px-2.5 py-0.5 rounded-full mb-2 inline-block shadow-2xs">
                       {s.subcategory_name || s.category_name}
                     </span>
                   )}
@@ -107,7 +104,7 @@ const Services: React.FC = () => {
                   </h3>
 
                   {/* Description */}
-                  <p className="text-xs sm:text-[13px] text-[#6B7280] font-normal leading-relaxed line-clamp-3 mb-3.5">
+                  <p className="text-xs sm:text-[13px] text-stone-600 font-light leading-relaxed line-clamp-3 mb-3.5">
                     {s.description}
                   </p>
 
@@ -117,7 +114,7 @@ const Services: React.FC = () => {
                       {s.features.map((feature, i) => (
                         <span
                           key={i}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#FAF7F2] border border-[#E8E2D8] rounded-md text-[11px] font-normal text-gray-700"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#FAF7F2] border border-[#E8E2D8] rounded-md text-[11px] font-light text-stone-700"
                         >
                           <Check size={11} className="text-[#7D3219] stroke-[2.5] shrink-0" />
                           <span>{feature}</span>
@@ -128,8 +125,7 @@ const Services: React.FC = () => {
                 </div>
 
                 {/* Bottom Row: Book Consultation CTA */}
-                <div className="pt-3 border-t border-[#E8E2D8] mt-auto">
-                  {/* Lightest Brown Family CTA Button with Micro-Curve */}
+                <div className="pt-3 border-t border-[#F0EAE1] mt-auto">
                   <button
                     type="button"
                     onClick={(e) => {
@@ -147,8 +143,8 @@ const Services: React.FC = () => {
           </div>
         )}
 
-        {/* Compact Consultation Banner (Clean, Typographic, No Giant Image) */}
-        <div className="bg-white rounded-xl border border-[#E8E2D8] p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xs">
+        {/* Compact Consultation Banner */}
+        <div className="bg-white rounded-2xl border border-[#E8E2D8] p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
           <div className="text-center md:text-left">
             <span className="text-[10px] sm:text-[11px] font-medium tracking-[0.24em] text-[#7D3219] uppercase font-sans mb-1 block">
               Direct Assistance

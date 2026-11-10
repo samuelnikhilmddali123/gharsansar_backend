@@ -141,7 +141,7 @@ const Header: React.FC = () => {
     <>
       <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
         <div
-          className="w-full transition-all duration-300 bg-[#F6F1E8]/95 backdrop-blur-md"
+          className="w-full transition-all duration-300 bg-[#FAF7F2]/95 backdrop-blur-md border-b border-[#E8E2D8]"
         >
           <div className="relative w-full max-w-[1720px] mx-auto px-3.5 sm:px-8 lg:px-10 xl:px-12 h-12 flex items-center justify-between">
             {/* 1. Left: Brand Logo */}

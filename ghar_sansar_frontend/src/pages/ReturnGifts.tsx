@@ -944,14 +944,14 @@ function CatalogCard({ product, index = 0 }: { product: any; index?: number }) {
           state: { ...product, isReturnGift: true },
         })
       }
-      className="group bg-white rounded-xl border border-[#E8E2D8] hover:border-[#D9B4A4] shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_28px_rgba(125,50,25,0.06)] hover:-translate-y-1 transition-all duration-300 p-3.5 sm:p-4 flex flex-col justify-between cursor-pointer h-full"
+      className="group bg-white rounded-2xl border border-[#E8E2D8] shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:shadow-[0_12px_28px_rgba(0,0,0,0.06)] hover:-translate-y-1 hover:border-[#D9B4A4] transition-all duration-300 p-3.5 sm:p-4 flex flex-col justify-between cursor-pointer h-full select-none font-poppins"
     >
       <div>
         {/* Product Image Container */}
-        <div className="relative w-full aspect-square rounded-lg overflow-hidden flex items-center justify-center p-3 sm:p-4 mb-3 bg-[#FAF8F5] border border-[#E8E2D8] group-hover:border-[#D9B4A4] transition-colors">
+        <div className="relative w-full aspect-square rounded-xl overflow-hidden flex items-center justify-center p-3 sm:p-4 mb-3.5 bg-[#FAF7F2] border border-[#E8E2D8]/80 group-hover:border-[#D9B4A4] transition-colors">
           {/* Discount Badge */}
           {discountPercent > 0 && (
-            <div className="absolute top-2.5 left-2.5 z-10 bg-[#7D3219] text-white text-[10.5px] font-poppins font-normal tracking-wider uppercase px-2 py-0.5 rounded-full shadow-xs pointer-events-none">
+            <div className="absolute top-2.5 left-2.5 z-10 bg-[#F7EBE4] text-[#7D3219] border border-[#D9B4A4]/80 text-[10.5px] font-medium tracking-wider uppercase px-2.5 py-0.5 rounded-full shadow-2xs pointer-events-none">
               {discountPercent}% OFF
             </div>
           )}
@@ -960,15 +960,15 @@ function CatalogCard({ product, index = 0 }: { product: any; index?: number }) {
           <button
             type="button"
             onClick={handleWishlist}
-            className={`absolute top-2.5 right-2.5 z-10 w-8 h-8 rounded-full bg-white/90 backdrop-blur-xs border border-[#E8E2D8] shadow-2xs flex items-center justify-center transition-all duration-200 hover:bg-white hover:scale-105 active:scale-95 cursor-pointer ${
+            className={`absolute top-2.5 right-2.5 z-10 w-7 h-7 rounded-full bg-white/90 backdrop-blur-xs border border-[#E8E2D8] shadow-2xs flex items-center justify-center transition-all duration-200 hover:bg-white hover:scale-105 active:scale-95 cursor-pointer ${
               isWishlisted
                 ? 'text-rose-600 bg-white border-rose-200'
-                : 'text-gray-400 hover:text-black'
+                : 'text-stone-400 hover:text-stone-900'
             }`}
             aria-label="Add to wishlist"
           >
             <Heart
-              size={15}
+              size={14}
               strokeWidth={2}
               className={isWishlisted ? 'fill-current text-rose-600' : ''}
             />
@@ -983,40 +983,40 @@ function CatalogCard({ product, index = 0 }: { product: any; index?: number }) {
         </div>
 
         {/* Product Title */}
-        <h3 className="font-poppins text-[15px] sm:text-base font-normal text-gray-950 leading-snug line-clamp-2 min-h-[44px] h-[44px] mb-1.5 group-hover:text-[#7D3219] transition-colors">
+        <h3 className="font-poppins text-sm sm:text-[15px] font-normal text-gray-900 leading-[21px] line-clamp-2 min-h-[42px] h-[42px] mb-1.5 group-hover:text-[#7D3219] transition-colors">
           {title}
         </h3>
 
         {/* Rating row: ★ 4.5 (191) */}
         <div className="flex items-center gap-1.5 text-xs mb-2">
           <Star size={13} className="fill-[#F4B740] text-[#F4B740] shrink-0" />
-          <span className="font-semibold text-[#171717] text-xs">{rating}</span>
-          <span className="text-[#6B7280] text-xs font-normal">({count})</span>
+          <span className="font-medium text-gray-900 text-xs">{rating}</span>
+          <span className="text-stone-400 text-xs font-light">({count})</span>
         </div>
 
         {/* Product Description */}
-        <p className="font-poppins text-xs text-[#6B7280] leading-[18px] line-clamp-2 min-h-[36px] h-[36px] mb-3 font-normal">
+        <p className="font-poppins text-xs text-stone-500 leading-[18px] line-clamp-2 min-h-[36px] h-[36px] mb-3 font-light">
           {desc}
         </p>
       </div>
 
       <div>
         {/* Divider */}
-        <div className="w-full border-t border-[#E8E2D8] mb-3" />
+        <div className="w-full border-t border-[#F0EAE1] mb-3" />
 
         {/* Price Row */}
         <div className="flex items-baseline justify-between mb-3">
           <div className="flex items-baseline gap-2">
-            <span className="font-poppins text-lg sm:text-[21px] font-normal text-gray-950 tracking-tight">
+            <span className="font-poppins text-lg sm:text-[20px] font-light text-gray-950 tracking-tight">
               ₹{price.toLocaleString('en-IN')}
             </span>
             {actualPrice > price && (
-              <span className="font-poppins text-xs sm:text-sm text-[#8C827A] line-through font-normal">
+              <span className="font-poppins text-xs sm:text-sm text-stone-400 line-through font-light">
                 ₹{actualPrice.toLocaleString('en-IN')}
               </span>
             )}
           </div>
-          <span className="text-[11px] text-[#8C827A] font-normal">(Min 50 pcs)</span>
+          <span className="text-[11px] text-stone-400 font-light">(Min 50 pcs)</span>
         </div>
 
         {/* Action Buttons Row */}
@@ -1028,7 +1028,7 @@ function CatalogCard({ product, index = 0 }: { product: any; index?: number }) {
                 <button
                   type="button"
                   onClick={handleDecrement}
-                  className="w-6 h-6 flex items-center justify-center bg-[#F7EBE4] hover:bg-[#EFE0D7] text-[#7D3219] border border-[#D9B4A4] rounded-sm active:scale-90 transition font-medium cursor-pointer"
+                  className="w-6 h-6 flex items-center justify-center bg-white hover:bg-gray-100 text-gray-800 border border-[#E8E2D8] rounded-sm active:scale-90 transition font-normal cursor-pointer"
                   aria-label="Decrease quantity"
                 >
                   <Minus size={11} strokeWidth={2} />
