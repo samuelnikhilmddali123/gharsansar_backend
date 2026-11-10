@@ -106,6 +106,10 @@ const ProductDetail: React.FC = () => {
   const isWishlisted = product ? isInWishlist(product.id) : false;
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
+  // Availability / Stock Status Checks
+  const isOutOfStock = Boolean(product?.status === "out_of_stock" || (product?.stock !== undefined && Number(product?.stock) <= 0));
+  const isComingSoon = Boolean(product?.status === "coming_soon");
+
   // Related products carousel ref
   const relatedScrollRef = useRef<HTMLDivElement>(null);
 
@@ -237,6 +241,7 @@ const ProductDetail: React.FC = () => {
   };
 
   const handleIncreaseQuantity = () => {
+    if (isOutOfStock || isComingSoon) return;
     if (product?.stock !== undefined && quantity >= product.stock) {
       toast.error(`Only ${product.stock} items left in stock`);
       return;
@@ -440,6 +445,14 @@ const ProductDetail: React.FC = () => {
 
   const handleAddToCart = () => {
     if (!product) return;
+    if (isOutOfStock) {
+      toast.error("This product is currently out of stock.");
+      return;
+    }
+    if (isComingSoon) {
+      toast("This product is coming soon!");
+      return;
+    }
     const catDisc = Number(product.categoryDiscountPercentage || product.discountPercentage || 0);
     const actP = Number(product.actualPrice !== undefined ? product.actualPrice : (product.price || 0)) || 0;
     const discP = Number(product.discountedPrice !== undefined ? product.discountedPrice : (catDisc > 0 ? Math.round((actP - (actP * (catDisc / 100))) * 100) / 100 : actP));
@@ -618,7 +631,21 @@ const ProductDetail: React.FC = () => {
           <span className="text-lg font-black text-gray-900">₹{(finalPrice * quantity) + (deliveryFee || 0)}</span>
         </div>
         <div className="flex gap-2 items-center">
-          {quantityInCart > 0 ? (
+          {isOutOfStock ? (
+            <button 
+              disabled
+              className="px-4 py-2.5 bg-rose-50 border border-rose-200 text-rose-700 rounded-none font-bold text-xs uppercase tracking-wider cursor-not-allowed"
+            >
+              Out of Stock
+            </button>
+          ) : isComingSoon ? (
+            <button 
+              disabled
+              className="px-4 py-2.5 bg-amber-50 border border-amber-300 text-amber-800 rounded-none font-bold text-xs uppercase tracking-wider cursor-not-allowed"
+            >
+              Coming Soon
+            </button>
+          ) : quantityInCart > 0 ? (
             <div className="flex items-center border border-[#0F2920] bg-[#f0f6f3] rounded-none px-2 py-1 gap-2">
               <button 
                 type="button"
@@ -841,10 +868,22 @@ const ProductDetail: React.FC = () => {
                   <span className="text-[10px] font-bold tracking-widest text-[#8C3259] bg-[#F8EAEF] px-2.5 py-1 rounded-none uppercase">
                     {product.category || "Water Bottles & Jars"}
                   </span>
-                  <span className="text-xs text-emerald-700 font-semibold flex items-center gap-1.5">
-                    <span className="w-2 h-2 bg-emerald-500 rounded-none animate-ping"></span>
-                    In Stock &amp; Ready
-                  </span>
+                  {isOutOfStock ? (
+                    <span className="text-xs text-rose-700 font-semibold flex items-center gap-1.5">
+                      <span className="w-2 h-2 bg-rose-500 rounded-none"></span>
+                      Out of Stock
+                    </span>
+                  ) : isComingSoon ? (
+                    <span className="text-xs text-amber-700 font-semibold flex items-center gap-1.5">
+                      <span className="w-2 h-2 bg-amber-500 rounded-none animate-pulse"></span>
+                      Coming Soon
+                    </span>
+                  ) : (
+                    <span className="text-xs text-emerald-700 font-semibold flex items-center gap-1.5">
+                      <span className="w-2 h-2 bg-emerald-500 rounded-none animate-ping"></span>
+                      In Stock &amp; Ready
+                    </span>
+                  )}
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -986,33 +1025,61 @@ const ProductDetail: React.FC = () => {
 
               {/* Quantity Selector and In-Stock Label */}
               <div className="flex items-center gap-4 mb-6">
-                <div className="flex items-center border border-gray-300 rounded-none bg-white shadow-2xs">
-                  <button 
-                    onClick={handleDecreaseQuantity}
-                    className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-none transition font-bold"
-                  >
-                    -
-                  </button>
-                  <span className="w-9 text-center font-bold text-sm text-gray-900">{quantity}</span>
-                  <button 
-                    onClick={handleIncreaseQuantity}
-                    className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-none transition font-bold"
-                  >
-                    +
-                  </button>
-                </div>
+                {isOutOfStock ? (
+                  <div className="text-xs text-rose-700 font-semibold flex items-center gap-1.5 bg-rose-50 px-3 py-1.5 border border-rose-200">
+                    <span className="w-1.5 h-1.5 bg-rose-500 rounded-none"></span>
+                    <span>Currently Out of Stock — Check back soon</span>
+                  </div>
+                ) : isComingSoon ? (
+                  <div className="text-xs text-amber-800 font-semibold flex items-center gap-1.5 bg-amber-50 px-3 py-1.5 border border-amber-300">
+                    <span className="w-1.5 h-1.5 bg-amber-500 rounded-none"></span>
+                    <span>Coming Soon — Not Yet Available for Purchase</span>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex items-center border border-gray-300 rounded-none bg-white shadow-2xs">
+                      <button 
+                        onClick={handleDecreaseQuantity}
+                        className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-none transition font-bold"
+                      >
+                        -
+                      </button>
+                      <span className="w-9 text-center font-bold text-sm text-gray-900">{quantity}</span>
+                      <button 
+                        onClick={handleIncreaseQuantity}
+                        className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-none transition font-bold"
+                      >
+                        +
+                      </button>
+                    </div>
 
-                <div className="text-xs text-emerald-600 font-semibold flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 bg-emerald-500 rounded-none"></span>
-                  <span>In Stock (24 items)</span>
-                </div>
+                    <div className="text-xs text-emerald-600 font-semibold flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 bg-emerald-500 rounded-none"></span>
+                      <span>In Stock ({product?.stock !== undefined ? product.stock : 24} items)</span>
+                    </div>
+                  </>
+                )}
               </div>
 
               {/* CTA Action Buttons matching screenshot */}
               <div className="space-y-3">
                 {/* Row 1: Add to Cart & Buy Now */}
                 <div className="flex gap-3">
-                  {quantityInCart > 0 ? (
+                  {isOutOfStock ? (
+                    <button
+                      disabled
+                      className="flex-1 py-3.5 px-6 bg-rose-50 border border-rose-200 text-rose-700 rounded-none font-bold uppercase tracking-wider text-xs cursor-not-allowed select-none"
+                    >
+                      Out of Stock
+                    </button>
+                  ) : isComingSoon ? (
+                    <button
+                      disabled
+                      className="flex-1 py-3.5 px-6 bg-amber-50 border border-amber-300 text-amber-800 rounded-none font-bold uppercase tracking-wider text-xs cursor-not-allowed select-none"
+                    >
+                      Coming Soon — Stay Tuned
+                    </button>
+                  ) : quantityInCart > 0 ? (
                     <div className="flex-1 flex items-center justify-between border-2 border-[#0F2920] bg-[#f0f6f3] rounded-none py-2 px-3 shadow-xs">
                       <button
                         type="button"
@@ -1049,22 +1116,23 @@ const ProductDetail: React.FC = () => {
                       </button>
                     </div>
                   ) : (
-                    <button
-                      onClick={handleAddToCart}
-                      className="flex-1 flex items-center justify-center gap-2 py-3.5 px-6 bg-[#0F2920] hover:bg-[#183E31] text-white rounded-none font-bold uppercase tracking-wider text-xs shadow-md transition transform active:scale-95 duration-200"
-                    >
-                      <ShoppingCart size={16} />
-                      <span>Add to Cart</span>
-                    </button>
+                    <>
+                      <button
+                        onClick={handleAddToCart}
+                        className="flex-1 flex items-center justify-center gap-2 py-3.5 px-6 bg-[#0F2920] hover:bg-[#183E31] text-white rounded-none font-bold uppercase tracking-wider text-xs shadow-md transition transform active:scale-95 duration-200"
+                      >
+                        <ShoppingCart size={16} />
+                        <span>Add to Cart</span>
+                      </button>
+                      <button
+                        onClick={handleBuyNow}
+                        className="flex-1 flex items-center justify-center gap-2 py-3.5 px-6 bg-[#EDF4F0] hover:bg-[#E2EDE6] text-[#0F2920] border border-[#CDE0D5] rounded-none font-bold uppercase tracking-wider text-xs transition transform active:scale-95 duration-200"
+                      >
+                        <Zap size={16} />
+                        <span>Buy Now</span>
+                      </button>
+                    </>
                   )}
-                  
-                  <button
-                    onClick={handleBuyNow}
-                    className="flex-1 flex items-center justify-center gap-2 py-3.5 px-6 bg-[#EDF4F0] hover:bg-[#E2EDE6] text-[#0F2920] border border-[#CDE0D5] rounded-none font-bold uppercase tracking-wider text-xs transition transform active:scale-95 duration-200"
-                  >
-                    <Zap size={16} />
-                    <span>Buy Now</span>
-                  </button>
                 </div>
 
                 {/* Row 2: WhatsApp Order & Call Support */}

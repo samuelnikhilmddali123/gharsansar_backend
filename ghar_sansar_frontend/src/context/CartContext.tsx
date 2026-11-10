@@ -13,6 +13,7 @@ export interface CartItem {
   isReturnGift?: boolean;
   minQty?: number;
   stock?: number;
+  status?: string;
 }
 
 interface CartContextType {
@@ -167,6 +168,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [items]);
 
   const addToCart = async (item: Omit<CartItem, 'quantity'> & { quantity?: number }) => {
+    if (item.status === "out_of_stock" || (item.stock !== undefined && item.stock <= 0)) {
+      return;
+    }
+    if (item.status === "coming_soon") {
+      return;
+    }
     const token = getAuthToken();
     const qtyToAdd = item.quantity || (item.isReturnGift ? 50 : 1);
 

@@ -103,11 +103,22 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
     ? categoryDiscount
     : (strikePrice > actualPrice ? Math.round(((strikePrice - actualPrice) / strikePrice) * 100) : 0);
 
+  const isOutOfStock = product.status === "out_of_stock" || (product.stock !== undefined && Number(product.stock) <= 0);
+  const isComingSoon = product.status === "coming_soon";
+
   // Single top-left discount badge (Never duplicated beside price)
   const displayDiscountBadge = discountPct > 0 ? `${discountPct}% OFF` : null;
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (isOutOfStock) {
+      toast.error("This product is currently out of stock");
+      return;
+    }
+    if (isComingSoon) {
+      toast("This product is coming soon!");
+      return;
+    }
     if (!actualPrice) {
       toast("Price on request");
       return;
@@ -156,6 +167,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
 
   const handleBuyNow = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (isOutOfStock) {
+      toast.error("This product is currently out of stock");
+      return;
+    }
+    if (isComingSoon) {
+      toast("This product is coming soon!");
+      return;
+    }
     if (!actualPrice) {
       toast("Price on request");
       return;
@@ -193,12 +212,20 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
       <div className="flex flex-col flex-1">
         {/* Product Image Container (Consistent 1:1 Aspect Ratio) */}
         <div className="relative w-full aspect-square rounded-none overflow-hidden flex items-center justify-center p-3 sm:p-4 mb-3.5 bg-[#FAF8F5] border border-[#E8E2D8] group-hover:border-gray-300 transition-colors">
-          {/* Main Discount Badge (ONLY Top-Left) */}
-          {displayDiscountBadge && (
+          {/* Status / Discount Badge (ONLY Top-Left) */}
+          {isOutOfStock ? (
+            <div className="absolute top-2.5 left-2.5 z-10 bg-rose-700 text-white text-[10px] font-poppins font-bold tracking-wider uppercase px-2.5 py-0.5 rounded-full shadow-xs pointer-events-none">
+              OUT OF STOCK
+            </div>
+          ) : isComingSoon ? (
+            <div className="absolute top-2.5 left-2.5 z-10 bg-amber-600 text-white text-[10px] font-poppins font-bold tracking-wider uppercase px-2.5 py-0.5 rounded-full shadow-xs pointer-events-none">
+              COMING SOON
+            </div>
+          ) : displayDiscountBadge ? (
             <div className="absolute top-2.5 left-2.5 z-10 bg-[#8E3F24] text-white text-[10.5px] font-poppins font-normal tracking-wider uppercase px-2.5 py-0.5 rounded-full shadow-xs pointer-events-none">
               {displayDiscountBadge}
             </div>
-          )}
+          ) : null}
 
           {/* Wishlist Heart Button (Top-Right) */}
           <button
@@ -271,7 +298,25 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
 
         {/* Action Buttons: Add to Cart (Secondary) & Buy Now (Primary) */}
         <div className="flex items-center gap-2 w-full">
-          {actualPrice > 0 ? (
+          {isOutOfStock ? (
+            <button
+              type="button"
+              disabled
+              onClick={(e) => e.stopPropagation()}
+              className="w-full h-[38px] px-2 bg-rose-50 border border-rose-200 text-rose-700 text-xs sm:text-[13px] font-semibold rounded-md flex items-center justify-center cursor-not-allowed select-none tracking-wide"
+            >
+              Out of Stock
+            </button>
+          ) : isComingSoon ? (
+            <button
+              type="button"
+              disabled
+              onClick={(e) => e.stopPropagation()}
+              className="w-full h-[38px] px-2 bg-amber-50 border border-amber-300 text-amber-800 text-xs sm:text-[13px] font-semibold rounded-md flex items-center justify-center cursor-not-allowed select-none tracking-wide"
+            >
+              Coming Soon
+            </button>
+          ) : actualPrice > 0 ? (
             <>
               {quantityInCart > 0 ? (
                 /* Quantity Stepper matching button height */

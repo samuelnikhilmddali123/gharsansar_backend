@@ -13,7 +13,9 @@
             "image": "/products/sonu_steel_products/sonu_2_tier_steamer_with_glass_lid_20_cm.webp",
             "description": "Premium quality stainless steel 2-tier steamer featuring a durable tempered glass lid and 20 cm diameter. Perfect for steaming vegetables, dumplings, and healthy dishes efficiently on both gas and induction cooktops.",
             "price": 1499,
-            "act-price": 1999
+            "act-price": 1999,
+            "status": "active",
+            "stock": 50
           },
           {
             "prod_id": "sonu_1779295730883_1",

@@ -24,6 +24,7 @@ export interface Product {
   category: string;
   subCategory: string;
   stock?: number;
+  status?: "active" | "out_of_stock" | "coming_soon";
 }
 
 interface ProductContextType {
@@ -32,6 +33,7 @@ interface ProductContextType {
   error: string | null;
   addProduct: (p: Partial<Product> & { imageFile?: File }) => Promise<void>;
   updateProduct: (id: string, p: Partial<Product> & { imageFile?: File }) => Promise<void>;
+  updateProductStatus: (id: string, status: "active" | "out_of_stock" | "coming_soon", stock?: number) => Promise<boolean>;
   deleteProduct: (id: string, category_type: string) => Promise<void>;
   refreshProducts: () => Promise<void>;
 }
@@ -153,7 +155,8 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
               video: img.video || "",
               category: category.name || category.category || "General",
               subCategory: sub.name,
-              stock: img.stock !== undefined ? img.stock : 50
+              stock: img.stock !== undefined ? img.stock : 50,
+              status: img.status || (img.stock !== undefined && Number(img.stock) <= 0 ? "out_of_stock" : "active")
             });
           });
         });
@@ -215,7 +218,8 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
                 video: img.video || "",
                 category: category.name || category.category || "General",
                 subCategory: sub.name,
-                stock: img.stock !== undefined ? img.stock : 50
+                stock: img.stock !== undefined ? img.stock : 50,
+                status: img.status || (img.stock !== undefined && Number(img.stock) <= 0 ? "out_of_stock" : "active")
               });
             });
           });
@@ -279,6 +283,8 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
       formData.append("price", Math.floor(p.price ?? 0).toString());
       formData.append("actual_price", Math.floor(p.actualPrice ?? 0).toString());
       formData.append("description", p.description || "");
+      if (p.status) formData.append("status", p.status);
+      if (p.stock !== undefined) formData.append("stock", p.stock.toString());
       if (p.video) formData.append("video", p.video);
 
       if (p.imageFile) {
@@ -295,7 +301,31 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
     }
   };
 
-
+  // Quick update product status
+  const updateProductStatus = async (
+    id: string,
+    status: "active" | "out_of_stock" | "coming_soon",
+    stock?: number
+  ): Promise<boolean> => {
+    try {
+      await axios.patch(`${BACKEND_URL}/storage/upload/products/status`, { id, status, stock });
+      setProducts((prev) =>
+        prev.map((item) =>
+          item.id === id
+            ? {
+                ...item,
+                status,
+                stock: stock !== undefined ? stock : (status === "out_of_stock" ? 0 : (item.stock && item.stock > 0 ? item.stock : 50))
+              }
+            : item
+        )
+      );
+      return true;
+    } catch (err) {
+      console.error("Error updating product status:", err);
+      return false;
+    }
+  };
 
   // Delete product
   const deleteProduct = async (id: string) => {
@@ -315,6 +345,7 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
         error,
         addProduct,
         updateProduct,
+        updateProductStatus,
         deleteProduct,
         refreshProducts: fetchProducts
       }}
