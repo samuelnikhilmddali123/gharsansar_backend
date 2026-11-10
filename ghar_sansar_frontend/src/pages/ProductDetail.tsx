@@ -91,10 +91,7 @@ const ProductDetail: React.FC = () => {
   const quantityInCart = cartItemForProduct ? cartItemForProduct.quantity : 0;
 
   // Gallery States
-  const [activeImageIndex, setActiveImageIndex] = useState(0);
-  const [isVideoActive, setIsVideoActive] = useState(false);
   const [is360Active, setIs360Active] = useState(false);
-  const [verticalThumbOffset, setVerticalThumbOffset] = useState(0);
   const [zoomPos, setZoomPos] = useState({ x: 0, y: 0 });
   const [isZooming, setIsZooming] = useState(false);
   const [activeLightboxImage, setActiveLightboxImage] = useState<string | null>(null);
@@ -276,40 +273,6 @@ const ProductDetail: React.FC = () => {
     }
   };
 
-  // Base list of mockup/alternative images for premium gallery feel matching screenshot
-  const productImages = useMemo(() => {
-    if (!product) return [];
-    const baseImg = product.image || "/products/waterbottles_and_jars/asian_diamond_insulated_inner_stainless_steel_flask_1_pc.webp";
-    return [
-      { url: baseImg, label: "Front View", isVideo: false },
-      { url: "/images/diamond_collection_banner.jpg", label: "Product & Lid", isVideo: false },
-      { url: baseImg, label: "Side Angle", transformClass: "scale-x-[-1]", isVideo: false },
-      { url: "/images/flask_lifestyle_banner.jpg", label: "Lifestyle View", isVideo: false },
-      { url: baseImg, label: "Detail View", transformClass: "scale-[1.35]", isVideo: false },
-      { url: "/images/flask_lifestyle_banner.jpg", label: "Product Video", isVideo: true }
-    ];
-  }, [product]);
-
-  // Gallery Navigation
-  const handlePrevImage = () => {
-    setIsVideoActive(false);
-    setActiveImageIndex((prev) => (prev > 0 ? prev - 1 : productImages.length - 1));
-  };
-
-  const handleNextImage = () => {
-    setIsVideoActive(false);
-    setActiveImageIndex((prev) => (prev < productImages.length - 1 ? prev + 1 : 0));
-  };
-
-  const handleSelectThumbnail = (idx: number) => {
-    if (productImages[idx]?.isVideo) {
-      setIsVideoActive(true);
-      setActiveImageIndex(idx);
-    } else {
-      setIsVideoActive(false);
-      setActiveImageIndex(idx);
-    }
-  };
 
   // Dynamic Product Specifications
   const productSpecs = useMemo(() => {
@@ -707,43 +670,15 @@ const ProductDetail: React.FC = () => {
         {/* 2-Column Product Showcase Section */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 pb-12">
           
-          {/* LEFT COLUMN: Gallery with Vertical Thumbnails, Main Stage & Horizontal Thumbnails */}
+          {/* LEFT COLUMN: Clean Studio Image Showcase */}
           <div className="lg:col-span-7 flex flex-col gap-3">
             
-            <div className="flex flex-col sm:flex-row gap-3 items-start">
-              {/* Vertical Thumbnails Strip (Left of main image on desktop) */}
-              <div className="hidden sm:flex flex-col items-center gap-2">
-                {productImages.slice(0, 5).map((imgObj, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => handleSelectThumbnail(idx)}
-                    className={`w-14 h-14 rounded-none p-1 bg-white border-2 transition-all overflow-hidden relative group flex items-center justify-center ${
-                      activeImageIndex === idx && !isVideoActive ? 'border-[#0F2920] shadow-sm' : 'border-gray-200/80 hover:border-gray-400'
-                    }`}
-                  >
-                    <img
-                      src={imgObj.url}
-                      alt={`Thumb ${idx + 1}`}
-                      className={`w-full h-full object-contain ${imgObj.transformClass || ""}`}
-                    />
-                  </button>
-                ))}
-                
-                {/* Vertical Scroll / Down Arrow */}
-                <button 
-                  onClick={() => handleSelectThumbnail((activeImageIndex + 1) % productImages.length)}
-                  className="w-14 h-7 rounded-none bg-white border border-gray-200/80 hover:bg-gray-50 flex items-center justify-center text-gray-500 transition shadow-2xs"
-                  title="Next View"
-                >
-                  <ChevronDown size={16} />
-                </button>
-              </div>
-
+            <div className="w-full">
               {/* Main Image Showcase Container */}
               <div 
-                className="flex-1 w-full relative overflow-hidden rounded-none bg-[#F7F6F0] aspect-[4/3] sm:aspect-square border border-[#E5E1D8] flex items-center justify-center p-6 sm:p-10 select-none group"
+                className="w-full relative overflow-hidden rounded-none bg-[#F7F6F0] aspect-square border border-[#E5E1D8] flex items-center justify-center p-6 sm:p-10 select-none group"
                 onMouseMove={handleMouseMove}
-                onMouseEnter={() => !isVideoActive && setIsZooming(true)}
+                onMouseEnter={() => setIsZooming(true)}
                 onMouseLeave={() => setIsZooming(false)}
               >
                 {/* 360 & Expand Controls at Top Right */}
@@ -760,7 +695,7 @@ const ProductDetail: React.FC = () => {
                   </button>
 
                   <button
-                    onClick={() => setActiveLightboxImage(productImages[activeImageIndex]?.url || product.image)}
+                    onClick={() => setActiveLightboxImage(product.image)}
                     className="p-1.5 rounded-none bg-black/60 hover:bg-black/80 text-white backdrop-blur-sm border border-white/20 transition shadow-sm"
                     title="Fullscreen Lightbox"
                   >
@@ -768,93 +703,39 @@ const ProductDetail: React.FC = () => {
                   </button>
                 </div>
 
-                {/* Left & Right Circular Nav Arrows */}
-                <button
-                  onClick={handlePrevImage}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-none bg-white/90 hover:bg-white text-gray-700 shadow-md border border-gray-200/60 flex items-center justify-center transition active:scale-95"
-                  title="Previous image"
-                >
-                  <ChevronLeft size={18} />
-                </button>
-                <button
-                  onClick={handleNextImage}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-none bg-white/90 hover:bg-white text-gray-700 shadow-md border border-gray-200/60 flex items-center justify-center transition active:scale-95"
-                  title="Next image"
-                >
-                  <ChevronRight size={18} />
-                </button>
-
                 {/* Bottom Right Zoom / Scan Icon */}
                 <button 
-                  onClick={() => setActiveLightboxImage(productImages[activeImageIndex]?.url || product.image)}
+                  onClick={() => setActiveLightboxImage(product.image)}
                   className="absolute bottom-4 right-4 z-20 p-2 rounded-none bg-white/90 hover:bg-white text-gray-600 shadow-sm border border-gray-200 transition"
+                  title="Expand Image"
                 >
                   <Scan size={15} />
                 </button>
 
-                {/* Main Media Content: Video or Studio Image */}
-                {isVideoActive ? (
-                  <div className="w-full h-full rounded-none overflow-hidden flex items-center justify-center bg-black/5">
-                    <video
-                      src="/videos/homepagevideo.mp4"
-                      autoPlay
-                      controls
-                      playsInline
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                ) : (
-                  <motion.div
-                    key={activeImageIndex}
-                    animate={is360Active ? { rotateY: [0, 360] } : {}}
-                    transition={is360Active ? { repeat: Infinity, duration: 4, ease: "linear" } : {}}
-                    className="w-full h-full flex items-center justify-center relative cursor-zoom-in"
-                  >
-                    {/* Realistic ambient ground shadow */}
-                    <div 
-                      className="absolute bottom-2 left-1/2 -translate-x-1/2 w-3/5 h-4 rounded-none bg-black/[0.06] blur-[6px] pointer-events-none" 
-                      aria-hidden="true" 
-                    />
-
-                    <StudioImage
-                      src={productImages[activeImageIndex]?.url || product.image}
-                      alt={product.title}
-                      loading="eager"
-                      className={`max-w-full max-h-full transition-transform duration-200 ${productImages[activeImageIndex]?.transformClass || "object-contain"}`}
-                      style={isZooming ? {
-                        transformOrigin: `${zoomPos.x}% ${zoomPos.y}%`,
-                        transform: 'scale(1.8)'
-                      } : {}}
-                    />
-                  </motion.div>
-                )}
-              </div>
-            </div>
-
-            {/* Horizontal Thumbnails Row below main image (matching screenshot with 6 items and video play icon) */}
-            <div className="grid grid-cols-6 gap-2 sm:gap-2.5 pt-1">
-              {productImages.map((imgObj, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => handleSelectThumbnail(idx)}
-                  className={`aspect-square rounded-none p-1 bg-white border-2 transition-all overflow-hidden relative group flex items-center justify-center ${
-                    activeImageIndex === idx ? 'border-[#0F2920] shadow-sm' : 'border-gray-200/80 hover:border-gray-400'
-                  }`}
+                {/* Main Media Content: Studio Image with Ambient Ground Shadow & Micro-Zoom */}
+                <motion.div
+                  animate={is360Active ? { rotateY: [0, 360] } : {}}
+                  transition={is360Active ? { repeat: Infinity, duration: 4, ease: "linear" } : {}}
+                  className="w-full h-full flex items-center justify-center relative cursor-zoom-in"
                 >
-                  <img
-                    src={imgObj.url}
-                    alt={imgObj.label}
-                    className={`w-full h-full object-contain ${imgObj.transformClass || ""}`}
+                  {/* Realistic ambient ground shadow */}
+                  <div 
+                    className="absolute bottom-2 left-1/2 -translate-x-1/2 w-3/5 h-4 rounded-none bg-black/[0.06] blur-[6px] pointer-events-none" 
+                    aria-hidden="true" 
                   />
-                  {imgObj.isVideo && (
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                      <div className="w-6 h-6 rounded-none bg-white/90 text-gray-900 flex items-center justify-center shadow-sm">
-                        <Play size={12} className="ml-0.5 fill-current" />
-                      </div>
-                    </div>
-                  )}
-                </button>
-              ))}
+
+                  <StudioImage
+                    src={product.image}
+                    alt={product.title || product.name}
+                    loading="eager"
+                    className="max-w-full max-h-full object-contain transition-transform duration-200"
+                    style={isZooming ? {
+                      transformOrigin: `${zoomPos.x}% ${zoomPos.y}%`,
+                      transform: 'scale(1.8)'
+                    } : {}}
+                  />
+                </motion.div>
+              </div>
             </div>
 
           </div>

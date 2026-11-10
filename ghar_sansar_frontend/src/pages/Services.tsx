@@ -127,28 +127,8 @@ const Services: React.FC = () => {
                   )}
                 </div>
 
-                {/* Bottom Row: Price & Book Enquiry CTA */}
+                {/* Bottom Row: Book Consultation CTA */}
                 <div className="pt-3 border-t border-[#E8E2D8] mt-auto">
-                  {s.price ? (
-                    <div className="flex items-baseline justify-between mb-3">
-                      <div>
-                        <div className="flex items-baseline gap-2">
-                          <span className="font-poppins text-lg sm:text-[21px] font-normal text-gray-950 tracking-tight">
-                            ₹{Number(s.price).toLocaleString("en-IN")}
-                          </span>
-                          {s.actual_price && Number(s.actual_price) > Number(s.price) && (
-                            <span className="font-poppins text-xs sm:text-sm text-[#8C827A] line-through font-normal">
-                              ₹{Number(s.actual_price).toLocaleString("en-IN")}
-                            </span>
-                          )}
-                        </div>
-                        <span className="text-[11px] text-[#8C827A] font-normal block">
-                          (Estimated starting package)
-                        </span>
-                      </div>
-                    </div>
-                  ) : null}
-
                   {/* Lightest Brown Family CTA Button with Micro-Curve */}
                   <button
                     type="button"

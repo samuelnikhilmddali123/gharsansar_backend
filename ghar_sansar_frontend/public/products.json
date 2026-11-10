@@ -50,7 +50,9 @@
             "image": "/products/sonu_steel_products/sonu_crysta_pot_14cm_1000_ml.webp",
             "description": "Elegant 1000 ml stainless steel Crysta pot with a 14 cm diameter. Beautiful mirror finish, heat-resistant handles, and superior heat retention, making it perfect for cooking and direct serving.",
             "price": 599,
-            "act-price": 1050
+            "act-price": 1050,
+            "status": "active",
+            "stock": 50
           },
           {
             "prod_id": "sonu_1779295730883_4",
@@ -60,7 +62,9 @@
             "image": "/products/sonu_steel_products/sonu_crysta_pot_16cm_1500_ml.webp",
             "description": "Superior 1500 ml stainless steel Crysta pot with a 16 cm diameter. Designed with an encapsulation base for uniform heating, dual side grips, and a premium polish that elevates your kitchen aesthetic.",
             "price": 799,
-            "act-price": 1137
+            "act-price": 1137,
+            "status": "active",
+            "stock": 50
           },
           {
             "prod_id": "sonu_1779295730883_5",
