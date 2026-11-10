@@ -110,44 +110,35 @@ const ProductDetail: React.FC = () => {
   // Related products carousel ref
   const relatedScrollRef = useRef<HTMLDivElement>(null);
 
-  // Helper to read initial pincode from account addresses or stored pincode
+  // Helper to read initial pincode from account addresses or explicitly saved pincode
   const getInitialPincode = () => {
     const local = localStorage.getItem("user_pincode");
-    if (local && /^\d{6}$/.test(local)) return local;
-    try {
-      const stored = localStorage.getItem("user_shipping_address");
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        const zip = parsed.zipCode || parsed.pincode;
-        if (zip && /^\d{6}$/.test(String(zip).trim())) return String(zip).trim();
-      }
-    } catch {}
-    return "520008"; // Default to Vijayawada as seen in design
+    // Ensure we do not use legacy hardcoded default "520008"
+    if (local && /^\d{6}$/.test(local) && local !== "520008") return local;
+    return "";
   };
 
   const getInitialArea = () => {
+    const localPin = localStorage.getItem("user_pincode");
+    if (!localPin || localPin === "520008") return "";
     const localArea = localStorage.getItem("user_area");
-    if (localArea) return localArea;
-    try {
-      const stored = localStorage.getItem("user_shipping_address");
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        const area = [parsed.city, parsed.state].filter(Boolean).join(", ") || parsed.city;
-        if (area) return area;
-      }
-    } catch {}
-    return "Vijayawada, Andhra Pradesh";
+    if (localArea && localArea !== "Vijayawada, Andhra Pradesh") return localArea;
+    return "";
   };
 
   const [pincode, setPincode] = useState<string>(getInitialPincode);
   const [savedArea, setSavedArea] = useState<string>(getInitialArea);
-  const [deliveryFee, setDeliveryFee] = useState<number | null>(99);
+  const [deliveryFee, setDeliveryFee] = useState<number | null>(() => {
+    const initialPin = getInitialPincode();
+    return initialPin ? (/^5[0-3]/.test(initialPin) ? 99 : 149) : null;
+  });
   const [isCheckingPincode, setIsCheckingPincode] = useState(false);
   const [isEditingPincode, setIsEditingPincode] = useState(false);
-  const [pincodeInput, setPincodeInput] = useState(pincode);
+  const [pincodeInput, setPincodeInput] = useState(getInitialPincode);
 
-  // Automatically sync pincode and area from user's account shipping address
+  // Automatically sync pincode and area only if the user is authenticated and has an address
   useEffect(() => {
+    if (!user) return;
     let activeAddr: any = null;
 
     if (user?.addresses && user.addresses.length > 0) {
@@ -158,13 +149,6 @@ const ProductDetail: React.FC = () => {
       try {
         const stored = localStorage.getItem(`shipping_address_${user.email}`);
         if (stored) activeAddr = JSON.parse(stored);
-      } catch {}
-    }
-
-    if (!activeAddr) {
-      try {
-        const storedGlobal = localStorage.getItem("user_shipping_address");
-        if (storedGlobal) activeAddr = JSON.parse(storedGlobal);
       } catch {}
     }
 
@@ -844,34 +828,44 @@ const ProductDetail: React.FC = () => {
                 ) : null}
               </div>
 
-              {/* Delivery Location Box matching screenshot */}
+              {/* Delivery Location Box */}
               <div className="p-4 bg-white rounded-none border border-gray-200/90 shadow-2xs space-y-3.5 mb-5">
-                <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Delivery Location</span>
+                <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Delivery &amp; Services</span>
                 
-                {isEditingPincode ? (
-                  <div className="flex items-center gap-2">
-                    <input 
-                      type="text" 
-                      placeholder="Enter 6-digit Pincode" 
-                      value={pincodeInput}
-                      onChange={(e) => setPincodeInput(e.target.value)}
-                      maxLength={6}
-                      className="flex-1 px-3.5 py-2 text-sm border border-gray-300 rounded-none focus:ring-2 focus:ring-[#0F2920] outline-none"
-                      disabled={isCheckingPincode}
-                    />
-                    <button 
-                      onClick={checkPincode}
-                      disabled={isCheckingPincode}
-                      className="px-4 py-2 bg-[#0F2920] text-white text-xs font-bold uppercase rounded-none hover:bg-black transition disabled:opacity-50"
-                    >
-                      {isCheckingPincode ? "Checking..." : "Apply"}
-                    </button>
-                    <button 
-                      onClick={() => setIsEditingPincode(false)}
-                      className="text-xs text-gray-500 hover:text-gray-700 px-2"
-                    >
-                      Cancel
-                    </button>
+                {isEditingPincode || !pincode ? (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <input 
+                        type="text" 
+                        placeholder="Enter 6-digit Pincode" 
+                        value={pincodeInput}
+                        onChange={(e) => setPincodeInput(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                        maxLength={6}
+                        className="flex-1 px-3.5 py-2 text-sm border border-gray-300 rounded-none focus:ring-2 focus:ring-[#0F2920] outline-none"
+                        disabled={isCheckingPincode}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") checkPincode();
+                        }}
+                      />
+                      <button 
+                        onClick={checkPincode}
+                        disabled={isCheckingPincode || pincodeInput.length !== 6}
+                        className="px-4 py-2 bg-[#0F2920] text-white text-xs font-bold uppercase rounded-none hover:bg-black transition disabled:opacity-50 cursor-pointer"
+                      >
+                        {isCheckingPincode ? "Checking..." : "Check"}
+                      </button>
+                      {pincode ? (
+                        <button 
+                          onClick={() => setIsEditingPincode(false)}
+                          className="text-xs text-gray-500 hover:text-gray-700 px-2 cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                      ) : null}
+                    </div>
+                    <p className="text-[11px] text-gray-500">
+                      Enter your pincode to check delivery availability and charges.
+                    </p>
                   </div>
                 ) : (
                   <div className="flex items-center justify-between">
@@ -885,26 +879,31 @@ const ProductDetail: React.FC = () => {
                       </div>
                     </div>
                     <button 
-                      onClick={() => setIsEditingPincode(true)}
-                      className="text-xs font-bold text-blue-600 hover:text-blue-800 transition"
+                      onClick={() => {
+                        setPincodeInput(pincode);
+                        setIsEditingPincode(true);
+                      }}
+                      className="text-xs font-bold text-blue-600 hover:text-blue-800 transition cursor-pointer"
                     >
                       Change
                     </button>
                   </div>
                 )}
 
-                <div className="pt-3 border-t border-gray-100 flex items-center justify-between text-xs font-medium">
-                  <div className="flex items-center gap-2 text-emerald-700">
-                    <Truck size={15} />
-                    <span>Delivery <strong className="font-bold">₹99 (Standard)</strong></span>
+                {pincode && deliveryFee !== null ? (
+                  <div className="pt-3 border-t border-gray-100 flex items-center justify-between text-xs font-medium">
+                    <div className="flex items-center gap-2 text-emerald-700">
+                      <Truck size={15} />
+                      <span>Delivery <strong className="font-bold">₹{deliveryFee} (Standard)</strong></span>
+                    </div>
+                    <div className="text-gray-500 text-[11px]">
+                      Estimated Delivery: <strong className="text-gray-800 font-bold">{deliveryDateString}</strong>
+                    </div>
                   </div>
-                  <div className="text-gray-500 text-[11px]">
-                    Estimated Delivery: <strong className="text-gray-800 font-bold">{deliveryDateString}</strong>
-                  </div>
-                </div>
+                ) : null}
               </div>
 
-              {/* Quantity Selector and In-Stock Label */}
+              {/* Quantity Selector */}
               <div className="flex items-center gap-4 mb-6">
                 {isOutOfStock ? (
                   <div className="text-xs text-rose-700 font-semibold flex items-center gap-1.5 bg-rose-50 px-3 py-1.5 border border-rose-200">
@@ -917,28 +916,21 @@ const ProductDetail: React.FC = () => {
                     <span>Coming Soon — Not Yet Available for Purchase</span>
                   </div>
                 ) : (
-                  <>
-                    <div className="flex items-center border border-gray-300 rounded-none bg-white shadow-2xs">
-                      <button 
-                        onClick={handleDecreaseQuantity}
-                        className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-none transition font-bold"
-                      >
-                        -
-                      </button>
-                      <span className="w-9 text-center font-bold text-sm text-gray-900">{quantity}</span>
-                      <button 
-                        onClick={handleIncreaseQuantity}
-                        className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-none transition font-bold"
-                      >
-                        +
-                      </button>
-                    </div>
-
-                    <div className="text-xs text-emerald-600 font-semibold flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 bg-emerald-500 rounded-none"></span>
-                      <span>In Stock ({product?.stock !== undefined ? product.stock : 24} items)</span>
-                    </div>
-                  </>
+                  <div className="flex items-center border border-gray-300 rounded-none bg-white shadow-2xs">
+                    <button 
+                      onClick={handleDecreaseQuantity}
+                      className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-none transition font-bold"
+                    >
+                      -
+                    </button>
+                    <span className="w-9 text-center font-bold text-sm text-gray-900">{quantity}</span>
+                    <button 
+                      onClick={handleIncreaseQuantity}
+                      className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-none transition font-bold"
+                    >
+                      +
+                    </button>
+                  </div>
                 )}
               </div>
 
