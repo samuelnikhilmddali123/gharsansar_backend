@@ -1022,45 +1022,59 @@ const ProductDetail: React.FC = () => {
 
         {/* ── Tab Content: Overview ───────────────────────────────────────────── */}
         {activeTab === "overview" && (
-          <div className="py-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-            <div className="lg:col-span-7 space-y-4">
-              <div>
-                <span className="text-[10.5px] font-medium tracking-widest text-[#7D3219] uppercase block mb-1">
-                  Product Overview
-                </span>
-                <h2 className="font-poppins text-2xl font-normal text-[#181513] leading-snug">
-                  Crafted for Daily Elegance &amp; Reliable Use
-                </h2>
-              </div>
-              <p className="text-sm text-[#736B63] leading-relaxed">
+          <div className="py-8 space-y-6 max-w-4xl">
+            {/* Description Block */}
+            <div className="space-y-2">
+              <span className="text-[10.5px] font-medium tracking-widest text-[#7D3219] uppercase block">
+                Product Overview
+              </span>
+              <h2 className="font-poppins text-xl sm:text-2xl font-normal text-[#181513] leading-snug">
+                Crafted for Daily Elegance &amp; Reliable Use
+              </h2>
+              <p className="text-xs sm:text-sm text-[#736B63] leading-relaxed pt-1">
                 {product.description || `The ${cleanTitle} brings authentic Ghar Sansar design, exceptional durability, and aesthetic charm to your home. Precision-crafted for seamless everyday utility and premium gifting.`}
               </p>
-
-              {/* 4 Feature Highlights */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
-                {[
-                  { title: "Premium Finish", sub: "Hand-inspected surface" },
-                  { title: "Durable Build", sub: "Built for long life" },
-                  { title: "Safe Packaging", sub: "Transit protected" },
-                  { title: "Ghar Sansar", sub: "Direct authenticity" },
-                ].map((item, i) => (
-                  <div key={i} className="p-3.5 bg-white border border-[#E8E2D8] rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
-                    <CheckCircle size={15} className="text-[#8E3F24] mb-1.5" />
-                    <span className="text-xs font-medium text-[#181513] block leading-tight">{item.title}</span>
-                    <span className="text-[10px] text-[#8C827A]">{item.sub}</span>
-                  </div>
-                ))}
-              </div>
             </div>
 
-            <div className="lg:col-span-5 bg-white rounded-2xl border border-[#E8E2D8] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)] space-y-4">
-              <h3 className="font-poppins text-sm font-medium text-[#181513]">Authenticity Guarantee</h3>
-              <p className="text-xs text-[#736B63] leading-relaxed">
-                Every piece in our catalogue is sourced with strict quality checks. From material safety to packaging integrity, we guarantee complete satisfaction.
-              </p>
-              <div className="pt-2 border-t border-[#F0EAE1] flex items-center justify-between text-xs text-[#8C827A]">
-                <span>Category: <strong className="text-[#181513]">{cleanCategory}</strong></span>
-                <span>Dispatch: <strong className="text-[#181513]">24-48 Hours</strong></span>
+            {/* 4 Feature Highlights Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {[
+                { title: "Premium Finish", sub: "Hand-inspected surface" },
+                { title: "Durable Build", sub: "Built for long life" },
+                { title: "Safe Packaging", sub: "Transit protected" },
+                { title: "100% Genuine", sub: "Direct authenticity" },
+              ].map((item, i) => (
+                <div key={i} className="p-3.5 bg-white border border-[#E8E2D8] rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+                  <CheckCircle size={15} className="text-[#8E3F24] mb-1.5" />
+                  <span className="text-xs font-medium text-[#181513] block leading-tight">{item.title}</span>
+                  <span className="text-[10px] text-[#8C827A] mt-0.5 block">{item.sub}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Authenticity Guarantee - Perfectly aligned with the left flow */}
+            <div className="bg-white rounded-xl border border-[#E8E2D8] p-4 sm:p-5 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="flex items-start gap-3 max-w-xl">
+                <div className="w-9 h-9 rounded-lg bg-[#F7EBE4] text-[#8E3F24] flex items-center justify-center shrink-0">
+                  <ShieldCheck size={18} />
+                </div>
+                <div>
+                  <h4 className="font-poppins text-xs sm:text-sm font-medium text-[#181513]">Authenticity &amp; Quality Guarantee</h4>
+                  <p className="text-xs text-[#736B63] leading-relaxed mt-0.5">
+                    Every piece in our catalogue is sourced with strict quality checks. From material safety to packaging integrity, we guarantee complete satisfaction.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-5 text-xs text-[#8C827A] border-t md:border-t-0 md:border-l border-[#F0EAE1] pt-3 md:pt-0 md:pl-5 shrink-0">
+                <div>
+                  <span className="block text-[10px] uppercase text-[#8C827A]">Category</span>
+                  <strong className="text-[#181513] font-medium">{cleanCategory}</strong>
+                </div>
+                <div>
+                  <span className="block text-[10px] uppercase text-[#8C827A]">Dispatch</span>
+                  <strong className="text-[#181513] font-medium">24–48 Hours</strong>
+                </div>
               </div>
             </div>
           </div>
