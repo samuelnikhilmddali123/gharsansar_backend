@@ -633,19 +633,20 @@ const ProductsPage: React.FC = () => {
 
       {/* 2. Main Content Container */}
       <div className="w-full max-w-[1880px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10 pt-2 sm:pt-3">
-        {/* Breadcrumb */}
-        <nav className="flex items-center space-x-2 text-xs text-stone-500 mb-4 font-normal">
-          <Link to="/" className="hover:text-stone-900 transition-colors">
-            Home
+        {/* Breadcrumb: [Home Icon] Home > Products > Category */}
+        <nav className="flex items-center space-x-2 text-xs sm:text-[13px] text-gray-500 font-medium mb-3">
+          <Link to="/" className="hover:text-black transition-colors flex items-center gap-1.5">
+            <Home size={14} className="shrink-0 text-gray-500" />
+            <span>Home</span>
           </Link>
-          <span className="text-stone-300">/</span>
-          <Link to="/products" className="hover:text-stone-900 transition-colors">
+          <span className="text-gray-400 select-none px-0.5">&gt;</span>
+          <Link to="/products" className="hover:text-black transition-colors">
             Products
           </Link>
           {categoryFilter !== "All" && (
             <>
-              <span className="text-stone-300">/</span>
-              <span className="text-stone-900 truncate max-w-[280px]">{currentCategoryName}</span>
+              <span className="text-gray-400 select-none px-0.5">&gt;</span>
+              <span className="text-gray-900 font-semibold">{currentCategoryName}</span>
             </>
           )}
         </nav>
@@ -653,18 +654,18 @@ const ProductsPage: React.FC = () => {
         {/* Collection Header & Right Controls Row */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 border-b border-[#E8E2D8]">
           <div>
-            <span className="text-[11px] font-semibold tracking-[0.24em] text-[#C86B4C] uppercase font-sans mb-1 block">
+            <span className="text-[11px] sm:text-xs font-medium tracking-[0.2em] text-[#8C827A] uppercase font-sans mb-1 block">
               Curated Collections
             </span>
             <div className="flex items-baseline gap-3 flex-wrap">
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-poppins text-gray-950 font-normal tracking-tight">
                 {currentCategoryName}
               </h1>
-              <span className="text-xs font-medium text-[#7D3219] bg-[#F7EBE4] px-3 py-0.5 rounded-full border border-[#D9B4A4]/80">
+              <span className="text-xs sm:text-sm font-medium text-[#736B63] bg-[#F0EAE1] px-2.5 py-0.5 rounded-full border border-[#E8E2D8]">
                 {totalCount} Products
               </span>
             </div>
-            <p className="text-xs sm:text-sm text-stone-600 mt-1 font-light leading-relaxed max-w-3xl">
+            <p className="text-xs sm:text-sm text-[#736B63] mt-1 font-normal leading-relaxed max-w-3xl">
               {currentCategorySubtitle}
             </p>
           </div>
@@ -683,7 +684,7 @@ const ProductsPage: React.FC = () => {
                 }
                 value={search}
                 onChange={(e) => updateQuery({ search: e.target.value, page: 1 })}
-                className="w-full h-[38px] bg-white border border-[#E8E2D8] focus:border-[#C86B4C] focus:ring-1 focus:ring-[#C86B4C] rounded-xl py-2 pl-9 pr-7 text-xs font-medium text-[#181513] placeholder:text-gray-400 focus:outline-none transition-all shadow-2xs"
+                className="w-full h-[38px] bg-white border border-[#E8E2D8] focus:border-black focus:ring-2 focus:ring-black/10 rounded-xl py-2 pl-9 pr-7 text-xs font-medium text-[#181513] placeholder:text-gray-400 focus:outline-none transition-all shadow-2xs"
               />
               {search && (
                 <button

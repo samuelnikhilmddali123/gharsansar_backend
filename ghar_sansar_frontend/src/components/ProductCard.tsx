@@ -203,7 +203,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-40px" }}
       transition={{ duration: 0.35, delay: (index % 12) * 0.03 }}
-      className="group relative bg-white rounded-2xl border border-[#E8E2D8] shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:shadow-[0_12px_28px_rgba(0,0,0,0.06)] hover:-translate-y-1 hover:border-[#D9B4A4] transition-all duration-300 flex flex-col justify-between p-3.5 sm:p-4 cursor-pointer h-full select-none overflow-hidden font-poppins"
+      className="group relative bg-white rounded-2xl border border-[#E8E2D8] shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_18px_36px_rgba(200,107,76,0.12)] hover:-translate-y-1.5 hover:border-[#8E3F24]/60 transition-all duration-300 flex flex-col justify-between p-3.5 sm:p-4 cursor-pointer h-full select-none overflow-hidden font-poppins"
       onClick={() =>
         navigate(`/product/${encodeURIComponent(product.id)}`, { state: product })
       }
@@ -211,18 +211,18 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
       {/* Top Section: Image + Badges + Info */}
       <div className="flex flex-col flex-1">
         {/* Product Image Container (Consistent 1:1 Aspect Ratio) */}
-        <div className="relative w-full aspect-square rounded-xl overflow-hidden flex items-center justify-center p-3 sm:p-4 mb-3.5 bg-[#FAF7F2] border border-[#E8E2D8]/80 group-hover:border-[#D9B4A4] transition-colors">
+        <div className="relative w-full aspect-square rounded-none overflow-hidden flex items-center justify-center p-3 sm:p-4 mb-3.5 bg-[#FAF8F5] border border-[#E8E2D8] group-hover:border-gray-300 transition-colors">
           {/* Status / Discount Badge (ONLY Top-Left) */}
           {isOutOfStock ? (
-            <div className="absolute top-2.5 left-2.5 z-10 bg-rose-50 text-rose-700 border border-rose-200 text-[10px] font-medium tracking-wider uppercase px-2.5 py-0.5 rounded-full shadow-2xs pointer-events-none">
+            <div className="absolute top-2.5 left-2.5 z-10 bg-rose-700 text-white text-[10px] font-poppins font-bold tracking-wider uppercase px-2.5 py-0.5 rounded-full shadow-xs pointer-events-none">
               OUT OF STOCK
             </div>
           ) : isComingSoon ? (
-            <div className="absolute top-2.5 left-2.5 z-10 bg-amber-50 text-amber-800 border border-amber-300 text-[10px] font-medium tracking-wider uppercase px-2.5 py-0.5 rounded-full shadow-2xs pointer-events-none">
+            <div className="absolute top-2.5 left-2.5 z-10 bg-amber-600 text-white text-[10px] font-poppins font-bold tracking-wider uppercase px-2.5 py-0.5 rounded-full shadow-xs pointer-events-none">
               COMING SOON
             </div>
           ) : displayDiscountBadge ? (
-            <div className="absolute top-2.5 left-2.5 z-10 bg-[#F7EBE4] text-[#7D3219] border border-[#D9B4A4]/80 text-[10.5px] font-medium tracking-wider uppercase px-2.5 py-0.5 rounded-full shadow-2xs pointer-events-none">
+            <div className="absolute top-2.5 left-2.5 z-10 bg-[#8E3F24] text-white text-[10.5px] font-poppins font-normal tracking-wider uppercase px-2.5 py-0.5 rounded-full shadow-xs pointer-events-none">
               {displayDiscountBadge}
             </div>
           ) : null}
@@ -231,15 +231,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
           <button
             type="button"
             onClick={handleWishlist}
-            className={`absolute top-2.5 right-2.5 z-10 w-7 h-7 rounded-full bg-white/90 backdrop-blur-xs border border-[#E8E2D8] shadow-2xs flex items-center justify-center transition-all duration-200 hover:bg-white hover:scale-105 active:scale-95 cursor-pointer ${
+            className={`absolute top-2.5 right-2.5 z-10 w-8 h-8 rounded-full bg-white/90 backdrop-blur-xs border border-gray-200/70 shadow-2xs flex items-center justify-center transition-all duration-200 hover:bg-white hover:scale-105 active:scale-95 cursor-pointer ${
               isWishlisted
                 ? "text-rose-600 bg-white border-rose-200"
-                : "text-stone-400 hover:text-stone-900"
+                : "text-gray-400 hover:text-black"
             }`}
             aria-label="Add to wishlist"
           >
             <Heart
-              size={14}
+              size={15}
               strokeWidth={2}
               className={isWishlisted ? "fill-current text-rose-600" : ""}
             />
@@ -259,19 +259,19 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
         </div>
 
         {/* Product Title (Strict 2-line clamp with fixed height for row alignment) */}
-        <h3 className="font-poppins text-sm sm:text-[15px] font-normal text-gray-900 leading-[21px] line-clamp-2 min-h-[42px] h-[42px] mb-1.5">
+        <h3 className="font-poppins text-[15px] sm:text-base font-normal text-[#181513] leading-[22px] line-clamp-2 min-h-[44px] h-[44px] mb-1.5">
           {product.title?.replace(/_/g, " ")}
         </h3>
 
         {/* Rating row: ★ 4.5 (191) with warm gold star */}
         <div className="flex items-center gap-1.5 text-xs mb-2">
           <Star size={13} className="fill-[#F4B740] text-[#F4B740] shrink-0" />
-          <span className="font-medium text-gray-900 text-xs">{rating}</span>
-          <span className="text-stone-400 text-xs font-light">({count})</span>
+          <span className="font-semibold text-[#171717] text-xs">{rating}</span>
+          <span className="text-[#6B7280] text-xs font-normal">({count})</span>
         </div>
 
         {/* Product Description (Strict 2-line clamp with fixed height for row alignment) */}
-        <p className="text-xs text-stone-500 leading-[18px] line-clamp-2 min-h-[36px] h-[36px] mb-3 font-light">
+        <p className="text-[13px] sm:text-sm text-[#6B7280] leading-[20px] line-clamp-2 min-h-[40px] h-[40px] mb-3.5 font-normal">
           {description}
         </p>
       </div>
@@ -282,17 +282,17 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
         <div className="flex items-baseline gap-2 mb-3 flex-wrap">
           {finalPrice > 0 ? (
             <>
-              <span className="font-poppins text-lg sm:text-[20px] font-light text-gray-950 tracking-tight">
+              <span className="font-poppins text-lg sm:text-[21px] font-normal text-gray-950 tracking-tight">
                 ₹{finalPrice.toLocaleString("en-IN")}
               </span>
               {strikePrice > finalPrice && (
-                <span className="text-xs sm:text-[13px] text-stone-400 line-through font-light" title="MRP / Strike Price">
+                <span className="text-xs sm:text-[13px] text-[#8C827A] line-through font-normal" title="MRP / Strike Price">
                   ₹{strikePrice.toLocaleString("en-IN")}
                 </span>
               )}
             </>
           ) : (
-            <span className="text-xs sm:text-sm font-light text-stone-500">Price on Request</span>
+            <span className="text-xs sm:text-sm font-normal text-gray-600">Price on Request</span>
           )}
         </div>
 
@@ -303,7 +303,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
               type="button"
               disabled
               onClick={(e) => e.stopPropagation()}
-              className="w-full h-[38px] px-2 bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium rounded-md flex items-center justify-center cursor-not-allowed select-none tracking-wide"
+              className="w-full h-[38px] px-2 bg-rose-50 border border-rose-200 text-rose-700 text-xs sm:text-[13px] font-semibold rounded-md flex items-center justify-center cursor-not-allowed select-none tracking-wide"
             >
               Out of Stock
             </button>
@@ -312,7 +312,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
               type="button"
               disabled
               onClick={(e) => e.stopPropagation()}
-              className="w-full h-[38px] px-2 bg-amber-50 border border-amber-300 text-amber-800 text-xs font-medium rounded-md flex items-center justify-center cursor-not-allowed select-none tracking-wide"
+              className="w-full h-[38px] px-2 bg-amber-50 border border-amber-300 text-amber-800 text-xs sm:text-[13px] font-semibold rounded-md flex items-center justify-center cursor-not-allowed select-none tracking-wide"
             >
               Coming Soon
             </button>

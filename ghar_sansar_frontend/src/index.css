@@ -177,34 +177,20 @@
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #FAF7F2;
+  background: #f1f1f1;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #D9B4A4;
-  border-radius: 4px;
+  background: #888;
+  border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #C86B4C;
-}
-
-/* Hide scrollbar utility */
-.no-scrollbar::-webkit-scrollbar,
-::-webkit-scrollbar.no-scrollbar {
-  display: none !important;
-  width: 0 !important;
-  height: 0 !important;
-}
-
-.no-scrollbar {
-  -ms-overflow-style: none !important;
-  scrollbar-width: none !important;
+  background: #555;
 }
 
 /* Smooth transitions for all interactive elements */

@@ -490,7 +490,9 @@ app.get(["/api/products", "/products"], async (req, res) => {
             hasCategoryDiscount: pricing.hasCategoryDiscount,
             isDiscounted: pricing.isDiscounted,
             discount_percentage: pricing.categoryDiscountPercentage,
-            discount_amount: pricing.categoryDiscountAmount
+            discount_amount: pricing.categoryDiscountAmount,
+            stock: item.stock !== undefined ? item.stock : 50,
+            status: item.status || (item.stock !== undefined && item.stock <= 0 ? "out_of_stock" : "active")
           };
         });
 
@@ -1904,6 +1906,7 @@ app.post("/api/storage/upload", productUpload.single("image"), (req, res) => {
     if (!subcategory[itemKey]) subcategory[itemKey] = [];
 
     const newProdId = `prod_${Date.now()}`;
+    const calculatedStock = stock !== undefined ? parseInt(stock) : (status === "out_of_stock" ? 0 : 50);
     const newProduct = {
       prod_id: newProdId,
       id: newProdId,
@@ -1914,11 +1917,27 @@ app.post("/api/storage/upload", productUpload.single("image"), (req, res) => {
       product_discount: product_discount ? parseFloat(product_discount) : undefined,
       description: description || "",
       image: imagePath,
-      stock: stock !== undefined ? parseInt(stock) : 50
+      stock: calculatedStock,
+      status: status || (calculatedStock <= 0 ? "out_of_stock" : "active")
     };
 
     subcategory[itemKey].push(newProduct);
-    fs.writeFileSync(productsPath, JSON.stringify(rawData, null, 2));
+    // Persist directly to MongoDB Atlas
+    writeJsonFile("products.json", rawData);
+    cachedProductsResponse = null;
+
+    try {
+      const db = getDatabase();
+      if (db) {
+        await db.collection("products").insertOne({
+          ...newProduct,
+          category: category.name,
+          subCategory: subcategory.name
+        });
+      }
+    } catch (e) {
+      console.warn("MongoDB flattened insert warning:", e.message);
+    }
 
     res.status(201).json({ success: true, message: "Product created successfully", product: newProduct });
   } catch (error) {
@@ -1988,19 +2007,8 @@ app.patch("/api/storage/upload/products/status", express.json(), async (req, res
       return res.status(404).json({ error: "Product not found to update status" });
     }
 
-    // Persist to JSON file & MongoDB Atlas
-    writeJsonFile(productsPath, rawData);
-    fs.writeFileSync(productsPath, JSON.stringify(rawData, null, 2));
-
-    // Also sync to frontend public
-    const frontendJson = path.join(__dirname, "..", "ghar_sansar_frontend", "public", "products.json");
-    if (fs.existsSync(frontendJson)) {
-      try {
-        fs.writeFileSync(frontendJson, JSON.stringify(rawData, null, 2));
-      } catch (e) {}
-    }
-
-    // Invalidate products cache
+    // Persist directly to MongoDB Atlas
+    writeJsonFile("products.json", rawData);
     cachedProductsResponse = null;
 
     // Update MongoDB flattened products collection
@@ -2115,16 +2123,8 @@ app.put("/api/storage/upload/products", productUpload.single("image"), async (re
       return res.status(404).json({ error: "Product not found to update" });
     }
 
-    writeJsonFile(productsPath, rawData);
-    fs.writeFileSync(productsPath, JSON.stringify(rawData, null, 2));
-
-    const frontendJson = path.join(__dirname, "..", "ghar_sansar_frontend", "public", "products.json");
-    if (fs.existsSync(frontendJson)) {
-      try {
-        fs.writeFileSync(frontendJson, JSON.stringify(rawData, null, 2));
-      } catch (e) {}
-    }
-
+    // Persist directly to MongoDB Atlas
+    writeJsonFile("products.json", rawData);
     cachedProductsResponse = null;
 
     try {
@@ -2195,7 +2195,21 @@ app.delete("/api/storage/uploads/products", (req, res) => {
       return res.status(404).json({ error: "Product not found to delete" });
     }
 
-    fs.writeFileSync(productsPath, JSON.stringify(rawData, null, 2));
+    // Persist directly to MongoDB Atlas
+    writeJsonFile("products.json", rawData);
+    cachedProductsResponse = null;
+
+    try {
+      const db = getDatabase();
+      if (db) {
+        await db.collection("products").deleteOne({
+          $or: [{ id: id }, { prod_id: id }, { name: id }]
+        });
+      }
+    } catch (e) {
+      console.warn("MongoDB flattened delete warning:", e.message);
+    }
+
     res.json({ success: true, message: "Product deleted successfully" });
   } catch (error) {
     console.error("Admin product delete error:", error);

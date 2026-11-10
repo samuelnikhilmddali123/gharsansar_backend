@@ -92,7 +92,7 @@ const Cart: React.FC = () => {
             </p>
             <Link
               to="/products"
-              className="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-[#F7EBE4] hover:bg-[#EFE0D7] text-[#7D3219] border border-[#D9B4A4] hover:border-[#7D3219] font-medium text-xs sm:text-sm rounded-md shadow-2xs transition-all cursor-pointer"
+              className="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-[#C26847] hover:bg-[#B05B3C] text-white font-medium text-xs sm:text-sm rounded-md shadow-2xs transition-all cursor-pointer"
             >
               <span>Explore Products</span>
               <ArrowRight size={14} />
@@ -107,7 +107,7 @@ const Cart: React.FC = () => {
   const grandTotal = totalPrice + taxAmount;
 
   return (
-    <div className="bg-[#FAF7F2] min-h-screen font-poppins pt-16 sm:pt-20 pb-16 flex flex-col selection:bg-[#F7EBE4] selection:text-[#7D3219] antialiased">
+    <div className="bg-[#FAF7F2] min-h-screen font-poppins pt-20 sm:pt-24 pb-16 sm:pb-20 flex flex-col selection:bg-[#F7EBE4] selection:text-[#7D3219] antialiased">
       <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="pb-5 border-b border-[#E8E2D8] mb-8 flex items-center justify-between gap-4">
@@ -291,7 +291,7 @@ const Cart: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleCheckoutClick}
-                  className="w-full py-3 px-4 bg-[#F7EBE4] hover:bg-[#EFE0D7] text-[#7D3219] border border-[#D9B4A4] hover:border-[#7D3219] font-medium text-xs sm:text-sm tracking-wide rounded-md shadow-2xs transition-all active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full py-3 px-4 bg-[#C26847] hover:bg-[#B05B3C] text-white font-medium text-xs sm:text-sm tracking-wide rounded-md shadow-2xs transition-all active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <span>Proceed to Checkout</span>
                   <ArrowRight size={14} />

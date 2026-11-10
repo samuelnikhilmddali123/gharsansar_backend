@@ -71,25 +71,26 @@ const BlogPost: React.FC = () => {
   };
 
   return (
-    <div className="bg-[#FAF7F2] min-h-screen font-poppins pt-16 sm:pt-20 pb-16 flex flex-col selection:bg-[#F7EBE4] selection:text-[#7D3219] antialiased">
+    <div className="bg-[#FAF7F2] min-h-screen font-poppins pt-20 sm:pt-24 pb-16 sm:pb-20 flex flex-col selection:bg-[#F7EBE4] selection:text-[#7D3219] antialiased">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         {/* Breadcrumb Navigation */}
-        <nav className="flex items-center space-x-2 text-xs text-stone-500 mb-6 font-normal">
-          <Link to="/" className="hover:text-stone-900 transition-colors cursor-pointer">
-            Home
+        <nav className="flex items-center space-x-2 text-xs sm:text-[13px] text-gray-500 font-medium mb-4">
+          <Link to="/" className="hover:text-[#7D3219] transition-colors flex items-center gap-1.5 cursor-pointer">
+            <Home size={14} className="shrink-0 text-gray-500" />
+            <span>Home</span>
           </Link>
-          <span className="text-stone-300">/</span>
-          <Link to="/blog" className="hover:text-stone-900 transition-colors cursor-pointer">
+          <span className="text-gray-400 select-none px-0.5">&gt;</span>
+          <Link to="/blog" className="hover:text-[#7D3219] transition-colors cursor-pointer">
             Design Journal
           </Link>
-          <span className="text-stone-300">/</span>
-          <span className="text-stone-900 font-medium truncate max-w-xs">{post.title}</span>
+          <span className="text-gray-400 select-none px-0.5">&gt;</span>
+          <span className="text-gray-900 font-semibold truncate max-w-xs">{post.title}</span>
         </nav>
 
         {/* Back Button */}
         <Link
           to="/blog"
-          className="inline-flex items-center gap-1.5 text-xs font-normal text-stone-600 hover:text-stone-950 mb-4 transition cursor-pointer"
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-600 hover:text-[#7D3219] mb-4 transition cursor-pointer"
         >
           <ArrowLeft size={14} />
           <span>Back to All Stories</span>
@@ -100,7 +101,7 @@ const BlogPost: React.FC = () => {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35 }}
-          className="bg-white rounded-2xl border border-[#E8E2D8] shadow-[0_2px_12px_rgba(0,0,0,0.02)] overflow-hidden"
+          className="bg-white rounded-xl border border-[#E8E2D8] shadow-2xs overflow-hidden"
         >
           {/* Media Header */}
           <div className="relative w-full aspect-[16/9] sm:aspect-[16/10] max-h-[460px] bg-black">

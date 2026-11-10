@@ -491,7 +491,7 @@ Looking forward to your response!`;
       <div className="w-full bg-[#FAF7F2] pt-16 sm:pt-14 pb-2 sm:pb-2.5">
         <div className="w-full max-w-[1880px] mx-auto px-3 sm:px-6 md:px-8 lg:px-10">
           <div
-            className="relative w-full rounded-2xl overflow-hidden border border-[#E8E2D8] shadow-[0_2px_12px_rgba(0,0,0,0.02)] bg-[#FAF7F2] group select-none aspect-[2172/724] sm:aspect-auto sm:h-[160px] md:h-[185px] lg:h-[210px] xl:h-[230px]"
+            className="relative w-full rounded-xl sm:rounded-2xl overflow-hidden border-[2px] sm:border-[2.5px] lg:border-[3px] border-[#F6F1E8] shadow-md bg-[#FAF7F2] group select-none aspect-[2172/724] sm:aspect-auto sm:h-[160px] md:h-[185px] lg:h-[210px] xl:h-[230px]"
           >
             {/* Banner Background Image */}
             <img
@@ -629,11 +629,11 @@ Looking forward to your response!`;
                   <div
                     key={cat.name}
                     onClick={() => onSelectCategory(cat.name)}
-                    className="group bg-white rounded-2xl border border-[#E8E2D8] hover:border-[#D9B4A4] shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:shadow-[0_12px_28px_rgba(125,50,25,0.06)] hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between p-3.5 sm:p-4 cursor-pointer"
+                    className="group bg-white rounded-xl sm:rounded-2xl border border-[#E8E2D8] hover:border-[#D9B4A4] shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_18px_36px_rgba(125,50,25,0.08)] hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between p-2.5 sm:p-4 cursor-pointer"
                   >
                     <div>
                       {/* Image container: aspect 4:3 rounded clean with no overlay obstruction */}
-                      <div className="relative w-full aspect-[4/3] rounded-xl overflow-hidden bg-[#FAF7F2] mb-3.5 border border-[#E8E2D8]/80">
+                      <div className="relative w-full aspect-[4/3] rounded-md sm:rounded-none overflow-hidden bg-[#FAF8F5] mb-2 sm:mb-3.5 border border-[#E8E2D8]">
                         <img
                           src={cat.image || placeholderImage}
                           alt={cat.name}

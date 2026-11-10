@@ -539,8 +539,8 @@ const Home: React.FC = () => {
 
           ========================================================================= */}
 
-      <section className="w-full pt-16 sm:pt-20 pb-4 sm:pb-6 px-4 sm:px-6 lg:px-8 bg-[#FAF7F2]">
-        <div className="relative w-full max-w-[1680px] mx-auto h-[calc(100vh-80px)] min-h-[480px] flex items-center bg-[#181513] rounded-2xl overflow-hidden border border-[#E8E2D8] shadow-[0_2px_12px_rgba(0,0,0,0.03)]">
+      <section className="w-full pt-14 sm:pt-16 pb-2 sm:pb-2.5 lg:pb-3 px-2 sm:px-2.5 lg:px-3 bg-[#FAF7F2]">
+        <div className="relative w-full max-w-[1680px] mx-auto h-[calc(100vh-64px)] sm:h-[calc(100vh-68px)] lg:h-[calc(100vh-72px)] min-h-[460px] flex items-center bg-[#181513] rounded-none overflow-hidden border-t-0 border-x-[3px] sm:border-x-[4px] border-b-[3px] sm:border-b-[4px] border-[#F6F1E8] shadow-xl shadow-stone-900/15">
           {/* Curved Photography Background */}
           <div className="absolute inset-0 z-0">
 
@@ -820,7 +820,7 @@ const Home: React.FC = () => {
 
           ========================================================================= */}
 
-      <section className="w-full bg-[#FAF7F2] py-12 sm:py-16 border-b border-[#E8E2D8]">
+      <section className="w-full bg-[#FAF7F2] pt-4 pb-4 sm:pt-6 sm:pb-6 border-b border-[#E8E2D8]">
 
         <div className="w-full max-w-[1600px] mx-auto px-5 sm:px-8 lg:px-12">
 
@@ -948,7 +948,7 @@ const Home: React.FC = () => {
 
           ========================================================================= */}
 
-      <section className="w-full bg-[#FAF7F2] py-12 sm:py-16 border-b border-[#E8E2D8]">
+      <section className="w-full bg-[#FAF7F2] pt-4 pb-6 sm:pt-5 sm:pb-8 border-b border-[#E8E2D8]">
 
         <div className="w-full max-w-[1600px] mx-auto px-5 sm:px-8 lg:px-12">
 
@@ -1249,7 +1249,7 @@ const Home: React.FC = () => {
 
           ========================================================================= */}
 
-      <section className="w-full bg-[#FAF7F2] py-12 sm:py-16 border-b border-[#E8E2D8]">
+      <section className="w-full bg-[#FAF7F2] pt-4 pb-5 sm:pt-5 sm:pb-6 border-b border-[#E8E2D8]/60">
 
         <div className="w-full max-w-[1600px] mx-auto px-5 sm:px-8 lg:px-12">
 

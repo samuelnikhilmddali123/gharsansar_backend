@@ -46,14 +46,17 @@ const Blog: React.FC = () => {
   };
 
   return (
-    <div className="bg-[#FAF7F2] min-h-screen font-poppins pt-16 sm:pt-20 pb-16 flex flex-col selection:bg-[#F7EBE4] selection:text-[#7D3219] antialiased">
+    <div className="bg-[#FAF7F2] min-h-screen font-poppins pt-20 sm:pt-24 pb-16 sm:pb-20 flex flex-col selection:bg-[#F7EBE4] selection:text-[#7D3219] antialiased">
       <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Breadcrumb Navigation */}
-        <nav className="flex items-center space-x-2 text-xs text-stone-500 mb-6 font-normal">
-          <Link to="/" className="hover:text-stone-900 transition-colors cursor-pointer">Home</Link>
-          <span className="text-stone-300">/</span>
-          <span className="text-stone-900 font-medium">Design Journal</span>
+        <nav className="flex items-center space-x-2 text-xs sm:text-[13px] text-gray-500 font-medium mb-4">
+          <Link to="/" className="hover:text-[#7D3219] transition-colors flex items-center gap-1.5 cursor-pointer">
+            <Home size={14} className="shrink-0 text-gray-500" />
+            <span>Home</span>
+          </Link>
+          <span className="text-gray-400 select-none px-0.5">&gt;</span>
+          <span className="text-gray-900 font-semibold">Design Journal</span>
         </nav>
 
         {/* Editorial Text-Only Header (No top banner images, clean and uncluttered) */}
@@ -154,11 +157,11 @@ const Blog: React.FC = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.35, delay: index * 0.04 }}
                   onClick={() => setSelectedPost(post)}
-                  className="group bg-white rounded-2xl border border-[#E8E2D8] hover:border-[#D9B4A4] shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:shadow-[0_12px_28px_rgba(125,50,25,0.06)] hover:-translate-y-1 transition-all duration-300 p-3.5 sm:p-4 flex flex-col justify-between cursor-pointer"
+                  className="group bg-white rounded-xl border border-[#E8E2D8] hover:border-[#D9B4A4] shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_28px_rgba(125,50,25,0.06)] hover:-translate-y-1 transition-all duration-300 p-3.5 sm:p-4 flex flex-col justify-between cursor-pointer"
                 >
                   <div>
                     {/* Media Preview Box */}
-                    <div className="relative w-full aspect-[16/10] sm:aspect-[9/13] max-h-[300px] rounded-xl overflow-hidden bg-[#FAF7F2] mb-3 border border-[#E8E2D8]/80">
+                    <div className="relative w-full aspect-[16/10] sm:aspect-[9/13] max-h-[300px] rounded-lg overflow-hidden bg-[#FAF8F5] mb-3 border border-[#E8E2D8]">
                       {hasVideo ? (
                         isYouTube ? (
                           <div className="relative w-full h-full bg-black/5 flex items-center justify-center">
