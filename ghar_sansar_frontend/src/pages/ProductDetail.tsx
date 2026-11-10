@@ -26,7 +26,6 @@ import {
   RotateCcw,
   Lock,
   Maximize2,
-  RotateCw,
   FileText,
   Scan,
   Check,
@@ -85,7 +84,6 @@ const ProductDetail: React.FC = () => {
   const quantityInCart = cartItemForProduct ? cartItemForProduct.quantity : 0;
 
   // Gallery States
-  const [is360Active, setIs360Active] = useState(false);
   const [zoomPos, setZoomPos] = useState({ x: 0, y: 0 });
   const [isZooming, setIsZooming] = useState(false);
   const [activeLightboxImage, setActiveLightboxImage] = useState<string | null>(null);
@@ -641,22 +639,11 @@ const ProductDetail: React.FC = () => {
                 onMouseEnter={() => setIsZooming(true)}
                 onMouseLeave={() => setIsZooming(false)}
               >
-                {/* 360 & Expand Controls at Top Right */}
+                {/* Expand Control at Top Right */}
                 <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
                   <button
-                    onClick={() => setIs360Active(!is360Active)}
-                    className={`px-2.5 py-1.5 rounded-none text-[11px] font-bold border transition flex items-center gap-1 shadow-sm ${
-                      is360Active ? 'bg-[#0F2920] text-white border-[#0F2920]' : 'bg-black/60 hover:bg-black/80 text-white backdrop-blur-sm border-white/20'
-                    }`}
-                    title="Interactive 360 View"
-                  >
-                    <RotateCw size={13} className={is360Active ? "animate-spin" : ""} />
-                    <span>360°</span>
-                  </button>
-
-                  <button
                     onClick={() => setActiveLightboxImage(product.image)}
-                    className="p-1.5 rounded-none bg-black/60 hover:bg-black/80 text-white backdrop-blur-sm border border-white/20 transition shadow-sm"
+                    className="p-1.5 rounded-none bg-black/60 hover:bg-black/80 text-white backdrop-blur-sm border border-white/20 transition shadow-sm cursor-pointer"
                     title="Fullscreen Lightbox"
                   >
                     <Maximize2 size={13} />
@@ -666,18 +653,14 @@ const ProductDetail: React.FC = () => {
                 {/* Bottom Right Zoom / Scan Icon */}
                 <button 
                   onClick={() => setActiveLightboxImage(product.image)}
-                  className="absolute bottom-4 right-4 z-20 p-2 rounded-none bg-white/90 hover:bg-white text-gray-600 shadow-sm border border-gray-200 transition"
+                  className="absolute bottom-4 right-4 z-20 p-2 rounded-none bg-white/90 hover:bg-white text-gray-600 shadow-sm border border-gray-200 transition cursor-pointer"
                   title="Expand Image"
                 >
                   <Scan size={15} />
                 </button>
 
                 {/* Main Media Content: Studio Image with Ambient Ground Shadow & Micro-Zoom */}
-                <motion.div
-                  animate={is360Active ? { rotateY: [0, 360] } : {}}
-                  transition={is360Active ? { repeat: Infinity, duration: 4, ease: "linear" } : {}}
-                  className="w-full h-full flex items-center justify-center relative cursor-zoom-in"
-                >
+                <div className="w-full h-full flex items-center justify-center relative cursor-zoom-in">
                   {/* Realistic ambient ground shadow */}
                   <div 
                     className="absolute bottom-2 left-1/2 -translate-x-1/2 w-3/5 h-4 rounded-none bg-black/[0.06] blur-[6px] pointer-events-none" 
@@ -694,7 +677,7 @@ const ProductDetail: React.FC = () => {
                       transform: 'scale(1.8)'
                     } : {}}
                   />
-                </motion.div>
+                </div>
               </div>
             </div>
 
