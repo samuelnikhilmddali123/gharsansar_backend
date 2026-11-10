@@ -65,7 +65,7 @@ const AppLayout = () => {
   const isMobileAuthRoute = location.pathname.startsWith("/mobile-auth");
   const isHomePage = location.pathname === "/";
   const isInteriorPage = location.pathname.startsWith("/interior-design");
-  const isProductsPage = location.pathname.startsWith("/products");
+  const isProductsPage = location.pathname.startsWith("/product");
   const isGiftsPage = location.pathname.startsWith("/return-gifts");
   const isServicesPage = location.pathname.startsWith("/services");
   const isBlogPage = location.pathname.startsWith("/blog");
@@ -117,7 +117,7 @@ const AppLayout = () => {
   return (
     <div className="min-h-screen bg-[#FAF7F2]">
       <Header />
-      <main className={isHomePage || isInteriorPage || isProductsPage || isGiftsPage || isServicesPage || isBlogPage || isLoginPage || isCartPage || isWishlistPage ? "" : "pt-20 sm:pt-24"}>
+      <main className={isHomePage || isInteriorPage || isProductsPage || isGiftsPage || isServicesPage || isBlogPage || isLoginPage || isCartPage || isWishlistPage ? "" : "pt-14"}>
         <Routes>
           {/* ---------- Public customer routes ---------- */}
           <Route path="/" element={<Home />} />

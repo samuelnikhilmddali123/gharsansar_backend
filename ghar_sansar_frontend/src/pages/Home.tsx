@@ -539,8 +539,8 @@ const Home: React.FC = () => {
 
           ========================================================================= */}
 
-      <section className="w-full pt-14 sm:pt-16 pb-2 sm:pb-2.5 lg:pb-3 px-2 sm:px-2.5 lg:px-3 bg-[#FAF7F2]">
-        <div className="relative w-full max-w-[1680px] mx-auto h-[calc(100vh-64px)] sm:h-[calc(100vh-68px)] lg:h-[calc(100vh-72px)] min-h-[460px] flex items-center bg-[#181513] rounded-none overflow-hidden border-t-0 border-x-[3px] sm:border-x-[4px] border-b-[3px] sm:border-b-[4px] border-[#F6F1E8] shadow-xl shadow-stone-900/15">
+      <section className="w-full pt-12 pb-2 sm:pb-2.5 lg:pb-3 px-2 sm:px-2.5 lg:px-3 bg-[#FAF7F2]">
+        <div className="relative w-full max-w-[1680px] mx-auto h-[calc(100vh-56px)] sm:h-[calc(100vh-58px)] lg:h-[calc(100vh-60px)] min-h-[460px] flex items-center bg-[#181513] rounded-none overflow-hidden border-t-0 border-x-[3px] sm:border-x-[4px] border-b-[3px] sm:border-b-[4px] border-[#F6F1E8] shadow-xl shadow-stone-900/15">
           {/* Curved Photography Background */}
           <div className="absolute inset-0 z-0">
 

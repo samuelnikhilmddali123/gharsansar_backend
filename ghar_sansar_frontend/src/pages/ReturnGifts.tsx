@@ -233,7 +233,7 @@ export default function ReturnGifts() {
   return (
     <div className="bg-[#FAF7F2] min-h-screen font-poppins pb-20 flex flex-col selection:bg-[#F7EBE4] selection:text-[#7D3219] antialiased">
       {/* 1. Inset Hero Banner */}
-      <div className="w-full bg-[#FAF7F2] pt-16 sm:pt-20 pb-2 sm:pb-2.5">
+      <div className="w-full bg-[#FAF7F2] pt-12 pb-2 sm:pb-2.5">
         <div className="w-full max-w-[1880px] mx-auto px-3 sm:px-6 md:px-8 lg:px-10">
           <div className="relative w-full rounded-xl sm:rounded-2xl overflow-hidden border-[2.5px] sm:border-[3px] border-[#F6F1E8] shadow-md bg-[#181513] group select-none h-[145px] sm:h-[180px] lg:h-[210px] xl:h-[230px]">
             {/* Background Image: rich, high-clarity festive gifts showcase */}

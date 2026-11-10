@@ -12,7 +12,7 @@ const BlogPost: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="bg-[#FAF7F2] min-h-screen flex items-center justify-center pt-20">
+      <div className="bg-[#FAF7F2] min-h-screen flex items-center justify-center pt-14">
         <div className="w-8 h-8 rounded-full border-2 border-[#D9B4A4] border-t-[#7D3219] animate-spin" />
       </div>
     );
@@ -20,7 +20,7 @@ const BlogPost: React.FC = () => {
 
   if (error) {
     return (
-      <div className="bg-[#FAF7F2] min-h-screen pt-24 text-center px-4">
+      <div className="bg-[#FAF7F2] min-h-screen pt-14 text-center px-4">
         <p className="text-red-600 text-sm mb-4">Error loading post: {error}</p>
         <Link
           to="/blog"
@@ -36,7 +36,7 @@ const BlogPost: React.FC = () => {
 
   if (!post) {
     return (
-      <div className="bg-[#FAF7F2] min-h-screen pt-24 text-center px-4">
+      <div className="bg-[#FAF7F2] min-h-screen pt-14 text-center px-4">
         <h2 className="text-xl font-poppins font-normal text-gray-950 mb-2">Post not found</h2>
         <p className="text-xs text-gray-500 mb-4">The blog story doesn’t exist or has been removed.</p>
         <Link
@@ -71,7 +71,7 @@ const BlogPost: React.FC = () => {
   };
 
   return (
-    <div className="bg-[#FAF7F2] min-h-screen font-poppins pt-20 sm:pt-24 pb-16 sm:pb-20 flex flex-col selection:bg-[#F7EBE4] selection:text-[#7D3219] antialiased">
+    <div className="bg-[#FAF7F2] min-h-screen font-poppins pt-14 pb-16 sm:pb-20 flex flex-col selection:bg-[#F7EBE4] selection:text-[#7D3219] antialiased">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         {/* Breadcrumb Navigation */}
         <nav className="flex items-center space-x-2 text-xs sm:text-[13px] text-gray-500 font-medium mb-4">

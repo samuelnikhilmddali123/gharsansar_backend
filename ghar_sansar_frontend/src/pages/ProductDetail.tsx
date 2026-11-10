@@ -513,7 +513,7 @@ const ProductDetail: React.FC = () => {
   // Loading State
   if (loading && !product) {
     return (
-      <div className="min-h-screen bg-[#FAF7F2] flex items-center justify-center pt-24 pb-20 font-poppins">
+      <div className="min-h-screen bg-[#FAF7F2] flex items-center justify-center pt-14 pb-20 font-poppins">
         <div className="max-w-6xl mx-auto px-4 w-full">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 animate-pulse">
             <div className="aspect-square bg-[#EAE4DC] rounded-2xl" />
@@ -600,7 +600,7 @@ const ProductDetail: React.FC = () => {
       </div>
 
       {/* ── Main Container ──────────────────────────────────────────────────── */}
-      <div className="max-w-[1220px] mx-auto px-4 sm:px-6 lg:px-8 pt-3 sm:pt-4">
+      <div className="max-w-[1220px] mx-auto px-4 sm:px-6 lg:px-8 pt-14">
 
         {/* ── Editorial Breadcrumb ────────────────────────────────────────── */}
         <nav className="flex items-center gap-1.5 text-xs text-[#8C827A] py-1 mb-2.5 overflow-x-auto no-scrollbar whitespace-nowrap">

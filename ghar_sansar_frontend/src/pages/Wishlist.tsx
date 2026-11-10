@@ -91,7 +91,7 @@ const Wishlist: React.FC = () => {
 
   if (loading && wishlist.length === 0) {
     return (
-      <div className="bg-[#FAF7F2] min-h-screen font-poppins pt-24 pb-16 flex items-center justify-center">
+      <div className="bg-[#FAF7F2] min-h-screen font-poppins pt-14 pb-16 flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 rounded-full border-2 border-[#D9B4A4] border-t-[#7D3219] animate-spin"></div>
           <p className="text-xs text-gray-500 font-normal">Loading your wishlist...</p>
@@ -101,7 +101,7 @@ const Wishlist: React.FC = () => {
   }
 
   return (
-    <div className="bg-[#FAF7F2] min-h-screen font-poppins pt-20 sm:pt-24 pb-16 sm:pb-20 flex flex-col selection:bg-[#F7EBE4] selection:text-[#7D3219] antialiased">
+    <div className="bg-[#FAF7F2] min-h-screen font-poppins pt-14 pb-16 sm:pb-20 flex flex-col selection:bg-[#F7EBE4] selection:text-[#7D3219] antialiased">
       <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="pb-5 border-b border-[#E8E2D8] mb-8 flex items-center justify-between gap-4">

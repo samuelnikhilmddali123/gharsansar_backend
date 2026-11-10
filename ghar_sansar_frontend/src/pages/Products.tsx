@@ -500,7 +500,7 @@ const ProductsPage: React.FC = () => {
   return (
     <div className="bg-[#FAF7F2] min-h-screen font-poppins text-[#181513] pb-16 flex flex-col selection:bg-[#8E3F24] selection:text-white antialiased">
       {/* 1. Hero Poster / Carousel */}
-      <div className="w-full bg-[#FAF7F2] pt-16 sm:pt-20 pb-2 sm:pb-3">
+      <div className="w-full bg-[#FAF7F2] pt-12 pb-2 sm:pb-3">
         <div className="w-full max-w-[1880px] mx-auto px-3 sm:px-6 md:px-8 lg:px-10">
           <div
             className="relative w-full aspect-[2048/472] rounded-xl sm:rounded-2xl overflow-hidden shadow-sm border border-[#E8E2D8] bg-[#181513] group select-none"
