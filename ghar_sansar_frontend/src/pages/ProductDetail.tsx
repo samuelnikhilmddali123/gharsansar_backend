@@ -9,7 +9,6 @@ import {
   Zap, 
   Star, 
   Camera, 
-  User2, 
   X, 
   CheckCircle,
   ShieldCheck,
@@ -22,7 +21,6 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
-  ChevronUp,
   MapPin,
   RotateCcw,
   Lock,
@@ -36,7 +34,6 @@ import {
   FileText,
   Scan,
   Check,
-  ExternalLink,
   Plus,
   Minus,
   Sparkles
@@ -94,7 +91,6 @@ const ProductDetail: React.FC = () => {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isVideoActive, setIsVideoActive] = useState(false);
   const [is360Active, setIs360Active] = useState(false);
-  const [verticalThumbOffset, setVerticalThumbOffset] = useState(0);
   const [zoomPos, setZoomPos] = useState({ x: 0, y: 0 });
   const [isZooming, setIsZooming] = useState(false);
   const [activeLightboxImage, setActiveLightboxImage] = useState<string | null>(null);
@@ -121,7 +117,7 @@ const ProductDetail: React.FC = () => {
         if (zip && /^\d{6}$/.test(String(zip).trim())) return String(zip).trim();
       }
     } catch {}
-    return "520008"; // Default to Vijayawada as seen in design
+    return "520008";
   };
 
   const getInitialArea = () => {
@@ -144,6 +140,10 @@ const ProductDetail: React.FC = () => {
   const [isCheckingPincode, setIsCheckingPincode] = useState(false);
   const [isEditingPincode, setIsEditingPincode] = useState(false);
   const [pincodeInput, setPincodeInput] = useState(pincode);
+
+  // Size & Color selection states
+  const [selectedSize, setSelectedSize] = useState<string>("");
+  const [selectedColor, setSelectedColor] = useState<string>("");
 
   // Automatically sync pincode and area from user's account shipping address
   useEffect(() => {
@@ -271,7 +271,7 @@ const ProductDetail: React.FC = () => {
     }
   };
 
-  // Base list of mockup/alternative images for premium gallery feel matching screenshot
+  // Product images gallery
   const productImages = useMemo(() => {
     if (!product) return [];
     const baseImg = product.image || "/products/waterbottles_and_jars/asian_diamond_insulated_inner_stainless_steel_flask_1_pc.webp";
@@ -422,7 +422,6 @@ const ProductDetail: React.FC = () => {
     toast.success("Review submitted successfully!");
     setIsReviewModalOpen(false);
 
-    // Reset Form
     setFormName("");
     setFormRating(5);
     setFormComment("");
@@ -448,7 +447,7 @@ const ProductDetail: React.FC = () => {
     addToCart({
       id: product.id || product._id,
       name: product.title || product.name,
-      price: effectivePrice, // Customer pays actualPrice (₹2,500)
+      price: effectivePrice,
       image: product.image || product.images?.[0],
       quantity: quantity,
       isReturnGift: state?.isReturnGift,
@@ -496,7 +495,7 @@ const ProductDetail: React.FC = () => {
     openWhatsAppOrderUrl(msg);
   };
 
-  // Related products under the same category (or fallback bottles)
+  // Related products under the same category
   const relatedProducts = useMemo(() => {
     if (!product) return [];
     const sameCat = products.filter((p) => p.category === product.category && p.id !== product.id);
@@ -515,17 +514,19 @@ const ProductDetail: React.FC = () => {
     }
   };
 
+  // ── Loading State ──────────────────────────────────────────────────────────
   if (loading && !product) {
     return (
-      <div className="min-h-screen bg-[#FAF9F5] pb-16 pt-16 sm:pt-20 flex items-center justify-center">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 animate-pulse">
-            <div className="lg:col-span-7 aspect-square bg-[#eae5dc] rounded-none" />
-            <div className="lg:col-span-5 space-y-6 pt-4">
-              <div className="h-6 bg-gray-200 rounded-none w-1/4" />
-              <div className="h-10 bg-gray-200 rounded-none w-3/4" />
-              <div className="h-28 bg-gray-200 rounded-none" />
-              <div className="h-14 bg-gray-200 rounded-none" />
+      <div className="min-h-screen bg-[#FAF7F2] flex items-center justify-center pt-20">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 animate-pulse">
+            <div className="aspect-square bg-[#EDE8E0] rounded-lg" />
+            <div className="space-y-5 pt-4">
+              <div className="h-4 bg-[#EDE8E0] rounded w-1/4" />
+              <div className="h-8 bg-[#EDE8E0] rounded w-3/4" />
+              <div className="h-4 bg-[#EDE8E0] rounded w-1/2" />
+              <div className="h-24 bg-[#EDE8E0] rounded" />
+              <div className="h-12 bg-[#EDE8E0] rounded" />
             </div>
           </div>
         </div>
@@ -533,241 +534,214 @@ const ProductDetail: React.FC = () => {
     );
   }
 
+  // ── Not Found State ────────────────────────────────────────────────────────
   if (!product) {
     return (
-      <div className="min-h-screen bg-[#FAF9F5] flex flex-col items-center justify-center p-6 text-center">
-        <div className="w-16 h-16 bg-red-100 text-red-600 rounded-none flex items-center justify-center mb-4">
-          <Info size={28} />
+      <div className="min-h-screen bg-[#FAF7F2] flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-14 h-14 bg-[#EDE8E0] text-[#9A7B66] rounded-full flex items-center justify-center mb-5">
+          <Info size={26} />
         </div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Product Not Found</h2>
-        <p className="text-gray-500 max-w-sm mb-6">The product you are looking for does not exist or has been removed.</p>
+        <h2 className="text-xl font-bold text-gray-900 mb-2">Product Not Found</h2>
+        <p className="text-sm text-gray-500 max-w-xs mb-6">The product you are looking for does not exist or has been removed.</p>
         <button
           onClick={() => navigate(state?.isReturnGift ? "/return-gifts" : "/products")}
-          className="flex items-center gap-2 px-6 py-3 bg-[#0F2920] text-white font-bold uppercase tracking-widest text-xs rounded-none hover:bg-black transition shadow-md"
+          className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#0F2920] text-white text-xs font-bold uppercase tracking-widest rounded-lg hover:bg-[#1a3d2f] transition"
         >
-          <ArrowLeft size={18} /> Back to Catalog
+          <ArrowLeft size={15} /> Back to Catalog
         </button>
       </div>
     );
   }
 
-  // Controlled Pricing Architecture: Strike Price (MRP), Actual Price (Base), Discounted Price (Final Customer Price)
+  // ── Pricing Architecture ───────────────────────────────────────────────────
   const actualPrice = Number(
     product.actualPrice !== undefined ? product.actualPrice :
     product.price !== undefined ? product.price :
     product.sellingPrice || 0
   ) || 0;
 
-  // Strike Price: Reference price displayed with strikethrough (e.g. ₹2,150)
   const strikePrice = Number(
     product.strikePrice !== undefined ? product.strikePrice :
     (product as any)["act-price"] !== undefined ? (product as any)["act-price"] :
     actualPrice
   ) || actualPrice;
 
-  // Category promotional discount % (e.g. 99%)
   const categoryDiscount = Number(
     product.categoryDiscountPercentage !== undefined ? product.categoryDiscountPercentage :
     product.discountPercentage || 0
   );
   const hasCategoryDiscount = categoryDiscount > 0;
 
-  // Category Discount Amount calculated based on STRIKE PRICE: e.g. ₹2,150 × 99% = ₹2,129
   const categoryDiscountAmount = strikePrice > 0 && hasCategoryDiscount
     ? Math.round(strikePrice * (categoryDiscount / 100))
     : 0;
 
-  // Discounted Price calculated dynamically from ACTUAL PRICE: e.g. ₹1,650 - (₹1,650 × 99 / 100) = ₹16.50
   const discountedPrice = Number(
     product.discountedPrice !== undefined ? product.discountedPrice :
     (hasCategoryDiscount ? Math.round((actualPrice - (actualPrice * (categoryDiscount / 100))) * 100) / 100 : actualPrice)
   );
 
-  // Final Customer Price: discountedPrice when category discount ON, actualPrice when OFF
   const finalPrice = Number(
     product.finalPrice !== undefined ? product.finalPrice :
     (hasCategoryDiscount ? discountedPrice : actualPrice)
   );
 
-  // Current Difference between Strike Price and Customer Price
   const currentDifference = Math.max(0, strikePrice - finalPrice);
 
   const displayDiscountBadge = categoryDiscount > 0
     ? `${categoryDiscount}% OFF`
     : (strikePrice > actualPrice ? `${Math.round(((strikePrice - actualPrice) / strikePrice) * 100)}% OFF` : null);
 
+  // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-[#FAF9F6] pb-20 font-sans relative overflow-x-hidden">
-      
-      {/* Subtle Botanical Watermarks on sides matching catalog screenshot */}
-      <div className="fixed top-28 left-0 -translate-x-12 w-64 h-96 pointer-events-none opacity-20 z-0 hidden 2xl:block select-none">
-        <svg viewBox="0 0 200 300" className="w-full h-full text-emerald-950/40 fill-current">
-          <path d="M10,150 Q70,70 120,40 Q100,100 80,160 Q130,120 180,100 Q150,160 110,210 Q160,200 190,220 Q130,250 80,260 Q50,265 20,280 Q40,220 20,180 Z" />
-        </svg>
-      </div>
-      <div className="fixed bottom-28 right-0 translate-x-12 w-64 h-96 pointer-events-none opacity-20 z-0 hidden 2xl:block select-none">
-        <svg viewBox="0 0 200 300" className="w-full h-full text-emerald-950/40 fill-current scale-x-[-1]">
-          <path d="M10,150 Q70,70 120,40 Q100,100 80,160 Q130,120 180,100 Q150,160 110,210 Q160,200 190,220 Q130,250 80,260 Q50,265 20,280 Q40,220 20,180 Z" />
-        </svg>
-      </div>
+    <div className="min-h-screen bg-[#FAF7F2] pb-24 md:pb-16 font-sans relative overflow-x-hidden">
 
-      {/* Luxury Sticky Mobile CTA Bar */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200/80 p-3.5 z-40 flex items-center justify-between shadow-2xl">
-        <div>
-          <span className="text-[10px] text-gray-500 block uppercase font-bold tracking-wider">Total Price</span>
-          <span className="text-lg font-black text-gray-900">₹{(finalPrice * quantity) + (deliveryFee || 0)}</span>
+      {/* ── Sticky Mobile CTA Bar ───────────────────────────────────────────── */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-[#E8E2D8] px-4 py-3 z-40 flex items-center gap-3 shadow-lg">
+        <div className="flex-1">
+          <span className="text-[10px] text-gray-400 uppercase font-semibold tracking-wider block">Total</span>
+          <span className="text-base font-bold text-gray-900">₹{((finalPrice * quantity) + (deliveryFee || 0)).toLocaleString("en-IN")}</span>
         </div>
-        <div className="flex gap-2 items-center">
+        <div className="flex gap-2">
           {quantityInCart > 0 ? (
-            <div className="flex items-center border border-[#0F2920] bg-[#f0f6f3] rounded-none px-2 py-1 gap-2">
-              <button 
+            <div className="flex items-center border border-[#0F2920] bg-[#EDF4F0] rounded-lg px-2 py-1.5 gap-2.5">
+              <button
                 type="button"
                 onClick={() => {
-                  if (quantityInCart > 1) {
-                    updateQuantity(cartItemForProduct!.id, quantityInCart - 1);
-                  } else {
-                    removeFromCart(cartItemForProduct!.id);
-                    toast.success("Removed from cart");
-                  }
+                  if (quantityInCart > 1) updateQuantity(cartItemForProduct!.id, quantityInCart - 1);
+                  else { removeFromCart(cartItemForProduct!.id); toast.success("Removed from cart"); }
                 }}
-                className="w-7 h-7 flex items-center justify-center bg-white text-gray-800 border border-gray-300 rounded-none font-bold text-sm active:scale-90 transition"
-              >
-                -
-              </button>
-              <span className="font-bold text-xs text-[#0F2920] px-1 select-none">{quantityInCart}</span>
-              <button 
+                className="w-6 h-6 flex items-center justify-center bg-white text-gray-700 border border-[#C4D6CC] rounded font-bold text-sm active:scale-90 transition"
+              >-</button>
+              <span className="font-bold text-xs text-[#0F2920] select-none">{quantityInCart}</span>
+              <button
                 type="button"
                 onClick={() => updateQuantity(cartItemForProduct!.id, quantityInCart + 1)}
-                className="w-7 h-7 flex items-center justify-center bg-[#0F2920] text-white rounded-none font-bold text-sm active:scale-90 transition"
-              >
-                +
-              </button>
+                className="w-6 h-6 flex items-center justify-center bg-[#0F2920] text-white rounded font-bold text-sm active:scale-90 transition"
+              >+</button>
             </div>
           ) : (
-            <button 
+            <button
               onClick={handleAddToCart}
-              className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-none font-bold text-xs uppercase tracking-wider transition"
+              className="px-4 py-2.5 bg-white border border-[#0F2920] text-[#0F2920] rounded-lg font-bold text-xs uppercase tracking-wider transition active:scale-95"
             >
               Add to Cart
             </button>
           )}
-          <button 
+          <button
             onClick={handleBuyNow}
-            className="px-5 py-2.5 bg-[#0F2920] hover:bg-[#183E31] text-white rounded-none font-bold text-xs uppercase tracking-wider transition shadow-md"
+            className="px-5 py-2.5 bg-[#0F2920] hover:bg-[#1a3d2f] text-white rounded-lg font-bold text-xs uppercase tracking-wider transition active:scale-95 shadow"
           >
             Buy Now
           </button>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-20 relative z-10">
-        
-        {/* Luxury Breadcrumb matching screenshot (Home > Shop > Category > Title) */}
-        <nav className="flex items-center space-x-1.5 text-xs text-gray-500 mb-6 font-medium">
-          <span className="cursor-pointer hover:text-gray-900 transition" onClick={() => navigate("/")}>Home</span>
-          <span>&gt;</span>
-          <span className="cursor-pointer hover:text-gray-900 transition" onClick={() => navigate(state?.isReturnGift ? "/return-gifts" : "/products")}>
+      {/* ── Main Container ──────────────────────────────────────────────────── */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-20">
+
+        {/* ── Breadcrumb ──────────────────────────────────────────────────── */}
+        <nav className="flex items-center gap-1.5 text-xs text-gray-400 py-4 font-medium">
+          <span className="cursor-pointer hover:text-gray-700 transition" onClick={() => navigate("/")}>Home</span>
+          <span>/</span>
+          <span className="cursor-pointer hover:text-gray-700 transition" onClick={() => navigate(state?.isReturnGift ? "/return-gifts" : "/products")}>
             {state?.isReturnGift ? "Return Gifts" : "Shop"}
           </span>
-          <span>&gt;</span>
-          <span className="cursor-pointer hover:text-gray-900 transition" onClick={() => navigate(state?.isReturnGift ? `/return-gifts?category=${product.category}` : `/products?category=${product.category}`)}>
-            {product.category || "Water Bottles & Jars"}
+          <span>/</span>
+          <span className="cursor-pointer hover:text-gray-700 transition" onClick={() => navigate(state?.isReturnGift ? `/return-gifts?category=${product.category}` : `/products?category=${product.category}`)}>
+            {product.category || "All Products"}
           </span>
-          <span>&gt;</span>
-          <span className="text-gray-900 font-bold truncate max-w-[280px]">{product.title || product.name}</span>
+          <span>/</span>
+          <span className="text-gray-700 font-semibold truncate max-w-[200px]">{product.title || product.name}</span>
         </nav>
 
-        {/* 2-Column Product Showcase Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 pb-12">
-          
-          {/* LEFT COLUMN: Gallery with Vertical Thumbnails, Main Stage & Horizontal Thumbnails */}
-          <div className="lg:col-span-7 flex flex-col gap-3">
-            
-            <div className="flex flex-col sm:flex-row gap-3 items-start">
-              {/* Vertical Thumbnails Strip (Left of main image on desktop) */}
-              <div className="hidden sm:flex flex-col items-center gap-2">
+        {/* ── Product Main Section (2-col grid) ───────────────────────────── */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-14 pb-10">
+
+          {/* LEFT: Image Gallery */}
+          <div className="flex flex-col gap-3">
+
+            {/* Main Image + Vertical Thumbnails */}
+            <div className="flex gap-3">
+              {/* Vertical Thumbnails – desktop only */}
+              <div className="hidden sm:flex flex-col gap-2">
                 {productImages.slice(0, 5).map((imgObj, idx) => (
                   <button
                     key={idx}
                     onClick={() => handleSelectThumbnail(idx)}
-                    className={`w-14 h-14 rounded-none p-1 bg-white border-2 transition-all overflow-hidden relative group flex items-center justify-center ${
-                      activeImageIndex === idx && !isVideoActive ? 'border-[#0F2920] shadow-sm' : 'border-gray-200/80 hover:border-gray-400'
+                    className={`w-14 h-14 rounded-lg p-1 bg-white border-2 transition-all overflow-hidden flex items-center justify-center ${
+                      activeImageIndex === idx && !isVideoActive
+                        ? "border-[#0F2920]"
+                        : "border-[#E8E2D8] hover:border-[#C4B9A8]"
                     }`}
                   >
                     <img
                       src={imgObj.url}
-                      alt={`Thumb ${idx + 1}`}
+                      alt={`View ${idx + 1}`}
                       className={`w-full h-full object-contain ${imgObj.transformClass || ""}`}
                     />
                   </button>
                 ))}
-                
-                {/* Vertical Scroll / Down Arrow */}
-                <button 
+                <button
                   onClick={() => handleSelectThumbnail((activeImageIndex + 1) % productImages.length)}
-                  className="w-14 h-7 rounded-none bg-white border border-gray-200/80 hover:bg-gray-50 flex items-center justify-center text-gray-500 transition shadow-2xs"
-                  title="Next View"
+                  className="w-14 h-7 rounded bg-white border border-[#E8E2D8] hover:bg-[#F5F1EC] flex items-center justify-center text-gray-400 transition"
                 >
-                  <ChevronDown size={16} />
+                  <ChevronDown size={15} />
                 </button>
               </div>
 
-              {/* Main Image Showcase Container */}
-              <div 
-                className="flex-1 w-full relative overflow-hidden rounded-none bg-[#F7F6F0] aspect-[4/3] sm:aspect-square border border-[#E5E1D8] flex items-center justify-center p-6 sm:p-10 select-none group"
+              {/* Main Image Stage */}
+              <div
+                className="flex-1 relative overflow-hidden rounded-xl bg-white border border-[#E8E2D8] aspect-square flex items-center justify-center p-6 sm:p-10 select-none group cursor-zoom-in"
                 onMouseMove={handleMouseMove}
                 onMouseEnter={() => !isVideoActive && setIsZooming(true)}
                 onMouseLeave={() => setIsZooming(false)}
               >
-                {/* 360 & Expand Controls at Top Right */}
-                <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
+                {/* Controls top-right */}
+                <div className="absolute top-3 right-3 z-20 flex gap-2">
                   <button
                     onClick={() => setIs360Active(!is360Active)}
-                    className={`px-2.5 py-1.5 rounded-none text-[11px] font-bold border transition flex items-center gap-1 shadow-sm ${
-                      is360Active ? 'bg-[#0F2920] text-white border-[#0F2920]' : 'bg-black/60 hover:bg-black/80 text-white backdrop-blur-sm border-white/20'
+                    className={`px-2 py-1 rounded text-[10px] font-bold border flex items-center gap-1 transition ${
+                      is360Active
+                        ? "bg-[#0F2920] text-white border-[#0F2920]"
+                        : "bg-white/80 text-gray-600 border-[#E8E2D8] hover:border-[#C4B9A8] backdrop-blur-sm"
                     }`}
-                    title="Interactive 360 View"
                   >
-                    <RotateCw size={13} className={is360Active ? "animate-spin" : ""} />
-                    <span>360°</span>
+                    <RotateCw size={11} className={is360Active ? "animate-spin" : ""} />
+                    360°
                   </button>
-
                   <button
                     onClick={() => setActiveLightboxImage(productImages[activeImageIndex]?.url || product.image)}
-                    className="p-1.5 rounded-none bg-black/60 hover:bg-black/80 text-white backdrop-blur-sm border border-white/20 transition shadow-sm"
-                    title="Fullscreen Lightbox"
+                    className="p-1.5 rounded bg-white/80 hover:bg-white text-gray-500 border border-[#E8E2D8] transition backdrop-blur-sm"
                   >
-                    <Maximize2 size={13} />
+                    <Maximize2 size={12} />
                   </button>
                 </div>
 
-                {/* Left & Right Circular Nav Arrows */}
+                {/* Nav Arrows */}
                 <button
                   onClick={handlePrevImage}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-none bg-white/90 hover:bg-white text-gray-700 shadow-md border border-gray-200/60 flex items-center justify-center transition active:scale-95"
-                  title="Previous image"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-gray-600 shadow-sm border border-[#E8E2D8] flex items-center justify-center transition active:scale-95"
                 >
-                  <ChevronLeft size={18} />
+                  <ChevronLeft size={16} />
                 </button>
                 <button
                   onClick={handleNextImage}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-none bg-white/90 hover:bg-white text-gray-700 shadow-md border border-gray-200/60 flex items-center justify-center transition active:scale-95"
-                  title="Next image"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-gray-600 shadow-sm border border-[#E8E2D8] flex items-center justify-center transition active:scale-95"
                 >
-                  <ChevronRight size={18} />
+                  <ChevronRight size={16} />
                 </button>
 
-                {/* Bottom Right Zoom / Scan Icon */}
-                <button 
-                  onClick={() => setActiveLightboxImage(productImages[activeImageIndex]?.url || product.image)}
-                  className="absolute bottom-4 right-4 z-20 p-2 rounded-none bg-white/90 hover:bg-white text-gray-600 shadow-sm border border-gray-200 transition"
-                >
-                  <Scan size={15} />
-                </button>
+                {/* Discount Badge on image */}
+                {displayDiscountBadge && (
+                  <div className="absolute top-3 left-3 z-20 bg-[#C57053] text-white text-[10px] font-bold px-2 py-1 rounded">
+                    {displayDiscountBadge}
+                  </div>
+                )}
 
-                {/* Main Media Content: Video or Studio Image */}
+                {/* Media Content */}
                 {isVideoActive ? (
-                  <div className="w-full h-full rounded-none overflow-hidden flex items-center justify-center bg-black/5">
+                  <div className="w-full h-full rounded overflow-hidden flex items-center justify-center bg-black/5">
                     <video
                       src="/videos/homepagevideo.mp4"
                       autoPlay
@@ -781,14 +755,8 @@ const ProductDetail: React.FC = () => {
                     key={activeImageIndex}
                     animate={is360Active ? { rotateY: [0, 360] } : {}}
                     transition={is360Active ? { repeat: Infinity, duration: 4, ease: "linear" } : {}}
-                    className="w-full h-full flex items-center justify-center relative cursor-zoom-in"
+                    className="w-full h-full flex items-center justify-center relative"
                   >
-                    {/* Realistic ambient ground shadow */}
-                    <div 
-                      className="absolute bottom-2 left-1/2 -translate-x-1/2 w-3/5 h-4 rounded-none bg-black/[0.06] blur-[6px] pointer-events-none" 
-                      aria-hidden="true" 
-                    />
-
                     <StudioImage
                       src={productImages[activeImageIndex]?.url || product.image}
                       alt={product.title}
@@ -796,7 +764,7 @@ const ProductDetail: React.FC = () => {
                       className={`max-w-full max-h-full transition-transform duration-200 ${productImages[activeImageIndex]?.transformClass || "object-contain"}`}
                       style={isZooming ? {
                         transformOrigin: `${zoomPos.x}% ${zoomPos.y}%`,
-                        transform: 'scale(1.8)'
+                        transform: 'scale(1.75)'
                       } : {}}
                     />
                   </motion.div>
@@ -804,14 +772,16 @@ const ProductDetail: React.FC = () => {
               </div>
             </div>
 
-            {/* Horizontal Thumbnails Row below main image (matching screenshot with 6 items and video play icon) */}
-            <div className="grid grid-cols-6 gap-2 sm:gap-2.5 pt-1">
+            {/* Horizontal Thumbnail Row */}
+            <div className="grid grid-cols-6 gap-2">
               {productImages.map((imgObj, idx) => (
                 <button
                   key={idx}
                   onClick={() => handleSelectThumbnail(idx)}
-                  className={`aspect-square rounded-none p-1 bg-white border-2 transition-all overflow-hidden relative group flex items-center justify-center ${
-                    activeImageIndex === idx ? 'border-[#0F2920] shadow-sm' : 'border-gray-200/80 hover:border-gray-400'
+                  className={`aspect-square rounded-lg p-1 bg-white border-2 transition-all overflow-hidden relative flex items-center justify-center ${
+                    activeImageIndex === idx
+                      ? "border-[#0F2920]"
+                      : "border-[#E8E2D8] hover:border-[#C4B9A8]"
                   }`}
                 >
                   <img
@@ -820,320 +790,286 @@ const ProductDetail: React.FC = () => {
                     className={`w-full h-full object-contain ${imgObj.transformClass || ""}`}
                   />
                   {imgObj.isVideo && (
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                      <div className="w-6 h-6 rounded-none bg-white/90 text-gray-900 flex items-center justify-center shadow-sm">
-                        <Play size={12} className="ml-0.5 fill-current" />
+                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center rounded-lg">
+                      <div className="w-5 h-5 rounded-full bg-white/90 flex items-center justify-center">
+                        <Play size={9} className="ml-0.5 fill-current text-gray-800" />
                       </div>
                     </div>
                   )}
                 </button>
               ))}
             </div>
-
           </div>
 
-          {/* RIGHT COLUMN: Product Details, Pricing, Location, Stock, CTAs */}
-          <div className="lg:col-span-5 flex flex-col justify-between space-y-5">
-            <div>
-              {/* Category Pill, In Stock Dot, and Heart/Share icons */}
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-[10px] font-bold tracking-widest text-[#8C3259] bg-[#F8EAEF] px-2.5 py-1 rounded-none uppercase">
-                    {product.category || "Water Bottles & Jars"}
-                  </span>
-                  <span className="text-xs text-emerald-700 font-semibold flex items-center gap-1.5">
-                    <span className="w-2 h-2 bg-emerald-500 rounded-none animate-ping"></span>
-                    In Stock &amp; Ready
-                  </span>
-                </div>
+          {/* RIGHT: Product Info */}
+          <div className="flex flex-col gap-5">
 
-                <div className="flex items-center gap-2">
-                  <button 
-                    onClick={() => {
-                      if (product) toggleWishlist(product);
-                    }}
-                    className={`p-2 rounded-none border transition ${
-                      isWishlisted ? 'bg-red-50 text-red-500 border-red-200' : 'bg-white text-gray-400 hover:text-gray-600 border-gray-200'
-                    }`}
-                    title="Wishlist"
-                  >
-                    <Heart size={17} className={isWishlisted ? 'fill-current' : ''} />
-                  </button>
-
-                  <button 
-                    onClick={handleShare}
-                    className="p-2 rounded-none border border-gray-200 bg-white text-gray-400 hover:text-gray-600 transition"
-                    title="Share"
-                  >
-                    <Share2 size={17} />
-                  </button>
-                </div>
+            {/* Category + Status + Actions */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[10px] font-bold tracking-widest text-[#9A7B66] bg-[#F5EFE6] px-2.5 py-1 rounded-full uppercase">
+                  {product.category || "Home Decor"}
+                </span>
+                <span className="text-[11px] text-emerald-700 font-semibold flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping inline-block"></span>
+                  In Stock
+                </span>
               </div>
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => { if (product) toggleWishlist(product); }}
+                  className={`p-2 rounded-lg border transition ${
+                    isWishlisted ? "bg-red-50 text-red-500 border-red-200" : "bg-white text-gray-400 hover:text-gray-600 border-[#E8E2D8]"
+                  }`}
+                >
+                  <Heart size={16} className={isWishlisted ? "fill-current" : ""} />
+                </button>
+                <button
+                  onClick={handleShare}
+                  className="p-2 rounded-lg border border-[#E8E2D8] bg-white text-gray-400 hover:text-gray-600 transition"
+                >
+                  <Share2 size={16} />
+                </button>
+              </div>
+            </div>
 
-              {/* Product Title */}
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900 leading-snug mb-2">
+            {/* Title */}
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-snug tracking-tight">
                 {product.title || product.name}
               </h1>
 
-              {/* Star Rating and Customer Reviews */}
-              <div className="flex items-center gap-2 mb-4">
-                <div className="flex items-center text-amber-500">
+              {/* Star Rating */}
+              <div className="flex items-center gap-2 mt-2">
+                <div className="flex items-center text-amber-400">
                   {[1, 2, 3, 4, 5].map((star) => (
-                    <Star key={star} size={15} className="fill-amber-400 text-amber-400" />
+                    <Star key={star} size={13} className="fill-amber-400 text-amber-400" />
                   ))}
                 </div>
-                <span className="text-xs font-bold text-gray-900">0.0</span>
-                <span className="text-xs text-gray-500 font-normal">
-                  ({reviews.length} Verified Customer Reviews)
+                <span className="text-xs font-bold text-gray-700">{avgRating > 0 ? avgRating.toFixed(1) : "New"}</span>
+                <span className="text-xs text-gray-400">({reviews.length} reviews)</span>
+              </div>
+            </div>
+
+            {/* Pricing */}
+            <div className="border-t border-b border-[#E8E2D8] py-4">
+              <div className="flex items-baseline gap-3 flex-wrap">
+                <span className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">
+                  ₹{finalPrice.toLocaleString("en-IN")}
                 </span>
-              </div>
-
-              {/* Pricing Section (Strike Price crossed out, Actual Price dominant, Category Discount Badge) */}
-              <div className="space-y-2.5 pb-5 border-b border-gray-100 mb-5">
-                <div className="flex items-center gap-3 flex-wrap">
-                  {strikePrice > finalPrice && (
-                    <span className="text-base sm:text-lg text-gray-400 line-through font-medium" title="MRP / Strike Price">
-                      ₹{strikePrice.toLocaleString("en-IN")}
-                    </span>
-                  )}
-                  <span className="text-3xl sm:text-4xl font-black text-gray-950 tracking-tight">
-                    ₹{finalPrice.toLocaleString("en-IN")}
+                {strikePrice > finalPrice && (
+                  <span className="text-base text-gray-400 line-through font-normal">
+                    ₹{strikePrice.toLocaleString("en-IN")}
                   </span>
-                  {displayDiscountBadge && (
-                    <span className="text-xs sm:text-sm font-bold text-white bg-red-600 px-2.5 py-1 rounded-md uppercase tracking-wider shadow-xs">
-                      {displayDiscountBadge}
-                    </span>
-                  )}
-                </div>
-
-                {/* Promotional Category Offer info line */}
-                {categoryDiscount > 0 ? (
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 pt-1 text-xs">
-                    <span className="inline-flex items-center gap-1.5 font-bold text-emerald-800 bg-emerald-50 border border-emerald-200/90 px-3 py-1.5 rounded-sm">
-                      <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>Category Offer: {categoryDiscount}% OFF</span>
-                    </span>
-                    <span className="text-gray-500 font-medium">
-                      (₹{categoryDiscountAmount.toLocaleString("en-IN")} promotional discount based on Strike Price)
-                    </span>
-                  </div>
-                ) : currentDifference > 0 ? (
-                  <div className="flex items-center gap-2 pt-1 text-xs text-gray-500 font-medium">
-                    <span>Direct Price Benefit: ₹{currentDifference.toLocaleString("en-IN")} below MRP</span>
-                  </div>
-                ) : null}
+                )}
+                {displayDiscountBadge && (
+                  <span className="text-xs font-bold text-[#C57053] bg-[#FDF0EB] px-2 py-0.5 rounded-full">
+                    {displayDiscountBadge}
+                  </span>
+                )}
               </div>
+              {categoryDiscount > 0 ? (
+                <p className="text-xs text-emerald-700 mt-1.5 font-medium">
+                  You save ₹{categoryDiscountAmount.toLocaleString("en-IN")} with category offer
+                </p>
+              ) : currentDifference > 0 ? (
+                <p className="text-xs text-emerald-700 mt-1.5 font-medium">
+                  ₹{currentDifference.toLocaleString("en-IN")} below MRP
+                </p>
+              ) : null}
+              <p className="text-[11px] text-gray-400 mt-1">Inclusive of all taxes · Free delivery above ₹999</p>
+            </div>
 
-              {/* Delivery Location Box matching screenshot */}
-              <div className="p-4 bg-white rounded-none border border-gray-200/90 shadow-2xs space-y-3.5 mb-5">
-                <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Delivery Location</span>
-                
-                {isEditingPincode ? (
-                  <div className="flex items-center gap-2">
-                    <input 
-                      type="text" 
-                      placeholder="Enter 6-digit Pincode" 
-                      value={pincodeInput}
-                      onChange={(e) => setPincodeInput(e.target.value)}
-                      maxLength={6}
-                      className="flex-1 px-3.5 py-2 text-sm border border-gray-300 rounded-none focus:ring-2 focus:ring-[#0F2920] outline-none"
-                      disabled={isCheckingPincode}
-                    />
-                    <button 
-                      onClick={checkPincode}
-                      disabled={isCheckingPincode}
-                      className="px-4 py-2 bg-[#0F2920] text-white text-xs font-bold uppercase rounded-none hover:bg-black transition disabled:opacity-50"
+            {/* Short Description */}
+            {product.description && (
+              <p className="text-sm text-gray-600 leading-relaxed">
+                {product.description.slice(0, 160)}{product.description.length > 160 ? "…" : ""}
+              </p>
+            )}
+
+            {/* Delivery Box */}
+            <div className="bg-white border border-[#E8E2D8] rounded-xl p-4 space-y-3">
+              <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Delivery</p>
+
+              {isEditingPincode ? (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    placeholder="Enter 6-digit Pincode"
+                    value={pincodeInput}
+                    onChange={(e) => setPincodeInput(e.target.value)}
+                    maxLength={6}
+                    className="flex-1 px-3 py-2 text-sm border border-[#E8E2D8] rounded-lg focus:ring-2 focus:ring-[#0F2920] outline-none bg-[#FAF7F2]"
+                    disabled={isCheckingPincode}
+                  />
+                  <button
+                    onClick={checkPincode}
+                    disabled={isCheckingPincode}
+                    className="px-4 py-2 bg-[#0F2920] text-white text-xs font-bold rounded-lg hover:bg-[#1a3d2f] transition disabled:opacity-50"
+                  >
+                    {isCheckingPincode ? "…" : "Apply"}
+                  </button>
+                  <button
+                    onClick={() => setIsEditingPincode(false)}
+                    className="text-xs text-gray-400 hover:text-gray-600 px-1"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-lg bg-[#F5EFE6] text-[#9A7B66] flex items-center justify-center shrink-0">
+                      <MapPin size={15} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900 leading-tight">{pincode}</p>
+                      <p className="text-xs text-gray-400 leading-tight">{savedArea}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setIsEditingPincode(true)}
+                    className="text-xs font-semibold text-[#0F2920] hover:underline"
+                  >
+                    Change
+                  </button>
+                </div>
+              )}
+
+              <div className="flex items-center justify-between pt-2.5 border-t border-[#E8E2D8] text-xs">
+                <div className="flex items-center gap-1.5 text-emerald-700 font-medium">
+                  <Truck size={13} />
+                  <span>Delivery <strong>₹{deliveryFee}</strong></span>
+                </div>
+                <div className="text-gray-400">
+                  Est. <strong className="text-gray-600">{deliveryDateString}</strong>
+                </div>
+              </div>
+            </div>
+
+            {/* Quantity Selector */}
+            <div className="flex items-center gap-4">
+              <div className="flex items-center border border-[#E8E2D8] rounded-lg bg-white overflow-hidden">
+                <button
+                  onClick={handleDecreaseQuantity}
+                  className="w-9 h-9 flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-[#F5F1EC] transition font-bold"
+                >
+                  <Minus size={14} />
+                </button>
+                <span className="w-10 text-center font-bold text-sm text-gray-900 select-none">{quantity}</span>
+                <button
+                  onClick={handleIncreaseQuantity}
+                  className="w-9 h-9 flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-[#F5F1EC] transition font-bold"
+                >
+                  <Plus size={14} />
+                </button>
+              </div>
+              <span className="text-xs text-emerald-700 font-semibold flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full inline-block"></span>
+                {product.stock ? `${product.stock} in stock` : "In Stock"}
+              </span>
+            </div>
+
+            {/* CTA Buttons */}
+            <div className="space-y-2.5">
+              {/* Add to Cart / Buy Now */}
+              <div className="flex gap-2.5">
+                {quantityInCart > 0 ? (
+                  <div className="flex-1 flex items-center justify-between border-2 border-[#0F2920] bg-[#EDF4F0] rounded-xl py-2.5 px-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (quantityInCart > 1) updateQuantity(cartItemForProduct!.id, quantityInCart - 1);
+                        else { removeFromCart(cartItemForProduct!.id); toast.success("Removed from cart"); }
+                      }}
+                      className="w-8 h-8 flex items-center justify-center bg-white text-[#0F2920] border border-[#C4D6CC] rounded-lg active:scale-90 transition"
                     >
-                      {isCheckingPincode ? "Checking..." : "Apply"}
+                      <Minus size={13} strokeWidth={2.5} />
                     </button>
-                    <button 
-                      onClick={() => setIsEditingPincode(false)}
-                      className="text-xs text-gray-500 hover:text-gray-700 px-2"
+                    <div className="text-center select-none">
+                      <span className="font-bold text-[#0F2920] text-sm block">{quantityInCart} in Cart</span>
+                      <span className="text-[10px] text-gray-500 uppercase font-medium">Tap - / + to adjust</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => updateQuantity(cartItemForProduct!.id, quantityInCart + 1)}
+                      className="w-8 h-8 flex items-center justify-center bg-[#0F2920] text-white rounded-lg active:scale-90 transition"
                     >
-                      Cancel
+                      <Plus size={13} strokeWidth={2.5} />
                     </button>
                   </div>
                 ) : (
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-none bg-[#EEF2FF] text-[#4F46E5] flex items-center justify-center shrink-0">
-                        <MapPin size={18} />
-                      </div>
-                      <div>
-                        <p className="text-sm font-bold text-gray-900 leading-tight">{pincode}</p>
-                        <p className="text-xs text-gray-500 leading-tight mt-0.5">{savedArea}</p>
-                      </div>
-                    </div>
-                    <button 
-                      onClick={() => setIsEditingPincode(true)}
-                      className="text-xs font-bold text-blue-600 hover:text-blue-800 transition"
-                    >
-                      Change
-                    </button>
-                  </div>
+                  <button
+                    onClick={handleAddToCart}
+                    className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-[#0F2920] hover:bg-[#1a3d2f] text-white rounded-xl font-bold uppercase tracking-wider text-xs shadow transition active:scale-95"
+                  >
+                    <ShoppingCart size={15} />
+                    Add to Cart
+                  </button>
                 )}
-
-                <div className="pt-3 border-t border-gray-100 flex items-center justify-between text-xs font-medium">
-                  <div className="flex items-center gap-2 text-emerald-700">
-                    <Truck size={15} />
-                    <span>Delivery <strong className="font-bold">₹99 (Standard)</strong></span>
-                  </div>
-                  <div className="text-gray-500 text-[11px]">
-                    Estimated Delivery: <strong className="text-gray-800 font-bold">{deliveryDateString}</strong>
-                  </div>
-                </div>
+                <button
+                  onClick={handleBuyNow}
+                  className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-[#F5EFE6] hover:bg-[#EDE5D8] text-[#6B4A36] border border-[#D9C9B4] rounded-xl font-bold uppercase tracking-wider text-xs transition active:scale-95"
+                >
+                  <Zap size={15} />
+                  Buy Now
+                </button>
               </div>
 
-              {/* Quantity Selector and In-Stock Label */}
-              <div className="flex items-center gap-4 mb-6">
-                <div className="flex items-center border border-gray-300 rounded-none bg-white shadow-2xs">
-                  <button 
-                    onClick={handleDecreaseQuantity}
-                    className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-none transition font-bold"
-                  >
-                    -
-                  </button>
-                  <span className="w-9 text-center font-bold text-sm text-gray-900">{quantity}</span>
-                  <button 
-                    onClick={handleIncreaseQuantity}
-                    className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-none transition font-bold"
-                  >
-                    +
-                  </button>
-                </div>
-
-                <div className="text-xs text-emerald-600 font-semibold flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 bg-emerald-500 rounded-none"></span>
-                  <span>In Stock (24 items)</span>
-                </div>
+              {/* WhatsApp + Call */}
+              <div className="grid grid-cols-2 gap-2.5">
+                <button
+                  type="button"
+                  onClick={handleWhatsAppOrderProduct}
+                  className="flex items-center justify-center gap-1.5 py-2.5 bg-[#F0FAF3] hover:bg-[#E4F5E9] text-[#1A7A35] border border-[#C2E8CF] rounded-xl font-semibold text-xs transition"
+                >
+                  <MessageCircle size={14} />
+                  Order via WhatsApp
+                </button>
+                <a
+                  href="tel:+919492664870"
+                  className="flex items-center justify-center gap-1.5 py-2.5 bg-white hover:bg-[#F5F1EC] text-gray-700 border border-[#E8E2D8] rounded-xl font-semibold text-xs transition"
+                >
+                  <Phone size={14} />
+                  Call Support
+                </a>
               </div>
-
-              {/* CTA Action Buttons matching screenshot */}
-              <div className="space-y-3">
-                {/* Row 1: Add to Cart & Buy Now */}
-                <div className="flex gap-3">
-                  {quantityInCart > 0 ? (
-                    <div className="flex-1 flex items-center justify-between border-2 border-[#0F2920] bg-[#f0f6f3] rounded-none py-2 px-3 shadow-xs">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (quantityInCart > 1) {
-                            updateQuantity(cartItemForProduct!.id, quantityInCart - 1);
-                          } else {
-                            removeFromCart(cartItemForProduct!.id);
-                            toast.success(`Removed from cart`);
-                          }
-                        }}
-                        className="w-9 h-9 flex items-center justify-center bg-white hover:bg-gray-100 text-[#0F2920] border border-[#c4d6cc] rounded-none active:scale-90 transition font-bold"
-                        aria-label="Decrease quantity"
-                      >
-                        <Minus size={15} strokeWidth={2.5} />
-                      </button>
-
-                      <div className="text-center select-none">
-                        <span className="font-bold text-[#0F2920] text-sm sm:text-base block">
-                          {quantityInCart} in Cart
-                        </span>
-                        <span className="text-[10px] text-gray-500 uppercase font-semibold">
-                          Click - / + to adjust
-                        </span>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => updateQuantity(cartItemForProduct!.id, quantityInCart + 1)}
-                        className="w-9 h-9 flex items-center justify-center bg-[#0F2920] hover:bg-[#183E31] text-white rounded-none active:scale-90 transition font-bold"
-                        aria-label="Increase quantity"
-                      >
-                        <Plus size={15} strokeWidth={2.5} />
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={handleAddToCart}
-                      className="flex-1 flex items-center justify-center gap-2 py-3.5 px-6 bg-[#0F2920] hover:bg-[#183E31] text-white rounded-none font-bold uppercase tracking-wider text-xs shadow-md transition transform active:scale-95 duration-200"
-                    >
-                      <ShoppingCart size={16} />
-                      <span>Add to Cart</span>
-                    </button>
-                  )}
-                  
-                  <button
-                    onClick={handleBuyNow}
-                    className="flex-1 flex items-center justify-center gap-2 py-3.5 px-6 bg-[#EDF4F0] hover:bg-[#E2EDE6] text-[#0F2920] border border-[#CDE0D5] rounded-none font-bold uppercase tracking-wider text-xs transition transform active:scale-95 duration-200"
-                  >
-                    <Zap size={16} />
-                    <span>Buy Now</span>
-                  </button>
-                </div>
-
-                {/* Row 2: WhatsApp Order & Call Support */}
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={handleWhatsAppOrderProduct}
-                    className="flex items-center justify-center gap-2 py-2.5 px-4 bg-[#EDF8F1] hover:bg-[#E1F3E7] text-[#1E7E34] border border-[#D1EEDB] rounded-none font-bold uppercase tracking-wider text-[11px] transition cursor-pointer"
-                  >
-                    <MessageCircle size={15} />
-                    <span>Order via WhatsApp</span>
-                  </button>
-
-                  <a
-                    href="tel:+919492664870"
-                    className="flex items-center justify-center gap-2 py-2.5 px-4 bg-[#F9F7F2] hover:bg-[#F2EEE4] text-[#4A4036] border border-[#EBE6DC] rounded-none font-bold uppercase tracking-wider text-[11px] transition"
-                  >
-                    <Phone size={15} />
-                    <span>Call Support</span>
-                  </a>
-                </div>
-              </div>
-
             </div>
+
+            {/* Trust Badges */}
+            <div className="grid grid-cols-4 gap-2 pt-1">
+              {[
+                { icon: <Truck size={15} />, label: "Fast Delivery", sub: "Pan India" },
+                { icon: <Lock size={15} />, label: "Secure Pay", sub: "Encrypted" },
+                { icon: <ShieldCheck size={15} />, label: "Genuine", sub: "100% Certified" },
+                { icon: <RotateCcw size={15} />, label: "No Returns", sub: "No Exchange" },
+              ].map((badge, i) => (
+                <div key={i} className="flex flex-col items-center text-center p-2 bg-white border border-[#E8E2D8] rounded-xl">
+                  <div className="text-[#9A7B66] mb-1">{badge.icon}</div>
+                  <span className="text-[9px] font-bold text-gray-800 leading-tight">{badge.label}</span>
+                  <span className="text-[9px] text-gray-400 leading-tight">{badge.sub}</span>
+                </div>
+              ))}
+            </div>
+
           </div>
         </div>
 
-        {/* 4 Trust Badges Row (spanning full width with hairline dividers) */}
-        <div className="bg-white rounded-none border border-gray-200/80 shadow-xs my-4 py-3.5 px-6 grid grid-cols-2 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-gray-200/60">
-          <div className="flex flex-col items-center text-center p-2.5">
-            <User2 className="w-5 h-5 text-gray-700 mb-1" strokeWidth={1.75} />
-            <span className="text-xs font-bold text-gray-900 leading-tight">Premium Quality</span>
-            <span className="text-[11px] text-gray-400 font-medium leading-tight mt-0.5">100% Certified</span>
-          </div>
-
-          <div className="flex flex-col items-center text-center p-2.5">
-            <Truck className="w-5 h-5 text-gray-700 mb-1" strokeWidth={1.75} />
-            <span className="text-xs font-bold text-gray-900 leading-tight">Fast Delivery</span>
-            <span className="text-[11px] text-gray-400 font-medium leading-tight mt-0.5">Pan India</span>
-          </div>
-
-          <div className="flex flex-col items-center text-center p-2.5">
-            <RotateCcw className="w-5 h-5 text-gray-700 mb-1" strokeWidth={1.75} />
-            <span className="text-xs font-bold text-gray-900 leading-tight">No Returns</span>
-            <span className="text-[11px] text-gray-400 font-medium leading-tight mt-0.5">No Exchange</span>
-          </div>
-
-          <div className="flex flex-col items-center text-center p-2.5">
-            <Lock className="w-5 h-5 text-gray-700 mb-1" strokeWidth={1.75} />
-            <span className="text-xs font-bold text-gray-900 leading-tight">Secure Payments</span>
-            <span className="text-[11px] text-gray-400 font-medium leading-tight mt-0.5">100% Encrypted</span>
-          </div>
-        </div>
-
-        {/* Tab Navigation matching screenshot */}
-        <div className="pt-6 border-b border-gray-200/80">
-          <div className="flex space-x-8 overflow-x-auto no-scrollbar">
+        {/* ── Tabs Section ────────────────────────────────────────────────────── */}
+        <div className="border-t border-[#E8E2D8]">
+          <div className="flex gap-6 overflow-x-auto no-scrollbar pt-1">
             {[
               { id: "description", label: "Description" },
               { id: "specifications", label: "Specifications" },
               { id: "materials", label: "Materials" },
-              { id: "shipping", label: "Shipping & Delivery" }
+              { id: "shipping", label: "Shipping" },
             ].map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`pb-3 text-sm font-bold tracking-normal transition-all border-b-2 whitespace-nowrap ${
-                  activeTab === tab.id 
-                    ? "border-[#0F2920] text-[#0F2920]" 
+                className={`pb-3 pt-4 text-sm font-semibold tracking-normal transition-all border-b-2 whitespace-nowrap ${
+                  activeTab === tab.id
+                    ? "border-[#0F2920] text-[#0F2920]"
                     : "border-transparent text-gray-400 hover:text-gray-600"
                 }`}
               >
@@ -1143,91 +1079,56 @@ const ProductDetail: React.FC = () => {
           </div>
         </div>
 
-        {/* Tab Content 1: Description Section (2 Columns with Feature Badges & Lifestyle Card) */}
+        {/* ── Tab: Description ───────────────────────────────────────────────── */}
         {activeTab === "description" && (
-          <div className="py-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-            {/* Left Description Column */}
-            <div className="lg:col-span-7 space-y-4">
-              <span className="text-[11px] font-bold tracking-[0.2em] text-[#9A7B66] uppercase block">
-                Premium Collection
-              </span>
-              <h2 className="text-2xl sm:text-3xl font-serif font-bold text-gray-900 leading-tight">
-                Elegant Craftsmanship<br className="hidden sm:block" /> &amp; Luxury Aesthetics
-              </h2>
-              <p className="text-sm text-gray-600 leading-relaxed max-w-xl">
-                {product.description || "Elegant insulated flask/mug, designed for leakproof travel. Perfect for coffee, tea, and other hot/cold beverages on the go."} This premium collection highlights our dedication to creating beautiful, lasting decorative elements for your home. Made with precision and passion, this piece will bring style and refinement to any interior layout.
+          <div className="py-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+            <div className="lg:col-span-7 space-y-5">
+              <div>
+                <span className="text-[10px] font-bold tracking-widest text-[#9A7B66] uppercase">Premium Collection</span>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 leading-snug mt-1">
+                  Elegant Craftsmanship &amp; Lasting Quality
+                </h2>
+              </div>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                {product.description || "Elegant insulated flask designed for leakproof travel. Perfect for coffee, tea, and other hot/cold beverages on the go."} This premium piece highlights our dedication to creating beautiful, lasting elements for your home — made with precision and passion.
               </p>
 
-              {/* 4 Feature Badges (2x2 Grid) */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4">
-                <div className="p-3 bg-white rounded-none border border-gray-200/70 shadow-2xs flex flex-col justify-between">
-                  <div className="w-8 h-8 rounded-none bg-amber-50 text-amber-600 flex items-center justify-center mb-2">
-                    <Flame size={16} />
+              {/* Feature Cards */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {[
+                  { icon: <Flame size={15} className="text-[#C57053]" />, bg: "bg-[#FDF0EB]", title: "Keeps Hot & Cold", sub: "Long Hours" },
+                  { icon: <Droplets size={15} className="text-blue-500" />, bg: "bg-blue-50", title: "Leak Proof", sub: "Design" },
+                  { icon: <Shield size={15} className="text-emerald-700" />, bg: "bg-emerald-50", title: "Food Grade", sub: "304 Steel" },
+                  { icon: <Coffee size={15} className="text-[#9A7B66]" />, bg: "bg-[#F5EFE6]", title: "Portable", sub: "With Cup Lid" },
+                ].map((f, i) => (
+                  <div key={i} className="p-3 bg-white border border-[#E8E2D8] rounded-xl flex flex-col gap-2">
+                    <div className={`w-8 h-8 rounded-lg ${f.bg} flex items-center justify-center`}>{f.icon}</div>
+                    <div>
+                      <span className="text-xs font-bold text-gray-900 block leading-tight">{f.title}</span>
+                      <span className="text-[10px] text-gray-400">{f.sub}</span>
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-xs font-bold text-gray-900 block leading-tight">Keeps Hot &amp; Cold</span>
-                    <span className="text-[10px] text-gray-400 font-medium">for Long Hours</span>
-                  </div>
-                </div>
-
-                <div className="p-3 bg-white rounded-none border border-gray-200/70 shadow-2xs flex flex-col justify-between">
-                  <div className="w-8 h-8 rounded-none bg-blue-50 text-blue-600 flex items-center justify-center mb-2">
-                    <Droplets size={16} />
-                  </div>
-                  <div>
-                    <span className="text-xs font-bold text-gray-900 block leading-tight">Leak Proof</span>
-                    <span className="text-[10px] text-gray-400 font-medium">Design</span>
-                  </div>
-                </div>
-
-                <div className="p-3 bg-white rounded-none border border-gray-200/70 shadow-2xs flex flex-col justify-between">
-                  <div className="w-8 h-8 rounded-none bg-emerald-50 text-emerald-700 flex items-center justify-center mb-2">
-                    <Shield size={16} />
-                  </div>
-                  <div>
-                    <span className="text-xs font-bold text-gray-900 block leading-tight">304 Stainless Steel</span>
-                    <span className="text-[10px] text-gray-400 font-medium">Food Grade</span>
-                  </div>
-                </div>
-
-                <div className="p-3 bg-white rounded-none border border-gray-200/70 shadow-2xs flex flex-col justify-between">
-                  <div className="w-8 h-8 rounded-none bg-purple-50 text-purple-600 flex items-center justify-center mb-2">
-                    <Coffee size={16} />
-                  </div>
-                  <div>
-                    <span className="text-xs font-bold text-gray-900 block leading-tight">Portable &amp; Travel</span>
-                    <span className="text-[10px] text-gray-400 font-medium">With Cup Lid</span>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
 
-            {/* Right Lifestyle Banner Column matching screenshot */}
+            {/* Lifestyle Banner */}
             <div className="lg:col-span-5">
-              <div className="relative rounded-none overflow-hidden aspect-[16/10] shadow-md border border-gray-200 group">
+              <div className="relative rounded-2xl overflow-hidden aspect-[4/3] shadow-sm border border-[#E8E2D8] group">
                 <img
                   src="/images/flask_lifestyle_banner.jpg"
                   alt="Stay Refreshed Anywhere"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/20 p-6 sm:p-8 flex flex-col justify-between">
-                  <div>
-                    <h3 className="text-2xl font-serif font-bold text-white leading-tight mb-1">
-                      Stay Refreshed<br />Anywhere
-                    </h3>
-                    <p className="text-xs text-white/80 max-w-xs">
-                      Premium design for your everyday essentials.
-                    </p>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <span className="bg-black/60 backdrop-blur-md text-white border border-white/20 px-3 py-1.5 rounded-none text-xs font-bold flex items-center gap-1.5">
-                      <Flame size={13} className="text-red-400 fill-red-400" />
-                      <span>HOT 12 Hours</span>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent p-5 flex flex-col justify-end">
+                  <h3 className="text-xl font-bold text-white leading-tight mb-1">Stay Refreshed<br />Anywhere</h3>
+                  <p className="text-xs text-white/70 mb-3">Premium design for your everyday essentials.</p>
+                  <div className="flex items-center gap-2">
+                    <span className="bg-black/50 backdrop-blur-sm text-white border border-white/20 px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center gap-1">
+                      <Flame size={11} className="text-red-400" /> HOT 12H
                     </span>
-                    <span className="bg-black/60 backdrop-blur-md text-white border border-white/20 px-3 py-1.5 rounded-none text-xs font-bold flex items-center gap-1.5">
-                      <Droplets size={13} className="text-cyan-300" />
-                      <span>COLD 24 Hours</span>
+                    <span className="bg-black/50 backdrop-blur-sm text-white border border-white/20 px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center gap-1">
+                      <Droplets size={11} className="text-cyan-300" /> COLD 24H
                     </span>
                   </div>
                 </div>
@@ -1236,28 +1137,18 @@ const ProductDetail: React.FC = () => {
           </div>
         )}
 
-        {/* Tab Content 2: Specifications Section (Table + Diamond Collection Banner) */}
+        {/* ── Tab: Specifications ─────────────────────────────────────────────── */}
         {activeTab === "specifications" && (
-          <div className="py-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-            {/* Left: Specifications Table */}
+          <div className="py-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
             <div className="lg:col-span-7">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-gray-900">Specifications</h3>
-                <span className="text-xs font-bold text-[#0F2920] flex items-center gap-1 hover:underline cursor-pointer">
-                  View More Details &rarr;
-                </span>
-              </div>
-
-              <div className="bg-white rounded-none border border-gray-200/80 overflow-hidden shadow-2xs">
-                <table className="w-full text-left text-xs">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Product Specifications</h3>
+              <div className="bg-white border border-[#E8E2D8] rounded-2xl overflow-hidden">
+                <table className="w-full text-left text-sm">
                   <tbody>
                     {productSpecs.map((spec, i) => (
-                      <tr 
-                        key={i} 
-                        className={`border-b last:border-0 border-gray-100 ${i % 2 === 0 ? "bg-gray-50/60" : "bg-white"}`}
-                      >
-                        <td className="px-5 py-3.5 font-bold text-gray-500 w-1/3">{spec.label}</td>
-                        <td className="px-5 py-3.5 font-medium text-gray-900">{spec.value}</td>
+                      <tr key={i} className={`border-b last:border-0 border-[#F0EBE3] ${i % 2 === 0 ? "bg-[#FAF7F2]" : "bg-white"}`}>
+                        <td className="px-5 py-3.5 font-semibold text-gray-500 w-2/5 text-xs uppercase tracking-wide">{spec.label}</td>
+                        <td className="px-5 py-3.5 font-medium text-gray-900 text-sm">{spec.value}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -1265,149 +1156,149 @@ const ProductDetail: React.FC = () => {
               </div>
             </div>
 
-            {/* Right: Diamond Collection Promo Card */}
             <div className="lg:col-span-5">
-              <div className="relative rounded-none overflow-hidden aspect-[16/10] shadow-md border border-gray-200 group">
+              <div className="relative rounded-2xl overflow-hidden aspect-[4/3] shadow-sm border border-[#E8E2D8] group">
                 <img
                   src="/images/diamond_collection_banner.jpg"
                   alt="Diamond Collection"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent p-6 sm:p-8 flex flex-col justify-center">
-                  <span className="text-xs font-extrabold tracking-widest uppercase text-amber-300 mb-1">
-                    DIAMOND COLLECTION
-                  </span>
-                  <div className="w-10 h-0.5 bg-amber-300 mb-3" />
-                  <p className="text-xs text-white/90 max-w-xs font-medium">
-                    Premium design for your everyday essentials.
-                  </p>
+                <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent p-6 flex flex-col justify-center">
+                  <span className="text-[10px] font-extrabold tracking-widest text-amber-300 uppercase mb-2">Diamond Collection</span>
+                  <div className="w-8 h-0.5 bg-amber-300 mb-3" />
+                  <p className="text-xs text-white/80 font-medium">Premium design for your everyday essentials.</p>
                 </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* Tab Content 3: Materials Section */}
+        {/* ── Tab: Materials ──────────────────────────────────────────────────── */}
         {activeTab === "materials" && (
-          <div className="py-10 max-w-3xl space-y-4">
-            <h3 className="text-xl font-serif font-bold text-gray-900">Only The Finest Materials</h3>
+          <div className="py-10 max-w-3xl space-y-5">
+            <div>
+              <span className="text-[10px] font-bold tracking-widest text-[#9A7B66] uppercase">Quality Standards</span>
+              <h3 className="text-xl font-bold text-gray-900 mt-1">Only The Finest Materials</h3>
+            </div>
             <p className="text-sm text-gray-600 leading-relaxed">
               Constructed with eco-friendly and robust, food-grade 304 Stainless Steel that guarantees structural integrity, superior thermal retention, and long durability under regular household usage.
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
-              <div className="p-4 bg-white rounded-none border border-gray-200/80 shadow-2xs">
-                <ShieldCheck className="w-6 h-6 text-emerald-700 mb-2" />
-                <h4 className="text-xs font-bold text-gray-900 mb-1">BPA-Free Certified</h4>
-                <p className="text-[11px] text-gray-500">100% non-toxic and food contact safe.</p>
-              </div>
-              <div className="p-4 bg-white rounded-none border border-gray-200/80 shadow-2xs">
-                <Award className="w-6 h-6 text-emerald-700 mb-2" />
-                <h4 className="text-xs font-bold text-gray-900 mb-1">304 Stainless Steel</h4>
-                <p className="text-[11px] text-gray-500">Rust-proof and odor-resistant interior.</p>
-              </div>
-              <div className="p-4 bg-white rounded-none border border-gray-200/80 shadow-2xs">
-                <Flame className="w-6 h-6 text-emerald-700 mb-2" />
-                <h4 className="text-xs font-bold text-gray-900 mb-1">Double Wall Vacuum</h4>
-                <p className="text-[11px] text-gray-500">Sweat-free exterior with extreme temperature lock.</p>
-              </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {[
+                { icon: <ShieldCheck className="w-5 h-5 text-emerald-700" />, title: "BPA-Free Certified", desc: "100% non-toxic and food contact safe." },
+                { icon: <Award className="w-5 h-5 text-[#9A7B66]" />, title: "304 Stainless Steel", desc: "Rust-proof and odor-resistant interior." },
+                { icon: <Flame className="w-5 h-5 text-[#C57053]" />, title: "Double Wall Vacuum", desc: "Sweat-free exterior with extreme temperature lock." },
+              ].map((m, i) => (
+                <div key={i} className="p-4 bg-white border border-[#E8E2D8] rounded-2xl">
+                  <div className="mb-2">{m.icon}</div>
+                  <h4 className="text-sm font-bold text-gray-900 mb-1">{m.title}</h4>
+                  <p className="text-xs text-gray-500 leading-relaxed">{m.desc}</p>
+                </div>
+              ))}
             </div>
           </div>
         )}
 
-        {/* Tab Content 4: Shipping & Delivery Section */}
+        {/* ── Tab: Shipping ───────────────────────────────────────────────────── */}
         {activeTab === "shipping" && (
-          <div className="py-10 max-w-3xl space-y-4">
-            <h3 className="text-xl font-serif font-bold text-gray-900">Reliable Logistics Network</h3>
+          <div className="py-10 max-w-3xl space-y-5">
+            <div>
+              <span className="text-[10px] font-bold tracking-widest text-[#9A7B66] uppercase">Logistics</span>
+              <h3 className="text-xl font-bold text-gray-900 mt-1">Reliable Delivery Network</h3>
+            </div>
             <p className="text-sm text-gray-600 leading-relaxed">
               We deliver using professional high-security transport partners (Delhivery, BlueDart, DTDC). Each item is securely packaged inside specialized heavy-duty boxes with multi-layer bubble wrap to guarantee safe arrival.
             </p>
-            <div className="bg-white p-5 rounded-none border border-gray-200/80 shadow-2xs space-y-2 text-xs text-gray-600">
-              <div className="flex items-center gap-2 font-bold text-gray-900">
-                <CheckCircle size={15} className="text-emerald-600" />
-                <span>Dispatched within 24–48 hours of order confirmation.</span>
-              </div>
-              <div className="flex items-center gap-2 font-bold text-gray-900">
-                <CheckCircle size={15} className="text-emerald-600" />
-                <span>Real-time SMS and WhatsApp tracking updates.</span>
-              </div>
-              <div className="flex items-center gap-2 font-bold text-gray-900">
-                <CheckCircle size={15} className="text-emerald-600" />
-                <span>Pan India standard delivery within 3–6 business days.</span>
-              </div>
+            <div className="bg-white border border-[#E8E2D8] rounded-2xl p-5 space-y-3">
+              {[
+                "Dispatched within 24–48 hours of order confirmation.",
+                "Real-time SMS and WhatsApp tracking updates.",
+                "Pan India standard delivery within 3–6 business days.",
+              ].map((point, i) => (
+                <div key={i} className="flex items-start gap-3 text-sm text-gray-700">
+                  <CheckCircle size={16} className="text-emerald-600 mt-0.5 shrink-0" />
+                  <span>{point}</span>
+                </div>
+              ))}
             </div>
           </div>
         )}
 
-        {/* Customer Reviews & Verification Section matching screenshot */}
-        <div className="py-12 border-t border-gray-200/80">
-          <div className="flex items-center gap-3 mb-6">
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Customer Reviews &amp; Verification</h2>
-            <span className="text-[11px] font-bold px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-none border border-emerald-200 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 bg-emerald-500 rounded-none"></span>
-              Verified Reviews Only
-            </span>
+        {/* ── Reviews Section ─────────────────────────────────────────────────── */}
+        <div className="py-12 border-t border-[#E8E2D8]">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <h2 className="text-xl font-bold text-gray-900">Customer Reviews</h2>
+              <span className="text-[10px] font-bold px-2 py-1 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-200">
+                Verified Only
+              </span>
+            </div>
+            {reviews.length > 0 && (
+              <button
+                onClick={() => setIsReviewModalOpen(true)}
+                className="text-xs font-semibold text-[#0F2920] hover:underline"
+              >
+                + Write Review
+              </button>
+            )}
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            {/* Left Rating Summary Card */}
-            <div className="lg:col-span-6 bg-white p-6 sm:p-7 rounded-none border border-gray-200/80 shadow-2xs space-y-5">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Rating Summary */}
+            <div className="bg-white border border-[#E8E2D8] rounded-2xl p-6 space-y-5">
               <div>
                 <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-2">Overall Score</span>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-5xl font-extrabold text-gray-900">{avgRating ? avgRating.toFixed(1) : "0.0"}</span>
-                  <span className="text-xs font-bold text-gray-400">out of 5</span>
+                  <span className="text-5xl font-bold text-gray-900">{avgRating ? avgRating.toFixed(1) : "0.0"}</span>
+                  <span className="text-xs text-gray-400">out of 5</span>
                 </div>
-                <div className="flex items-center text-gray-200 mt-2 mb-4">
+                <div className="flex items-center gap-0.5 mt-2">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <Star
                       key={star}
-                      size={18}
-                      className={star <= Math.round(avgRating) ? "fill-amber-400 text-amber-400" : "text-gray-200"}
+                      size={16}
+                      className={star <= Math.round(avgRating) ? "fill-amber-400 text-amber-400" : "text-[#E8E2D8]"}
                     />
                   ))}
                 </div>
               </div>
 
-              {/* Progress Bars (5 Star to 1 Star) */}
-              <div className="space-y-2.5">
+              <div className="space-y-2">
                 {[5, 4, 3, 2, 1].map((r) => (
-                  <div key={r} className="flex items-center text-xs text-gray-500 font-medium">
-                    <span className="w-12">{r} star</span>
-                    <div className="flex-1 h-2 bg-gray-100 rounded-none mx-3 overflow-hidden">
-                      <div 
-                        className="h-full bg-emerald-700 rounded-none transition-all duration-500"
+                  <div key={r} className="flex items-center text-xs text-gray-500 gap-2">
+                    <span className="w-10 shrink-0">{r} star</span>
+                    <div className="flex-1 h-1.5 bg-[#F0EBE3] rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-[#9A7B66] rounded-full transition-all duration-500"
                         style={{ width: `${ratingPercentages[r as 5|4|3|2|1] || 0}%` }}
                       />
                     </div>
-                    <span className="w-8 text-right text-gray-400 font-semibold">{ratingPercentages[r as 5|4|3|2|1] || 0}%</span>
+                    <span className="w-8 text-right text-gray-400">{ratingPercentages[r as 5|4|3|2|1] || 0}%</span>
                   </div>
                 ))}
               </div>
 
-              {/* Review Restricted Badge Notice */}
-              <div className="p-4 bg-[#FDF3F3] rounded-none border border-[#FADBD8] flex items-start gap-3">
-                <div className="w-8 h-8 rounded-none bg-[#FCE8E8] text-[#D32F2F] flex items-center justify-center shrink-0">
-                  <ShieldCheck size={16} />
-                </div>
+              <div className="p-3.5 bg-[#FDF7F4] border border-[#F0D9CE] rounded-xl flex items-start gap-3">
+                <ShieldCheck size={16} className="text-[#C57053] mt-0.5 shrink-0" />
                 <div>
-                  <h4 className="text-xs font-extrabold text-[#D32F2F] leading-tight">Review Restricted</h4>
-                  <p className="text-[11px] text-gray-500 leading-relaxed mt-0.5">
-                    To maintain strict authenticity, only customers who have verified purchase history for this item can write feedback.
+                  <h4 className="text-xs font-bold text-[#C57053]">Review Restricted</h4>
+                  <p className="text-[11px] text-gray-500 mt-0.5 leading-relaxed">
+                    Only customers with verified purchase history can submit reviews.
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Right: Empty State or Reviews Display */}
-            <div className="lg:col-span-6 bg-white p-6 sm:p-7 rounded-none border border-gray-200/80 shadow-2xs flex flex-col items-center justify-center text-center">
+            {/* Reviews Display */}
+            <div className="bg-white border border-[#E8E2D8] rounded-2xl p-6 flex flex-col">
               {reviews.length === 0 ? (
-                <div className="space-y-4 py-8">
-                  <div className="w-12 h-12 rounded-none bg-gray-50 text-gray-400 flex items-center justify-center mx-auto border border-gray-200/60">
-                    <FileText size={22} />
+                <div className="flex-1 flex flex-col items-center justify-center text-center py-8 space-y-4">
+                  <div className="w-12 h-12 rounded-full bg-[#F5EFE6] text-[#9A7B66] flex items-center justify-center">
+                    <FileText size={20} />
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-gray-800">No reviews yet.</h3>
-                    <p className="text-xs text-gray-400 mt-1">Be the first to share your feedback!</p>
+                    <h3 className="text-sm font-bold text-gray-800">No reviews yet</h3>
+                    <p className="text-xs text-gray-400 mt-1">Be the first to share your experience!</p>
                   </div>
                   <button
                     onClick={() => {
@@ -1418,35 +1309,29 @@ const ProductDetail: React.FC = () => {
                         setIsReviewModalOpen(true);
                       }
                     }}
-                    className="px-8 py-3 bg-[#0F2920] hover:bg-[#183E31] text-white rounded-none font-bold uppercase tracking-wider text-xs shadow-md transition active:scale-95"
+                    className="px-6 py-2.5 bg-[#0F2920] hover:bg-[#1a3d2f] text-white rounded-xl font-bold text-xs uppercase tracking-wider transition active:scale-95"
                   >
                     Write a Review
                   </button>
                 </div>
               ) : (
-                <div className="w-full space-y-4 text-left">
-                  <div className="flex items-center justify-between pb-2 border-b border-gray-100">
-                    <span className="text-xs font-bold text-gray-900">{reviews.length} Customer Feedback</span>
-                    <button
-                      onClick={() => setIsReviewModalOpen(true)}
-                      className="text-xs font-bold text-[#0F2920] hover:underline"
-                    >
-                      + Add Review
-                    </button>
+                <div className="w-full space-y-3">
+                  <div className="flex items-center justify-between pb-3 border-b border-[#E8E2D8]">
+                    <span className="text-sm font-bold text-gray-900">{reviews.length} Review{reviews.length !== 1 ? "s" : ""}</span>
                   </div>
-                  <div className="max-h-72 overflow-y-auto space-y-3 pr-2">
+                  <div className="max-h-72 overflow-y-auto space-y-3 pr-1">
                     {reviews.map((rev) => (
-                      <div key={rev.id} className="p-3 bg-gray-50 rounded-none border border-gray-100 space-y-1.5">
+                      <div key={rev.id} className="p-4 bg-[#FAF7F2] border border-[#E8E2D8] rounded-xl space-y-2">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold text-gray-900">{rev.name}</span>
+                          <span className="text-sm font-bold text-gray-900">{rev.name}</span>
                           <span className="text-[10px] text-gray-400">{rev.date}</span>
                         </div>
-                        <div className="flex items-center text-amber-400">
+                        <div className="flex items-center gap-0.5">
                           {[1, 2, 3, 4, 5].map((s) => (
-                            <Star key={s} size={11} className={s <= rev.rating ? "fill-current" : "text-gray-200"} />
+                            <Star key={s} size={12} className={s <= rev.rating ? "fill-amber-400 text-amber-400" : "text-[#E8E2D8]"} />
                           ))}
                         </div>
-                        <p className="text-xs text-gray-600">{rev.comment}</p>
+                        <p className="text-xs text-gray-600 leading-relaxed">{rev.comment}</p>
                       </div>
                     ))}
                   </div>
@@ -1456,33 +1341,33 @@ const ProductDetail: React.FC = () => {
           </div>
         </div>
 
-        {/* Related Masterpieces Section matching screenshot */}
+        {/* ── Related Products ─────────────────────────────────────────────────── */}
         {relatedProducts.length > 0 && (
-          <div className="py-12 border-t border-gray-200/80">
+          <div className="py-10 border-t border-[#E8E2D8]">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">Related Masterpieces</h2>
+              <div>
+                <span className="text-[10px] font-bold tracking-widest text-[#9A7B66] uppercase">You May Also Like</span>
+                <h2 className="text-xl font-bold text-gray-900 mt-0.5">Related Products</h2>
+              </div>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => scrollRelated("left")}
-                  className="w-8 h-8 rounded-none bg-white hover:bg-gray-100 border border-gray-200 shadow-2xs flex items-center justify-center text-gray-700 transition"
-                  title="Previous"
+                  className="w-8 h-8 rounded-full bg-white hover:bg-[#F5EFE6] border border-[#E8E2D8] flex items-center justify-center text-gray-600 transition"
                 >
-                  <ChevronLeft size={16} />
+                  <ChevronLeft size={15} />
                 </button>
                 <button
                   onClick={() => scrollRelated("right")}
-                  className="w-8 h-8 rounded-none bg-white hover:bg-gray-100 border border-gray-200 shadow-2xs flex items-center justify-center text-gray-700 transition"
-                  title="Next"
+                  className="w-8 h-8 rounded-full bg-white hover:bg-[#F5EFE6] border border-[#E8E2D8] flex items-center justify-center text-gray-600 transition"
                 >
-                  <ChevronRight size={16} />
+                  <ChevronRight size={15} />
                 </button>
               </div>
             </div>
 
-            {/* Horizontal Scrollable Carousel of 5 Cards */}
-            <div 
+            <div
               ref={relatedScrollRef}
-              className="flex gap-4 overflow-x-auto pb-4 no-scrollbar scroll-smooth"
+              className="flex gap-4 overflow-x-auto pb-3 no-scrollbar scroll-smooth"
             >
               {relatedProducts.map((relProduct, idx) => {
                 const relActualPrice = relProduct.actualPrice || (relProduct["act-price"] as number) || (relProduct.price ? Math.round(relProduct.price * 1.3) : 0);
@@ -1498,139 +1383,95 @@ const ProductDetail: React.FC = () => {
                   <div
                     key={relProduct.id || idx}
                     onClick={() => navigate(`/product/${encodeURIComponent(relProduct.id)}`, { state: relProduct })}
-                    className="w-56 sm:w-64 shrink-0 bg-white rounded-none border border-gray-200/80 p-3.5 hover:shadow-md transition-all duration-300 flex flex-col justify-between cursor-pointer group"
+                    className="w-52 sm:w-56 shrink-0 bg-white border border-[#E8E2D8] rounded-2xl p-3.5 hover:shadow-md transition-all duration-300 flex flex-col cursor-pointer group"
                   >
-                    <div>
-                      {/* Heart Wishlist */}
-                      <div className="flex justify-end mb-1">
-                        <button 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleWishlist(relProduct);
-                          }}
-                          className={`transition p-1 ${
-                            isInWishlist(relProduct.id) ? "text-red-500" : "text-gray-300 hover:text-red-500"
-                          }`}
-                        >
-                          <Heart size={16} className={isInWishlist(relProduct.id) ? "fill-current" : ""} />
-                        </button>
-                      </div>
-
-                      {/* Image */}
-                      <div className="aspect-square rounded-none bg-[#FAF8F5] p-2 flex items-center justify-center overflow-hidden mb-3 border border-gray-100">
-                        <img
-                          src={relProduct.image}
-                          alt={relProduct.title || relProduct.name}
-                          className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
-                        />
-                      </div>
-
-                      {/* Rating: ★ 4.5 (10) */}
-                      <div className="flex items-center gap-1 text-[11px] text-amber-500 mb-1.5">
-                        <div className="flex items-center">
-                          {[1, 2, 3, 4, 5].map((s) => (
-                            <Star key={s} size={11} className={s <= 4 ? "fill-amber-400 text-amber-400" : "text-gray-200"} />
-                          ))}
-                        </div>
-                        <span className="font-bold text-gray-800">4.5</span>
-                        <span className="text-gray-400 font-normal">(10)</span>
-                      </div>
-
-                      {/* Title */}
-                      <h4 className="text-xs font-bold text-gray-900 line-clamp-2 min-h-[32px] leading-tight mb-2 group-hover:text-emerald-900 transition-colors">
-                        {relProduct.title || relProduct.name}
-                      </h4>
+                    {/* Wishlist */}
+                    <div className="flex justify-end mb-1.5">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); toggleWishlist(relProduct); }}
+                        className={`p-1 transition ${isInWishlist(relProduct.id) ? "text-red-500" : "text-gray-300 hover:text-red-400"}`}
+                      >
+                        <Heart size={15} className={isInWishlist(relProduct.id) ? "fill-current" : ""} />
+                      </button>
                     </div>
 
-                    <div>
-                      {/* Price & Discount */}
-                      <div className="flex items-baseline gap-1.5 mb-3">
-                        <span className="text-sm font-extrabold text-gray-900">₹{relProduct.price}</span>
-                        {relActualPrice > relProduct.price && (
-                          <span className="text-[10px] text-gray-400 line-through">₹{relActualPrice}</span>
-                        )}
-                        <span className="text-[10px] font-bold text-[#D32F2F]">
-                          {relDiscount}% OFF
-                        </span>
-                      </div>
+                    {/* Image */}
+                    <div className="aspect-square rounded-xl bg-[#FAF7F2] flex items-center justify-center overflow-hidden mb-3 border border-[#E8E2D8]">
+                      <img
+                        src={relProduct.image}
+                        alt={relProduct.title || relProduct.name}
+                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                      />
+                    </div>
 
-                      {/* Action Buttons matching screenshot */}
-                      <div className="flex items-center gap-2">
-                        {relQtyInCart > 0 ? (
-                          <div
-                            onClick={(e) => e.stopPropagation()}
-                            className="flex-1 h-[28px] border border-[#0F2920] bg-[#f0f6f3] rounded-none flex items-center justify-between px-1 shadow-2xs"
-                          >
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (relQtyInCart > 1) {
-                                  updateQuantity(relCartItem!.id, relQtyInCart - 1);
-                                } else {
-                                  removeFromCart(relCartItem!.id);
-                                  toast.success(`Removed from cart`);
-                                }
-                              }}
-                              className="w-5 h-5 flex items-center justify-center bg-white hover:bg-gray-100 text-[#0F2920] border border-[#c4d6cc] rounded-none active:scale-90 transition font-bold"
-                              aria-label="Decrease quantity"
-                            >
-                              <Minus size={10} strokeWidth={2.5} />
-                            </button>
+                    {/* Stars */}
+                    <div className="flex items-center gap-1 mb-1.5">
+                      {[1,2,3,4,5].map((s) => (
+                        <Star key={s} size={10} className={s <= 4 ? "fill-amber-400 text-amber-400" : "text-[#E8E2D8]"} />
+                      ))}
+                      <span className="text-[10px] font-bold text-gray-700 ml-0.5">4.5</span>
+                    </div>
 
-                            <span className="font-bold text-[#0F2920] text-[11px] px-1 select-none">
-                              {relQtyInCart}
-                            </span>
+                    {/* Title */}
+                    <h4 className="text-xs font-semibold text-gray-900 line-clamp-2 leading-tight mb-2 group-hover:text-[#0F2920] transition-colors flex-1">
+                      {relProduct.title || relProduct.name}
+                    </h4>
 
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                updateQuantity(relCartItem!.id, relQtyInCart + 1);
-                              }}
-                              className="w-5 h-5 flex items-center justify-center bg-[#0F2920] hover:bg-[#183E31] text-white rounded-none active:scale-90 transition font-bold"
-                              aria-label="Increase quantity"
-                            >
-                              <Plus size={10} strokeWidth={2.5} />
-                            </button>
-                          </div>
-                        ) : (
+                    {/* Price */}
+                    <div className="flex items-baseline gap-1.5 mb-3">
+                      <span className="text-sm font-bold text-gray-900">₹{relProduct.price}</span>
+                      {relActualPrice > relProduct.price && (
+                        <span className="text-[10px] text-gray-400 line-through">₹{relActualPrice}</span>
+                      )}
+                      <span className="text-[10px] font-bold text-[#C57053]">{relDiscount}% OFF</span>
+                    </div>
+
+                    {/* Buttons */}
+                    <div className="flex gap-1.5" onClick={(e) => e.stopPropagation()}>
+                      {relQtyInCart > 0 ? (
+                        <div className="flex-1 h-7 border border-[#0F2920] bg-[#EDF4F0] rounded-lg flex items-center justify-between px-1.5">
                           <button
+                            type="button"
                             onClick={(e) => {
                               e.stopPropagation();
-                              addToCart({
-                                id: relProduct.id,
-                                name: relProduct.title || relProduct.name,
-                                price: relProduct.price,
-                                image: relProduct.image,
-                                quantity: 1
-                              });
-                              toast.success("Added to cart!");
+                              if (relQtyInCart > 1) updateQuantity(relCartItem!.id, relQtyInCart - 1);
+                              else { removeFromCart(relCartItem!.id); toast.success("Removed"); }
                             }}
-                            className="flex-1 py-1.5 px-2 bg-white hover:bg-gray-50 border border-gray-200 text-gray-800 rounded-none font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-1 shadow-2xs active:scale-95 transition"
+                            className="w-5 h-5 flex items-center justify-center bg-white text-[#0F2920] border border-[#C4D6CC] rounded active:scale-90 transition"
                           >
-                            <ShoppingCart size={11} />
-                            <span>Add to Cart</span>
+                            <Minus size={9} />
                           </button>
-                        )}
-
+                          <span className="font-bold text-[#0F2920] text-[11px]">{relQtyInCart}</span>
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); updateQuantity(relCartItem!.id, relQtyInCart + 1); }}
+                            className="w-5 h-5 flex items-center justify-center bg-[#0F2920] text-white rounded active:scale-90 transition"
+                          >
+                            <Plus size={9} />
+                          </button>
+                        </div>
+                      ) : (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            addToCart({
-                              id: relProduct.id,
-                              name: relProduct.title || relProduct.name,
-                              price: relProduct.price,
-                              image: relProduct.image,
-                              quantity: 1
-                            });
-                            navigate("/checkout");
+                            addToCart({ id: relProduct.id, name: relProduct.title || relProduct.name, price: relProduct.price, image: relProduct.image, quantity: 1 });
+                            toast.success("Added to cart!");
                           }}
-                          className="flex-1 py-1.5 px-2 bg-[#0F2920] hover:bg-[#183E31] text-white rounded-none font-bold text-[10px] uppercase tracking-wider flex items-center justify-center transition active:scale-95 shadow-2xs"
+                          className="flex-1 py-1.5 bg-white hover:bg-[#F5EFE6] border border-[#E8E2D8] text-gray-700 rounded-lg font-semibold text-[10px] flex items-center justify-center gap-1 transition active:scale-95"
                         >
-                          Buy Now
+                          <ShoppingCart size={10} /> Add
                         </button>
-                      </div>
+                      )}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          addToCart({ id: relProduct.id, name: relProduct.title || relProduct.name, price: relProduct.price, image: relProduct.image, quantity: 1 });
+                          navigate("/checkout");
+                        }}
+                        className="flex-1 py-1.5 bg-[#0F2920] hover:bg-[#1a3d2f] text-white rounded-lg font-semibold text-[10px] flex items-center justify-center transition active:scale-95"
+                      >
+                        Buy Now
+                      </button>
                     </div>
                   </div>
                 );
@@ -1641,25 +1482,25 @@ const ProductDetail: React.FC = () => {
 
       </div>
 
-      {/* Review Modal Form */}
+      {/* ── Review Modal ───────────────────────────────────────────────────────── */}
       <AnimatePresence>
         {isReviewModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white rounded-none p-6 sm:p-8 max-w-md w-full shadow-2xl relative"
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="bg-white rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative"
             >
               <button
                 onClick={() => setIsReviewModalOpen(false)}
-                className="absolute top-5 right-5 text-gray-400 hover:text-gray-600 p-1 rounded-none"
+                className="absolute top-5 right-5 text-gray-400 hover:text-gray-600 p-1 rounded-lg transition"
               >
-                <X size={20} />
+                <X size={18} />
               </button>
 
-              <h3 className="text-lg font-bold text-gray-900 mb-1">Write your Review</h3>
-              <p className="text-xs text-gray-500 mb-4">{product.title || product.name}</p>
+              <h3 className="text-lg font-bold text-gray-900 mb-0.5">Write a Review</h3>
+              <p className="text-xs text-gray-400 mb-5">{product.title || product.name}</p>
 
               <form onSubmit={handleReviewSubmit} className="space-y-4">
                 <div>
@@ -1670,23 +1511,23 @@ const ProductDetail: React.FC = () => {
                     value={formName}
                     onChange={(e) => setFormName(e.target.value)}
                     placeholder="Enter your name"
-                    className="w-full px-3.5 py-2 border border-gray-200 rounded-none text-xs focus:ring-2 focus:ring-[#0F2920] outline-none"
+                    className="w-full px-3.5 py-2.5 border border-[#E8E2D8] rounded-xl text-sm bg-[#FAF7F2] focus:ring-2 focus:ring-[#0F2920] outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">Your Rating</label>
-                  <div className="flex items-center gap-1.5 py-1">
+                  <label className="block text-xs font-bold text-gray-700 mb-1.5">Your Rating</label>
+                  <div className="flex items-center gap-1.5">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button
                         type="button"
                         key={star}
                         onClick={() => setFormRating(star)}
-                        className="text-amber-400 hover:scale-110 active:scale-95 transition-transform"
+                        className="hover:scale-110 active:scale-95 transition-transform"
                       >
                         <Star
-                          size={24}
-                          className={star <= formRating ? "fill-amber-400 text-amber-400" : "text-gray-200"}
+                          size={28}
+                          className={star <= formRating ? "fill-amber-400 text-amber-400" : "text-[#E8E2D8]"}
                         />
                       </button>
                     ))}
@@ -1694,38 +1535,37 @@ const ProductDetail: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">Review Comments</label>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">Your Review</label>
                   <textarea
                     required
                     rows={3}
                     value={formComment}
                     onChange={(e) => setFormComment(e.target.value)}
-                    placeholder="Describe your experience with this product..."
-                    className="w-full px-3.5 py-2 border border-gray-200 rounded-none text-xs focus:ring-2 focus:ring-[#0F2920] outline-none"
+                    placeholder="Describe your experience..."
+                    className="w-full px-3.5 py-2.5 border border-[#E8E2D8] rounded-xl text-sm bg-[#FAF7F2] focus:ring-2 focus:ring-[#0F2920] outline-none resize-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">Add Photo (Optional)</label>
-                  <div className="mt-1 flex flex-col items-center justify-center border border-dashed border-gray-200 rounded-none p-3 bg-gray-50 relative cursor-pointer hover:bg-gray-100 transition">
+                  <label className="block text-xs font-bold text-gray-700 mb-1">Add Photo <span className="text-gray-400 font-normal">(Optional)</span></label>
+                  <div className="flex items-center justify-center border-2 border-dashed border-[#E8E2D8] rounded-xl p-4 bg-[#FAF7F2] relative cursor-pointer hover:bg-[#F5EFE6] transition">
                     {imagePreview ? (
-                      <div className="relative w-full h-24 flex items-center justify-center">
-                        <img src={imagePreview} alt="Preview" className="max-h-full max-w-full object-contain rounded-none shadow" />
+                      <div className="relative w-full h-20 flex items-center justify-center">
+                        <img src={imagePreview} alt="Preview" className="max-h-full max-w-full object-contain rounded-lg" />
                         <button
                           type="button"
-                          onClick={() => {
-                            setImagePreview("");
-                            setFormImage("");
-                          }}
-                          className="absolute top-0 right-0 bg-red-600 text-white rounded-none p-1 shadow"
+                          onClick={() => { setImagePreview(""); setFormImage(""); }}
+                          className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-0.5 shadow"
                         >
-                          <X size={12} />
+                          <X size={11} />
                         </button>
                       </div>
                     ) : (
                       <>
-                        <Camera className="w-5 h-5 text-gray-400 mb-1" />
-                        <span className="text-[10px] text-gray-500 font-semibold">Select delivery pic</span>
+                        <div className="text-center pointer-events-none">
+                          <Camera className="w-5 h-5 text-[#9A7B66] mx-auto mb-1" />
+                          <span className="text-xs text-gray-400">Click to upload photo</span>
+                        </div>
                         <input
                           type="file"
                           accept="image/*"
@@ -1739,9 +1579,9 @@ const ProductDetail: React.FC = () => {
 
                 <button
                   type="submit"
-                  className="w-full py-3 bg-[#0F2920] hover:bg-[#183E31] text-white font-bold rounded-none text-xs uppercase tracking-wider shadow-md transition"
+                  className="w-full py-3 bg-[#0F2920] hover:bg-[#1a3d2f] text-white font-bold rounded-xl text-sm uppercase tracking-wider shadow transition active:scale-95"
                 >
-                  Submit Verified Review
+                  Submit Review
                 </button>
               </form>
             </motion.div>
@@ -1749,7 +1589,7 @@ const ProductDetail: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* Expand Image Lightbox */}
+      {/* ── Lightbox ────────────────────────────────────────────────────────────── */}
       <AnimatePresence>
         {activeLightboxImage && (
           <motion.div
@@ -1761,9 +1601,9 @@ const ProductDetail: React.FC = () => {
           >
             <button
               onClick={() => setActiveLightboxImage(null)}
-              className="absolute top-6 right-6 bg-white/20 hover:bg-white/40 text-white rounded-none p-2.5 transition"
+              className="absolute top-5 right-5 bg-white/10 hover:bg-white/20 text-white rounded-full p-2.5 transition"
             >
-              <X size={20} />
+              <X size={18} />
             </button>
             <motion.img
               initial={{ scale: 0.95 }}
@@ -1771,7 +1611,7 @@ const ProductDetail: React.FC = () => {
               exit={{ scale: 0.95 }}
               src={activeLightboxImage}
               alt="Full scale view"
-              className="max-w-full max-h-[85vh] object-contain rounded-none shadow-2xl"
+              className="max-w-full max-h-[88vh] object-contain rounded-xl shadow-2xl"
             />
           </motion.div>
         )}
