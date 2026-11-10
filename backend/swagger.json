@@ -2355,19 +2355,116 @@
       },
       "put": {
         "tags": [
-          "Storage & Uploads"
+          "Storage & Uploads",
+          "Products"
         ],
-        "summary": "Replace or update an existing uploaded product image",
+        "summary": "Update an existing product (pricing, stock, availability status, details, image)",
+        "description": "Updates an existing product in the catalog. Accepts status ('active', 'out_of_stock', 'coming_soon'), price, actual_price, stock, title, description, category, and image. Synchronizes immediately to products.json and MongoDB Atlas.",
         "requestBody": {
           "required": true,
           "content": {
             "multipart/form-data": {
               "schema": {
                 "type": "object",
+                "required": [
+                  "id"
+                ],
                 "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Product ID to update",
+                    "example": "sonu_1779295730883_0"
+                  },
+                  "title": {
+                    "type": "string",
+                    "description": "Product display title",
+                    "example": "Sonu 2 Tier Steamer With Glass Lid 20 Cm"
+                  },
+                  "price": {
+                    "type": "integer",
+                    "description": "Actual selling price (e.g. 1499)",
+                    "example": 1499
+                  },
+                  "actual_price": {
+                    "type": "integer",
+                    "description": "Strike price / MRP (e.g. 1999)",
+                    "example": 1999
+                  },
+                  "stock": {
+                    "type": "integer",
+                    "description": "Stock quantity",
+                    "example": 50
+                  },
+                  "status": {
+                    "$ref": "#/components/schemas/ProductAvailabilityStatus"
+                  },
+                  "product_discount": {
+                    "type": "number",
+                    "description": "Product-specific discount %",
+                    "example": 0
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Product description"
+                  },
+                  "category_name": {
+                    "type": "string",
+                    "description": "Category name"
+                  },
+                  "subcategory_name": {
+                    "type": "string",
+                    "description": "Subcategory name"
+                  },
                   "image": {
                     "type": "string",
-                    "format": "binary"
+                    "format": "binary",
+                    "description": "Optional new image file"
+                  }
+                }
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "example": "sonu_1779295730883_0"
+                  },
+                  "title": {
+                    "type": "string",
+                    "example": "Sonu 2 Tier Steamer With Glass Lid 20 Cm"
+                  },
+                  "price": {
+                    "type": "integer",
+                    "example": 1499
+                  },
+                  "actual_price": {
+                    "type": "integer",
+                    "example": 1999
+                  },
+                  "stock": {
+                    "type": "integer",
+                    "example": 50
+                  },
+                  "status": {
+                    "$ref": "#/components/schemas/ProductAvailabilityStatus"
+                  },
+                  "product_discount": {
+                    "type": "number",
+                    "example": 0
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "category_name": {
+                    "type": "string"
+                  },
+                  "subcategory_name": {
+                    "type": "string"
                   }
                 }
               }
@@ -2376,7 +2473,30 @@
         },
         "responses": {
           "200": {
-            "description": "Product image updated successfully"
+            "description": "Product updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Product updated successfully"
+                    },
+                    "product": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found"
           }
         }
       }
@@ -4390,6 +4510,44 @@
           }
         }
       }
+    },
+    "/api/storage/upload/products/status": {
+      "patch": {
+        "tags": [
+          "Products",
+          "Storage & Uploads"
+        ],
+        "summary": "Quick update product availability status (Active, Out of Stock, Coming Soon)",
+        "description": "Quickly toggle a product's availability status. Used by Products Admin table to instantly set any product to 'active', 'out_of_stock', or 'coming_soon'. Automatically updates stock (0 for out_of_stock, 50 for active/coming_soon), clears product cache, and synchronizes to products.json and MongoDB Atlas.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProductStatusRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Status updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateProductStatusResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing product id or status"
+          },
+          "404": {
+            "description": "Product not found"
+          }
+        }
+      }
     }
   },
   "security": [
@@ -4777,6 +4935,13 @@
           "addedAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ProductAvailabilityStatus"
+          },
+          "stock": {
+            "type": "integer",
+            "example": 50
           }
         }
       },
@@ -5015,6 +5180,66 @@
             "type": "number",
             "example": 2133.5,
             "description": "Total customer savings compared to MRP: max(0, strikePrice - finalPrice)."
+          },
+          "status": {
+            "$ref": "#/components/schemas/ProductAvailabilityStatus"
+          },
+          "stock": {
+            "type": "integer",
+            "example": 50,
+            "description": "Available stock quantity. If <= 0 or status is 'out_of_stock', purchasing is disabled."
+          }
+        }
+      },
+      "ProductAvailabilityStatus": {
+        "type": "string",
+        "enum": [
+          "active",
+          "out_of_stock",
+          "coming_soon"
+        ],
+        "description": "Product availability status: 'active' (normal purchasing enabled), 'out_of_stock' (stock = 0, Add to Cart & Buy Now disabled, Out of Stock badge), 'coming_soon' (preview only, purchasing disabled, Coming Soon gold badge)",
+        "example": "active"
+      },
+      "UpdateProductStatusRequest": {
+        "type": "object",
+        "required": [
+          "id",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "sonu_1779295730883_0",
+            "description": "Product unique identifier (prod_id or id)"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ProductAvailabilityStatus"
+          },
+          "stock": {
+            "type": "integer",
+            "example": 50,
+            "description": "Optional stock quantity override. If omitted, 'out_of_stock' sets stock to 0, while 'active' / 'coming_soon' sets stock to existing value or default 50."
+          }
+        }
+      },
+      "UpdateProductStatusResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "Product marked as Out of Stock"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ProductAvailabilityStatus"
+          },
+          "stock": {
+            "type": "integer",
+            "example": 0
           }
         }
       }
