@@ -28,6 +28,8 @@ export const allCollectionOptions = [
   { key: "All", label: "All Collections" },
   { key: "sonu_steel_products", label: "Sonu Steel Products" },
   { key: "Cello", label: "Cello" },
+  { key: "Milton Water Bottles", label: "Milton Water Bottles" },
+  { key: "Harshdeep Planters", label: "Harshadeep Planters & Pots" },
   { key: "Aquarium & Accessories", label: "Aquarium & Accessories" },
   { key: "Lunch Boxes", label: "Lunch Boxes" },
   { key: "Water Bottles & Jars", label: "Water Bottles & Jars" },
@@ -43,7 +45,6 @@ export const allCollectionOptions = [
   { key: "Handicrafts & Gifts", label: "Handicrafts & Gifts" },
   { key: "Ceramic Pots", label: "Ceramic Pots" },
   { key: "Artificial Plants", label: "Artificial Plants" },
-  { key: "Harshdeep Planters", label: "Harshdeep Planters" },
   { key: "Garlands", label: "Garlands" },
 ];
 
@@ -56,6 +57,8 @@ function formatName(name: string) {
   if (matched) return matched.label;
   if (name === "sonu_steel_products") return "Sonu Steel Products";
   if (name === "birds_and_accessories") return "Birds And Accessories";
+  if (name.toLowerCase().includes("harsh")) return "Harshadeep Planters & Pots";
+  if (name.toLowerCase().includes("milton")) return "Milton Water Bottles";
   return name
     .replace(/_/g, " ")
     .replace(/\b\w/g, (c) => c.toUpperCase());
@@ -261,7 +264,9 @@ const ProductsPage: React.FC = () => {
     return products.filter(
       (p) =>
         p.category?.toLowerCase() === categoryFilter.toLowerCase() ||
-        (categoryFilter === "German Silver & More" && p.category?.toLowerCase().includes("german"))
+        (categoryFilter === "German Silver & More" && p.category?.toLowerCase().includes("german")) ||
+        (categoryFilter.toLowerCase().includes("harsh") && p.category?.toLowerCase().includes("harsh")) ||
+        (categoryFilter.toLowerCase().includes("milton") && p.category?.toLowerCase().includes("milton"))
     );
   }, [products, categoryFilter]);
 
@@ -338,7 +343,9 @@ const ProductsPage: React.FC = () => {
       if (categoryFilter !== "All") {
         const matchesCategory =
           p.category?.toLowerCase() === categoryFilter.toLowerCase() ||
-          (categoryFilter === "German Silver & More" && p.category?.toLowerCase().includes("german"));
+          (categoryFilter === "German Silver & More" && p.category?.toLowerCase().includes("german")) ||
+          (categoryFilter.toLowerCase().includes("harsh") && p.category?.toLowerCase().includes("harsh")) ||
+          (categoryFilter.toLowerCase().includes("milton") && p.category?.toLowerCase().includes("milton"));
         if (!matchesCategory) return false;
       }
       // Subcategory / Pill filter
@@ -391,7 +398,9 @@ const ProductsPage: React.FC = () => {
           if (
             opt.toLowerCase() === cat ||
             (opt === "German Silver & More" && cat.includes("german")) ||
-            (opt === "sonu_steel_products" && (cat.includes("sonu") || p.title?.toLowerCase().includes("sonu")))
+            (opt === "sonu_steel_products" && (cat.includes("sonu") || p.title?.toLowerCase().includes("sonu"))) ||
+            (opt.toLowerCase().includes("harsh") && cat.includes("harsh")) ||
+            (opt.toLowerCase().includes("milton") && cat.includes("milton"))
           ) {
             return opt;
           }
