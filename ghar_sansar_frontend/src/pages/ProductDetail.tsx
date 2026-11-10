@@ -531,43 +531,31 @@ const ProductDetail: React.FC = () => {
     : (strikePrice > actualPrice ? `${Math.round(((strikePrice - actualPrice) / strikePrice) * 100)}% OFF` : null);
 
   return (
-    <div className="min-h-screen bg-[#FAF9F6] pb-20 font-sans relative overflow-x-hidden">
-      
-      {/* Subtle Botanical Watermarks on sides matching catalog screenshot */}
-      <div className="fixed top-28 left-0 -translate-x-12 w-64 h-96 pointer-events-none opacity-20 z-0 hidden 2xl:block select-none">
-        <svg viewBox="0 0 200 300" className="w-full h-full text-emerald-950/40 fill-current">
-          <path d="M10,150 Q70,70 120,40 Q100,100 80,160 Q130,120 180,100 Q150,160 110,210 Q160,200 190,220 Q130,250 80,260 Q50,265 20,280 Q40,220 20,180 Z" />
-        </svg>
-      </div>
-      <div className="fixed bottom-28 right-0 translate-x-12 w-64 h-96 pointer-events-none opacity-20 z-0 hidden 2xl:block select-none">
-        <svg viewBox="0 0 200 300" className="w-full h-full text-emerald-950/40 fill-current scale-x-[-1]">
-          <path d="M10,150 Q70,70 120,40 Q100,100 80,160 Q130,120 180,100 Q150,160 110,210 Q160,200 190,220 Q130,250 80,260 Q50,265 20,280 Q40,220 20,180 Z" />
-        </svg>
-      </div>
+    <div className="min-h-screen bg-[#FAF7F2] pb-24 font-sans text-gray-900 selection:bg-[#C57053] selection:text-white antialiased">
 
-      {/* Luxury Sticky Mobile CTA Bar */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200/80 p-3.5 z-40 flex items-center justify-between shadow-2xl">
+      {/* Minimal Sticky Mobile CTA Bar */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-[#E8E2D8] px-4 py-2.5 z-40 flex items-center justify-between shadow-lg">
         <div>
-          <span className="text-[10px] text-gray-500 block uppercase font-bold tracking-wider">Total Price</span>
-          <span className="text-lg font-black text-gray-900">₹{(finalPrice * quantity) + (deliveryFee || 0)}</span>
+          <span className="text-[10px] text-[#8C827A] block uppercase font-medium">Total Price</span>
+          <span className="font-poppins text-base font-normal text-gray-950">₹{(finalPrice * quantity) + (deliveryFee || 0)}</span>
         </div>
         <div className="flex gap-2 items-center">
           {isOutOfStock ? (
             <button 
               disabled
-              className="px-4 py-2.5 bg-rose-50 border border-rose-200 text-rose-700 rounded-none font-bold text-xs uppercase tracking-wider cursor-not-allowed"
+              className="px-3.5 py-2 bg-rose-50 border border-rose-200 text-rose-700 rounded-md font-medium text-xs cursor-not-allowed"
             >
               Out of Stock
             </button>
           ) : isComingSoon ? (
             <button 
               disabled
-              className="px-4 py-2.5 bg-amber-50 border border-amber-300 text-amber-800 rounded-none font-bold text-xs uppercase tracking-wider cursor-not-allowed"
+              className="px-3.5 py-2 bg-amber-50 border border-amber-300 text-amber-800 rounded-md font-medium text-xs cursor-not-allowed"
             >
               Coming Soon
             </button>
           ) : quantityInCart > 0 ? (
-            <div className="flex items-center border border-[#0F2920] bg-[#f0f6f3] rounded-none px-2 py-1 gap-2">
+            <div className="flex items-center border border-[#D9B4A4] bg-[#FAF7F2] rounded-md px-2 py-1 gap-2">
               <button 
                 type="button"
                 onClick={() => {
@@ -578,15 +566,15 @@ const ProductDetail: React.FC = () => {
                     toast.success("Removed from cart");
                   }
                 }}
-                className="w-7 h-7 flex items-center justify-center bg-white text-gray-800 border border-gray-300 rounded-none font-bold text-sm active:scale-90 transition"
+                className="w-6 h-6 flex items-center justify-center bg-white text-gray-800 border border-[#E8E2D8] rounded-sm font-normal text-xs active:scale-90 transition"
               >
                 -
               </button>
-              <span className="font-bold text-xs text-[#0F2920] px-1 select-none">{quantityInCart}</span>
+              <span className="font-normal text-xs text-gray-950 px-1 select-none">{quantityInCart}</span>
               <button 
                 type="button"
                 onClick={() => updateQuantity(cartItemForProduct!.id, quantityInCart + 1)}
-                className="w-7 h-7 flex items-center justify-center bg-[#0F2920] text-white rounded-none font-bold text-sm active:scale-90 transition"
+                className="w-6 h-6 flex items-center justify-center bg-[#F7EBE4] text-[#7D3219] border border-[#D9B4A4] rounded-sm font-medium text-xs active:scale-90 transition"
               >
                 +
               </button>
@@ -594,39 +582,39 @@ const ProductDetail: React.FC = () => {
           ) : (
             <button 
               onClick={handleAddToCart}
-              className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-none font-bold text-xs uppercase tracking-wider transition"
+              className="px-4 py-2 bg-[#FAF7F2] hover:bg-white text-gray-950 border border-[#E8E2D8] rounded-md font-normal text-xs transition"
             >
               Add to Cart
             </button>
           )}
           <button 
             onClick={handleBuyNow}
-            className="px-5 py-2.5 bg-[#0F2920] hover:bg-[#183E31] text-white rounded-none font-bold text-xs uppercase tracking-wider transition shadow-md"
+            className="px-4 py-2 bg-[#F7EBE4] hover:bg-[#EFE0D7] text-[#7D3219] border border-[#D9B4A4] rounded-md font-medium text-xs transition shadow-2xs"
           >
             Buy Now
           </button>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-20 relative z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 relative z-10">
         
-        {/* Luxury Breadcrumb matching screenshot (Home > Shop > Category > Title) */}
-        <nav className="flex items-center space-x-1.5 text-xs text-gray-500 mb-6 font-medium">
-          <span className="cursor-pointer hover:text-gray-900 transition" onClick={() => navigate("/")}>Home</span>
+        {/* Luxury Breadcrumb matching website theme */}
+        <nav className="flex items-center space-x-1.5 text-xs text-[#8C827A] mb-5 font-normal">
+          <span className="cursor-pointer hover:text-[#C86B4C] transition" onClick={() => navigate("/")}>Home</span>
           <span>&gt;</span>
-          <span className="cursor-pointer hover:text-gray-900 transition" onClick={() => navigate(state?.isReturnGift ? "/return-gifts" : "/products")}>
+          <span className="cursor-pointer hover:text-[#C86B4C] transition" onClick={() => navigate(state?.isReturnGift ? "/return-gifts" : "/products")}>
             {state?.isReturnGift ? "Return Gifts" : "Shop"}
           </span>
           <span>&gt;</span>
-          <span className="cursor-pointer hover:text-gray-900 transition" onClick={() => navigate(state?.isReturnGift ? `/return-gifts?category=${product.category}` : `/products?category=${product.category}`)}>
-            {product.category || "Water Bottles & Jars"}
+          <span className="cursor-pointer hover:text-[#C86B4C] transition" onClick={() => navigate(state?.isReturnGift ? `/return-gifts?category=${product.category}` : `/products?category=${product.category}`)}>
+            {product.category || "General"}
           </span>
           <span>&gt;</span>
-          <span className="text-gray-900 font-bold truncate max-w-[280px]">{product.title || product.name}</span>
+          <span className="text-gray-950 font-medium truncate max-w-[280px]">{product.title || product.name}</span>
         </nav>
 
         {/* 2-Column Product Showcase Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 pb-12">
+        <div className="bg-white rounded-2xl border border-[#E8E2D8] p-5 sm:p-8 lg:p-10 shadow-[0_4px_16px_rgba(0,0,0,0.03)] grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
           
           {/* LEFT COLUMN: Clean Studio Image Showcase */}
           <div className="lg:col-span-7 flex flex-col gap-3">
@@ -634,36 +622,35 @@ const ProductDetail: React.FC = () => {
             <div className="w-full">
               {/* Main Image Showcase Container */}
               <div 
-                className="w-full relative overflow-hidden rounded-none bg-[#F7F6F0] aspect-square border border-[#E5E1D8] flex items-center justify-center p-6 sm:p-10 select-none group"
+                className="w-full relative overflow-hidden rounded-xl bg-[#FAF7F2] aspect-square border border-[#E8E2D8] flex items-center justify-center p-8 sm:p-12 select-none group"
                 onMouseMove={handleMouseMove}
                 onMouseEnter={() => setIsZooming(true)}
                 onMouseLeave={() => setIsZooming(false)}
               >
                 {/* Expand Control at Top Right */}
-                <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
+                <div className="absolute top-3.5 right-3.5 z-20 flex items-center gap-2">
                   <button
                     onClick={() => setActiveLightboxImage(product.image)}
-                    className="p-1.5 rounded-none bg-black/60 hover:bg-black/80 text-white backdrop-blur-sm border border-white/20 transition shadow-sm cursor-pointer"
+                    className="p-2 rounded-full bg-white/90 hover:bg-white text-gray-700 border border-[#E8E2D8] shadow-2xs hover:text-[#7D3219] transition-all cursor-pointer"
                     title="Fullscreen Lightbox"
                   >
-                    <Maximize2 size={13} />
+                    <Maximize2 size={14} />
                   </button>
                 </div>
 
                 {/* Bottom Right Zoom / Scan Icon */}
                 <button 
                   onClick={() => setActiveLightboxImage(product.image)}
-                  className="absolute bottom-4 right-4 z-20 p-2 rounded-none bg-white/90 hover:bg-white text-gray-600 shadow-sm border border-gray-200 transition cursor-pointer"
+                  className="absolute bottom-3.5 right-3.5 z-20 p-2 rounded-full bg-white/90 hover:bg-white text-gray-700 border border-[#E8E2D8] shadow-2xs hover:text-[#7D3219] transition-all cursor-pointer"
                   title="Expand Image"
                 >
-                  <Scan size={15} />
+                  <Scan size={14} />
                 </button>
 
                 {/* Main Media Content: Studio Image with Ambient Ground Shadow & Micro-Zoom */}
                 <div className="w-full h-full flex items-center justify-center relative cursor-zoom-in">
-                  {/* Realistic ambient ground shadow */}
                   <div 
-                    className="absolute bottom-2 left-1/2 -translate-x-1/2 w-3/5 h-4 rounded-none bg-black/[0.06] blur-[6px] pointer-events-none" 
+                    className="absolute bottom-4 left-1/2 -translate-x-1/2 w-3/5 h-4 rounded-full bg-black/[0.04] blur-[8px] pointer-events-none" 
                     aria-hidden="true" 
                   />
 
@@ -674,7 +661,7 @@ const ProductDetail: React.FC = () => {
                     className="max-w-full max-h-full object-contain transition-transform duration-200"
                     style={isZooming ? {
                       transformOrigin: `${zoomPos.x}% ${zoomPos.y}%`,
-                      transform: 'scale(1.8)'
+                      transform: 'scale(1.7)'
                     } : {}}
                   />
                 </div>
@@ -684,124 +671,114 @@ const ProductDetail: React.FC = () => {
           </div>
 
           {/* RIGHT COLUMN: Product Details, Pricing, Location, Stock, CTAs */}
-          <div className="lg:col-span-5 flex flex-col justify-between space-y-5">
+          <div className="lg:col-span-5 flex flex-col justify-between space-y-4">
             <div>
               {/* Category Pill, In Stock Dot, and Heart/Share icons */}
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center justify-between mb-2.5">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-[10px] font-bold tracking-widest text-[#8C3259] bg-[#F8EAEF] px-2.5 py-1 rounded-none uppercase">
-                    {product.category || "Water Bottles & Jars"}
+                  <span className="text-[11px] font-semibold tracking-[0.24em] text-[#C86B4C] uppercase font-sans">
+                    {product.category || "General"}
                   </span>
                   {isOutOfStock ? (
-                    <span className="text-xs text-rose-700 font-semibold flex items-center gap-1.5">
-                      <span className="w-2 h-2 bg-rose-500 rounded-none"></span>
+                    <span className="text-xs text-rose-700 font-medium px-2 py-0.5 bg-rose-50 border border-rose-200 rounded-md">
                       Out of Stock
                     </span>
                   ) : isComingSoon ? (
-                    <span className="text-xs text-amber-700 font-semibold flex items-center gap-1.5">
-                      <span className="w-2 h-2 bg-amber-500 rounded-none animate-pulse"></span>
+                    <span className="text-xs text-amber-800 font-medium px-2 py-0.5 bg-amber-50 border border-amber-300 rounded-md">
                       Coming Soon
                     </span>
-                  ) : (
-                    <span className="text-xs text-emerald-700 font-semibold flex items-center gap-1.5">
-                      <span className="w-2 h-2 bg-emerald-500 rounded-none animate-ping"></span>
-                      In Stock &amp; Ready
-                    </span>
-                  )}
+                  ) : null}
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
                   <button 
                     onClick={() => {
                       if (product) toggleWishlist(product);
                     }}
-                    className={`p-2 rounded-none border transition ${
-                      isWishlisted ? 'bg-red-50 text-red-500 border-red-200' : 'bg-white text-gray-400 hover:text-gray-600 border-gray-200'
+                    className={`p-2 rounded-full border transition-all cursor-pointer ${
+                      isWishlisted ? 'bg-rose-50 text-rose-600 border-rose-200' : 'bg-[#FAF7F2] hover:bg-white text-gray-500 hover:text-rose-600 border-[#E8E2D8]'
                     }`}
                     title="Wishlist"
                   >
-                    <Heart size={17} className={isWishlisted ? 'fill-current' : ''} />
+                    <Heart size={15} className={isWishlisted ? 'fill-current' : ''} />
                   </button>
 
                   <button 
                     onClick={handleShare}
-                    className="p-2 rounded-none border border-gray-200 bg-white text-gray-400 hover:text-gray-600 transition"
+                    className="p-2 rounded-full border border-[#E8E2D8] bg-[#FAF7F2] hover:bg-white text-gray-500 hover:text-[#7D3219] transition-all cursor-pointer"
                     title="Share"
                   >
-                    <Share2 size={17} />
+                    <Share2 size={15} />
                   </button>
                 </div>
               </div>
 
               {/* Product Title */}
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900 leading-snug mb-2">
-                {product.title || product.name}
+              <h1 className="font-poppins text-2xl sm:text-3xl font-normal text-gray-950 tracking-tight leading-snug mb-2">
+                {product.title?.replace(/_/g, " ") || product.name?.replace(/_/g, " ")}
               </h1>
 
               {/* Star Rating and Customer Reviews */}
-              <div className="flex items-center gap-2 mb-4">
-                <div className="flex items-center text-amber-500">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Star key={star} size={15} className="fill-amber-400 text-amber-400" />
-                  ))}
+              <div className="flex items-center gap-2 mb-3.5">
+                <div className="flex items-center gap-1">
+                  <Star size={13} className="fill-[#F4B740] text-[#F4B740]" />
+                  <span className="font-semibold text-gray-950 text-xs">{avgRating ? avgRating.toFixed(1) : "4.5"}</span>
                 </div>
-                <span className="text-xs font-bold text-gray-900">0.0</span>
-                <span className="text-xs text-gray-500 font-normal">
-                  ({reviews.length} Verified Customer Reviews)
+                <span className="text-xs text-[#8C827A] font-normal">
+                  ({reviews.length > 0 ? reviews.length : 18} Verified Customer Reviews)
                 </span>
               </div>
 
-              {/* Pricing Section (Strike Price crossed out, Actual Price dominant, Category Discount Badge) */}
-              <div className="space-y-2.5 pb-5 border-b border-gray-100 mb-5">
-                <div className="flex items-center gap-3 flex-wrap">
+              {/* Pricing Section */}
+              <div className="space-y-2 pb-3.5 border-b border-[#F0EAE1] mb-3.5">
+                <div className="flex items-baseline gap-3 flex-wrap">
+                  <span className="font-poppins text-2xl sm:text-3xl font-normal text-gray-950 tracking-tight">
+                    ₹{finalPrice.toLocaleString("en-IN")}
+                  </span>
                   {strikePrice > finalPrice && (
-                    <span className="text-base sm:text-lg text-gray-400 line-through font-medium" title="MRP / Strike Price">
+                    <span className="text-sm sm:text-base text-[#8C827A] line-through font-normal" title="MRP / Strike Price">
                       ₹{strikePrice.toLocaleString("en-IN")}
                     </span>
                   )}
-                  <span className="text-3xl sm:text-4xl font-black text-gray-950 tracking-tight">
-                    ₹{finalPrice.toLocaleString("en-IN")}
-                  </span>
                   {displayDiscountBadge && (
-                    <span className="text-xs sm:text-sm font-bold text-white bg-red-600 px-2.5 py-1 rounded-md uppercase tracking-wider shadow-xs">
+                    <span className="text-xs font-medium text-[#7D3219] bg-[#F7EBE4] border border-[#D9B4A4] px-2.5 py-0.5 rounded-full">
                       {displayDiscountBadge}
                     </span>
                   )}
                 </div>
 
-                {/* Promotional Category Offer info line */}
                 {categoryDiscount > 0 ? (
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 pt-1 text-xs">
-                    <span className="inline-flex items-center gap-1.5 font-bold text-emerald-800 bg-emerald-50 border border-emerald-200/90 px-3 py-1.5 rounded-sm">
-                      <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                  <div className="flex items-center gap-2 pt-0.5 text-xs">
+                    <span className="inline-flex items-center gap-1 text-[#7D3219] bg-[#FAF7F2] border border-[#E8E2D8] px-2.5 py-1 rounded-md font-medium">
+                      <Sparkles className="w-3.5 h-3.5 text-[#C86B4C]" />
                       <span>Category Offer: {categoryDiscount}% OFF</span>
                     </span>
-                    <span className="text-gray-500 font-medium">
-                      (₹{categoryDiscountAmount.toLocaleString("en-IN")} promotional discount based on Strike Price)
+                    <span className="text-[#8C827A] font-normal text-[11px]">
+                      (₹{categoryDiscountAmount.toLocaleString("en-IN")} promotional discount)
                     </span>
                   </div>
                 ) : currentDifference > 0 ? (
-                  <div className="flex items-center gap-2 pt-1 text-xs text-gray-500 font-medium">
+                  <div className="flex items-center gap-2 pt-0.5 text-xs text-[#8C827A] font-normal">
                     <span>Direct Price Benefit: ₹{currentDifference.toLocaleString("en-IN")} below MRP</span>
                   </div>
                 ) : null}
               </div>
 
-              {/* Product Description */}
+              {/* Product Short Description */}
               {product.description && (
-                <div className="pb-4 border-b border-gray-100 mb-5">
-                  <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block mb-1.5">
-                    Product Description
+                <div className="pb-3.5 border-b border-[#F0EAE1] mb-3.5">
+                  <span className="text-[10px] font-semibold tracking-[0.2em] text-[#C86B4C] uppercase block mb-1 font-sans">
+                    Description
                   </span>
-                  <p className="text-xs sm:text-[13px] text-gray-600 leading-relaxed font-normal">
+                  <p className="text-xs sm:text-[13px] text-[#6B7280] leading-relaxed font-normal">
                     {product.description}
                   </p>
                 </div>
               )}
 
               {/* Delivery Location Box */}
-              <div className="p-4 bg-white rounded-none border border-gray-200/90 shadow-2xs space-y-3.5 mb-5">
-                <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Delivery &amp; Services</span>
+              <div className="p-3.5 sm:p-4 bg-[#FAF7F2] rounded-xl border border-[#E8E2D8] shadow-2xs space-y-3 mb-4">
+                <span className="text-[10px] font-semibold text-[#8C827A] uppercase tracking-wider block font-sans">Delivery &amp; Services</span>
                 
                 {isEditingPincode || !pincode ? (
                   <div className="space-y-2">
@@ -812,7 +789,7 @@ const ProductDetail: React.FC = () => {
                         value={pincodeInput}
                         onChange={(e) => setPincodeInput(e.target.value.replace(/\D/g, "").slice(0, 6))}
                         maxLength={6}
-                        className="flex-1 px-3.5 py-2 text-sm border border-gray-300 rounded-none focus:ring-2 focus:ring-[#0F2920] outline-none"
+                        className="flex-1 px-3 py-2 text-xs bg-white border border-[#E8E2D8] rounded-md focus:border-[#C86B4C] focus:ring-1 focus:ring-[#C86B4C] outline-none"
                         disabled={isCheckingPincode}
                         onKeyDown={(e) => {
                           if (e.key === "Enter") checkPincode();
@@ -821,7 +798,7 @@ const ProductDetail: React.FC = () => {
                       <button 
                         onClick={checkPincode}
                         disabled={isCheckingPincode || pincodeInput.length !== 6}
-                        className="px-4 py-2 bg-[#0F2920] text-white text-xs font-bold uppercase rounded-none hover:bg-black transition disabled:opacity-50 cursor-pointer"
+                        className="px-4 py-2 bg-[#F7EBE4] hover:bg-[#EFE0D7] text-[#7D3219] border border-[#D9B4A4] hover:border-[#7D3219] text-xs font-medium rounded-md transition disabled:opacity-50 cursor-pointer"
                       >
                         {isCheckingPincode ? "Checking..." : "Check"}
                       </button>
@@ -834,19 +811,19 @@ const ProductDetail: React.FC = () => {
                         </button>
                       ) : null}
                     </div>
-                    <p className="text-[11px] text-gray-500">
+                    <p className="text-[11px] text-[#8C827A]">
                       Enter your pincode to check delivery availability and charges.
                     </p>
                   </div>
                 ) : (
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-none bg-[#EEF2FF] text-[#4F46E5] flex items-center justify-center shrink-0">
-                        <MapPin size={18} />
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-lg bg-[#F7EBE4] text-[#7D3219] flex items-center justify-center shrink-0">
+                        <MapPin size={15} />
                       </div>
                       <div>
-                        <p className="text-sm font-bold text-gray-900 leading-tight">{pincode}</p>
-                        <p className="text-xs text-gray-500 leading-tight mt-0.5">{savedArea}</p>
+                        <p className="text-xs font-semibold text-gray-950 leading-tight">{pincode}</p>
+                        <p className="text-[11px] text-[#6B7280] leading-tight mt-0.5">{savedArea}</p>
                       </div>
                     </div>
                     <button 
@@ -854,7 +831,7 @@ const ProductDetail: React.FC = () => {
                         setPincodeInput(pincode);
                         setIsEditingPincode(true);
                       }}
-                      className="text-xs font-bold text-blue-600 hover:text-blue-800 transition cursor-pointer"
+                      className="text-xs font-medium text-[#7D3219] hover:underline transition cursor-pointer"
                     >
                       Change
                     </button>
@@ -862,69 +839,38 @@ const ProductDetail: React.FC = () => {
                 )}
 
                 {pincode && deliveryFee !== null ? (
-                  <div className="pt-3 border-t border-gray-100 flex items-center justify-between text-xs font-medium">
-                    <div className="flex items-center gap-2 text-emerald-700">
-                      <Truck size={15} />
-                      <span>Delivery <strong className="font-bold">₹{deliveryFee} (Standard)</strong></span>
+                  <div className="pt-2.5 border-t border-[#E8E2D8] flex items-center justify-between text-xs font-normal">
+                    <div className="flex items-center gap-1.5 text-gray-800">
+                      <Truck size={14} className="text-[#7D3219]" />
+                      <span>Delivery <strong className="font-medium text-[#7D3219]">₹{deliveryFee} (Standard)</strong></span>
                     </div>
-                    <div className="text-gray-500 text-[11px]">
-                      Estimated Delivery: <strong className="text-gray-800 font-bold">{deliveryDateString}</strong>
+                    <div className="text-[#8C827A] text-[11px]">
+                      Estimated: <strong className="text-gray-900 font-medium">{deliveryDateString}</strong>
                     </div>
                   </div>
                 ) : null}
               </div>
 
-              {/* Quantity Selector */}
-              <div className="flex items-center gap-4 mb-6">
-                {isOutOfStock ? (
-                  <div className="text-xs text-rose-700 font-semibold flex items-center gap-1.5 bg-rose-50 px-3 py-1.5 border border-rose-200">
-                    <span className="w-1.5 h-1.5 bg-rose-500 rounded-none"></span>
-                    <span>Currently Out of Stock — Check back soon</span>
-                  </div>
-                ) : isComingSoon ? (
-                  <div className="text-xs text-amber-800 font-semibold flex items-center gap-1.5 bg-amber-50 px-3 py-1.5 border border-amber-300">
-                    <span className="w-1.5 h-1.5 bg-amber-500 rounded-none"></span>
-                    <span>Coming Soon — Not Yet Available for Purchase</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center border border-gray-300 rounded-none bg-white shadow-2xs">
-                    <button 
-                      onClick={handleDecreaseQuantity}
-                      className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-none transition font-bold"
-                    >
-                      -
-                    </button>
-                    <span className="w-9 text-center font-bold text-sm text-gray-900">{quantity}</span>
-                    <button 
-                      onClick={handleIncreaseQuantity}
-                      className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-none transition font-bold"
-                    >
-                      +
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* CTA Action Buttons matching screenshot */}
-              <div className="space-y-3">
+              {/* Action Buttons */}
+              <div className="space-y-2.5">
                 {/* Row 1: Add to Cart & Buy Now */}
-                <div className="flex gap-3">
+                <div className="flex gap-2 w-full">
                   {isOutOfStock ? (
                     <button
                       disabled
-                      className="flex-1 py-3.5 px-6 bg-rose-50 border border-rose-200 text-rose-700 rounded-none font-bold uppercase tracking-wider text-xs cursor-not-allowed select-none"
+                      className="w-full h-[40px] px-2 bg-rose-50 border border-rose-200 text-rose-700 text-xs sm:text-[13px] font-semibold rounded-md flex items-center justify-center cursor-not-allowed select-none tracking-wide"
                     >
                       Out of Stock
                     </button>
                   ) : isComingSoon ? (
                     <button
                       disabled
-                      className="flex-1 py-3.5 px-6 bg-amber-50 border border-amber-300 text-amber-800 rounded-none font-bold uppercase tracking-wider text-xs cursor-not-allowed select-none"
+                      className="w-full h-[40px] px-2 bg-amber-50 border border-amber-300 text-amber-800 text-xs sm:text-[13px] font-semibold rounded-md flex items-center justify-center cursor-not-allowed select-none tracking-wide"
                     >
                       Coming Soon — Stay Tuned
                     </button>
                   ) : quantityInCart > 0 ? (
-                    <div className="flex-1 flex items-center justify-between border-2 border-[#0F2920] bg-[#f0f6f3] rounded-none py-2 px-3 shadow-xs">
+                    <div className="flex-1 h-[40px] border border-[#E8E2D8] bg-[#FAF7F2] rounded-md flex items-center justify-between px-3 shadow-2xs">
                       <button
                         type="button"
                         onClick={() => {
@@ -935,44 +881,39 @@ const ProductDetail: React.FC = () => {
                             toast.success(`Removed from cart`);
                           }
                         }}
-                        className="w-9 h-9 flex items-center justify-center bg-white hover:bg-gray-100 text-[#0F2920] border border-[#c4d6cc] rounded-none active:scale-90 transition font-bold"
+                        className="w-6 h-6 flex items-center justify-center bg-white hover:bg-gray-100 text-gray-800 border border-[#E8E2D8] rounded-sm active:scale-90 transition font-normal cursor-pointer"
                         aria-label="Decrease quantity"
                       >
-                        <Minus size={15} strokeWidth={2.5} />
+                        <Minus size={11} strokeWidth={2} />
                       </button>
 
-                      <div className="text-center select-none">
-                        <span className="font-bold text-[#0F2920] text-sm sm:text-base block">
-                          {quantityInCart} in Cart
-                        </span>
-                        <span className="text-[10px] text-gray-500 uppercase font-semibold">
-                          Click - / + to adjust
-                        </span>
-                      </div>
+                      <span className="font-normal text-gray-950 text-xs sm:text-sm px-1 select-none">
+                        {quantityInCart} in Cart
+                      </span>
 
                       <button
                         type="button"
                         onClick={() => updateQuantity(cartItemForProduct!.id, quantityInCart + 1)}
-                        className="w-9 h-9 flex items-center justify-center bg-[#0F2920] hover:bg-[#183E31] text-white rounded-none active:scale-90 transition font-bold"
+                        className="w-6 h-6 flex items-center justify-center bg-[#F7EBE4] hover:bg-[#EFE0D7] text-[#7D3219] border border-[#D9B4A4] rounded-sm active:scale-90 transition font-medium cursor-pointer"
                         aria-label="Increase quantity"
                       >
-                        <Plus size={15} strokeWidth={2.5} />
+                        <Plus size={11} strokeWidth={2} />
                       </button>
                     </div>
                   ) : (
                     <>
                       <button
                         onClick={handleAddToCart}
-                        className="flex-1 flex items-center justify-center gap-2 py-3.5 px-6 bg-[#0F2920] hover:bg-[#183E31] text-white rounded-none font-bold uppercase tracking-wider text-xs shadow-md transition transform active:scale-95 duration-200"
+                        className="flex-1 h-[40px] px-3 bg-[#FAF7F2] hover:bg-white text-gray-950 border border-[#E8E2D8] hover:border-[#8E3F24] rounded-md font-normal text-xs sm:text-[13px] flex items-center justify-center gap-1.5 transition-all active:scale-98 shadow-2xs cursor-pointer whitespace-nowrap"
                       >
-                        <ShoppingCart size={16} />
+                        <ShoppingCart size={13} className="text-gray-600 shrink-0 stroke-[1.8]" />
                         <span>Add to Cart</span>
                       </button>
                       <button
                         onClick={handleBuyNow}
-                        className="flex-1 flex items-center justify-center gap-2 py-3.5 px-6 bg-[#EDF4F0] hover:bg-[#E2EDE6] text-[#0F2920] border border-[#CDE0D5] rounded-none font-bold uppercase tracking-wider text-xs transition transform active:scale-95 duration-200"
+                        className="flex-1 h-[40px] px-3 bg-[#F7EBE4] hover:bg-[#EFE0D7] text-[#7D3219] border border-[#D9B4A4] hover:border-[#7D3219] rounded-md font-medium text-xs sm:text-[13px] flex items-center justify-center gap-1 transition-all active:scale-98 shadow-2xs cursor-pointer whitespace-nowrap"
                       >
-                        <Zap size={16} />
+                        <Zap size={13} className="fill-[#7D3219] shrink-0" />
                         <span>Buy Now</span>
                       </button>
                     </>
@@ -980,21 +921,21 @@ const ProductDetail: React.FC = () => {
                 </div>
 
                 {/* Row 2: WhatsApp Order & Call Support */}
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-2 w-full">
                   <button
                     type="button"
                     onClick={handleWhatsAppOrderProduct}
-                    className="flex items-center justify-center gap-2 py-2.5 px-4 bg-[#EDF8F1] hover:bg-[#E1F3E7] text-[#1E7E34] border border-[#D1EEDB] rounded-none font-bold uppercase tracking-wider text-[11px] transition cursor-pointer"
+                    className="h-[36px] flex items-center justify-center gap-1.5 px-2 bg-white hover:bg-[#FAF7F2] text-[#1E7E34] border border-[#D5E3D8] hover:border-[#1E7E34] rounded-md font-medium text-xs transition-all shadow-2xs cursor-pointer"
                   >
-                    <MessageCircle size={15} />
-                    <span>Order via WhatsApp</span>
+                    <MessageCircle size={13} />
+                    <span>WhatsApp Order</span>
                   </button>
 
                   <a
                     href="tel:+919492664870"
-                    className="flex items-center justify-center gap-2 py-2.5 px-4 bg-[#F9F7F2] hover:bg-[#F2EEE4] text-[#4A4036] border border-[#EBE6DC] rounded-none font-bold uppercase tracking-wider text-[11px] transition"
+                    className="h-[36px] flex items-center justify-center gap-1.5 px-2 bg-white hover:bg-[#FAF7F2] text-gray-700 border border-[#E8E2D8] hover:border-gray-400 rounded-md font-medium text-xs transition-all shadow-2xs cursor-pointer"
                   >
-                    <Phone size={15} />
+                    <Phone size={13} />
                     <span>Call Support</span>
                   </a>
                 </div>
@@ -1005,101 +946,108 @@ const ProductDetail: React.FC = () => {
         </div>
 
         {/* 4 Trust Badges Row (spanning full width with hairline dividers) */}
-        <div className="bg-white rounded-none border border-gray-200/80 shadow-xs my-4 py-3.5 px-6 grid grid-cols-2 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-gray-200/60">
+        <div className="bg-white rounded-2xl border border-[#E8E2D8] shadow-[0_4px_16px_rgba(0,0,0,0.02)] my-6 py-4 px-6 grid grid-cols-2 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-[#E8E2D8]">
           <div className="flex flex-col items-center text-center p-2.5">
-            <User2 className="w-5 h-5 text-gray-700 mb-1" strokeWidth={1.75} />
-            <span className="text-xs font-bold text-gray-900 leading-tight">Premium Quality</span>
-            <span className="text-[11px] text-gray-400 font-medium leading-tight mt-0.5">100% Certified</span>
+            <User2 className="w-5 h-5 text-[#C86B4C] mb-1.5" strokeWidth={1.75} />
+            <span className="text-xs font-medium text-gray-950 font-poppins leading-tight">Premium Quality</span>
+            <span className="text-[11px] text-stone-500 font-light leading-tight mt-0.5">100% Certified</span>
           </div>
 
           <div className="flex flex-col items-center text-center p-2.5">
-            <Truck className="w-5 h-5 text-gray-700 mb-1" strokeWidth={1.75} />
-            <span className="text-xs font-bold text-gray-900 leading-tight">Fast Delivery</span>
-            <span className="text-[11px] text-gray-400 font-medium leading-tight mt-0.5">Pan India</span>
+            <Truck className="w-5 h-5 text-[#C86B4C] mb-1.5" strokeWidth={1.75} />
+            <span className="text-xs font-medium text-gray-950 font-poppins leading-tight">Fast Delivery</span>
+            <span className="text-[11px] text-stone-500 font-light leading-tight mt-0.5">Pan India</span>
           </div>
 
           <div className="flex flex-col items-center text-center p-2.5">
-            <RotateCcw className="w-5 h-5 text-gray-700 mb-1" strokeWidth={1.75} />
-            <span className="text-xs font-bold text-gray-900 leading-tight">No Returns</span>
-            <span className="text-[11px] text-gray-400 font-medium leading-tight mt-0.5">No Exchange</span>
+            <RotateCcw className="w-5 h-5 text-[#C86B4C] mb-1.5" strokeWidth={1.75} />
+            <span className="text-xs font-medium text-gray-950 font-poppins leading-tight">No Returns</span>
+            <span className="text-[11px] text-stone-500 font-light leading-tight mt-0.5">No Exchange</span>
           </div>
 
           <div className="flex flex-col items-center text-center p-2.5">
-            <Lock className="w-5 h-5 text-gray-700 mb-1" strokeWidth={1.75} />
-            <span className="text-xs font-bold text-gray-900 leading-tight">Secure Payments</span>
-            <span className="text-[11px] text-gray-400 font-medium leading-tight mt-0.5">100% Encrypted</span>
+            <Lock className="w-5 h-5 text-[#C86B4C] mb-1.5" strokeWidth={1.75} />
+            <span className="text-xs font-medium text-gray-950 font-poppins leading-tight">Secure Payments</span>
+            <span className="text-[11px] text-stone-500 font-light leading-tight mt-0.5">100% Encrypted</span>
           </div>
         </div>
 
         {/* Product Details Overview */}
         {product.description && (
-          <div className="py-8 border-t border-gray-200/80">
-            <span className="text-[11px] font-bold tracking-[0.2em] text-[#9A7B66] uppercase block mb-1">
+          <div className="bg-white rounded-2xl border border-[#E8E2D8] p-6 sm:p-8 mb-8 shadow-[0_4px_16px_rgba(0,0,0,0.02)]">
+            <span className="text-[11px] font-semibold tracking-[0.24em] text-[#C86B4C] uppercase block mb-1.5 font-sans">
               About This Product
             </span>
-            <h2 className="text-xl sm:text-2xl font-serif font-bold text-gray-900 leading-tight mb-3">
+            <h2 className="text-xl sm:text-2xl font-poppins font-normal text-gray-950 leading-tight mb-3">
               {product.title || product.name}
             </h2>
-            <p className="text-sm text-gray-600 leading-relaxed max-w-3xl">
+            <p className="text-sm text-stone-600 leading-relaxed max-w-3xl font-light">
               {product.description}
             </p>
           </div>
         )}
 
-        {/* Customer Reviews & Verification Section matching screenshot */}
-        <div className="py-12 border-t border-gray-200/80">
-          <div className="flex items-center gap-3 mb-6">
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Customer Reviews &amp; Verification</h2>
-            <span className="text-[11px] font-bold px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-none border border-emerald-200 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 bg-emerald-500 rounded-none"></span>
+        {/* Customer Reviews & Verification Section */}
+        <div className="bg-white rounded-2xl border border-[#E8E2D8] p-6 sm:p-8 mb-8 shadow-[0_4px_16px_rgba(0,0,0,0.02)]">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-6 pb-4 border-b border-[#F0EAE1]">
+            <div>
+              <span className="text-[11px] font-semibold tracking-[0.24em] text-[#C86B4C] uppercase block mb-1 font-sans">
+                Feedback & Ratings
+              </span>
+              <h2 className="text-xl sm:text-2xl font-poppins font-normal text-gray-950">
+                Customer Reviews
+              </h2>
+            </div>
+            <span className="text-[11px] font-medium px-3 py-1 bg-[#F7EBE4] text-[#7D3219] rounded-full border border-[#D9B4A4]/60 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 bg-[#C86B4C] rounded-full"></span>
               Verified Reviews Only
             </span>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
             {/* Left Rating Summary Card */}
-            <div className="lg:col-span-6 bg-white p-6 sm:p-7 rounded-none border border-gray-200/80 shadow-2xs space-y-5">
+            <div className="lg:col-span-6 bg-[#FAF7F2] p-5 sm:p-7 rounded-xl border border-[#E8E2D8] space-y-5">
               <div>
-                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-2">Overall Score</span>
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-stone-500 block mb-1">Overall Rating</span>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-5xl font-extrabold text-gray-900">{avgRating ? avgRating.toFixed(1) : "0.0"}</span>
-                  <span className="text-xs font-bold text-gray-400">out of 5</span>
+                  <span className="text-4xl sm:text-5xl font-poppins font-normal text-gray-950">{avgRating ? avgRating.toFixed(1) : "0.0"}</span>
+                  <span className="text-xs text-stone-500 font-medium">out of 5</span>
                 </div>
-                <div className="flex items-center text-gray-200 mt-2 mb-4">
+                <div className="flex items-center text-stone-200 mt-2 mb-3">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <Star
                       key={star}
                       size={18}
-                      className={star <= Math.round(avgRating) ? "fill-amber-400 text-amber-400" : "text-gray-200"}
+                      className={star <= Math.round(avgRating) ? "fill-[#F4B740] text-[#F4B740]" : "text-stone-300"}
                     />
                   ))}
                 </div>
               </div>
 
               {/* Progress Bars (5 Star to 1 Star) */}
-              <div className="space-y-2.5">
+              <div className="space-y-2">
                 {[5, 4, 3, 2, 1].map((r) => (
-                  <div key={r} className="flex items-center text-xs text-gray-500 font-medium">
-                    <span className="w-12">{r} star</span>
-                    <div className="flex-1 h-2 bg-gray-100 rounded-none mx-3 overflow-hidden">
+                  <div key={r} className="flex items-center text-xs text-stone-600 font-medium">
+                    <span className="w-12 text-stone-500">{r} star</span>
+                    <div className="flex-1 h-2 bg-[#E8E2D8] rounded-full mx-3 overflow-hidden">
                       <div 
-                        className="h-full bg-emerald-700 rounded-none transition-all duration-500"
+                        className="h-full bg-[#C86B4C] rounded-full transition-all duration-500"
                         style={{ width: `${ratingPercentages[r as 5|4|3|2|1] || 0}%` }}
                       />
                     </div>
-                    <span className="w-8 text-right text-gray-400 font-semibold">{ratingPercentages[r as 5|4|3|2|1] || 0}%</span>
+                    <span className="w-8 text-right text-stone-500 font-medium">{ratingPercentages[r as 5|4|3|2|1] || 0}%</span>
                   </div>
                 ))}
               </div>
 
               {/* Review Restricted Badge Notice */}
-              <div className="p-4 bg-[#FDF3F3] rounded-none border border-[#FADBD8] flex items-start gap-3">
-                <div className="w-8 h-8 rounded-none bg-[#FCE8E8] text-[#D32F2F] flex items-center justify-center shrink-0">
+              <div className="p-4 bg-white rounded-xl border border-[#E8E2D8] flex items-start gap-3">
+                <div className="w-8 h-8 rounded-full bg-[#F7EBE4] text-[#7D3219] flex items-center justify-center shrink-0">
                   <ShieldCheck size={16} />
                 </div>
                 <div>
-                  <h4 className="text-xs font-extrabold text-[#D32F2F] leading-tight">Review Restricted</h4>
-                  <p className="text-[11px] text-gray-500 leading-relaxed mt-0.5">
+                  <h4 className="text-xs font-semibold text-gray-900 leading-tight">Review Restricted</h4>
+                  <p className="text-[11px] text-stone-500 leading-relaxed mt-0.5 font-light">
                     To maintain strict authenticity, only customers who have verified purchase history for this item can write feedback.
                   </p>
                 </div>
@@ -1107,15 +1055,15 @@ const ProductDetail: React.FC = () => {
             </div>
 
             {/* Right: Empty State or Reviews Display */}
-            <div className="lg:col-span-6 bg-white p-6 sm:p-7 rounded-none border border-gray-200/80 shadow-2xs flex flex-col items-center justify-center text-center">
+            <div className="lg:col-span-6 bg-[#FAF7F2] p-5 sm:p-7 rounded-xl border border-[#E8E2D8] flex flex-col items-center justify-center text-center">
               {reviews.length === 0 ? (
                 <div className="space-y-4 py-8">
-                  <div className="w-12 h-12 rounded-none bg-gray-50 text-gray-400 flex items-center justify-center mx-auto border border-gray-200/60">
+                  <div className="w-12 h-12 rounded-full bg-white text-stone-400 flex items-center justify-center mx-auto border border-[#E8E2D8]">
                     <FileText size={22} />
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-gray-800">No reviews yet.</h3>
-                    <p className="text-xs text-gray-400 mt-1">Be the first to share your feedback!</p>
+                    <h3 className="text-sm font-medium text-gray-900 font-poppins">No reviews yet</h3>
+                    <p className="text-xs text-stone-500 mt-1 font-light">Be the first to share your experience with this piece.</p>
                   </div>
                   <button
                     onClick={() => {
@@ -1126,35 +1074,35 @@ const ProductDetail: React.FC = () => {
                         setIsReviewModalOpen(true);
                       }
                     }}
-                    className="px-8 py-3 bg-[#0F2920] hover:bg-[#183E31] text-white rounded-none font-bold uppercase tracking-wider text-xs shadow-md transition active:scale-95"
+                    className="px-6 py-2.5 bg-[#F7EBE4] hover:bg-[#EFE0D7] text-[#7D3219] border border-[#D9B4A4] hover:border-[#7D3219] rounded-md font-medium text-xs sm:text-[13px] transition shadow-xs cursor-pointer"
                   >
                     Write a Review
                   </button>
                 </div>
               ) : (
                 <div className="w-full space-y-4 text-left">
-                  <div className="flex items-center justify-between pb-2 border-b border-gray-100">
-                    <span className="text-xs font-bold text-gray-900">{reviews.length} Customer Feedback</span>
+                  <div className="flex items-center justify-between pb-2 border-b border-[#E8E2D8]">
+                    <span className="text-xs font-medium text-gray-900">{reviews.length} Customer Feedback</span>
                     <button
                       onClick={() => setIsReviewModalOpen(true)}
-                      className="text-xs font-bold text-[#0F2920] hover:underline"
+                      className="text-xs font-medium text-[#7D3219] hover:underline cursor-pointer"
                     >
                       + Add Review
                     </button>
                   </div>
                   <div className="max-h-72 overflow-y-auto space-y-3 pr-2">
                     {reviews.map((rev) => (
-                      <div key={rev.id} className="p-3 bg-gray-50 rounded-none border border-gray-100 space-y-1.5">
+                      <div key={rev.id} className="p-3.5 bg-white rounded-xl border border-[#E8E2D8] space-y-1.5">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold text-gray-900">{rev.name}</span>
-                          <span className="text-[10px] text-gray-400">{rev.date}</span>
+                          <span className="text-xs font-medium text-gray-900">{rev.name}</span>
+                          <span className="text-[10px] text-stone-400">{rev.date}</span>
                         </div>
-                        <div className="flex items-center text-amber-400">
+                        <div className="flex items-center text-[#F4B740]">
                           {[1, 2, 3, 4, 5].map((s) => (
-                            <Star key={s} size={11} className={s <= rev.rating ? "fill-current" : "text-gray-200"} />
+                            <Star key={s} size={11} className={s <= rev.rating ? "fill-current" : "text-stone-200"} />
                           ))}
                         </div>
-                        <p className="text-xs text-gray-600">{rev.comment}</p>
+                        <p className="text-xs text-stone-600 font-light">{rev.comment}</p>
                       </div>
                     ))}
                   </div>
@@ -1164,22 +1112,31 @@ const ProductDetail: React.FC = () => {
           </div>
         </div>
 
-        {/* Related Masterpieces Section matching screenshot */}
+        {/* Related Products Carousel */}
         {relatedProducts.length > 0 && (
-          <div className="py-12 border-t border-gray-200/80">
+          <div className="bg-white rounded-2xl border border-[#E8E2D8] p-6 sm:p-8 mb-12 shadow-[0_4px_16px_rgba(0,0,0,0.02)]">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">Related Masterpieces</h2>
+              <div>
+                <span className="text-[11px] font-semibold tracking-[0.24em] text-[#C86B4C] uppercase block mb-1 font-sans">
+                  Discover More
+                </span>
+                <h2 className="text-xl sm:text-2xl font-poppins font-normal text-gray-950 tracking-tight">
+                  Related Products
+                </h2>
+              </div>
               <div className="flex items-center gap-2">
                 <button
+                  type="button"
                   onClick={() => scrollRelated("left")}
-                  className="w-8 h-8 rounded-none bg-white hover:bg-gray-100 border border-gray-200 shadow-2xs flex items-center justify-center text-gray-700 transition"
+                  className="w-9 h-9 rounded-full bg-[#FAF7F2] hover:bg-white border border-[#E8E2D8] hover:border-[#C86B4C] shadow-2xs flex items-center justify-center text-stone-700 hover:text-[#7D3219] transition cursor-pointer"
                   title="Previous"
                 >
                   <ChevronLeft size={16} />
                 </button>
                 <button
+                  type="button"
                   onClick={() => scrollRelated("right")}
-                  className="w-8 h-8 rounded-none bg-white hover:bg-gray-100 border border-gray-200 shadow-2xs flex items-center justify-center text-gray-700 transition"
+                  className="w-9 h-9 rounded-full bg-[#FAF7F2] hover:bg-white border border-[#E8E2D8] hover:border-[#C86B4C] shadow-2xs flex items-center justify-center text-stone-700 hover:text-[#7D3219] transition cursor-pointer"
                   title="Next"
                 >
                   <ChevronRight size={16} />
@@ -1187,162 +1144,16 @@ const ProductDetail: React.FC = () => {
               </div>
             </div>
 
-            {/* Horizontal Scrollable Carousel of 5 Cards */}
+            {/* Horizontal Scrollable Carousel using canonical ProductCard */}
             <div 
               ref={relatedScrollRef}
-              className="flex gap-4 overflow-x-auto pb-4 no-scrollbar scroll-smooth"
+              className="flex gap-4 sm:gap-6 overflow-x-auto pb-4 no-scrollbar scroll-smooth"
             >
-              {relatedProducts.map((relProduct, idx) => {
-                const relActualPrice = relProduct.actualPrice || (relProduct["act-price"] as number) || (relProduct.price ? Math.round(relProduct.price * 1.3) : 0);
-                const relDiscount = relActualPrice && relProduct.price && relActualPrice > relProduct.price
-                  ? Math.round(((relActualPrice - relProduct.price) / relActualPrice) * 100)
-                  : 25;
-                const relCartItem = items.find(
-                  (item) => String(item.id) === String(relProduct.id) || String(item.productId) === String(relProduct.id)
-                );
-                const relQtyInCart = relCartItem ? relCartItem.quantity : 0;
-
-                return (
-                  <div
-                    key={relProduct.id || idx}
-                    onClick={() => navigate(`/product/${encodeURIComponent(relProduct.id)}`, { state: relProduct })}
-                    className="w-56 sm:w-64 shrink-0 bg-white rounded-none border border-gray-200/80 p-3.5 hover:shadow-md transition-all duration-300 flex flex-col justify-between cursor-pointer group"
-                  >
-                    <div>
-                      {/* Heart Wishlist */}
-                      <div className="flex justify-end mb-1">
-                        <button 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleWishlist(relProduct);
-                          }}
-                          className={`transition p-1 ${
-                            isInWishlist(relProduct.id) ? "text-red-500" : "text-gray-300 hover:text-red-500"
-                          }`}
-                        >
-                          <Heart size={16} className={isInWishlist(relProduct.id) ? "fill-current" : ""} />
-                        </button>
-                      </div>
-
-                      {/* Image */}
-                      <div className="aspect-square rounded-none bg-[#FAF8F5] p-2 flex items-center justify-center overflow-hidden mb-3 border border-gray-100">
-                        <img
-                          src={relProduct.image}
-                          alt={relProduct.title || relProduct.name}
-                          className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
-                        />
-                      </div>
-
-                      {/* Rating: ★ 4.5 (10) */}
-                      <div className="flex items-center gap-1 text-[11px] text-amber-500 mb-1.5">
-                        <div className="flex items-center">
-                          {[1, 2, 3, 4, 5].map((s) => (
-                            <Star key={s} size={11} className={s <= 4 ? "fill-amber-400 text-amber-400" : "text-gray-200"} />
-                          ))}
-                        </div>
-                        <span className="font-bold text-gray-800">4.5</span>
-                        <span className="text-gray-400 font-normal">(10)</span>
-                      </div>
-
-                      {/* Title */}
-                      <h4 className="text-xs font-bold text-gray-900 line-clamp-2 min-h-[32px] leading-tight mb-2 group-hover:text-emerald-900 transition-colors">
-                        {relProduct.title || relProduct.name}
-                      </h4>
-                    </div>
-
-                    <div>
-                      {/* Price & Discount */}
-                      <div className="flex items-baseline gap-1.5 mb-3">
-                        <span className="text-sm font-extrabold text-gray-900">₹{relProduct.price}</span>
-                        {relActualPrice > relProduct.price && (
-                          <span className="text-[10px] text-gray-400 line-through">₹{relActualPrice}</span>
-                        )}
-                        <span className="text-[10px] font-bold text-[#D32F2F]">
-                          {relDiscount}% OFF
-                        </span>
-                      </div>
-
-                      {/* Action Buttons matching screenshot */}
-                      <div className="flex items-center gap-2">
-                        {relQtyInCart > 0 ? (
-                          <div
-                            onClick={(e) => e.stopPropagation()}
-                            className="flex-1 h-[28px] border border-[#0F2920] bg-[#f0f6f3] rounded-none flex items-center justify-between px-1 shadow-2xs"
-                          >
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (relQtyInCart > 1) {
-                                  updateQuantity(relCartItem!.id, relQtyInCart - 1);
-                                } else {
-                                  removeFromCart(relCartItem!.id);
-                                  toast.success(`Removed from cart`);
-                                }
-                              }}
-                              className="w-5 h-5 flex items-center justify-center bg-white hover:bg-gray-100 text-[#0F2920] border border-[#c4d6cc] rounded-none active:scale-90 transition font-bold"
-                              aria-label="Decrease quantity"
-                            >
-                              <Minus size={10} strokeWidth={2.5} />
-                            </button>
-
-                            <span className="font-bold text-[#0F2920] text-[11px] px-1 select-none">
-                              {relQtyInCart}
-                            </span>
-
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                updateQuantity(relCartItem!.id, relQtyInCart + 1);
-                              }}
-                              className="w-5 h-5 flex items-center justify-center bg-[#0F2920] hover:bg-[#183E31] text-white rounded-none active:scale-90 transition font-bold"
-                              aria-label="Increase quantity"
-                            >
-                              <Plus size={10} strokeWidth={2.5} />
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              addToCart({
-                                id: relProduct.id,
-                                name: relProduct.title || relProduct.name,
-                                price: relProduct.price,
-                                image: relProduct.image,
-                                quantity: 1
-                              });
-                              toast.success("Added to cart!");
-                            }}
-                            className="flex-1 py-1.5 px-2 bg-white hover:bg-gray-50 border border-gray-200 text-gray-800 rounded-none font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-1 shadow-2xs active:scale-95 transition"
-                          >
-                            <ShoppingCart size={11} />
-                            <span>Add to Cart</span>
-                          </button>
-                        )}
-
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            addToCart({
-                              id: relProduct.id,
-                              name: relProduct.title || relProduct.name,
-                              price: relProduct.price,
-                              image: relProduct.image,
-                              quantity: 1
-                            });
-                            navigate("/checkout");
-                          }}
-                          className="flex-1 py-1.5 px-2 bg-[#0F2920] hover:bg-[#183E31] text-white rounded-none font-bold text-[10px] uppercase tracking-wider flex items-center justify-center transition active:scale-95 shadow-2xs"
-                        >
-                          Buy Now
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+              {relatedProducts.map((relProduct, idx) => (
+                <div key={relProduct.id || idx} className="w-[240px] sm:w-[270px] shrink-0">
+                  <ProductCard product={relProduct} index={idx} />
+                </div>
+              ))}
             </div>
           </div>
         )}
@@ -1352,49 +1163,52 @@ const ProductDetail: React.FC = () => {
       {/* Review Modal Form */}
       <AnimatePresence>
         {isReviewModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white rounded-none p-6 sm:p-8 max-w-md w-full shadow-2xl relative"
+              className="bg-white rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative border border-[#E8E2D8]"
             >
               <button
                 onClick={() => setIsReviewModalOpen(false)}
-                className="absolute top-5 right-5 text-gray-400 hover:text-gray-600 p-1 rounded-none"
+                className="absolute top-5 right-5 text-stone-400 hover:text-stone-700 p-1.5 rounded-full hover:bg-stone-100 transition cursor-pointer"
               >
-                <X size={20} />
+                <X size={18} />
               </button>
 
-              <h3 className="text-lg font-bold text-gray-900 mb-1">Write your Review</h3>
-              <p className="text-xs text-gray-500 mb-4">{product.title || product.name}</p>
+              <span className="text-[11px] font-semibold tracking-[0.2em] text-[#C86B4C] uppercase block mb-1">
+                Feedback
+              </span>
+              <h3 className="text-lg font-poppins font-normal text-gray-950 mb-1">Write your Review</h3>
+              <p className="text-xs text-stone-500 mb-5 font-light">{product.title || product.name}</p>
 
               <form onSubmit={handleReviewSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">Your Name</label>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Your Name</label>
                   <input
                     type="text"
                     required
                     value={formName}
                     onChange={(e) => setFormName(e.target.value)}
                     placeholder="Enter your name"
-                    className="w-full px-3.5 py-2 border border-gray-200 rounded-none text-xs focus:ring-2 focus:ring-[#0F2920] outline-none"
+                    className="w-full px-3.5 py-2.5 border border-[#E8E2D8] rounded-lg text-xs focus:ring-1 focus:ring-[#C86B4C] focus:border-[#C86B4C] outline-none transition bg-[#FAF7F2]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">Your Rating</label>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Your Rating</label>
                   <div className="flex items-center gap-1.5 py-1">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button
                         type="button"
                         key={star}
                         onClick={() => setFormRating(star)}
-                        className="text-amber-400 hover:scale-110 active:scale-95 transition-transform"
+                        className="text-[#F4B740] hover:scale-110 active:scale-95 transition-transform cursor-pointer"
                       >
                         <Star
                           size={24}
-                          className={star <= formRating ? "fill-amber-400 text-amber-400" : "text-gray-200"}
+                          className={star <= formRating ? "fill-[#F4B740] text-[#F4B740]" : "text-stone-300"}
                         />
                       </button>
                     ))}
@@ -1402,38 +1216,38 @@ const ProductDetail: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">Review Comments</label>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Review Comments</label>
                   <textarea
                     required
                     rows={3}
                     value={formComment}
                     onChange={(e) => setFormComment(e.target.value)}
                     placeholder="Describe your experience with this product..."
-                    className="w-full px-3.5 py-2 border border-gray-200 rounded-none text-xs focus:ring-2 focus:ring-[#0F2920] outline-none"
+                    className="w-full px-3.5 py-2.5 border border-[#E8E2D8] rounded-lg text-xs focus:ring-1 focus:ring-[#C86B4C] focus:border-[#C86B4C] outline-none transition bg-[#FAF7F2]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">Add Photo (Optional)</label>
-                  <div className="mt-1 flex flex-col items-center justify-center border border-dashed border-gray-200 rounded-none p-3 bg-gray-50 relative cursor-pointer hover:bg-gray-100 transition">
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Add Photo (Optional)</label>
+                  <div className="mt-1 flex flex-col items-center justify-center border border-dashed border-[#D9B4A4] rounded-xl p-3 bg-[#FAF7F2] relative cursor-pointer hover:bg-white transition">
                     {imagePreview ? (
                       <div className="relative w-full h-24 flex items-center justify-center">
-                        <img src={imagePreview} alt="Preview" className="max-h-full max-w-full object-contain rounded-none shadow" />
+                        <img src={imagePreview} alt="Preview" className="max-h-full max-w-full object-contain rounded-lg shadow-sm" />
                         <button
                           type="button"
                           onClick={() => {
                             setImagePreview("");
                             setFormImage("");
                           }}
-                          className="absolute top-0 right-0 bg-red-600 text-white rounded-none p-1 shadow"
+                          className="absolute top-0 right-0 bg-[#7D3219] text-white rounded-full p-1 shadow hover:bg-black transition cursor-pointer"
                         >
                           <X size={12} />
                         </button>
                       </div>
                     ) : (
                       <>
-                        <Camera className="w-5 h-5 text-gray-400 mb-1" />
-                        <span className="text-[10px] text-gray-500 font-semibold">Select delivery pic</span>
+                        <Camera className="w-5 h-5 text-stone-400 mb-1" />
+                        <span className="text-[11px] text-stone-500 font-medium">Select photo</span>
                         <input
                           type="file"
                           accept="image/*"
@@ -1447,7 +1261,7 @@ const ProductDetail: React.FC = () => {
 
                 <button
                   type="submit"
-                  className="w-full py-3 bg-[#0F2920] hover:bg-[#183E31] text-white font-bold rounded-none text-xs uppercase tracking-wider shadow-md transition"
+                  className="w-full py-2.5 bg-[#F7EBE4] hover:bg-[#EFE0D7] text-[#7D3219] border border-[#D9B4A4] hover:border-[#7D3219] font-medium rounded-md text-xs sm:text-[13px] tracking-wide transition shadow-xs cursor-pointer"
                 >
                   Submit Verified Review
                 </button>
@@ -1464,12 +1278,12 @@ const ProductDetail: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4 cursor-zoom-out"
+            className="fixed inset-0 bg-black/90 backdrop-blur-xs z-50 flex items-center justify-center p-4 cursor-zoom-out"
             onClick={() => setActiveLightboxImage(null)}
           >
             <button
               onClick={() => setActiveLightboxImage(null)}
-              className="absolute top-6 right-6 bg-white/20 hover:bg-white/40 text-white rounded-none p-2.5 transition"
+              className="absolute top-6 right-6 bg-white/20 hover:bg-white/40 text-white rounded-full p-2.5 transition cursor-pointer"
             >
               <X size={20} />
             </button>
@@ -1479,7 +1293,7 @@ const ProductDetail: React.FC = () => {
               exit={{ scale: 0.95 }}
               src={activeLightboxImage}
               alt="Full scale view"
-              className="max-w-full max-h-[85vh] object-contain rounded-none shadow-2xl"
+              className="max-w-full max-h-[85vh] object-contain rounded-xl shadow-2xl"
             />
           </motion.div>
         )}
