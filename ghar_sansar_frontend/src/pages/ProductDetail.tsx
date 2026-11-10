@@ -902,15 +902,38 @@ const ProductDetail: React.FC = () => {
                   </button>
                 </div>
 
-                {/* Add to Cart */}
+                {/* Add to Cart / In-Cart Stepper */}
                 {quantityInCart > 0 ? (
-                  <div className="flex-1 h-[42px] border border-[#E8E2D8] bg-[#FAF7F2] rounded-xl flex items-center justify-between px-3 text-xs">
-                    <span className="font-medium text-[#181513]">{quantityInCart} in Cart</span>
+                  <div className="flex-1 h-[42px] border border-[#E8E2D8] bg-[#FAF7F2] rounded-xl flex items-center justify-between px-2 shadow-2xs">
                     <button
-                      onClick={() => updateQuantity(cartItemForProduct!.id, quantityInCart + 1)}
-                      className="text-[#8E3F24] font-medium hover:underline text-[11px]"
+                      type="button"
+                      onClick={() => {
+                        if (quantityInCart > 1) {
+                          updateQuantity(cartItemForProduct!.id, quantityInCart - 1);
+                        } else {
+                          removeFromCart(cartItemForProduct!.id);
+                          toast.success("Removed from cart");
+                        }
+                      }}
+                      className="w-7 h-7 flex items-center justify-center bg-white hover:bg-[#F0EAE1] text-gray-800 border border-[#E8E2D8] rounded-lg active:scale-90 transition cursor-pointer"
+                      title="Decrease or remove"
+                      aria-label="Decrease quantity"
                     >
-                      + Add
+                      <Minus size={11} />
+                    </button>
+
+                    <span className="font-medium text-xs text-[#181513] select-none">
+                      {quantityInCart} in Cart
+                    </span>
+
+                    <button
+                      type="button"
+                      onClick={() => updateQuantity(cartItemForProduct!.id, quantityInCart + 1)}
+                      className="w-7 h-7 flex items-center justify-center bg-[#F7EBE4] hover:bg-[#EFE0D7] text-[#7D3219] border border-[#D9B4A4] rounded-lg active:scale-90 transition cursor-pointer"
+                      title="Add more"
+                      aria-label="Increase quantity"
+                    >
+                      <Plus size={11} />
                     </button>
                   </div>
                 ) : (
