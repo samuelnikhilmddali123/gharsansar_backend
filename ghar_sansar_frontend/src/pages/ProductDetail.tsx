@@ -39,7 +39,6 @@ import { useAuth } from "../context/AuthContext";
 import { useOrders } from "../context/OrderContext";
 import { generateOrderId, generateSingleProductWhatsAppMessage, openWhatsAppOrderUrl } from "../utils/whatsappOrder";
 import ProductCard from "../components/ProductCard";
-import StudioImage from "../components/StudioImage";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -649,7 +648,7 @@ const ProductDetail: React.FC = () => {
 
               {/* Main Image Stage */}
               <div 
-                className="flex-1 w-full relative overflow-hidden rounded-2xl bg-white border border-[#E8E2D8] aspect-square flex items-center justify-center p-6 sm:p-10 select-none group shadow-[0_4px_24px_rgba(0,0,0,0.03)] cursor-crosshair"
+                className="flex-1 w-full relative overflow-hidden rounded-2xl bg-white border border-[#E8E2D8] aspect-square flex items-center justify-center p-4 sm:p-6 select-none group shadow-[0_4px_24px_rgba(0,0,0,0.03)] cursor-zoom-in"
                 onMouseMove={handleMouseMove}
                 onMouseEnter={() => setIsZooming(true)}
                 onMouseLeave={() => setIsZooming(false)}
@@ -709,21 +708,21 @@ const ProductDetail: React.FC = () => {
                   </>
                 )}
 
-                {/* Studio Product Image with Zoom */}
+                {/* Product Image Stage (Uncut, full product & packaging visibility) */}
                 <motion.div
                   key={activeImageIndex}
                   animate={is360Active ? { rotateY: [0, 360] } : {}}
                   transition={is360Active ? { repeat: Infinity, duration: 4, ease: "linear" } : {}}
-                  className="w-full h-full flex items-center justify-center relative"
+                  className="w-full h-full flex items-center justify-center relative p-2"
                 >
-                  <StudioImage
+                  <img
                     src={productImages[activeImageIndex] || product.image}
                     alt={cleanTitle}
                     loading="eager"
-                    className="max-w-full max-h-full object-contain transition-transform duration-200"
+                    className="max-w-[92%] max-h-[92%] w-auto h-auto object-contain select-none transition-transform duration-300 ease-out"
                     style={isZooming ? {
                       transformOrigin: `${zoomPos.x}% ${zoomPos.y}%`,
-                      transform: 'scale(1.7)'
+                      transform: 'scale(1.35)'
                     } : {}}
                   />
                 </motion.div>
@@ -1282,7 +1281,7 @@ const ProductDetail: React.FC = () => {
                   Handpicked Recommendations
                 </span>
                 <h2 className="font-poppins text-2xl font-normal text-[#181513] tracking-tight">
-                  Related Masterpieces
+                  Related Products
                 </h2>
               </div>
               <div className="flex items-center gap-2">
