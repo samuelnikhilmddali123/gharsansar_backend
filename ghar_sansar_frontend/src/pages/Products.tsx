@@ -203,7 +203,7 @@ const ProductsPage: React.FC = () => {
         id: "sonu",
         title: "Sonu Cookware",
         category: "sonu_steel_products",
-        image: "/products/sonu_steel_products/sonu%20poster.png",
+        image: "/products/sonu_steel_products/sonu%20banner.png",
         alt: "Sonu Cookware Crafted for Happy Cooking",
       },
       {
