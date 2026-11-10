@@ -21,18 +21,12 @@ import {
   Share2,
   ChevronLeft,
   ChevronRight,
-  ChevronDown,
   ChevronUp,
   MapPin,
   RotateCcw,
   Lock,
-  Flame,
-  Droplets,
-  Shield,
-  Coffee,
   Maximize2,
   RotateCw,
-  Play,
   FileText,
   Scan,
   Check,
@@ -98,7 +92,6 @@ const ProductDetail: React.FC = () => {
 
   // Commerce States
   const [quantity, setQuantity] = useState(state?.isReturnGift ? 50 : 1);
-  const [activeTab, setActiveTab] = useState("description");
   const { isInWishlist, toggleWishlist } = useWishlist();
   const isWishlisted = product ? isInWishlist(product.id) : false;
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
@@ -258,23 +251,6 @@ const ProductDetail: React.FC = () => {
   };
 
 
-  // Dynamic Product Specifications
-  const productSpecs = useMemo(() => {
-    const title = product?.title || product?.name || "";
-    const isBottle = /bottle|flask|mug|sipper|water/i.test(title + " " + (product?.category || ""));
-    const capacityMatch = title.match(/(\d+\s*(?:ml|l|ltr|gm|kg))/i);
-    const capacity = capacityMatch ? capacityMatch[1] : (isBottle ? "500 ml" : "Standard Size");
-
-    return [
-      { label: "Product Name", value: product?.title || product?.name || "Asian Diamond Insulated Inner Stainless Steel Flask" },
-      { label: "Capacity", value: capacity },
-      { label: "Material", value: isBottle ? "304 Stainless Steel (Food Grade)" : "Premium High-Grade Material" },
-      { label: "Color", value: "Silver / White (Diamond Design)" },
-      { label: "Insulation", value: isBottle ? "Double Wall Vacuum Insulation" : "Multi-layer Durable Coating" },
-      { label: "Usage", value: isBottle ? "Hot & Cold Beverages" : "Indoor & Everyday Living" },
-      { label: "Package Contents", value: isBottle ? "1 Flask with Lid (Cup)" : "1 Unit in Protective Box" },
-    ];
-  }, [product]);
 
   // Review Form States
   const [formName, setFormName] = useState("");
@@ -828,6 +804,18 @@ const ProductDetail: React.FC = () => {
                 ) : null}
               </div>
 
+              {/* Product Description */}
+              {product.description && (
+                <div className="pb-4 border-b border-gray-100 mb-5">
+                  <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block mb-1.5">
+                    Product Description
+                  </span>
+                  <p className="text-xs sm:text-[13px] text-gray-600 leading-relaxed font-normal">
+                    {product.description}
+                  </p>
+                </div>
+              )}
+
               {/* Delivery Location Box */}
               <div className="p-4 bg-white rounded-none border border-gray-200/90 shadow-2xs space-y-3.5 mb-5">
                 <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Delivery &amp; Services</span>
@@ -1060,222 +1048,18 @@ const ProductDetail: React.FC = () => {
           </div>
         </div>
 
-        {/* Tab Navigation matching screenshot */}
-        <div className="pt-6 border-b border-gray-200/80">
-          <div className="flex space-x-8 overflow-x-auto no-scrollbar">
-            {[
-              { id: "description", label: "Description" },
-              { id: "specifications", label: "Specifications" },
-              { id: "materials", label: "Materials" },
-              { id: "shipping", label: "Shipping & Delivery" }
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`pb-3 text-sm font-bold tracking-normal transition-all border-b-2 whitespace-nowrap ${
-                  activeTab === tab.id 
-                    ? "border-[#0F2920] text-[#0F2920]" 
-                    : "border-transparent text-gray-400 hover:text-gray-600"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Tab Content 1: Description Section (2 Columns with Feature Badges & Lifestyle Card) */}
-        {activeTab === "description" && (
-          <div className="py-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-            {/* Left Description Column */}
-            <div className="lg:col-span-7 space-y-4">
-              <span className="text-[11px] font-bold tracking-[0.2em] text-[#9A7B66] uppercase block">
-                Premium Collection
-              </span>
-              <h2 className="text-2xl sm:text-3xl font-serif font-bold text-gray-900 leading-tight">
-                Elegant Craftsmanship<br className="hidden sm:block" /> &amp; Luxury Aesthetics
-              </h2>
-              <p className="text-sm text-gray-600 leading-relaxed max-w-xl">
-                {product.description || "Elegant insulated flask/mug, designed for leakproof travel. Perfect for coffee, tea, and other hot/cold beverages on the go."} This premium collection highlights our dedication to creating beautiful, lasting decorative elements for your home. Made with precision and passion, this piece will bring style and refinement to any interior layout.
-              </p>
-
-              {/* 4 Feature Badges (2x2 Grid) */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4">
-                <div className="p-3 bg-white rounded-none border border-gray-200/70 shadow-2xs flex flex-col justify-between">
-                  <div className="w-8 h-8 rounded-none bg-amber-50 text-amber-600 flex items-center justify-center mb-2">
-                    <Flame size={16} />
-                  </div>
-                  <div>
-                    <span className="text-xs font-bold text-gray-900 block leading-tight">Keeps Hot &amp; Cold</span>
-                    <span className="text-[10px] text-gray-400 font-medium">for Long Hours</span>
-                  </div>
-                </div>
-
-                <div className="p-3 bg-white rounded-none border border-gray-200/70 shadow-2xs flex flex-col justify-between">
-                  <div className="w-8 h-8 rounded-none bg-blue-50 text-blue-600 flex items-center justify-center mb-2">
-                    <Droplets size={16} />
-                  </div>
-                  <div>
-                    <span className="text-xs font-bold text-gray-900 block leading-tight">Leak Proof</span>
-                    <span className="text-[10px] text-gray-400 font-medium">Design</span>
-                  </div>
-                </div>
-
-                <div className="p-3 bg-white rounded-none border border-gray-200/70 shadow-2xs flex flex-col justify-between">
-                  <div className="w-8 h-8 rounded-none bg-emerald-50 text-emerald-700 flex items-center justify-center mb-2">
-                    <Shield size={16} />
-                  </div>
-                  <div>
-                    <span className="text-xs font-bold text-gray-900 block leading-tight">304 Stainless Steel</span>
-                    <span className="text-[10px] text-gray-400 font-medium">Food Grade</span>
-                  </div>
-                </div>
-
-                <div className="p-3 bg-white rounded-none border border-gray-200/70 shadow-2xs flex flex-col justify-between">
-                  <div className="w-8 h-8 rounded-none bg-purple-50 text-purple-600 flex items-center justify-center mb-2">
-                    <Coffee size={16} />
-                  </div>
-                  <div>
-                    <span className="text-xs font-bold text-gray-900 block leading-tight">Portable &amp; Travel</span>
-                    <span className="text-[10px] text-gray-400 font-medium">With Cup Lid</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Lifestyle Banner Column matching screenshot */}
-            <div className="lg:col-span-5">
-              <div className="relative rounded-none overflow-hidden aspect-[16/10] shadow-md border border-gray-200 group">
-                <img
-                  src="/images/flask_lifestyle_banner.jpg"
-                  alt="Stay Refreshed Anywhere"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/20 p-6 sm:p-8 flex flex-col justify-between">
-                  <div>
-                    <h3 className="text-2xl font-serif font-bold text-white leading-tight mb-1">
-                      Stay Refreshed<br />Anywhere
-                    </h3>
-                    <p className="text-xs text-white/80 max-w-xs">
-                      Premium design for your everyday essentials.
-                    </p>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <span className="bg-black/60 backdrop-blur-md text-white border border-white/20 px-3 py-1.5 rounded-none text-xs font-bold flex items-center gap-1.5">
-                      <Flame size={13} className="text-red-400 fill-red-400" />
-                      <span>HOT 12 Hours</span>
-                    </span>
-                    <span className="bg-black/60 backdrop-blur-md text-white border border-white/20 px-3 py-1.5 rounded-none text-xs font-bold flex items-center gap-1.5">
-                      <Droplets size={13} className="text-cyan-300" />
-                      <span>COLD 24 Hours</span>
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Tab Content 2: Specifications Section (Table + Diamond Collection Banner) */}
-        {activeTab === "specifications" && (
-          <div className="py-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-            {/* Left: Specifications Table */}
-            <div className="lg:col-span-7">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-gray-900">Specifications</h3>
-                <span className="text-xs font-bold text-[#0F2920] flex items-center gap-1 hover:underline cursor-pointer">
-                  View More Details &rarr;
-                </span>
-              </div>
-
-              <div className="bg-white rounded-none border border-gray-200/80 overflow-hidden shadow-2xs">
-                <table className="w-full text-left text-xs">
-                  <tbody>
-                    {productSpecs.map((spec, i) => (
-                      <tr 
-                        key={i} 
-                        className={`border-b last:border-0 border-gray-100 ${i % 2 === 0 ? "bg-gray-50/60" : "bg-white"}`}
-                      >
-                        <td className="px-5 py-3.5 font-bold text-gray-500 w-1/3">{spec.label}</td>
-                        <td className="px-5 py-3.5 font-medium text-gray-900">{spec.value}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* Right: Diamond Collection Promo Card */}
-            <div className="lg:col-span-5">
-              <div className="relative rounded-none overflow-hidden aspect-[16/10] shadow-md border border-gray-200 group">
-                <img
-                  src="/images/diamond_collection_banner.jpg"
-                  alt="Diamond Collection"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent p-6 sm:p-8 flex flex-col justify-center">
-                  <span className="text-xs font-extrabold tracking-widest uppercase text-amber-300 mb-1">
-                    DIAMOND COLLECTION
-                  </span>
-                  <div className="w-10 h-0.5 bg-amber-300 mb-3" />
-                  <p className="text-xs text-white/90 max-w-xs font-medium">
-                    Premium design for your everyday essentials.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Tab Content 3: Materials Section */}
-        {activeTab === "materials" && (
-          <div className="py-10 max-w-3xl space-y-4">
-            <h3 className="text-xl font-serif font-bold text-gray-900">Only The Finest Materials</h3>
-            <p className="text-sm text-gray-600 leading-relaxed">
-              Constructed with eco-friendly and robust, food-grade 304 Stainless Steel that guarantees structural integrity, superior thermal retention, and long durability under regular household usage.
+        {/* Product Details Overview */}
+        {product.description && (
+          <div className="py-8 border-t border-gray-200/80">
+            <span className="text-[11px] font-bold tracking-[0.2em] text-[#9A7B66] uppercase block mb-1">
+              About This Product
+            </span>
+            <h2 className="text-xl sm:text-2xl font-serif font-bold text-gray-900 leading-tight mb-3">
+              {product.title || product.name}
+            </h2>
+            <p className="text-sm text-gray-600 leading-relaxed max-w-3xl">
+              {product.description}
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
-              <div className="p-4 bg-white rounded-none border border-gray-200/80 shadow-2xs">
-                <ShieldCheck className="w-6 h-6 text-emerald-700 mb-2" />
-                <h4 className="text-xs font-bold text-gray-900 mb-1">BPA-Free Certified</h4>
-                <p className="text-[11px] text-gray-500">100% non-toxic and food contact safe.</p>
-              </div>
-              <div className="p-4 bg-white rounded-none border border-gray-200/80 shadow-2xs">
-                <Award className="w-6 h-6 text-emerald-700 mb-2" />
-                <h4 className="text-xs font-bold text-gray-900 mb-1">304 Stainless Steel</h4>
-                <p className="text-[11px] text-gray-500">Rust-proof and odor-resistant interior.</p>
-              </div>
-              <div className="p-4 bg-white rounded-none border border-gray-200/80 shadow-2xs">
-                <Flame className="w-6 h-6 text-emerald-700 mb-2" />
-                <h4 className="text-xs font-bold text-gray-900 mb-1">Double Wall Vacuum</h4>
-                <p className="text-[11px] text-gray-500">Sweat-free exterior with extreme temperature lock.</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Tab Content 4: Shipping & Delivery Section */}
-        {activeTab === "shipping" && (
-          <div className="py-10 max-w-3xl space-y-4">
-            <h3 className="text-xl font-serif font-bold text-gray-900">Reliable Logistics Network</h3>
-            <p className="text-sm text-gray-600 leading-relaxed">
-              We deliver using professional high-security transport partners (Delhivery, BlueDart, DTDC). Each item is securely packaged inside specialized heavy-duty boxes with multi-layer bubble wrap to guarantee safe arrival.
-            </p>
-            <div className="bg-white p-5 rounded-none border border-gray-200/80 shadow-2xs space-y-2 text-xs text-gray-600">
-              <div className="flex items-center gap-2 font-bold text-gray-900">
-                <CheckCircle size={15} className="text-emerald-600" />
-                <span>Dispatched within 24–48 hours of order confirmation.</span>
-              </div>
-              <div className="flex items-center gap-2 font-bold text-gray-900">
-                <CheckCircle size={15} className="text-emerald-600" />
-                <span>Real-time SMS and WhatsApp tracking updates.</span>
-              </div>
-              <div className="flex items-center gap-2 font-bold text-gray-900">
-                <CheckCircle size={15} className="text-emerald-600" />
-                <span>Pan India standard delivery within 3–6 business days.</span>
-              </div>
-            </div>
           </div>
         )}
 
