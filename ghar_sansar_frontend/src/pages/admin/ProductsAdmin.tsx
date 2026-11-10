@@ -1360,9 +1360,18 @@ const ProductsAdmin: React.FC = () => {
                                         const strikeVal = p.strikePrice || p.strike_price || parseFloat(p.actual_price || p.price);
                                         const actualVal = p.actualPrice || parseFloat(p.price);
                                         const catDiscountPct = p.categoryDiscountPercentage || 0;
+                                        const hasDiscount = catDiscountPct > 0;
                                         const discountAmt = p.categoryDiscountAmount !== undefined
                                           ? p.categoryDiscountAmount
-                                          : (strikeVal > 0 && catDiscountPct > 0 ? Math.round(strikeVal * (catDiscountPct / 100)) : 0);
+                                          : (strikeVal > 0 && hasDiscount ? Math.round(strikeVal * (catDiscountPct / 100)) : 0);
+                                        const discountedVal = p.discountedPrice !== undefined
+                                          ? p.discountedPrice
+                                          : (hasDiscount ? Math.round((actualVal - (actualVal * (catDiscountPct / 100))) * 100) / 100 : actualVal);
+                                        const finalVal = p.finalPrice !== undefined
+                                          ? p.finalPrice
+                                          : (hasDiscount ? discountedVal : actualVal);
+                                        const stock = p.stock !== undefined ? p.stock : 50;
+                                        const prodStatus = p.status || (stock <= 0 ? "out_of_stock" : "active");
 
                                         return (
                                           <div
@@ -1376,6 +1385,24 @@ const ProductsAdmin: React.FC = () => {
                                                     {catDiscountPct}% OFF
                                                   </span>
                                                 )}
+                                                <div className="absolute top-2 right-2 z-10">
+                                                  <select
+                                                    value={prodStatus}
+                                                    onChange={(e) => handleQuickStatusChange(p.id, e.target.value as any)}
+                                                    className={`text-[10px] font-bold py-0.5 pl-2 pr-5 rounded-full appearance-none cursor-pointer border shadow-xs outline-none ${
+                                                      prodStatus === "out_of_stock"
+                                                        ? "bg-rose-50 text-rose-700 border-rose-300"
+                                                        : prodStatus === "coming_soon"
+                                                        ? "bg-amber-50 text-amber-800 border-amber-300"
+                                                        : "bg-emerald-50 text-emerald-800 border-emerald-300"
+                                                    }`}
+                                                    title="Click to change status"
+                                                  >
+                                                    <option value="active">Active</option>
+                                                    <option value="out_of_stock">Out of Stock</option>
+                                                    <option value="coming_soon">Coming Soon</option>
+                                                  </select>
+                                                </div>
                                                 <img
                                                   src={fixImageUrl(p.image)}
                                                   alt={p.title}
