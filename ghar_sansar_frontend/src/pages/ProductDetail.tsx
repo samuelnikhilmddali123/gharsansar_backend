@@ -494,9 +494,11 @@ const ProductDetail: React.FC = () => {
 
   const scrollRelated = (direction: "left" | "right") => {
     if (relatedScrollRef.current) {
-      const scrollAmount = 320;
-      relatedScrollRef.current.scrollBy({
-        left: direction === "left" ? -scrollAmount : scrollAmount,
+      const container = relatedScrollRef.current;
+      const card = container.firstElementChild as HTMLElement;
+      const step = card ? (card.offsetWidth + 16) : 300;
+      container.scrollBy({
+        left: direction === "left" ? -step : step,
         behavior: "smooth"
       });
     }
@@ -1307,10 +1309,17 @@ const ProductDetail: React.FC = () => {
             {/* Render with the site's official ProductCard component */}
             <div 
               ref={relatedScrollRef}
-              className="flex gap-4 overflow-x-auto pb-4 no-scrollbar scroll-smooth"
+              className="flex gap-4 overflow-x-auto pb-5 pt-1 scroll-smooth snap-x snap-mandatory related-products-scroll"
+              style={{
+                scrollbarWidth: 'thin',
+                scrollbarColor: '#8E3F24 #E8E2D8'
+              }}
             >
               {relatedProducts.map((relProduct, idx) => (
-                <div key={relProduct.id || idx} className="w-64 sm:w-72 shrink-0">
+                <div 
+                  key={relProduct.id || idx} 
+                  className="w-full sm:w-[calc((100%-16px)/2)] md:w-[calc((100%-32px)/3)] lg:w-[calc((100%-48px)/4)] xl:w-[calc((100%-64px)/5)] shrink-0 snap-start"
+                >
                   <ProductCard product={relProduct} index={idx} />
                 </div>
               ))}

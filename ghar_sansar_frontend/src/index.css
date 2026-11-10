@@ -265,3 +265,19 @@ html {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+/* Related products horizontal scrollbar */
+.related-products-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+.related-products-scroll::-webkit-scrollbar-track {
+  background: #E8E2D8;
+  border-radius: 9999px;
+}
+.related-products-scroll::-webkit-scrollbar-thumb {
+  background: #8E3F24;
+  border-radius: 9999px;
+}
+.related-products-scroll::-webkit-scrollbar-thumb:hover {
+  background: #742F19;
+}
