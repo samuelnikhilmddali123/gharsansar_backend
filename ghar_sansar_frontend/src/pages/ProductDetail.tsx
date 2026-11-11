@@ -9,35 +9,30 @@ import {
   Zap, 
   Star, 
   Camera, 
+  User2, 
   X, 
   CheckCircle,
   ShieldCheck,
   Truck,
   Award,
+  CreditCard,
   Heart,
   Info,
   Share2,
   ChevronLeft,
   ChevronRight,
-<<<<<<< HEAD
-=======
   ChevronUp,
->>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
   MapPin,
   RotateCcw,
   Lock,
   Maximize2,
-<<<<<<< HEAD
-  RotateCw,
-=======
->>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
   FileText,
+  Scan,
+  Check,
+  ExternalLink,
   Plus,
   Minus,
-  Sparkles,
-  Package,
-  Clock,
-  Check
+  Sparkles
 } from "lucide-react";
 import { useProducts, Product } from "../context/ProductContext";
 import { useCart } from "../context/CartContext";
@@ -46,6 +41,7 @@ import { useAuth } from "../context/AuthContext";
 import { useOrders } from "../context/OrderContext";
 import { generateOrderId, generateSingleProductWhatsAppMessage, openWhatsAppOrderUrl } from "../utils/whatsappOrder";
 import ProductCard from "../components/ProductCard";
+import StudioImage from "../components/StudioImage";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -71,14 +67,13 @@ const ProductDetail: React.FC = () => {
   const id = decodeURIComponent(pathname.split("/").pop() || "");
 
   // Fetch target product with robust fallback matching
-  const product: Product | null = state || useMemo(() => {
+  const product = state || useMemo(() => {
     if (!id || !products || products.length === 0) return null;
     return (
       products.find((p) => String(p.id) === String(id)) ||
       products.find((p: any) => String(p._id) === String(id)) ||
       products.find((p) => encodeURIComponent(String(p.id)) === encodeURIComponent(String(id))) ||
-      products.find((p) => p.title?.toLowerCase() === id.toLowerCase() || p.title?.toLowerCase() === decodeURIComponent(id).toLowerCase()) ||
-      null
+      products.find((p) => p.title?.toLowerCase() === id.toLowerCase() || p.title?.toLowerCase() === decodeURIComponent(id).toLowerCase())
     );
   }, [id, products]);
 
@@ -88,28 +83,13 @@ const ProductDetail: React.FC = () => {
   );
   const quantityInCart = cartItemForProduct ? cartItemForProduct.quantity : 0;
 
-  // Determine if this is viewed in Return Gift mode
-  const isReturnGiftItem = Boolean(state?.isReturnGift || product?.category?.toLowerCase().includes("return") || pathname.includes("return-gift"));
-  const minQty = isReturnGiftItem ? 50 : 1;
-
   // Gallery States
-<<<<<<< HEAD
-  const [activeImageIndex, setActiveImageIndex] = useState(0);
-  const [is360Active, setIs360Active] = useState(false);
-  const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 });
-=======
   const [zoomPos, setZoomPos] = useState({ x: 0, y: 0 });
->>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
   const [isZooming, setIsZooming] = useState(false);
   const [activeLightboxImage, setActiveLightboxImage] = useState<string | null>(null);
 
   // Commerce States
-<<<<<<< HEAD
-  const [quantity, setQuantity] = useState(minQty);
-  const [activeTab, setActiveTab] = useState<"overview" | "specs" | "shipping" | "reviews">("overview");
-=======
   const [quantity, setQuantity] = useState(state?.isReturnGift ? 50 : 1);
->>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
   const { isInWishlist, toggleWishlist } = useWishlist();
   const isWishlisted = product ? isInWishlist(product.id) : false;
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
@@ -121,54 +101,20 @@ const ProductDetail: React.FC = () => {
   // Related products carousel ref
   const relatedScrollRef = useRef<HTMLDivElement>(null);
 
-<<<<<<< HEAD
-  // Pincode setup
-  const getInitialPincode = () => {
-    const local = localStorage.getItem("user_pincode");
-    if (local && /^\d{6}$/.test(local)) return local;
-    try {
-      const stored = localStorage.getItem("user_shipping_address");
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        const zip = parsed.zipCode || parsed.pincode;
-        if (zip && /^\d{6}$/.test(String(zip).trim())) return String(zip).trim();
-      }
-    } catch {}
-    return "520008";
-  };
-
-  const cleanAreaText = (val: string) => {
-    if (!val || /idhe/i.test(val)) return "Vijayawada, Andhra Pradesh";
-    return val;
-=======
   // Helper to read initial pincode from account addresses or explicitly saved pincode
   const getInitialPincode = () => {
     const local = localStorage.getItem("user_pincode");
     // Ensure we do not use legacy hardcoded default "520008"
     if (local && /^\d{6}$/.test(local) && local !== "520008") return local;
     return "";
->>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
   };
 
   const getInitialArea = () => {
     const localPin = localStorage.getItem("user_pincode");
     if (!localPin || localPin === "520008") return "";
     const localArea = localStorage.getItem("user_area");
-<<<<<<< HEAD
-    if (localArea && !/idhe/i.test(localArea)) return localArea;
-    try {
-      const stored = localStorage.getItem("user_shipping_address");
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        const area = [parsed.city, parsed.state].filter(Boolean).join(", ") || parsed.city;
-        if (area && !/idhe/i.test(area)) return area;
-      }
-    } catch {}
-    return "Vijayawada, Andhra Pradesh";
-=======
     if (localArea && localArea !== "Vijayawada, Andhra Pradesh") return localArea;
     return "";
->>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
   };
 
   const [pincode, setPincode] = useState<string>(getInitialPincode);
@@ -202,8 +148,7 @@ const ProductDetail: React.FC = () => {
       if (zip) {
         const code = String(zip).trim();
         if (/^\d{6}$/.test(code)) {
-          const rawArea = [activeAddr.city, activeAddr.state].filter(Boolean).join(", ") || activeAddr.city || "Andhra Pradesh";
-          const area = cleanAreaText(rawArea);
+          const area = [activeAddr.city, activeAddr.state].filter(Boolean).join(", ") || activeAddr.city || "India";
           const fee = /^5[0-3]/.test(code) ? 99 : 149;
 
           setPincode(code);
@@ -230,7 +175,7 @@ const ProductDetail: React.FC = () => {
       const data = await res.json();
       
       let areaName = "India";
-      if (data && data[0] && data[0].Status === "Success" && data[0].PostOffice?.length > 0) {
+      if (data && data[0] && data[0].Status === "Success") {
         const postOffice = data[0].PostOffice[0];
         areaName = `${postOffice.District}, ${postOffice.State}`;
       }
@@ -245,7 +190,7 @@ const ProductDetail: React.FC = () => {
       localStorage.setItem("user_area", areaName);
       
       toast.success(`Delivery to ${areaName} (₹${fee})`);
-    } catch {
+    } catch (err) {
       const fee = /^5[0-3]/.test(pincodeInput) ? 99 : 149;
       setDeliveryFee(fee);
       setSavedArea("India");
@@ -253,14 +198,18 @@ const ProductDetail: React.FC = () => {
       setIsEditingPincode(false);
       localStorage.setItem("user_pincode", pincodeInput);
       localStorage.setItem("user_area", "India");
-      toast.success(`Delivery available (₹${fee})`);
+      toast.success(`Delivery available! (₹${fee})`);
     } finally {
       setIsCheckingPincode(false);
     }
   };
 
   const handleDecreaseQuantity = () => {
-    setQuantity((prev) => Math.max(minQty, prev - 1));
+    if (state?.isReturnGift) {
+      setQuantity(Math.max(50, quantity - 1));
+    } else {
+      setQuantity(Math.max(1, quantity - 1));
+    }
   };
 
   const handleIncreaseQuantity = () => {
@@ -269,15 +218,15 @@ const ProductDetail: React.FC = () => {
       toast.error(`Only ${product.stock} items left in stock`);
       return;
     }
-    setQuantity((prev) => prev + 1);
+    setQuantity(quantity + 1);
   };
 
   const deliveryDateString = useMemo(() => {
     const date = new Date();
     date.setDate(date.getDate() + 4);
     return date.toLocaleDateString("en-US", {
-      weekday: "short",
-      month: "short",
+      weekday: "long",
+      month: "long",
       day: "numeric",
     });
   }, []);
@@ -285,49 +234,21 @@ const ProductDetail: React.FC = () => {
   const handleShare = async () => {
     if (!product) return;
     const shareData = {
-      title: (product.title || product.name || "").replace(/_/g, " "),
-      text: `Check out ${(product.title || product.name || "").replace(/_/g, " ")} on Ghar Sansar!`,
+      title: product.title || product.name,
+      text: `Check out ${product.title || product.name} at Ghar Sansar!`,
       url: window.location.href,
     };
     if (navigator.share) {
       try {
         await navigator.share(shareData);
-      } catch {}
+      } catch (err) {}
     } else {
       navigator.clipboard.writeText(shareData.url);
-      toast.success("Product link copied!");
+      toast.success("Link copied to clipboard!");
     }
   };
 
-<<<<<<< HEAD
-  // Product gallery: Extract REAL images for this product (NO hardcoded fake banners)
-  const productImages = useMemo(() => {
-    if (!product) return [];
-    const imgs: string[] = [];
-    if (Array.isArray(product.images) && product.images.length > 0) {
-      imgs.push(...product.images.filter(Boolean));
-    }
-    if (product.image && !imgs.includes(product.image)) {
-      imgs.unshift(product.image);
-    }
-    // If only one image exists, provide it as single source
-    if (imgs.length === 0 && product.image) {
-      imgs.push(product.image);
-    }
-    return imgs.length > 0 ? imgs : ["/images/placeholder.jpg"];
-  }, [product]);
 
-  // Gallery Navigation
-  const handlePrevImage = () => {
-    setActiveImageIndex((prev) => (prev > 0 ? prev - 1 : productImages.length - 1));
-  };
-
-  const handleNextImage = () => {
-    setActiveImageIndex((prev) => (prev < productImages.length - 1 ? prev + 1 : 0));
-  };
-=======
-
->>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
 
   // Review Form States
   const [formName, setFormName] = useState("");
@@ -336,29 +257,32 @@ const ProductDetail: React.FC = () => {
   const [formImage, setFormImage] = useState("");
   const [imagePreview, setImagePreview] = useState("");
 
-  // Stored reviews
+  // Initial reviews
   const [reviews, setReviews] = useState<Review[]>(() => {
     if (!product) return [];
     const saved = localStorage.getItem(`product_reviews_${product.id}`);
     return saved ? JSON.parse(saved) : [];
   });
 
+  // Sync reviews to localStorage
   useEffect(() => {
     if (product) {
       localStorage.setItem(`product_reviews_${product.id}`, JSON.stringify(reviews));
     }
   }, [reviews, product]);
 
+  // Check if customer has bought this product
+  const hasBoughtProduct = useMemo(() => {
+    if (!isAuthenticated || !user) return false;
+    return orders.some((order) => 
+      order.items.some((item) => item.id === product?.id)
+    );
+  }, [orders, user, isAuthenticated, product]);
+
   // Rating aggregate calculations
   const { avgRating, ratingPercentages } = useMemo(() => {
     if (reviews.length === 0) {
-      // Deterministic fallback rating from product ID for consistent polish
-      const hash = (product?.id || "default").split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
-      const fallbackRating = 4.3 + (hash % 6) * 0.1;
-      return { 
-        avgRating: Number(fallbackRating.toFixed(1)), 
-        ratingPercentages: { 5: 75, 4: 20, 3: 5, 2: 0, 1: 0 } 
-      };
+      return { avgRating: 0, ratingPercentages: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 } };
     }
     const sum = reviews.reduce((acc, r) => acc + r.rating, 0);
     const avg = Math.round((sum / reviews.length) * 10) / 10;
@@ -378,8 +302,9 @@ const ProductDetail: React.FC = () => {
     };
 
     return { avgRating: avg, ratingPercentages: percentages };
-  }, [reviews, product]);
+  }, [reviews]);
 
+  // Handle Review Image Upload
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -392,15 +317,17 @@ const ProductDetail: React.FC = () => {
         const base64String = reader.result as string;
         setFormImage(base64String);
         setImagePreview(base64String);
+        toast.success("Image uploaded successfully!");
       };
       reader.readAsDataURL(file);
     }
   };
 
+  // Submit Review
   const handleReviewSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formName.trim() || !formComment.trim()) {
-      toast.error("Please fill in your name and comment.");
+      toast.error("Please fill in all fields.");
       return;
     }
 
@@ -411,16 +338,17 @@ const ProductDetail: React.FC = () => {
       comment: formComment.trim(),
       date: new Date().toLocaleDateString("en-US", {
         year: "numeric",
-        month: "short",
+        month: "long",
         day: "numeric",
       }),
       image: formImage
     };
 
     setReviews([newRev, ...reviews]);
-    toast.success("Review submitted!");
+    toast.success("Review submitted successfully!");
     setIsReviewModalOpen(false);
 
+    // Reset Form
     setFormName("");
     setFormRating(5);
     setFormComment("");
@@ -431,54 +359,13 @@ const ProductDetail: React.FC = () => {
   // Zoom on Hover Handler
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
-    const x = Math.max(0, Math.min(100, ((e.clientX - left) / width) * 100));
-    const y = Math.max(0, Math.min(100, ((e.clientY - top) / height) * 100));
+    const x = ((e.clientX - left) / width) * 100;
+    const y = ((e.clientY - top) / height) * 100;
     setZoomPos({ x, y });
   };
 
-  const cleanTitle = (product?.title || product?.name || "Product").replace(/_/g, " ").trim();
-  const cleanCategory = (product?.category || "Return Gifts").replace(/_/g, " ").trim();
-
-  // Pricing Architecture
-  const actualPrice = Number(
-    product?.actualPrice !== undefined ? product.actualPrice :
-    product?.price !== undefined ? product.price :
-    product?.sellingPrice || 0
-  ) || 0;
-
-  const strikePrice = Number(
-    product?.strikePrice !== undefined ? product.strikePrice :
-    (product as any)?.["act-price"] !== undefined ? (product as any)["act-price"] :
-    (product as any)?.["actPrice"] !== undefined ? (product as any)["actPrice"] :
-    actualPrice
-  ) || actualPrice;
-
-  const categoryDiscount = Number(
-    product?.categoryDiscountPercentage !== undefined ? product.categoryDiscountPercentage :
-    product?.discountPercentage || 0
-  );
-  const hasCategoryDiscount = categoryDiscount > 0;
-
-  const discountedPrice = Number(
-    product?.discountedPrice !== undefined ? product.discountedPrice :
-    (hasCategoryDiscount ? Math.round((actualPrice - (actualPrice * (categoryDiscount / 100))) * 100) / 100 : actualPrice)
-  );
-
-  const finalPrice = Number(
-    product?.finalPrice !== undefined ? product.finalPrice :
-    (hasCategoryDiscount ? discountedPrice : actualPrice)
-  );
-
-  const discountPct = categoryDiscount > 0
-    ? categoryDiscount
-    : (strikePrice > actualPrice ? Math.round(((strikePrice - actualPrice) / strikePrice) * 100) : 0);
-
-  const displayDiscountBadge = discountPct > 0 ? `${discountPct}% OFF` : null;
-
   const handleAddToCart = () => {
     if (!product) return;
-<<<<<<< HEAD
-=======
     if (isOutOfStock) {
       toast.error("This product is currently out of stock.");
       return;
@@ -492,18 +379,17 @@ const ProductDetail: React.FC = () => {
     const discP = Number(product.discountedPrice !== undefined ? product.discountedPrice : (catDisc > 0 ? Math.round((actP - (actP * (catDisc / 100))) * 100) / 100 : actP));
     const effectivePrice = Number(product.finalPrice !== undefined ? product.finalPrice : (catDisc > 0 ? discP : actP));
 
->>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
     addToCart({
       id: product.id || product._id,
-      name: cleanTitle,
-      price: finalPrice,
+      name: product.title || product.name,
+      price: effectivePrice, // Customer pays actualPrice (₹2,500)
       image: product.image || product.images?.[0],
       quantity: quantity,
-      isReturnGift: isReturnGiftItem,
-      minQty: minQty,
+      isReturnGift: state?.isReturnGift,
+      minQty: state?.isReturnGift ? 50 : 1,
       stock: product.stock
     });
-    toast.success(`Added ${quantity} ${quantity > 1 ? 'items' : 'item'} to cart!`);
+    toast.success(`Added ${quantity} ${quantity > 1 ? 'items' : 'item'} to your cart!`);
   };
 
   const handleBuyNow = () => {
@@ -529,59 +415,51 @@ const ProductDetail: React.FC = () => {
     const msg = generateSingleProductWhatsAppMessage(orderId, customerInfo, {
       product: {
         id: product.id,
-        title: cleanTitle,
-        name: cleanTitle,
-        price: finalPrice,
+        title: product.title || product.name,
+        name: product.name || product.title,
+        price: product.price,
         image: product.image,
-        category: cleanCategory,
+        category: product.category,
         subCategory: product.subCategory
       },
       quantity: quantity,
-<<<<<<< HEAD
-      unitPrice: finalPrice
-=======
       unitPrice: product.price,
       selectedSize: undefined,
       selectedColor: undefined
->>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
     });
     openWhatsAppOrderUrl(msg);
   };
 
-  // Related products under the same category
+  // Related products under the same category (or fallback bottles)
   const relatedProducts = useMemo(() => {
     if (!product) return [];
     const sameCat = products.filter((p) => p.category === product.category && p.id !== product.id);
-    if (sameCat.length >= 4) return sameCat.slice(0, 8);
+    if (sameCat.length >= 5) return sameCat.slice(0, 10);
     const others = products.filter((p) => p.id !== product.id && !sameCat.some((sc) => sc.id === p.id));
-    return [...sameCat, ...others].slice(0, 8);
+    return [...sameCat, ...others].slice(0, 10);
   }, [products, product]);
 
   const scrollRelated = (direction: "left" | "right") => {
     if (relatedScrollRef.current) {
-      const container = relatedScrollRef.current;
-      const card = container.firstElementChild as HTMLElement;
-      const step = card ? (card.offsetWidth + 16) : 300;
-      container.scrollBy({
-        left: direction === "left" ? -step : step,
+      const scrollAmount = 300;
+      relatedScrollRef.current.scrollBy({
+        left: direction === "left" ? -scrollAmount : scrollAmount,
         behavior: "smooth"
       });
     }
   };
 
-  // Loading State
   if (loading && !product) {
     return (
-      <div className="min-h-screen bg-[#FAF7F2] flex items-center justify-center pt-14 pb-20 font-poppins">
-        <div className="max-w-6xl mx-auto px-4 w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 animate-pulse">
-            <div className="aspect-square bg-[#EAE4DC] rounded-2xl" />
-            <div className="space-y-4 pt-4">
-              <div className="h-4 bg-[#EAE4DC] rounded-full w-24" />
-              <div className="h-8 bg-[#EAE4DC] rounded-xl w-3/4" />
-              <div className="h-4 bg-[#EAE4DC] rounded-full w-32" />
-              <div className="h-28 bg-[#EAE4DC] rounded-2xl" />
-              <div className="h-12 bg-[#EAE4DC] rounded-xl" />
+      <div className="min-h-screen bg-[#FAF9F5] pb-16 pt-16 sm:pt-20 flex items-center justify-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 animate-pulse">
+            <div className="lg:col-span-7 aspect-square bg-[#eae5dc] rounded-none" />
+            <div className="lg:col-span-5 space-y-6 pt-4">
+              <div className="h-6 bg-gray-200 rounded-none w-1/4" />
+              <div className="h-10 bg-gray-200 rounded-none w-3/4" />
+              <div className="h-28 bg-gray-200 rounded-none" />
+              <div className="h-14 bg-gray-200 rounded-none" />
             </div>
           </div>
         </div>
@@ -589,298 +467,70 @@ const ProductDetail: React.FC = () => {
     );
   }
 
-  // Not Found State
   if (!product) {
     return (
-      <div className="min-h-screen bg-[#FAF7F2] flex flex-col items-center justify-center p-6 text-center font-poppins">
-        <div className="w-14 h-14 bg-[#F7EBE4] text-[#8E3F24] rounded-full flex items-center justify-center mb-4">
-          <Info size={26} />
+      <div className="min-h-screen bg-[#FAF9F5] flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-16 h-16 bg-red-100 text-red-600 rounded-none flex items-center justify-center mb-4">
+          <Info size={28} />
         </div>
-        <h2 className="text-xl font-normal text-[#181513] mb-1.5">Product Not Found</h2>
-        <p className="text-xs text-[#736B63] max-w-xs mb-6">The product you are looking for does not exist or has been moved.</p>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Product Not Found</h2>
+        <p className="text-gray-500 max-w-sm mb-6">The product you are looking for does not exist or has been removed.</p>
         <button
-          onClick={() => navigate(isReturnGiftItem ? "/return-gifts" : "/products")}
-          className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#8E3F24] hover:bg-[#742F19] text-white text-xs font-medium uppercase tracking-wider rounded-xl transition shadow-xs"
+          onClick={() => navigate(state?.isReturnGift ? "/return-gifts" : "/products")}
+          className="flex items-center gap-2 px-6 py-3 bg-[#0F2920] text-white font-bold uppercase tracking-widest text-xs rounded-none hover:bg-black transition shadow-md"
         >
-          <ArrowLeft size={14} /> Back to Catalog
+          <ArrowLeft size={18} /> Back to Catalog
         </button>
       </div>
     );
   }
 
+  // Controlled Pricing Architecture: Strike Price (MRP), Actual Price (Base), Discounted Price (Final Customer Price)
+  const actualPrice = Number(
+    product.actualPrice !== undefined ? product.actualPrice :
+    product.price !== undefined ? product.price :
+    product.sellingPrice || 0
+  ) || 0;
+
+  // Strike Price: Reference price displayed with strikethrough (e.g. ₹2,150)
+  const strikePrice = Number(
+    product.strikePrice !== undefined ? product.strikePrice :
+    (product as any)["act-price"] !== undefined ? (product as any)["act-price"] :
+    actualPrice
+  ) || actualPrice;
+
+  // Category promotional discount % (e.g. 99%)
+  const categoryDiscount = Number(
+    product.categoryDiscountPercentage !== undefined ? product.categoryDiscountPercentage :
+    product.discountPercentage || 0
+  );
+  const hasCategoryDiscount = categoryDiscount > 0;
+
+  // Category Discount Amount calculated based on STRIKE PRICE: e.g. ₹2,150 × 99% = ₹2,129
+  const categoryDiscountAmount = strikePrice > 0 && hasCategoryDiscount
+    ? Math.round(strikePrice * (categoryDiscount / 100))
+    : 0;
+
+  // Discounted Price calculated dynamically from ACTUAL PRICE: e.g. ₹1,650 - (₹1,650 × 99 / 100) = ₹16.50
+  const discountedPrice = Number(
+    product.discountedPrice !== undefined ? product.discountedPrice :
+    (hasCategoryDiscount ? Math.round((actualPrice - (actualPrice * (categoryDiscount / 100))) * 100) / 100 : actualPrice)
+  );
+
+  // Final Customer Price: discountedPrice when category discount ON, actualPrice when OFF
+  const finalPrice = Number(
+    product.finalPrice !== undefined ? product.finalPrice :
+    (hasCategoryDiscount ? discountedPrice : actualPrice)
+  );
+
+  // Current Difference between Strike Price and Customer Price
+  const currentDifference = Math.max(0, strikePrice - finalPrice);
+
+  const displayDiscountBadge = categoryDiscount > 0
+    ? `${categoryDiscount}% OFF`
+    : (strikePrice > actualPrice ? `${Math.round(((strikePrice - actualPrice) / strikePrice) * 100)}% OFF` : null);
+
   return (
-<<<<<<< HEAD
-    <div className="min-h-screen bg-[#FAF7F2] font-poppins text-[#181513] pb-24 md:pb-20 selection:bg-[#8E3F24] selection:text-white antialiased">
-      
-      {/* ── Sticky Mobile CTA Bar ───────────────────────────────────────────── */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-[#E8E2D8] px-4 py-3 z-40 flex items-center gap-3 shadow-lg">
-        <div className="flex-1">
-          <span className="text-[10px] text-[#8C827A] uppercase font-medium tracking-wider block">Total Price</span>
-          <span className="text-base font-normal text-gray-950 font-poppins">
-            ₹{((finalPrice * quantity) + (deliveryFee || 0)).toLocaleString("en-IN")}
-          </span>
-        </div>
-        <div className="flex gap-2">
-          {quantityInCart > 0 ? (
-            <div className="flex items-center border border-[#E8E2D8] bg-[#FAF7F2] rounded-xl px-2 py-1 gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  if (quantityInCart > 1) updateQuantity(cartItemForProduct!.id, quantityInCart - 1);
-                  else { removeFromCart(cartItemForProduct!.id); toast.success("Removed from cart"); }
-                }}
-                className="w-6 h-6 flex items-center justify-center bg-white text-gray-700 border border-[#E8E2D8] rounded active:scale-90 transition font-normal"
-              >
-                -
-              </button>
-              <span className="font-normal text-xs text-[#181513] select-none px-1">{quantityInCart}</span>
-              <button
-                type="button"
-                onClick={() => updateQuantity(cartItemForProduct!.id, quantityInCart + 1)}
-                className="w-6 h-6 flex items-center justify-center bg-[#8E3F24] text-white rounded active:scale-90 transition font-normal"
-              >
-                +
-              </button>
-            </div>
-          ) : (
-            <button
-              onClick={handleAddToCart}
-              className="px-4 py-2.5 bg-white border border-[#E8E2D8] hover:border-[#8E3F24] text-[#181513] rounded-xl text-xs font-medium uppercase tracking-wider transition active:scale-95 shadow-2xs"
-            >
-              Add to Cart
-            </button>
-          )}
-          <button
-            onClick={handleBuyNow}
-            className="px-5 py-2.5 bg-[#8E3F24] hover:bg-[#742F19] text-white rounded-xl text-xs font-medium uppercase tracking-wider transition active:scale-95 shadow-xs"
-          >
-            Buy Now
-          </button>
-        </div>
-      </div>
-
-      {/* ── Main Container ──────────────────────────────────────────────────── */}
-      <div className="max-w-[1220px] mx-auto px-4 sm:px-6 lg:px-8 pt-14">
-
-        {/* ── Editorial Breadcrumb ────────────────────────────────────────── */}
-        <nav className="flex items-center gap-1.5 text-xs text-[#8C827A] py-1 mb-2.5 overflow-x-auto no-scrollbar whitespace-nowrap">
-          <span onClick={() => navigate("/")} className="hover:text-[#181513] cursor-pointer transition-colors">Home</span>
-          <span className="text-[#D5CEC4]">/</span>
-          <span onClick={() => navigate(isReturnGiftItem ? "/return-gifts" : "/products")} className="hover:text-[#181513] cursor-pointer transition-colors">
-            {isReturnGiftItem ? "Return Gifts" : "Products"}
-          </span>
-          <span className="text-[#D5CEC4]">/</span>
-          <span 
-            onClick={() => navigate(isReturnGiftItem ? `/return-gifts?category=${encodeURIComponent(product.category || "")}` : `/products?category=${encodeURIComponent(product.category || "")}`)} 
-            className="hover:text-[#181513] cursor-pointer transition-colors capitalize"
-          >
-            {cleanCategory}
-          </span>
-          <span className="text-[#D5CEC4]">/</span>
-          <span className="text-[#181513] font-medium truncate max-w-[280px]">
-            {cleanTitle}
-          </span>
-        </nav>
-
-        {/* ── 2-Column Product Showcase ───────────────────────────────────── */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 pb-8 items-start">
-
-          {/* LEFT: Product Gallery (50% Split, compact, no cutoffs) */}
-          <div className="flex flex-col gap-2.5 w-full max-w-[500px] mx-auto lg:mx-0">
-            
-            <div className="flex flex-col sm:flex-row gap-2.5 items-start">
-              {/* Vertical Thumbnails */}
-              {productImages.length > 1 && (
-                <div className="hidden sm:flex flex-col gap-2 shrink-0">
-                  {productImages.map((imgUrl, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => setActiveImageIndex(idx)}
-                      className={`w-12 h-12 rounded-xl p-1 bg-white border transition-all overflow-hidden flex items-center justify-center cursor-pointer ${
-                        activeImageIndex === idx
-                          ? "border-[#8E3F24] ring-1 ring-[#8E3F24]"
-                          : "border-[#E8E2D8] hover:border-[#8E3F24]/50 opacity-80 hover:opacity-100"
-                      }`}
-                    >
-                      <img
-                        src={imgUrl}
-                        alt={`Thumbnail ${idx + 1}`}
-                        className="w-full h-full object-contain"
-                      />
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {/* Main Image Stage */}
-              <div 
-                className="flex-1 w-full relative overflow-hidden rounded-2xl bg-white border border-[#E8E2D8] aspect-square max-h-[440px] flex items-center justify-center p-4 sm:p-6 select-none group shadow-[0_2px_10px_rgba(0,0,0,0.02)] cursor-zoom-in"
-                onMouseMove={handleMouseMove}
-                onMouseEnter={() => setIsZooming(true)}
-                onMouseLeave={() => setIsZooming(false)}
-              >
-                {/* Main Discount Badge (Top-Left) */}
-                {displayDiscountBadge && (
-                  <div className="absolute top-2.5 left-2.5 z-20 bg-[#8E3F24] text-white text-[10.5px] font-medium tracking-wider uppercase px-2.5 py-0.5 rounded-full shadow-xs pointer-events-none">
-                    {displayDiscountBadge}
-                  </div>
-                )}
-
-                {/* Top-Right Interactive Actions */}
-                <div className="absolute top-2.5 right-2.5 z-20 flex items-center gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => setIs360Active(!is360Active)}
-                    className={`px-2 py-0.5 rounded-full text-[10px] font-medium border flex items-center gap-1 transition-all cursor-pointer ${
-                      is360Active 
-                        ? "bg-[#8E3F24] text-white border-[#8E3F24]" 
-                        : "bg-white/90 text-[#4A433D] border-[#E8E2D8] shadow-2xs backdrop-blur-xs"
-                    }`}
-                    title="Interactive 360 rotation"
-                  >
-                    <RotateCw size={11} className={is360Active ? "animate-spin" : ""} />
-                    <span>360°</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setActiveLightboxImage(productImages[activeImageIndex] || product.image)}
-                    className="w-7 h-7 rounded-full bg-white/90 hover:bg-white text-[#4A433D] hover:text-black border border-[#E8E2D8] flex items-center justify-center transition-all shadow-2xs backdrop-blur-xs cursor-pointer"
-                    title="Expand View"
-                  >
-                    <Maximize2 size={12} />
-                  </button>
-                </div>
-
-                {/* Left / Right Nav Arrows */}
-                {productImages.length > 1 && (
-                  <>
-                    <button
-                      type="button"
-                      onClick={handlePrevImage}
-                      className="absolute left-2 top-1/2 -translate-y-1/2 z-20 w-7 h-7 rounded-full bg-white/90 hover:bg-white text-[#4A433D] shadow-xs border border-[#E8E2D8] flex items-center justify-center cursor-pointer"
-                      aria-label="Previous image"
-                    >
-                      <ChevronLeft size={14} />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleNextImage}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-7 h-7 rounded-full bg-white/90 hover:bg-white text-[#4A433D] shadow-xs border border-[#E8E2D8] flex items-center justify-center cursor-pointer"
-                      aria-label="Next image"
-                    >
-                      <ChevronRight size={14} />
-                    </button>
-                  </>
-                )}
-
-                {/* Product Image Stage (Uncut, full product & packaging visibility) */}
-                <motion.div
-                  key={activeImageIndex}
-                  animate={is360Active ? { rotateY: [0, 360] } : {}}
-                  transition={is360Active ? { repeat: Infinity, duration: 4, ease: "linear" } : {}}
-                  className="w-full h-full flex items-center justify-center relative p-1"
-                >
-                  <img
-                    src={productImages[activeImageIndex] || product.image}
-                    alt={cleanTitle}
-                    loading="eager"
-                    className="max-w-[85%] max-h-[85%] w-auto h-auto object-contain select-none transition-transform duration-300 ease-out"
-                    style={isZooming ? {
-                      transformOrigin: `${zoomPos.x}% ${zoomPos.y}%`,
-                      transform: 'scale(1.35)'
-                    } : {}}
-                  />
-                </motion.div>
-              </div>
-            </div>
-
-            {/* Mobile Thumbnails Row */}
-            {productImages.length > 1 && (
-              <div className="flex sm:hidden gap-1.5 overflow-x-auto pb-1 no-scrollbar">
-                {productImages.map((imgUrl, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setActiveImageIndex(idx)}
-                    className={`w-12 h-12 shrink-0 rounded-lg p-1 bg-white border transition-all overflow-hidden flex items-center justify-center ${
-                      activeImageIndex === idx ? "border-[#8E3F24] ring-1 ring-[#8E3F24]" : "border-[#E8E2D8]"
-                    }`}
-                  >
-                    <img src={imgUrl} alt={`Thumb ${idx + 1}`} className="w-full h-full object-contain" />
-                  </button>
-                ))}
-              </div>
-            )}
-
-          </div>
-
-          {/* RIGHT: Compact, Minimal, Unified Product Details */}
-          <div className="flex flex-col space-y-3.5">
-            
-            {/* Header: Category Badge + Stock Status + Wishlist / Share */}
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-medium tracking-wider text-[#7D3219] bg-[#F7EBE4] border border-[#D9B4A4] px-2.5 py-0.5 rounded-full uppercase">
-                    {cleanCategory}
-                  </span>
-                  <span className="text-xs text-emerald-700 font-medium flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping"></span>
-                    In Stock
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => toggleWishlist(product)}
-                    className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all cursor-pointer ${
-                      isWishlisted 
-                        ? "bg-rose-50 border-rose-200 text-rose-600" 
-                        : "bg-white border-[#E8E2D8] text-[#8C827A] hover:text-[#181513] hover:border-[#8E3F24]"
-                    }`}
-                    title={isWishlisted ? "In Wishlist" : "Add to Wishlist"}
-                  >
-                    <Heart size={15} className={isWishlisted ? "fill-current" : ""} />
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={handleShare}
-                    className="w-8 h-8 rounded-full border border-[#E8E2D8] bg-white text-[#8C827A] hover:text-[#181513] hover:border-[#8E3F24] flex items-center justify-center transition-all cursor-pointer"
-                    title="Share Product"
-                  >
-                    <Share2 size={15} />
-                  </button>
-                </div>
-              </div>
-
-              {/* Product Title */}
-              <h1 className="font-poppins text-xl sm:text-2xl font-normal text-[#181513] leading-snug tracking-tight mb-1.5">
-                {cleanTitle}
-              </h1>
-
-              {/* Ratings Row */}
-              <div className="flex items-center gap-1.5 text-xs text-[#8C827A]">
-                <div className="flex items-center gap-0.5 text-[#F4B740]">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Star key={star} size={13} className="fill-[#F4B740]" />
-                  ))}
-                </div>
-                <span className="font-medium text-[#181513]">{avgRating.toFixed(1)}</span>
-                <span>({reviews.length > 0 ? reviews.length : 128} verified reviews)</span>
-              </div>
-            </div>
-
-            {/* Integrated Minimal Price & Delivery Bar (No heavy separate boxes) */}
-            <div className="bg-white rounded-xl border border-[#E8E2D8] p-3.5 space-y-2.5 shadow-2xs">
-              <div className="flex items-baseline gap-2.5 flex-wrap">
-                <span className="font-poppins text-2xl sm:text-3xl font-normal text-gray-950 tracking-tight">
-                  ₹{finalPrice.toLocaleString("en-IN")}
-                </span>
-                {strikePrice > finalPrice && (
-                  <span className="text-sm text-[#8C827A] line-through font-normal">
-=======
     <div className="min-h-screen bg-[#FAF7F2] pb-24 font-sans text-gray-900 selection:bg-[#C57053] selection:text-white antialiased">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 relative z-10">
         
@@ -990,45 +640,10 @@ const ProductDetail: React.FC = () => {
                 </span>
                 {strikePrice > finalPrice && (
                   <span className="text-sm text-stone-400 line-through font-light" title="MRP">
->>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
                     ₹{strikePrice.toLocaleString("en-IN")}
                   </span>
                 )}
                 {displayDiscountBadge && (
-<<<<<<< HEAD
-                  <span className="text-[11px] font-medium text-[#7D3219] bg-[#F7EBE4] border border-[#D9B4A4] px-2 py-0.5 rounded-full">
-                    {displayDiscountBadge}
-                  </span>
-                )}
-                {strikePrice > finalPrice && (
-                  <span className="text-[11px] text-emerald-700 font-medium ml-auto">
-                    Save ₹{(strikePrice - finalPrice).toLocaleString("en-IN")}
-                  </span>
-                )}
-              </div>
-
-              {/* One-line Delivery Check */}
-              <div className="pt-2 border-t border-[#F0EAE1] flex flex-col gap-1 text-xs">
-                <div className="flex items-center justify-between text-[#736B63]">
-                  <div className="flex items-center gap-1.5 truncate">
-                    <MapPin size={13} className="text-[#8E3F24] shrink-0" />
-                    <span className="truncate">Deliver to <strong className="text-[#181513]">{pincode}</strong> ({savedArea})</span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setIsEditingPincode(!isEditingPincode)}
-                    className="text-[11px] font-medium text-[#8E3F24] hover:underline cursor-pointer ml-2 shrink-0"
-                  >
-                    {isEditingPincode ? "Cancel" : "Change"}
-                  </button>
-                </div>
-
-                {isEditingPincode && (
-                  <div className="flex items-center gap-1.5 pt-1">
-                    <input
-                      type="text"
-                      placeholder="6-digit Pincode"
-=======
                   <span className="text-xs font-medium text-[#7D3219] bg-[#F7EBE4] border border-[#D9B4A4]/80 px-2.5 py-0.5 rounded-full">
                     {displayDiscountBadge}
                   </span>
@@ -1061,38 +676,17 @@ const ProductDetail: React.FC = () => {
                     <input 
                       type="text" 
                       placeholder="Enter 6-digit Pincode" 
->>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
                       value={pincodeInput}
                       onChange={(e) => setPincodeInput(e.target.value.replace(/\D/g, "").slice(0, 6))}
                       maxLength={6}
-<<<<<<< HEAD
-                      className="flex-1 px-2.5 py-1 text-xs border border-[#E8E2D8] rounded-lg bg-[#FAF7F2] focus:ring-1 focus:ring-[#8E3F24] outline-none"
-=======
                       className="w-48 px-3 py-1.5 text-xs bg-white border border-[#E8E2D8] rounded-md focus:border-[#C86B4C] outline-none"
                       disabled={isCheckingPincode}
                       onKeyDown={(e) => {
                         if (e.key === "Enter") checkPincode();
                       }}
->>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
                     />
-                    <button
-                      type="button"
+                    <button 
                       onClick={checkPincode}
-<<<<<<< HEAD
-                      className="px-3 py-1 bg-[#8E3F24] text-white text-xs font-medium rounded-lg hover:bg-[#742F19] cursor-pointer"
-                    >
-                      Apply
-                    </button>
-                  </div>
-                )}
-
-                <div className="flex items-center justify-between text-[11px] text-[#8C827A] pt-0.5">
-                  <span className="flex items-center gap-1 text-emerald-700 font-medium">
-                    <Truck size={12} /> Standard delivery ₹{deliveryFee}
-                  </span>
-                  <span>Est. <strong className="text-[#181513]">{deliveryDateString}</strong></span>
-                </div>
-=======
                       disabled={isCheckingPincode || pincodeInput.length !== 6}
                       className="px-3.5 py-1.5 bg-[#F7EBE4] hover:bg-[#EFE0D7] text-[#7D3219] border border-[#D9B4A4] text-xs font-medium rounded-md transition disabled:opacity-50 cursor-pointer"
                     >
@@ -1115,369 +709,8 @@ const ProductDetail: React.FC = () => {
                     <span>Standard ₹{deliveryFee} (by {deliveryDateString})</span>
                   </div>
                 )}
->>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
-              </div>
-            </div>
-
-<<<<<<< HEAD
-            {/* Quantity & CTA Action Row */}
-            <div className="space-y-2 pt-0.5">
-              <div className="flex items-center gap-2.5">
-                {/* Stepper */}
-                <div className="h-[42px] border border-[#E8E2D8] bg-white rounded-xl flex items-center justify-between px-2 w-28 shrink-0 shadow-2xs">
-                  <button
-                    type="button"
-                    onClick={handleDecreaseQuantity}
-                    className="w-6 h-6 flex items-center justify-center bg-[#FAF7F2] hover:bg-[#F0EAE1] text-gray-800 border border-[#E8E2D8] rounded active:scale-90 transition cursor-pointer"
-                  >
-                    <Minus size={11} />
-                  </button>
-                  <span className="font-normal text-xs text-[#181513] select-none">{quantity}</span>
-                  <button
-                    type="button"
-                    onClick={handleIncreaseQuantity}
-                    className="w-6 h-6 flex items-center justify-center bg-[#F7EBE4] hover:bg-[#EFE0D7] text-[#7D3219] border border-[#D9B4A4] rounded active:scale-90 transition cursor-pointer"
-                  >
-                    <Plus size={11} />
-                  </button>
-                </div>
-
-                {/* Add to Cart / In-Cart Stepper */}
-                {quantityInCart > 0 ? (
-                  <div className="flex-1 h-[42px] border border-[#E8E2D8] bg-[#FAF7F2] rounded-xl flex items-center justify-between px-2 shadow-2xs">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (quantityInCart > 1) {
-                          updateQuantity(cartItemForProduct!.id, quantityInCart - 1);
-                        } else {
-                          removeFromCart(cartItemForProduct!.id);
-                          toast.success("Removed from cart");
-                        }
-                      }}
-                      className="w-7 h-7 flex items-center justify-center bg-white hover:bg-[#F0EAE1] text-gray-800 border border-[#E8E2D8] rounded-lg active:scale-90 transition cursor-pointer"
-                      title="Decrease or remove"
-                      aria-label="Decrease quantity"
-                    >
-                      <Minus size={11} />
-                    </button>
-
-                    <span className="font-medium text-xs text-[#181513] select-none">
-                      {quantityInCart} in Cart
-                    </span>
-
-                    <button
-                      type="button"
-                      onClick={() => updateQuantity(cartItemForProduct!.id, quantityInCart + 1)}
-                      className="w-7 h-7 flex items-center justify-center bg-[#F7EBE4] hover:bg-[#EFE0D7] text-[#7D3219] border border-[#D9B4A4] rounded-lg active:scale-90 transition cursor-pointer"
-                      title="Add more"
-                      aria-label="Increase quantity"
-                    >
-                      <Plus size={11} />
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={handleAddToCart}
-                    className="flex-1 h-[42px] px-3 bg-white hover:bg-[#FAF7F2] border border-[#E8E2D8] hover:border-[#8E3F24] text-gray-950 text-xs font-medium uppercase tracking-wider rounded-xl flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-2xs cursor-pointer"
-                  >
-                    <ShoppingCart size={14} className="text-gray-600" />
-                    <span>Add to Cart</span>
-                  </button>
-                )}
-
-                {/* Buy Now */}
-                <button
-                  type="button"
-                  onClick={handleBuyNow}
-                  className="flex-1 h-[42px] px-4 bg-[#8E3F24] hover:bg-[#742F19] text-white text-xs font-medium uppercase tracking-wider rounded-xl flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-xs cursor-pointer"
-                >
-                  <Zap size={14} />
-                  <span>Buy Now</span>
-                </button>
               </div>
 
-              {isReturnGiftItem && (
-                <p className="text-[10.5px] text-[#7D3219] bg-[#F7EBE4] px-2 py-0.5 rounded-md inline-block">
-                  Bulk Return Gift: Minimum order 50 units
-                </p>
-              )}
-
-              {/* WhatsApp & Call Links */}
-              <div className="grid grid-cols-2 gap-2 pt-0.5">
-                <button
-                  type="button"
-                  onClick={handleWhatsAppOrderProduct}
-                  className="h-[34px] bg-[#EDF8F1] hover:bg-[#E1F3E7] text-[#1E7E34] border border-[#D1EEDB] rounded-lg font-medium text-[11px] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-                >
-                  <MessageCircle size={13} />
-                  <span>Order on WhatsApp</span>
-                </button>
-
-                <a
-                  href="tel:+919492664870"
-                  className="h-[34px] bg-white hover:bg-[#FAF7F2] text-[#4A433D] hover:text-black border border-[#E8E2D8] rounded-lg font-medium text-[11px] flex items-center justify-center gap-1.5 transition-colors"
-                >
-                  <Phone size={13} />
-                  <span>Call Support</span>
-                </a>
-              </div>
-
-              {/* Trust Strip */}
-              <div className="pt-2 border-t border-[#F0EAE1] flex items-center justify-between text-[10.5px] text-[#8C827A]">
-                <span className="flex items-center gap-1"><Award size={11} className="text-[#8E3F24]" /> 100% Certified</span>
-                <span className="flex items-center gap-1"><Package size={11} className="text-[#8E3F24]" /> Box Packing</span>
-                <span className="flex items-center gap-1"><Truck size={11} className="text-[#8E3F24]" /> Fast Dispatch</span>
-                <span className="flex items-center gap-1"><Lock size={11} className="text-[#8E3F24]" /> Secure Pay</span>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-        {/* ── Tabs Navigation ─────────────────────────────────────────────────── */}
-        <div className="border-t border-[#E8E2D8]">
-          <div className="flex gap-8 overflow-x-auto no-scrollbar pt-1">
-            {[
-              { id: "overview", label: "Overview" },
-              { id: "specs", label: "Specifications" },
-              { id: "shipping", label: "Shipping & Handling" },
-              { id: "reviews", label: `Reviews (${reviews.length > 0 ? reviews.length : 128})` },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`pb-3.5 pt-4 text-sm font-medium tracking-normal transition-all border-b-2 whitespace-nowrap cursor-pointer ${
-                  activeTab === tab.id
-                    ? "border-[#8E3F24] text-[#8E3F24]"
-                    : "border-transparent text-[#8C827A] hover:text-[#181513]"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* ── Tab Content: Overview ───────────────────────────────────────────── */}
-        {activeTab === "overview" && (
-          <div className="py-8 space-y-6 max-w-4xl">
-            {/* Description Block */}
-            <div className="space-y-2">
-              <span className="text-[10.5px] font-medium tracking-widest text-[#7D3219] uppercase block">
-                Product Overview
-              </span>
-              <h2 className="font-poppins text-xl sm:text-2xl font-normal text-[#181513] leading-snug">
-                Crafted for Daily Elegance &amp; Reliable Use
-              </h2>
-              <p className="text-xs sm:text-sm text-[#736B63] leading-relaxed pt-1">
-                {product.description || `The ${cleanTitle} brings authentic Ghar Sansar design, exceptional durability, and aesthetic charm to your home. Precision-crafted for seamless everyday utility and premium gifting.`}
-              </p>
-            </div>
-
-            {/* 4 Feature Highlights Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {[
-                { title: "Premium Finish", sub: "Hand-inspected surface" },
-                { title: "Durable Build", sub: "Built for long life" },
-                { title: "Safe Packaging", sub: "Transit protected" },
-                { title: "100% Genuine", sub: "Direct authenticity" },
-              ].map((item, i) => (
-                <div key={i} className="p-3.5 bg-white border border-[#E8E2D8] rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
-                  <CheckCircle size={15} className="text-[#8E3F24] mb-1.5" />
-                  <span className="text-xs font-medium text-[#181513] block leading-tight">{item.title}</span>
-                  <span className="text-[10px] text-[#8C827A] mt-0.5 block">{item.sub}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* Authenticity Guarantee - Perfectly aligned with the left flow */}
-            <div className="bg-white rounded-xl border border-[#E8E2D8] p-4 sm:p-5 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div className="flex items-start gap-3 max-w-xl">
-                <div className="w-9 h-9 rounded-lg bg-[#F7EBE4] text-[#8E3F24] flex items-center justify-center shrink-0">
-                  <ShieldCheck size={18} />
-                </div>
-                <div>
-                  <h4 className="font-poppins text-xs sm:text-sm font-medium text-[#181513]">Authenticity &amp; Quality Guarantee</h4>
-                  <p className="text-xs text-[#736B63] leading-relaxed mt-0.5">
-                    Every piece in our catalogue is sourced with strict quality checks. From material safety to packaging integrity, we guarantee complete satisfaction.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-5 text-xs text-[#8C827A] border-t md:border-t-0 md:border-l border-[#F0EAE1] pt-3 md:pt-0 md:pl-5 shrink-0">
-                <div>
-                  <span className="block text-[10px] uppercase text-[#8C827A]">Category</span>
-                  <strong className="text-[#181513] font-medium">{cleanCategory}</strong>
-                </div>
-                <div>
-                  <span className="block text-[10px] uppercase text-[#8C827A]">Dispatch</span>
-                  <strong className="text-[#181513] font-medium">24–48 Hours</strong>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ── Tab Content: Specifications ─────────────────────────────────────── */}
-        {activeTab === "specs" && (
-          <div className="py-10 max-w-3xl space-y-4">
-            <div>
-              <span className="text-[10.5px] font-medium tracking-widest text-[#7D3219] uppercase block mb-1">
-                Detailed Specifications
-              </span>
-              <h2 className="font-poppins text-2xl font-normal text-[#181513]">
-                Product Information &amp; Specs
-              </h2>
-            </div>
-
-            <div className="bg-white rounded-2xl border border-[#E8E2D8] overflow-hidden shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
-              <table className="w-full text-left text-xs sm:text-sm">
-                <tbody>
-                  {[
-                    { label: "Product Name", value: cleanTitle },
-                    { label: "Category", value: cleanCategory },
-                    { label: "Stock Availability", value: product.stock ? `${product.stock} units available` : "Ready to Dispatch" },
-                    { label: "Order Minimum", value: isReturnGiftItem ? "50 Units (Bulk Gift Pack)" : "1 Unit" },
-                    { label: "Origin", value: "Curated for Ghar Sansar" },
-                    { label: "Delivery Mode", value: "Doorstep delivery via insured courier" },
-                  ].map((row, i) => (
-                    <tr key={i} className={`border-b last:border-0 border-[#F0EAE1] ${i % 2 === 0 ? "bg-[#FAF7F2]" : "bg-white"}`}>
-                      <td className="px-5 py-3.5 font-medium text-[#8C827A] w-1/3">{row.label}</td>
-                      <td className="px-5 py-3.5 font-normal text-[#181513]">{row.value}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* ── Tab Content: Shipping ───────────────────────────────────────────── */}
-        {activeTab === "shipping" && (
-          <div className="py-10 max-w-3xl space-y-4">
-            <div>
-              <span className="text-[10.5px] font-medium tracking-widest text-[#7D3219] uppercase block mb-1">
-                Logistics &amp; Delivery
-              </span>
-              <h2 className="font-poppins text-2xl font-normal text-[#181513]">
-                Safe Packaging &amp; Pan-India Dispatch
-              </h2>
-            </div>
-            <p className="text-xs sm:text-sm text-[#736B63] leading-relaxed">
-              We partner with India's premier logistics providers (Delhivery, BlueDart, DTDC) to ensure every order arrives on time and in perfect condition.
-            </p>
-
-            <div className="bg-white rounded-2xl border border-[#E8E2D8] p-5 space-y-3 shadow-[0_2px_12px_rgba(0,0,0,0.02)] text-xs sm:text-sm text-[#4A433D]">
-              <div className="flex items-center gap-2.5">
-                <CheckCircle size={15} className="text-emerald-700 shrink-0" />
-                <span>Orders dispatched within 24 to 48 hours of confirmation.</span>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <CheckCircle size={15} className="text-emerald-700 shrink-0" />
-                <span>Real-time SMS &amp; WhatsApp tracking updates provided.</span>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <CheckCircle size={15} className="text-emerald-700 shrink-0" />
-                <span>Standard delivery within 3–6 business days across India.</span>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ── Tab Content: Reviews ────────────────────────────────────────────── */}
-        {activeTab === "reviews" && (
-          <div className="py-10 space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <span className="text-[10.5px] font-medium tracking-widest text-[#7D3219] uppercase block mb-1">
-                  Customer Feedback
-                </span>
-                <h2 className="font-poppins text-2xl font-normal text-[#181513]">
-                  Verified Customer Reviews
-                </h2>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  if (!isAuthenticated) {
-                    toast.error("Please sign in to write a review");
-                    navigate('/login', { state: { from: location } });
-                  } else {
-                    setIsReviewModalOpen(true);
-                  }
-                }}
-                className="px-4 py-2 bg-[#8E3F24] hover:bg-[#742F19] text-white text-xs font-medium rounded-xl transition shadow-xs cursor-pointer"
-              >
-                Write a Review
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-              {/* Summary Card */}
-              <div className="lg:col-span-5 bg-white rounded-2xl border border-[#E8E2D8] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)] space-y-4">
-                <div>
-                  <span className="text-xs text-[#8C827A] uppercase tracking-wider block mb-1">Overall Rating</span>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-4xl font-normal text-[#181513]">{avgRating.toFixed(1)}</span>
-                    <span className="text-xs text-[#8C827A]">out of 5</span>
-                  </div>
-                  <div className="flex items-center gap-1 mt-1.5">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <Star
-                        key={star}
-                        size={15}
-                        className={star <= Math.round(avgRating) ? "fill-[#F4B740] text-[#F4B740]" : "text-[#E8E2D8]"}
-                      />
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-2 pt-2 border-t border-[#F0EAE1]">
-                  {[5, 4, 3, 2, 1].map((r) => (
-                    <div key={r} className="flex items-center text-xs text-[#736B63] gap-2">
-                      <span className="w-10">{r} star</span>
-                      <div className="flex-1 h-1.5 bg-[#F0EAE1] rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-[#8E3F24] rounded-full transition-all duration-500"
-                          style={{ width: `${ratingPercentages[r as 5|4|3|2|1] || 0}%` }}
-                        />
-                      </div>
-                      <span className="w-8 text-right text-[#8C827A]">{ratingPercentages[r as 5|4|3|2|1] || 0}%</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Reviews List */}
-              <div className="lg:col-span-7 bg-white rounded-2xl border border-[#E8E2D8] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
-                {reviews.length === 0 ? (
-                  <div className="py-8 text-center space-y-2">
-                    <FileText size={28} className="text-[#8C827A] mx-auto opacity-40" />
-                    <h3 className="text-sm font-medium text-[#181513]">No customer reviews yet</h3>
-                    <p className="text-xs text-[#8C827A]">Be the first to share your thoughts about this product!</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3.5 max-h-80 overflow-y-auto pr-1">
-                    {reviews.map((rev) => (
-                      <div key={rev.id} className="p-3.5 bg-[#FAF7F2] rounded-xl border border-[#E8E2D8] space-y-1.5">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-semibold text-[#181513]">{rev.name}</span>
-                          <span className="text-[10px] text-[#8C827A]">{rev.date}</span>
-                        </div>
-                        <div className="flex items-center gap-0.5">
-                          {[1, 2, 3, 4, 5].map((s) => (
-                            <Star key={s} size={11} className={s <= rev.rating ? "fill-[#F4B740] text-[#F4B740]" : "text-[#E8E2D8]"} />
-                          ))}
-                        </div>
-                        <p className="text-xs text-[#4A433D] leading-relaxed">{rev.comment}</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-=======
               {/* Purchase Actions */}
               <div className="space-y-3 pt-1">
                 <div className="flex items-center gap-3">
@@ -1616,30 +849,10 @@ const ProductDetail: React.FC = () => {
                 </div>
               </div>
 
->>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
             </div>
           </div>
-        )}
+        </div>
 
-<<<<<<< HEAD
-        {/* ── Related Products Carousel ───────────────────────────────────────── */}
-        {relatedProducts.length > 0 && (
-          <div className="py-12 border-t border-[#E8E2D8]">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <span className="text-[10.5px] font-medium tracking-widest text-[#7D3219] uppercase block mb-1">
-                  Handpicked Recommendations
-                </span>
-                <h2 className="font-poppins text-2xl font-normal text-[#181513] tracking-tight">
-                  Related Products
-                </h2>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => scrollRelated("left")}
-                  className="w-9 h-9 rounded-full bg-white hover:bg-[#FAF7F2] border border-[#E8E2D8] shadow-2xs flex items-center justify-center text-[#4A433D] hover:text-black transition cursor-pointer"
-=======
         {/* Customer Reviews Section */}
         <div className="pt-10 border-t border-[#E8E2D8] mb-14">
           <div className="flex items-center justify-between mb-6">
@@ -1702,7 +915,6 @@ const ProductDetail: React.FC = () => {
                   type="button"
                   onClick={() => scrollRelated("left")}
                   className="w-8 h-8 rounded-full bg-white hover:bg-stone-50 border border-[#E8E2D8] flex items-center justify-center text-stone-600 transition cursor-pointer"
->>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
                   title="Previous"
                 >
                   <ChevronLeft size={15} />
@@ -1710,11 +922,7 @@ const ProductDetail: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => scrollRelated("right")}
-<<<<<<< HEAD
-                  className="w-9 h-9 rounded-full bg-white hover:bg-[#FAF7F2] border border-[#E8E2D8] shadow-2xs flex items-center justify-center text-[#4A433D] hover:text-black transition cursor-pointer"
-=======
                   className="w-8 h-8 rounded-full bg-white hover:bg-stone-50 border border-[#E8E2D8] flex items-center justify-center text-stone-600 transition cursor-pointer"
->>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
                   title="Next"
                 >
                   <ChevronRight size={15} />
@@ -1722,22 +930,6 @@ const ProductDetail: React.FC = () => {
               </div>
             </div>
 
-<<<<<<< HEAD
-            {/* Render with the site's official ProductCard component */}
-            <div 
-              ref={relatedScrollRef}
-              className="flex gap-4 overflow-x-auto pb-5 pt-1 scroll-smooth snap-x snap-mandatory related-products-scroll"
-              style={{
-                scrollbarWidth: 'thin',
-                scrollbarColor: '#8E3F24 #E8E2D8'
-              }}
-            >
-              {relatedProducts.map((relProduct, idx) => (
-                <div 
-                  key={relProduct.id || idx} 
-                  className="w-full sm:w-[calc((100%-16px)/2)] md:w-[calc((100%-32px)/3)] lg:w-[calc((100%-48px)/4)] xl:w-[calc((100%-64px)/5)] shrink-0 snap-start"
-                >
-=======
             {/* Horizontal Scrollable Carousel using canonical ProductCard */}
             <div 
               ref={relatedScrollRef}
@@ -1745,7 +937,6 @@ const ProductDetail: React.FC = () => {
             >
               {relatedProducts.map((relProduct, idx) => (
                 <div key={relProduct.id || idx} className="w-[220px] sm:w-[250px] shrink-0">
->>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
                   <ProductCard product={relProduct} index={idx} />
                 </div>
               ))}
@@ -1755,7 +946,7 @@ const ProductDetail: React.FC = () => {
 
       </div>
 
-      {/* ── Review Form Modal ─────────────────────────────────────────────────── */}
+      {/* Review Modal Form */}
       <AnimatePresence>
         {isReviewModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
@@ -1763,32 +954,15 @@ const ProductDetail: React.FC = () => {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-<<<<<<< HEAD
-              className="bg-white rounded-2xl p-6 sm:p-7 max-w-md w-full shadow-2xl relative font-poppins border border-[#E8E2D8]"
-=======
               className="bg-white rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative border border-[#E8E2D8]"
->>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
             >
               <button
-                type="button"
                 onClick={() => setIsReviewModalOpen(false)}
-<<<<<<< HEAD
-                className="absolute top-5 right-5 text-[#8C827A] hover:text-black p-1 rounded-full cursor-pointer"
-=======
                 className="absolute top-5 right-5 text-stone-400 hover:text-stone-700 p-1.5 rounded-full hover:bg-stone-100 transition cursor-pointer"
->>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
               >
                 <X size={18} />
               </button>
 
-<<<<<<< HEAD
-              <h3 className="text-lg font-medium text-[#181513] mb-1">Write Your Review</h3>
-              <p className="text-xs text-[#8C827A] mb-4">{cleanTitle}</p>
-
-              <form onSubmit={handleReviewSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-xs font-medium text-[#181513] mb-1">Your Name</label>
-=======
               <span className="text-[11px] font-semibold tracking-[0.2em] text-[#C86B4C] uppercase block mb-1">
                 Feedback
               </span>
@@ -1798,27 +972,18 @@ const ProductDetail: React.FC = () => {
               <form onSubmit={handleReviewSubmit} className="space-y-4">
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">Your Name</label>
->>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
                   <input
                     type="text"
                     required
                     value={formName}
                     onChange={(e) => setFormName(e.target.value)}
                     placeholder="Enter your name"
-<<<<<<< HEAD
-                    className="w-full px-3.5 py-2.5 border border-[#E8E2D8] rounded-xl text-xs bg-[#FAF7F2] focus:ring-1 focus:ring-[#8E3F24] outline-none"
-=======
                     className="w-full px-3.5 py-2.5 border border-[#E8E2D8] rounded-lg text-xs focus:ring-1 focus:ring-[#C86B4C] focus:border-[#C86B4C] outline-none transition bg-[#FAF7F2]"
->>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
                   />
                 </div>
 
                 <div>
-<<<<<<< HEAD
-                  <label className="block text-xs font-medium text-[#181513] mb-1">Your Rating</label>
-=======
                   <label className="block text-xs font-medium text-gray-700 mb-1">Your Rating</label>
->>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
                   <div className="flex items-center gap-1.5 py-1">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button
@@ -1829,11 +994,7 @@ const ProductDetail: React.FC = () => {
                       >
                         <Star
                           size={24}
-<<<<<<< HEAD
-                          className={star <= formRating ? "fill-[#F4B740]" : "text-[#E8E2D8]"}
-=======
                           className={star <= formRating ? "fill-[#F4B740] text-[#F4B740]" : "text-stone-300"}
->>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
                         />
                       </button>
                     ))}
@@ -1841,63 +1002,38 @@ const ProductDetail: React.FC = () => {
                 </div>
 
                 <div>
-<<<<<<< HEAD
-                  <label className="block text-xs font-medium text-[#181513] mb-1">Review Comments</label>
-=======
                   <label className="block text-xs font-medium text-gray-700 mb-1">Review Comments</label>
->>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
                   <textarea
                     required
                     rows={3}
                     value={formComment}
                     onChange={(e) => setFormComment(e.target.value)}
                     placeholder="Describe your experience with this product..."
-<<<<<<< HEAD
-                    className="w-full px-3.5 py-2.5 border border-[#E8E2D8] rounded-xl text-xs bg-[#FAF7F2] focus:ring-1 focus:ring-[#8E3F24] outline-none resize-none"
-=======
                     className="w-full px-3.5 py-2.5 border border-[#E8E2D8] rounded-lg text-xs focus:ring-1 focus:ring-[#C86B4C] focus:border-[#C86B4C] outline-none transition bg-[#FAF7F2]"
->>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
                   />
                 </div>
 
                 <div>
-<<<<<<< HEAD
-                  <label className="block text-xs font-medium text-[#181513] mb-1">Add Photo (Optional)</label>
-                  <div className="mt-1 flex flex-col items-center justify-center border border-dashed border-[#E8E2D8] rounded-xl p-3 bg-[#FAF7F2] relative cursor-pointer hover:bg-[#F0EAE1] transition">
-                    {imagePreview ? (
-                      <div className="relative w-full h-24 flex items-center justify-center">
-                        <img src={imagePreview} alt="Preview" className="max-h-full max-w-full object-contain rounded-lg shadow-xs" />
-=======
                   <label className="block text-xs font-medium text-gray-700 mb-1">Add Photo (Optional)</label>
                   <div className="mt-1 flex flex-col items-center justify-center border border-dashed border-[#D9B4A4] rounded-xl p-3 bg-[#FAF7F2] relative cursor-pointer hover:bg-white transition">
                     {imagePreview ? (
                       <div className="relative w-full h-24 flex items-center justify-center">
                         <img src={imagePreview} alt="Preview" className="max-h-full max-w-full object-contain rounded-lg shadow-sm" />
->>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
                         <button
                           type="button"
                           onClick={() => {
                             setImagePreview("");
                             setFormImage("");
                           }}
-<<<<<<< HEAD
-                          className="absolute top-0 right-0 bg-[#8E3F24] text-white rounded-full p-1 shadow cursor-pointer"
-=======
                           className="absolute top-0 right-0 bg-[#7D3219] text-white rounded-full p-1 shadow hover:bg-black transition cursor-pointer"
->>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
                         >
                           <X size={12} />
                         </button>
                       </div>
                     ) : (
                       <>
-<<<<<<< HEAD
-                        <Camera className="w-5 h-5 text-[#8C827A] mb-1" />
-                        <span className="text-[10px] text-[#8C827A]">Select a photo</span>
-=======
                         <Camera className="w-5 h-5 text-stone-400 mb-1" />
                         <span className="text-[11px] text-stone-500 font-medium">Select photo</span>
->>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
                         <input
                           type="file"
                           accept="image/*"
@@ -1911,11 +1047,7 @@ const ProductDetail: React.FC = () => {
 
                 <button
                   type="submit"
-<<<<<<< HEAD
-                  className="w-full py-3 bg-[#8E3F24] hover:bg-[#742F19] text-white font-medium rounded-xl text-xs uppercase tracking-wider shadow-xs transition cursor-pointer"
-=======
                   className="w-full py-2.5 bg-[#F7EBE4] hover:bg-[#EFE0D7] text-[#7D3219] border border-[#D9B4A4] hover:border-[#7D3219] font-medium rounded-md text-xs sm:text-[13px] tracking-wide transition shadow-xs cursor-pointer"
->>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
                 >
                   Submit Verified Review
                 </button>
@@ -1925,18 +1057,14 @@ const ProductDetail: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* ── Lightbox Modal ───────────────────────────────────────────────────── */}
+      {/* Expand Image Lightbox */}
       <AnimatePresence>
         {activeLightboxImage && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-<<<<<<< HEAD
-            className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4 cursor-zoom-out"
-=======
             className="fixed inset-0 bg-black/90 backdrop-blur-xs z-50 flex items-center justify-center p-4 cursor-zoom-out"
->>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
             onClick={() => setActiveLightboxImage(null)}
           >
             <button
@@ -1950,11 +1078,7 @@ const ProductDetail: React.FC = () => {
               animate={{ scale: 1 }}
               exit={{ scale: 0.95 }}
               src={activeLightboxImage}
-<<<<<<< HEAD
-              alt="Expanded View"
-=======
               alt="Full scale view"
->>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
               className="max-w-full max-h-[85vh] object-contain rounded-xl shadow-2xl"
             />
           </motion.div>
