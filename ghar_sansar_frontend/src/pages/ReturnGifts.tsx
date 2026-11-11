@@ -243,19 +243,19 @@ export default function ReturnGifts() {
               className="absolute inset-0 w-full h-full object-cover object-[center_35%] pointer-events-none"
             />
             {/* Soft directional gradient only over text area so the gifts remain vibrant & visible */}
-            <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/50 to-transparent max-w-2xl sm:max-w-xl" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent sm:hidden" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-transparent max-w-[56%] sm:max-w-xl z-[1]" />
 
             {/* Banner typography */}
-            <div className="relative h-full flex flex-col justify-center px-4 sm:px-10 md:px-14 lg:px-16 max-w-2xl z-10">
-              <span className="text-[10px] sm:text-[11px] font-medium tracking-[0.26em] text-[#E8A588] uppercase font-sans mb-1.5 sm:mb-2 block drop-shadow-xs">
-                Artisanal Curations • Celebration Favors
+            <div className="relative h-full flex flex-col justify-center px-3 sm:px-10 md:px-14 lg:px-16 max-w-[52%] xs:max-w-[54%] sm:max-w-xl z-10">
+              <span className="text-[8.5px] xs:text-[9.5px] sm:text-[11px] font-medium tracking-[0.16em] sm:tracking-[0.26em] text-[#E8A588] uppercase font-sans mb-1 sm:mb-2 block drop-shadow-xs line-clamp-1">
+                Artisanal Curations • Favors
               </span>
-              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-poppins text-white font-normal tracking-tight leading-tight mb-1.5 sm:mb-2 drop-shadow-xs">
-                Festive & Return Gifts
+              <h1 className="text-[17px] xs:text-xl sm:text-2xl md:text-3xl lg:text-4xl font-poppins text-white font-normal tracking-tight leading-[1.18] sm:leading-tight mb-1 sm:mb-2 drop-shadow-xs">
+                Festive &amp; Return Gifts
               </h1>
-              <p className="text-xs sm:text-[13px] text-[#FAF7F2] font-normal leading-relaxed max-w-lg line-clamp-2 drop-shadow-xs">
-                Handcrafted German silver, brass, ceramic, crystal, and sacred favors for weddings, housewarmings, anniversaries, and joyful festivities.
+              <p className="text-[10px] xs:text-[11px] sm:text-[13px] text-[#FAF7F2]/90 font-normal leading-[14px] xs:leading-[16px] sm:leading-relaxed line-clamp-2 drop-shadow-xs">
+                <span className="sm:hidden">Handcrafted German silver, brass &amp; sacred celebration favors.</span>
+                <span className="hidden sm:inline">Handcrafted German silver, brass, ceramic, crystal, and sacred favors for weddings, housewarmings, anniversaries, and joyful festivities.</span>
               </p>
             </div>
           </div>

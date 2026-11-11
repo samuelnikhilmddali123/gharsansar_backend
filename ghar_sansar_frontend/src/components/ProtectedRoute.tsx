@@ -11,7 +11,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode; role?: string }> = (
 
   const userRole = (user?.role || "").toLowerCase();
   const userEmail = (user?.email || "").toLowerCase();
-  const isAdmin = userRole === "admin" || userEmail === "gharsansarshop@gmail.com";
+  const isAdmin = userRole === "admin" || userEmail === "gharsansarshop@gmail.com" || userEmail === "gharsansarwebsite@gmail.com";
 
   if (role) {
     const requiredRole = role.toLowerCase();

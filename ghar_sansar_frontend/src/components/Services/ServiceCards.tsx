@@ -25,7 +25,7 @@ const getServiceMetadata = (service: Service) => {
     suitableFor: "Villas, Apartments & Independent Houses",
     materials: "Premium Plywood, Laminates & Hardware",
     warranty: isPremium ? "10 Years On-site" : "5 Years Limited",
-    budget: `Starting from ₹${service.price.toLocaleString()}`
+    budget: "Customized on Inspection"
   };
 };
 
@@ -135,7 +135,7 @@ export default function ServiceCards() {
                     <div className="flex items-start gap-2">
                       <Wallet size={16} className="text-luxury-gold mt-0.5 flex-shrink-0" />
                       <div>
-                        <div className="text-[10px] font-bold text-gray-400 uppercase">Est. Budget</div>
+                        <div className="text-[10px] font-bold text-gray-400 uppercase">Consultation</div>
                         <div className="text-xs font-semibold text-gray-900">{meta.budget}</div>
                       </div>
                     </div>

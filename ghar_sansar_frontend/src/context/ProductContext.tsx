@@ -24,6 +24,7 @@ export interface Product {
   category: string;
   subCategory: string;
   stock?: number;
+  status?: "active" | "out_of_stock" | "coming_soon";
 }
 
 interface ProductContextType {
@@ -32,6 +33,7 @@ interface ProductContextType {
   error: string | null;
   addProduct: (p: Partial<Product> & { imageFile?: File }) => Promise<void>;
   updateProduct: (id: string, p: Partial<Product> & { imageFile?: File }) => Promise<void>;
+  updateProductStatus: (id: string, status: "active" | "out_of_stock" | "coming_soon", stock?: number) => Promise<boolean>;
   deleteProduct: (id: string, category_type: string) => Promise<void>;
   refreshProducts: () => Promise<void>;
 }
@@ -153,7 +155,8 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
               video: img.video || "",
               category: category.name || category.category || "General",
               subCategory: sub.name,
-              stock: img.stock !== undefined ? img.stock : 50
+              stock: img.stock !== undefined ? img.stock : 50,
+              status: img.status || (img.stock !== undefined && Number(img.stock) <= 0 ? "out_of_stock" : "active")
             });
           });
         });
@@ -162,76 +165,11 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
         allProducts.push(...catProducts);
       });
 
-      console.log("Total products found:", allProducts.length);
+      console.log("Total products found from MongoDB Atlas:", allProducts.length);
       setProducts(allProducts);
     } catch (err) {
-      console.warn("Backend API fetch failed, trying static /products.json fallback:", err);
-      try {
-        const localRes = await axios.get("/products.json");
-        const categories = Array.isArray(localRes.data) ? localRes.data : [];
-        const fallbackProducts: Product[] = [];
-        
-        // Prioritize Sonu Steel Products first in fallback as well
-        const sortedFallbackCategories = [...categories].sort((a: any, b: any) => {
-          const nameA = (a.name || a.category || "").toLowerCase();
-          const nameB = (b.name || b.category || "").toLowerCase();
-          const aIsSonu = nameA.includes("sonu") ? 1 : 0;
-          const bIsSonu = nameB.includes("sonu") ? 1 : 0;
-          return bIsSonu - aIsSonu;
-        });
-
-        sortedFallbackCategories.forEach((category: any) => {
-          const catProducts: Product[] = [];
-          category.subcategories?.forEach((sub: any) => {
-            const items = sub.products || sub.images || sub.services || [];
-            items.forEach((img: any, index: number) => {
-              const imageUrl = fixImageUrl(img.image);
-              const sellingPrice = parseInt(img.selling_price) || parseInt(img.price) || 0;
-              const strikePrice = parseInt(img.strike_price) || parseInt(img.actual_price) || parseInt(img["act-price"]) || parseInt(img.actualPrice) || (sellingPrice > 0 ? Math.round(sellingPrice * 1.25) : 0);
-              const finalPrice = parseInt(img.final_price) || parseInt(img.finalPrice) || parseInt(img.price) || sellingPrice;
-              const discountPct = parseFloat(img.discount_percentage) || 0;
-              const savings = parseInt(img.savings) || Math.max(0, strikePrice - finalPrice);
-              const totalDiscountPercent = parseInt(img.total_discount_percent) || (strikePrice > 0 ? Math.round(((strikePrice - finalPrice) / strikePrice) * 100) : 0);
-              const isOnSale = img.is_on_sale !== undefined ? Boolean(img.is_on_sale) : (finalPrice < strikePrice || discountPct > 0);
-
-              catProducts.push({
-                id: img.id || `${category.name || category.category}-${sub.name}-${index}`,
-                title: img.title || img.name || "Untitled Product",
-                name: img.title || img.name || "Untitled Product",
-                description: img.description || "",
-                price: finalPrice,
-                sellingPrice: sellingPrice,
-                actualPrice: strikePrice,
-                strikePrice: strikePrice,
-                finalPrice: finalPrice,
-                discountPercentage: discountPct,
-                discountSource: img.discount_source || null,
-                categoryDiscount: parseFloat(img.category_discount) || 0,
-                productDiscount: parseFloat(img.product_discount) || 0,
-                savings: savings,
-                totalDiscountPercent: totalDiscountPercent,
-                isOnSale: isOnSale,
-                image: imageUrl,
-                video: img.video || "",
-                category: category.name || category.category || "General",
-                subCategory: sub.name,
-                stock: img.stock !== undefined ? img.stock : 50
-              });
-            });
-          });
-          // Sort items within this category according to price ascending
-          catProducts.sort((a, b) => (a.price || 0) - (b.price || 0));
-          fallbackProducts.push(...catProducts);
-        });
-        if (fallbackProducts.length > 0) {
-          console.log("Loaded products from static /products.json:", fallbackProducts.length);
-          setProducts(fallbackProducts);
-          return;
-        }
-      } catch (localErr) {
-        console.error("Static products fallback also failed:", localErr);
-      }
-      setError(err instanceof Error ? err.message : "Failed to fetch products");
+      console.error("Backend MongoDB Atlas products fetch failed:", err);
+      setError(err instanceof Error ? err.message : "Failed to fetch products from database");
       setProducts([]);
     } finally {
       setLoading(false);
@@ -279,6 +217,8 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
       formData.append("price", Math.floor(p.price ?? 0).toString());
       formData.append("actual_price", Math.floor(p.actualPrice ?? 0).toString());
       formData.append("description", p.description || "");
+      if (p.status) formData.append("status", p.status);
+      if (p.stock !== undefined) formData.append("stock", p.stock.toString());
       if (p.video) formData.append("video", p.video);
 
       if (p.imageFile) {
@@ -295,7 +235,31 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
     }
   };
 
-
+  // Quick update product status
+  const updateProductStatus = async (
+    id: string,
+    status: "active" | "out_of_stock" | "coming_soon",
+    stock?: number
+  ): Promise<boolean> => {
+    try {
+      await axios.patch(`${BACKEND_URL}/storage/upload/products/status`, { id, status, stock });
+      setProducts((prev) =>
+        prev.map((item) =>
+          item.id === id
+            ? {
+                ...item,
+                status,
+                stock: stock !== undefined ? stock : (status === "out_of_stock" ? 0 : (item.stock && item.stock > 0 ? item.stock : 50))
+              }
+            : item
+        )
+      );
+      return true;
+    } catch (err) {
+      console.error("Error updating product status:", err);
+      return false;
+    }
+  };
 
   // Delete product
   const deleteProduct = async (id: string) => {
@@ -315,6 +279,7 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
         error,
         addProduct,
         updateProduct,
+        updateProductStatus,
         deleteProduct,
         refreshProducts: fetchProducts
       }}

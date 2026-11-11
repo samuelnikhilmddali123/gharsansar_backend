@@ -28,6 +28,8 @@ export const allCollectionOptions = [
   { key: "All", label: "All Collections" },
   { key: "sonu_steel_products", label: "Sonu Steel Products" },
   { key: "Cello", label: "Cello" },
+  { key: "Milton Water Bottles", label: "Milton Water Bottles" },
+  { key: "Harshdeep Planters", label: "Harshadeep Planters & Pots" },
   { key: "Aquarium & Accessories", label: "Aquarium & Accessories" },
   { key: "Lunch Boxes", label: "Lunch Boxes" },
   { key: "Water Bottles & Jars", label: "Water Bottles & Jars" },
@@ -43,7 +45,6 @@ export const allCollectionOptions = [
   { key: "Handicrafts & Gifts", label: "Handicrafts & Gifts" },
   { key: "Ceramic Pots", label: "Ceramic Pots" },
   { key: "Artificial Plants", label: "Artificial Plants" },
-  { key: "Harshdeep Planters", label: "Harshdeep Planters" },
   { key: "Garlands", label: "Garlands" },
 ];
 
@@ -56,6 +57,8 @@ function formatName(name: string) {
   if (matched) return matched.label;
   if (name === "sonu_steel_products") return "Sonu Steel Products";
   if (name === "birds_and_accessories") return "Birds And Accessories";
+  if (name.toLowerCase().includes("harsh")) return "Harshadeep Planters & Pots";
+  if (name.toLowerCase().includes("milton")) return "Milton Water Bottles";
   return name
     .replace(/_/g, " ")
     .replace(/\b\w/g, (c) => c.toUpperCase());
@@ -200,7 +203,7 @@ const ProductsPage: React.FC = () => {
         id: "sonu",
         title: "Sonu Cookware",
         category: "sonu_steel_products",
-        image: "/products/sonu_steel_products/sonu%20poster.png",
+        image: "/products/sonu_steel_products/sonu%20banner.png",
         alt: "Sonu Cookware Crafted for Happy Cooking",
       },
       {
@@ -261,7 +264,9 @@ const ProductsPage: React.FC = () => {
     return products.filter(
       (p) =>
         p.category?.toLowerCase() === categoryFilter.toLowerCase() ||
-        (categoryFilter === "German Silver & More" && p.category?.toLowerCase().includes("german"))
+        (categoryFilter === "German Silver & More" && p.category?.toLowerCase().includes("german")) ||
+        (categoryFilter.toLowerCase().includes("harsh") && p.category?.toLowerCase().includes("harsh")) ||
+        (categoryFilter.toLowerCase().includes("milton") && p.category?.toLowerCase().includes("milton"))
     );
   }, [products, categoryFilter]);
 
@@ -338,7 +343,9 @@ const ProductsPage: React.FC = () => {
       if (categoryFilter !== "All") {
         const matchesCategory =
           p.category?.toLowerCase() === categoryFilter.toLowerCase() ||
-          (categoryFilter === "German Silver & More" && p.category?.toLowerCase().includes("german"));
+          (categoryFilter === "German Silver & More" && p.category?.toLowerCase().includes("german")) ||
+          (categoryFilter.toLowerCase().includes("harsh") && p.category?.toLowerCase().includes("harsh")) ||
+          (categoryFilter.toLowerCase().includes("milton") && p.category?.toLowerCase().includes("milton"));
         if (!matchesCategory) return false;
       }
       // Subcategory / Pill filter
@@ -391,7 +398,9 @@ const ProductsPage: React.FC = () => {
           if (
             opt.toLowerCase() === cat ||
             (opt === "German Silver & More" && cat.includes("german")) ||
-            (opt === "sonu_steel_products" && (cat.includes("sonu") || p.title?.toLowerCase().includes("sonu")))
+            (opt === "sonu_steel_products" && (cat.includes("sonu") || p.title?.toLowerCase().includes("sonu"))) ||
+            (opt.toLowerCase().includes("harsh") && cat.includes("harsh")) ||
+            (opt.toLowerCase().includes("milton") && cat.includes("milton"))
           ) {
             return opt;
           }
@@ -503,7 +512,7 @@ const ProductsPage: React.FC = () => {
       <div className="w-full bg-[#FAF7F2] pt-12 pb-2 sm:pb-3">
         <div className="w-full max-w-[1880px] mx-auto px-3 sm:px-6 md:px-8 lg:px-10">
           <div
-            className="relative w-full aspect-[2048/472] rounded-xl sm:rounded-2xl overflow-hidden shadow-sm border border-[#E8E2D8] bg-[#181513] group select-none"
+            className="relative w-full aspect-[2048/472] rounded-xl sm:rounded-2xl overflow-hidden shadow-sm border border-[#E8E2D8] bg-[#FAF7F2] sm:bg-[#181513] group select-none"
             onMouseEnter={() => setIsSliderHovered(true)}
             onMouseLeave={() => setIsSliderHovered(false)}
             onTouchStart={(e) => {
@@ -536,7 +545,7 @@ const ProductsPage: React.FC = () => {
                 animate="center"
                 exit="exit"
                 transition={{ duration: 0.55, ease: [0.32, 0.72, 0, 1] }}
-                className="w-full h-full cursor-pointer relative flex items-center justify-center bg-[#181513]"
+                className="w-full h-full cursor-pointer relative flex items-center justify-center bg-[#FAF7F2] sm:bg-[#181513]"
                 onClick={() =>
                   updateQuery({
                     category: bannerSlides[currentSlideIndex].category,
@@ -548,7 +557,7 @@ const ProductsPage: React.FC = () => {
                 <img
                   src={bannerSlides[currentSlideIndex].image}
                   alt={bannerSlides[currentSlideIndex].alt}
-                  className="w-full h-full object-contain md:object-cover object-center block mx-auto select-none"
+                  className="w-full h-full object-fill sm:object-cover object-center block mx-auto select-none"
                 />
               </motion.div>
             </AnimatePresence>

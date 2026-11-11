@@ -12,11 +12,16 @@ const normalizeEmail = (e) => (e || "").trim().toLowerCase();
  * Generate a production-grade signed JWT token for a user.
  */
 function generateToken(user) {
+  const normEmail = normalizeEmail(user.email);
+  const isAdmin = (user.role && String(user.role).toUpperCase() === "ADMIN") ||
+    normEmail === "gharsansarshop@gmail.com" ||
+    normEmail === "gharsansarwebsite@gmail.com";
+
   const payload = {
-    _id: user._id ? user._id.toString() : undefined,
-    id: typeof user.id === "number" ? user.id : 1,
-    email: normalizeEmail(user.email),
-    role: (user.role && user.role.toLowerCase() === "admin") ? "ADMIN" : "CUSTOMER"
+    _id: user._id ? user._id.toString() : (isAdmin ? "admin_01" : undefined),
+    id: isAdmin ? "admin_01" : (typeof user.id === "number" ? user.id : (user._id ? user._id.toString() : undefined)),
+    email: normEmail,
+    role: isAdmin ? "ADMIN" : "CUSTOMER"
   };
 
   return jwt.sign(payload, JWT_SECRET, { expiresIn: "30d" });
@@ -32,37 +37,60 @@ async function findUserByIdentifier(identifier) {
     const cleanId = String(identifier).trim();
     const cleanEmail = normalizeEmail(cleanId);
 
-    // 1. Try finding in MongoDB via Mongoose
-    let user = null;
-    if (/^[0-9a-fA-F]{24}$/.test(cleanId)) {
-      user = await User.findById(cleanId);
-    }
-    if (!user) {
-      const numId = parseInt(cleanId, 10);
-      if (!isNaN(numId)) {
-        user = await User.findOne({ id: numId });
+    // If it's the admin identifier or email
+    if (cleanEmail === "gharsansarshop@gmail.com" || cleanEmail === "gharsansarwebsite@gmail.com" || cleanId === "admin_01") {
+      let admin = null;
+      try {
+        admin = await User.findOne({ email: cleanEmail.includes("@") ? cleanEmail : "gharsansarshop@gmail.com" });
+      } catch (e) {}
+
+      if (!admin) {
+        return {
+          _id: "admin_01",
+          id: "admin_01",
+          email: cleanEmail.includes("@") ? cleanEmail : "gharsansarshop@gmail.com",
+          full_name: "Admin",
+          role: "ADMIN",
+          is_active: true
+        };
       }
-    }
-    if (!user && cleanEmail.includes("@")) {
-      user = await User.findOne({ email: cleanEmail });
+      if (typeof admin.toObject === "function") admin = admin.toObject();
+      admin.role = "ADMIN";
+      return admin;
     }
 
-    if (user) return user;
+    // 1. If it's an email address, lookup by email (highest priority & guaranteed uniqueness)
+    if (cleanEmail.includes("@")) {
+      const user = await User.findOne({ email: cleanEmail });
+      if (user) return user;
+    }
+
+    // 2. If it's a 24-character hexadecimal MongoDB ObjectId
+    if (/^[0-9a-fA-F]{24}$/.test(cleanId)) {
+      const user = await User.findById(cleanId);
+      if (user) return user;
+    }
+
+    // 3. Lookup by numeric id ONLY if the identifier is strictly numeric digits
+    if (/^\d+$/.test(cleanId)) {
+      const numId = parseInt(cleanId, 10);
+      const user = await User.findOne({ id: numId });
+      if (user) return user;
+    }
   } catch (err) {
     // Continue to fallback
   }
 
-  // 2. Fallback to cache / users.json
+  // 4. Fallback to cache / users.json
   try {
     const users = readData(USERS_FILE, []);
     const cleanStr = String(identifier).trim();
     const cleanEmail = normalizeEmail(cleanStr);
-    const numId = parseInt(cleanStr, 10);
 
     const found = users.find((u) => {
       if (u._id && String(u._id) === cleanStr) return true;
-      if (!isNaN(numId) && u.id === numId) return true;
       if (normalizeEmail(u.email) === cleanEmail) return true;
+      if (/^\d+$/.test(cleanStr) && u.id === parseInt(cleanStr, 10)) return true;
       return false;
     });
 
@@ -98,17 +126,43 @@ async function resolveUserFromRequest(req) {
     try {
       const decoded = jwt.verify(token, JWT_SECRET);
       if (decoded) {
-        let user = await findUserByIdentifier(decoded._id || decoded.id || decoded.email);
-        if (!user && (decoded.email === "gharsansarshop@gmail.com" || decoded.email === "gharsansarwebsite@gmail.com" || decoded.role === "ADMIN")) {
-          user = {
-            _id: "admin_01",
-            id: 1,
-            email: decoded.email || "gharsansarshop@gmail.com",
-            full_name: "Admin",
-            role: "ADMIN",
-            is_active: true
-          };
+        const normEmail = normalizeEmail(decoded.email);
+        const isAdmin = (decoded.role && String(decoded.role).toUpperCase() === "ADMIN") ||
+          normEmail === "gharsansarshop@gmail.com" ||
+          normEmail === "gharsansarwebsite@gmail.com" ||
+          decoded.id === "admin_01" ||
+          decoded._id === "admin_01";
+
+        if (isAdmin) {
+          let user = normEmail ? await findUserByIdentifier(normEmail) : null;
+          if (!user) {
+            user = {
+              _id: "admin_01",
+              id: "admin_01",
+              email: normEmail || "gharsansarshop@gmail.com",
+              full_name: "Admin",
+              role: "ADMIN",
+              is_active: true
+            };
+          } else {
+            if (typeof user.toObject === "function") user = user.toObject();
+            user.role = "ADMIN";
+          }
+          return user;
         }
+
+        // For regular customers: Prioritize lookup by email first (unique), then _id, then numeric id
+        let user = null;
+        if (normEmail) {
+          user = await findUserByIdentifier(normEmail);
+        }
+        if (!user && decoded._id && decoded._id !== "admin_01") {
+          user = await findUserByIdentifier(decoded._id);
+        }
+        if (!user && decoded.id && typeof decoded.id === "number") {
+          user = await findUserByIdentifier(decoded.id);
+        }
+
         if (user && user.is_active !== false) {
           return user;
         }
@@ -128,11 +182,13 @@ async function resolveUserFromRequest(req) {
     // C) Handle legacy admin token format: admin_token_gharsansar_<timestamp>
     if (token.startsWith("admin_token_")) {
       const user = await findUserByIdentifier("gharsansarshop@gmail.com");
-      if (user) return user;
-      // Auto-fallback admin object
+      if (user) {
+        if (typeof user.toObject === "function") return { ...user.toObject(), role: "ADMIN" };
+        return { ...user, role: "ADMIN" };
+      }
       return {
         _id: "admin_01",
-        id: 1,
+        id: "admin_01",
         email: "gharsansarshop@gmail.com",
         full_name: "Admin",
         role: "ADMIN",

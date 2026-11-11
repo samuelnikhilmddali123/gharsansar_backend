@@ -42,6 +42,7 @@ interface Product {
   subCategory: string;
   features?: string[];
   stock?: number;
+  status?: "active" | "out_of_stock" | "coming_soon";
 }
 
 // Category type
@@ -90,7 +91,7 @@ const ProductsAdmin: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All");
   const [discountFilter, setDiscountFilter] = useState<"All" | "Discounted" | "Non-Discounted">("All");
-  const [statusFilter, setStatusFilter] = useState<"All" | "Active" | "Out of Stock">("All");
+  const [statusFilter, setStatusFilter] = useState<"All" | "Active" | "Out of Stock" | "Coming Soon">("All");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [viewMode, setViewMode] = useState<"table" | "catalog">("table");
@@ -133,6 +134,7 @@ const ProductsAdmin: React.FC = () => {
     subCategory: "Premium Line",
     features: [] as string[],
     stock: "50",
+    status: "active" as "active" | "out_of_stock" | "coming_soon",
   });
 
   // Fetch active category discounts
@@ -213,6 +215,7 @@ const ProductsAdmin: React.FC = () => {
               category: category.name,
               subCategory: sub.name,
               stock: p.stock !== undefined ? p.stock : 50,
+              status: p.status || (p.stock !== undefined && Number(p.stock) <= 0 ? "out_of_stock" : "active"),
             });
           });
         });
@@ -320,6 +323,7 @@ const ProductsAdmin: React.FC = () => {
         params.append("category_name", form.category);
         params.append("subcategory_name", form.subCategory);
         params.append("stock", form.stock);
+        params.append("status", form.status);
 
         res = await fetch(`${API_BASE}/storage/upload/products`, {
           method: "PUT",
@@ -338,6 +342,7 @@ const ProductsAdmin: React.FC = () => {
         formData.append("actual_price", finalStrikePriceToSave.toString());
         formData.append("description", form.description);
         formData.append("stock", form.stock);
+        formData.append("status", form.status);
         if (form.image instanceof File) {
           formData.append("image", form.image);
         }
@@ -380,6 +385,7 @@ const ProductsAdmin: React.FC = () => {
       subCategory: p.subCategory,
       features: p.features || [],
       stock: p.stock !== undefined ? p.stock.toString() : "50",
+      status: p.status || (p.stock !== undefined && p.stock <= 0 ? "out_of_stock" : "active"),
     });
     setPreview(null);
     setExistingImageUrl(fixImageUrl(p.image));
@@ -387,6 +393,38 @@ const ProductsAdmin: React.FC = () => {
     setShowForm(true);
 
     window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // Quick Status Change directly from Catalog Table (Active, Out of Stock, Coming Soon)
+  const handleQuickStatusChange = async (id: string, newStatus: "active" | "out_of_stock" | "coming_soon") => {
+    // Optimistically update products state for instantaneous 0ms feedback
+    setProducts((prev) =>
+      prev.map((item) =>
+        item.id === id
+          ? {
+              ...item,
+              status: newStatus,
+              stock: newStatus === "out_of_stock" ? 0 : (item.stock && item.stock > 0 ? item.stock : 50),
+            }
+          : item
+      )
+    );
+
+    try {
+      const res = await fetch(`${API_BASE}/storage/upload/products/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, status: newStatus }),
+      });
+
+      if (!res.ok) {
+        throw new Error(`Failed to update status: ${res.status}`);
+      }
+    } catch (err: any) {
+      console.error("Quick status update failed:", err);
+      alert(`Could not update status: ${err.message || "Server error"}`);
+      fetchCategoriesAndProducts();
+    }
   };
 
   // Delete product
@@ -423,6 +461,7 @@ const ProductsAdmin: React.FC = () => {
       subCategory: categoriesData[0]?.subcategories[0]?.name || "Premium Line",
       features: [],
       stock: "50",
+      status: "active",
     });
     setPreview(null);
     setExistingImageUrl(null);
@@ -449,11 +488,13 @@ const ProductsAdmin: React.FC = () => {
       if (discountFilter === "Discounted") matchesDiscount = Boolean(isDiscounted);
       else if (discountFilter === "Non-Discounted") matchesDiscount = !isDiscounted;
 
-      // 4. Status filter (Active / In Stock vs Out of Stock)
+      // 4. Status filter (Active vs Out of Stock vs Coming Soon)
       const stockQty = p.stock !== undefined ? p.stock : 50;
+      const currentStatus = p.status || (stockQty <= 0 ? "out_of_stock" : "active");
       let matchesStatus = true;
-      if (statusFilter === "Active") matchesStatus = stockQty > 0;
-      else if (statusFilter === "Out of Stock") matchesStatus = stockQty === 0;
+      if (statusFilter === "Active") matchesStatus = currentStatus === "active";
+      else if (statusFilter === "Out of Stock") matchesStatus = currentStatus === "out_of_stock";
+      else if (statusFilter === "Coming Soon") matchesStatus = currentStatus === "coming_soon";
 
       // 5. Price range filter (based on Actual Price)
       const priceVal = p.actualPrice || parseFloat(p.price) || 0;
@@ -610,6 +651,7 @@ const ProductsAdmin: React.FC = () => {
               <option value="All">All Stock Status</option>
               <option value="Active">Active / In Stock</option>
               <option value="Out of Stock">Out of Stock</option>
+              <option value="Coming Soon">Coming Soon</option>
             </select>
           </div>
         </div>
@@ -684,8 +726,8 @@ const ProductsAdmin: React.FC = () => {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Product Title & Stock */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {/* Product Title, Stock & Availability */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
                 <div className="md:col-span-2">
                   <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-2">
                     Product Title *
@@ -708,10 +750,39 @@ const ProductsAdmin: React.FC = () => {
                     type="number"
                     placeholder="e.g., 50"
                     value={form.stock}
-                    onChange={(e) => setForm({ ...form, stock: e.target.value })}
+                    onChange={(e) => {
+                      const newStock = e.target.value;
+                      setForm({
+                        ...form,
+                        stock: newStock,
+                        status: Number(newStock) <= 0 ? "out_of_stock" : (form.status === "out_of_stock" ? "active" : form.status)
+                      });
+                    }}
                     className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none text-sm transition"
                     required
                   />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-2">
+                    Product Availability *
+                  </label>
+                  <select
+                    value={form.status}
+                    onChange={(e) => {
+                      const newStatus = e.target.value as any;
+                      setForm({
+                        ...form,
+                        status: newStatus,
+                        stock: newStatus === "out_of_stock" ? "0" : (Number(form.stock) <= 0 ? "50" : form.stock)
+                      });
+                    }}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none text-sm transition appearance-none bg-white font-medium"
+                  >
+                    <option value="active">🟢 Active / In Stock</option>
+                    <option value="out_of_stock">🔴 Out of Stock</option>
+                    <option value="coming_soon">⏳ Coming Soon</option>
+                  </select>
                 </div>
               </div>
 
@@ -1137,17 +1208,25 @@ const ProductsAdmin: React.FC = () => {
 
                         {/* Status Column */}
                         <td className="py-3.5 px-4 text-center">
-                          <span
-                            className={`inline-block text-xs px-2.5 py-1 rounded-full font-bold ${
-                              stock > 10
-                                ? "bg-emerald-100 text-emerald-800"
-                                : stock > 0
-                                ? "bg-amber-100 text-amber-800"
-                                : "bg-rose-100 text-rose-800"
-                            }`}
-                          >
-                            {stock > 0 ? "Active" : "Out of Stock"}
-                          </span>
+                          <div className="relative inline-flex items-center justify-center">
+                            <select
+                              value={p.status || (stock <= 0 ? "out_of_stock" : "active")}
+                              onChange={(e) => handleQuickStatusChange(p.id, e.target.value as any)}
+                              className={`text-[11px] font-bold py-1 pl-2.5 pr-6 rounded-full appearance-none cursor-pointer border transition-all duration-150 outline-none shadow-xs ${
+                                (p.status === "out_of_stock" || (!p.status && stock <= 0))
+                                  ? "bg-rose-50 text-rose-700 border-rose-300 hover:bg-rose-100 focus:ring-2 focus:ring-rose-400"
+                                  : p.status === "coming_soon"
+                                  ? "bg-amber-50 text-amber-800 border-amber-300 hover:bg-amber-100 focus:ring-2 focus:ring-amber-400"
+                                  : "bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100 focus:ring-2 focus:ring-emerald-400"
+                              }`}
+                              title="Click to toggle status: Active, Out of Stock, or Coming Soon"
+                            >
+                              <option value="active">Active</option>
+                              <option value="out_of_stock">Out of Stock</option>
+                              <option value="coming_soon">Coming Soon</option>
+                            </select>
+                            <ChevronDown className="w-3 h-3 text-gray-500 absolute right-2 pointer-events-none" />
+                          </div>
                         </td>
 
                         {/* Actions Column */}
@@ -1281,9 +1360,18 @@ const ProductsAdmin: React.FC = () => {
                                         const strikeVal = p.strikePrice || p.strike_price || parseFloat(p.actual_price || p.price);
                                         const actualVal = p.actualPrice || parseFloat(p.price);
                                         const catDiscountPct = p.categoryDiscountPercentage || 0;
+                                        const hasDiscount = catDiscountPct > 0;
                                         const discountAmt = p.categoryDiscountAmount !== undefined
                                           ? p.categoryDiscountAmount
-                                          : (strikeVal > 0 && catDiscountPct > 0 ? Math.round(strikeVal * (catDiscountPct / 100)) : 0);
+                                          : (strikeVal > 0 && hasDiscount ? Math.round(strikeVal * (catDiscountPct / 100)) : 0);
+                                        const discountedVal = p.discountedPrice !== undefined
+                                          ? p.discountedPrice
+                                          : (hasDiscount ? Math.round((actualVal - (actualVal * (catDiscountPct / 100))) * 100) / 100 : actualVal);
+                                        const finalVal = p.finalPrice !== undefined
+                                          ? p.finalPrice
+                                          : (hasDiscount ? discountedVal : actualVal);
+                                        const stock = p.stock !== undefined ? p.stock : 50;
+                                        const prodStatus = p.status || (stock <= 0 ? "out_of_stock" : "active");
 
                                         return (
                                           <div
@@ -1297,6 +1385,24 @@ const ProductsAdmin: React.FC = () => {
                                                     {catDiscountPct}% OFF
                                                   </span>
                                                 )}
+                                                <div className="absolute top-2 right-2 z-10">
+                                                  <select
+                                                    value={prodStatus}
+                                                    onChange={(e) => handleQuickStatusChange(p.id, e.target.value as any)}
+                                                    className={`text-[10px] font-bold py-0.5 pl-2 pr-5 rounded-full appearance-none cursor-pointer border shadow-xs outline-none ${
+                                                      prodStatus === "out_of_stock"
+                                                        ? "bg-rose-50 text-rose-700 border-rose-300"
+                                                        : prodStatus === "coming_soon"
+                                                        ? "bg-amber-50 text-amber-800 border-amber-300"
+                                                        : "bg-emerald-50 text-emerald-800 border-emerald-300"
+                                                    }`}
+                                                    title="Click to change status"
+                                                  >
+                                                    <option value="active">Active</option>
+                                                    <option value="out_of_stock">Out of Stock</option>
+                                                    <option value="coming_soon">Coming Soon</option>
+                                                  </select>
+                                                </div>
                                                 <img
                                                   src={fixImageUrl(p.image)}
                                                   alt={p.title}

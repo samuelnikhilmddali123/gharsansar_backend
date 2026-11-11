@@ -29,6 +29,8 @@ const COLLECTION_MAP = {
   "cart.json": "carts",
   "push_tokens.json": "push_tokens",
   "products.json": "product_catalog",
+  "product_catalog": "product_catalog",
+  "products": "product_catalog",
   "return_gifts.json": "return_gifts",
   "23_evening_products.json": "product_catalog",
   "category_discounts.json": "category_discounts",

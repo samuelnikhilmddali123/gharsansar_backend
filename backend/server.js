@@ -490,7 +490,9 @@ app.get(["/api/products", "/products"], async (req, res) => {
             hasCategoryDiscount: pricing.hasCategoryDiscount,
             isDiscounted: pricing.isDiscounted,
             discount_percentage: pricing.categoryDiscountPercentage,
-            discount_amount: pricing.categoryDiscountAmount
+            discount_amount: pricing.categoryDiscountAmount,
+            stock: item.stock !== undefined ? item.stock : 50,
+            status: item.status || (item.stock !== undefined && item.stock <= 0 ? "out_of_stock" : "active")
           };
         });
 
@@ -537,19 +539,33 @@ const getNextUserId = (users) => {
   return maxId + 1;
 };
 
-// Formatter to guarantee exact Image 2 user document format
+// Formatter to guarantee exact user document format
 const formatUserResponse = (user) => {
-  const intId = typeof user.id === "number" ? user.id : (parseInt(String(user.id).replace(/\D/g, "")) || 1);
+  const normEmail = normalizeEmail(user.email);
+  const isAdmin = (user.role && String(user.role).toUpperCase() === "ADMIN") ||
+    normEmail === "gharsansarshop@gmail.com" ||
+    normEmail === "gharsansarwebsite@gmail.com";
+
+  let idVal = user.id;
+  if (isAdmin) {
+    idVal = user.id || "admin_01";
+  } else if (typeof user.id === "number") {
+    idVal = user.id;
+  } else {
+    const parsed = parseInt(String(user.id || "").replace(/\D/g, ""));
+    idVal = !isNaN(parsed) && parsed > 0 ? parsed : (user._id ? String(user._id) : 1);
+  }
+
   return {
-    _id: user._id,
-    id: intId,
+    _id: user._id || (isAdmin ? "admin_01" : undefined),
+    id: idVal,
     email: user.email || "",
     password_hash: user.password_hash || "",
-    full_name: (user.full_name || user.name || "").trim(),
+    full_name: (user.full_name || user.name || (isAdmin ? "Admin" : "")).trim(),
     phone: (user.phone || "").replace(/\D/g, ""),
     company_name: user.company_name || "",
     gstin: user.gstin || "",
-    role: (user.role && user.role.toLowerCase() === "admin") ? "ADMIN" : "CUSTOMER",
+    role: isAdmin ? "ADMIN" : "CUSTOMER",
     is_active: user.is_active !== undefined ? Boolean(user.is_active) : true,
     firebase_uid: user.firebase_uid || "",
     photo_url: user.photo_url || user.profilePicture || "",
@@ -1777,6 +1793,7 @@ app.get("/api/storage/upload/products", async (req, res) => {
             discount_percentage: pricing.categoryDiscountPercentage,
             discount_amount: pricing.categoryDiscountAmount,
             stock: item.stock !== undefined ? item.stock : 50,
+            status: item.status || (item.stock !== undefined && item.stock <= 0 ? "out_of_stock" : "active"),
             image: imageUrl,
             category: categoryName,
             subCategory: subName
@@ -1850,7 +1867,7 @@ app.post("/api/storage/upload", productUpload.single("image"), (req, res) => {
     }
 
     // Default product saving
-    const { category_name, subcategory_name, title, price, actual_price, description, stock, product_discount } = req.body;
+    const { category_name, subcategory_name, title, price, actual_price, description, stock, product_discount, status } = req.body;
     const parsedPrice = parseInt(price) || 0;
     const parsedActualPrice = parseInt(actual_price) || 0;
 
@@ -1889,6 +1906,7 @@ app.post("/api/storage/upload", productUpload.single("image"), (req, res) => {
     if (!subcategory[itemKey]) subcategory[itemKey] = [];
 
     const newProdId = `prod_${Date.now()}`;
+    const calculatedStock = stock !== undefined ? parseInt(stock) : (status === "out_of_stock" ? 0 : 50);
     const newProduct = {
       prod_id: newProdId,
       id: newProdId,
@@ -1899,11 +1917,27 @@ app.post("/api/storage/upload", productUpload.single("image"), (req, res) => {
       product_discount: product_discount ? parseFloat(product_discount) : undefined,
       description: description || "",
       image: imagePath,
-      stock: stock !== undefined ? parseInt(stock) : 50
+      stock: calculatedStock,
+      status: status || (calculatedStock <= 0 ? "out_of_stock" : "active")
     };
 
     subcategory[itemKey].push(newProduct);
-    fs.writeFileSync(productsPath, JSON.stringify(rawData, null, 2));
+    // Persist directly to MongoDB Atlas
+    writeJsonFile("products.json", rawData);
+    cachedProductsResponse = null;
+
+    try {
+      const db = getDatabase();
+      if (db) {
+        await db.collection("products").insertOne({
+          ...newProduct,
+          category: category.name,
+          subCategory: subcategory.name
+        });
+      }
+    } catch (e) {
+      console.warn("MongoDB flattened insert warning:", e.message);
+    }
 
     res.status(201).json({ success: true, message: "Product created successfully", product: newProduct });
   } catch (error) {
@@ -1912,10 +1946,100 @@ app.post("/api/storage/upload", productUpload.single("image"), (req, res) => {
   }
 });
 
-// Admin: Update product
-app.put("/api/storage/upload/products", productUpload.single("image"), (req, res) => {
+// Admin: Quick update product stock / availability status
+app.patch("/api/storage/upload/products/status", express.json(), async (req, res) => {
   try {
-    const { id, title, price, actual_price, description, category_name, subcategory_name, stock, product_discount } = req.body;
+    const { id, status, stock } = req.body;
+    if (!id || !status) {
+      return res.status(400).json({ error: "Product id and status are required" });
+    }
+
+    const productsPath = path.join(__dirname, "public", "products.json");
+    const rawData = readJsonFile(productsPath, []);
+    let updated = false;
+    let targetItem = null;
+
+    for (let c of rawData) {
+      for (let s of c.subcategories || []) {
+        const itemKey = s.images ? "images" : s.products ? "products" : "images";
+        const items = s[itemKey] || [];
+        const idx = items.findIndex(item => item.prod_id === id || item.id === id || item.name === id);
+        if (idx !== -1) {
+          const calculatedStock = stock !== undefined ? parseInt(stock) : (status === "out_of_stock" ? 0 : (items[idx].stock > 0 ? items[idx].stock : 50));
+          items[idx] = {
+            ...items[idx],
+            status: status,
+            stock: calculatedStock
+          };
+          targetItem = items[idx];
+          updated = true;
+          break;
+        }
+      }
+      if (updated) break;
+    }
+
+    if (!updated && id) {
+      const match = id.match(/^prod_(\d+)_(\d+)_(\d+)$/);
+      if (match) {
+        const catIdx = parseInt(match[1]);
+        const subIdx = parseInt(match[2]);
+        const idx = parseInt(match[3]);
+        if (rawData[catIdx] && rawData[catIdx].subcategories[subIdx]) {
+          const sub = rawData[catIdx].subcategories[subIdx];
+          const itemKey = sub.images ? "images" : sub.products ? "products" : "services";
+          const items = sub[itemKey];
+          if (items && items[idx]) {
+            const calculatedStock = stock !== undefined ? parseInt(stock) : (status === "out_of_stock" ? 0 : (items[idx].stock > 0 ? items[idx].stock : 50));
+            items[idx] = {
+              ...items[idx],
+              status: status,
+              stock: calculatedStock
+            };
+            targetItem = items[idx];
+            updated = true;
+          }
+        }
+      }
+    }
+
+    if (!updated) {
+      return res.status(404).json({ error: "Product not found to update status" });
+    }
+
+    // Persist directly to MongoDB Atlas
+    writeJsonFile("products.json", rawData);
+    cachedProductsResponse = null;
+
+    // Update MongoDB flattened products collection
+    try {
+      const db = getDatabase();
+      if (db) {
+        await db.collection("products").updateOne(
+          { $or: [{ id: id }, { prod_id: id }, { name: id }] },
+          { $set: { status: targetItem.status, stock: targetItem.stock } }
+        );
+      }
+    } catch (e) {
+      console.warn("MongoDB flattened update warning:", e.message);
+    }
+
+    res.json({
+      success: true,
+      message: `Product marked as ${status === "out_of_stock" ? "Out of Stock" : status === "coming_soon" ? "Coming Soon" : "Active"}`,
+      status: targetItem.status,
+      stock: targetItem.stock
+    });
+  } catch (error) {
+    console.error("Quick status update error:", error);
+    res.status(500).json({ error: "Failed to update product status" });
+  }
+});
+
+// Admin: Update product
+app.put("/api/storage/upload/products", productUpload.single("image"), async (req, res) => {
+  try {
+    const { id, title, price, actual_price, description, category_name, subcategory_name, stock, product_discount, status } = req.body;
 
     const parsedPrice = price !== undefined ? parseInt(price) : null;
     const parsedActualPrice = actual_price !== undefined ? parseInt(actual_price) : null;
@@ -1931,6 +2055,7 @@ app.put("/api/storage/upload/products", productUpload.single("image"), (req, res
     const rawData = readJsonFile(productsPath, []);
 
     let updated = false;
+    let targetItem = null;
 
     // 1. Try matching by exact ID (for newly added products that have a unique ID in the database)
     if (id) {
@@ -1940,17 +2065,20 @@ app.put("/api/storage/upload/products", productUpload.single("image"), (req, res
           const items = s[itemKey] || [];
           const idx = items.findIndex(item => (item.prod_id === id || item.id === id || item.name === id));
           if (idx !== -1) {
+            const calculatedStock = stock !== undefined ? parseInt(stock) : (status === "out_of_stock" ? 0 : (items[idx].stock > 0 ? items[idx].stock : 50));
             items[idx] = {
               ...items[idx],
-              name: title || items[idx].name,
-              title: title || items[idx].title,
+              name: title !== undefined ? title : items[idx].name,
+              title: title !== undefined ? title : items[idx].title,
               price: price !== undefined ? parseInt(price) : items[idx].price,
               "act-price": actual_price !== undefined ? parseInt(actual_price) : items[idx]["act-price"],
               product_discount: product_discount !== undefined ? parseFloat(product_discount) : items[idx].product_discount,
-              description: description || items[idx].description,
+              description: description !== undefined ? description : items[idx].description,
               image: imagePath || items[idx].image,
-              stock: stock !== undefined ? parseInt(stock) : items[idx].stock
+              stock: calculatedStock,
+              status: status !== undefined ? status : (items[idx].status || (calculatedStock <= 0 ? "out_of_stock" : "active"))
             };
+            targetItem = items[idx];
             updated = true;
             break;
           }
@@ -1971,17 +2099,20 @@ app.put("/api/storage/upload/products", productUpload.single("image"), (req, res
           const itemKey = sub.images ? "images" : sub.products ? "products" : "services";
           const items = sub[itemKey];
           if (items && items[idx]) {
+            const calculatedStock = stock !== undefined ? parseInt(stock) : (status === "out_of_stock" ? 0 : (items[idx].stock > 0 ? items[idx].stock : 50));
             items[idx] = {
               ...items[idx],
-              name: title || items[idx].name || items[idx].title,
-              title: title || items[idx].title || items[idx].name,
+              name: title !== undefined ? title : items[idx].name || items[idx].title,
+              title: title !== undefined ? title : items[idx].title || items[idx].name,
               price: price !== undefined ? parseInt(price) : items[idx].price,
               "act-price": actual_price !== undefined ? parseInt(actual_price) : items[idx]["act-price"] || items[idx].price,
               product_discount: product_discount !== undefined ? parseFloat(product_discount) : items[idx].product_discount,
-              description: description || items[idx].description,
+              description: description !== undefined ? description : items[idx].description,
               image: imagePath || items[idx].image,
-              stock: stock !== undefined ? parseInt(stock) : items[idx].stock
+              stock: calculatedStock,
+              status: status !== undefined ? status : (items[idx].status || (calculatedStock <= 0 ? "out_of_stock" : "active"))
             };
+            targetItem = items[idx];
             updated = true;
           }
         }
@@ -1992,8 +2123,23 @@ app.put("/api/storage/upload/products", productUpload.single("image"), (req, res
       return res.status(404).json({ error: "Product not found to update" });
     }
 
-    fs.writeFileSync(productsPath, JSON.stringify(rawData, null, 2));
-    res.json({ success: true, message: "Product updated successfully" });
+    // Persist directly to MongoDB Atlas
+    writeJsonFile("products.json", rawData);
+    cachedProductsResponse = null;
+
+    try {
+      const db = getDatabase();
+      if (db && targetItem) {
+        await db.collection("products").updateOne(
+          { $or: [{ id: id }, { prod_id: id }, { name: id }] },
+          { $set: { status: targetItem.status, stock: targetItem.stock, title: targetItem.title, price: targetItem.price, actPrice: targetItem["act-price"] } }
+        );
+      }
+    } catch (e) {
+      console.warn("MongoDB flattened update warning:", e.message);
+    }
+
+    res.json({ success: true, message: "Product updated successfully", product: targetItem });
   } catch (error) {
     console.error("Admin product update error:", error);
     res.status(500).json({ error: "Failed to update product" });
@@ -2049,7 +2195,21 @@ app.delete("/api/storage/uploads/products", (req, res) => {
       return res.status(404).json({ error: "Product not found to delete" });
     }
 
-    fs.writeFileSync(productsPath, JSON.stringify(rawData, null, 2));
+    // Persist directly to MongoDB Atlas
+    writeJsonFile("products.json", rawData);
+    cachedProductsResponse = null;
+
+    try {
+      const db = getDatabase();
+      if (db) {
+        await db.collection("products").deleteOne({
+          $or: [{ id: id }, { prod_id: id }, { name: id }]
+        });
+      }
+    } catch (e) {
+      console.warn("MongoDB flattened delete warning:", e.message);
+    }
+
     res.json({ success: true, message: "Product deleted successfully" });
   } catch (error) {
     console.error("Admin product delete error:", error);

@@ -19,11 +19,18 @@ import {
   Share2,
   ChevronLeft,
   ChevronRight,
+<<<<<<< HEAD
+=======
+  ChevronUp,
+>>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
   MapPin,
   RotateCcw,
   Lock,
   Maximize2,
+<<<<<<< HEAD
   RotateCw,
+=======
+>>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
   FileText,
   Plus,
   Minus,
@@ -86,22 +93,35 @@ const ProductDetail: React.FC = () => {
   const minQty = isReturnGiftItem ? 50 : 1;
 
   // Gallery States
+<<<<<<< HEAD
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [is360Active, setIs360Active] = useState(false);
   const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 });
+=======
+  const [zoomPos, setZoomPos] = useState({ x: 0, y: 0 });
+>>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
   const [isZooming, setIsZooming] = useState(false);
   const [activeLightboxImage, setActiveLightboxImage] = useState<string | null>(null);
 
   // Commerce States
+<<<<<<< HEAD
   const [quantity, setQuantity] = useState(minQty);
   const [activeTab, setActiveTab] = useState<"overview" | "specs" | "shipping" | "reviews">("overview");
+=======
+  const [quantity, setQuantity] = useState(state?.isReturnGift ? 50 : 1);
+>>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
   const { isInWishlist, toggleWishlist } = useWishlist();
   const isWishlisted = product ? isInWishlist(product.id) : false;
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
+  // Availability / Stock Status Checks
+  const isOutOfStock = Boolean(product?.status === "out_of_stock" || (product?.stock !== undefined && Number(product?.stock) <= 0));
+  const isComingSoon = Boolean(product?.status === "coming_soon");
+
   // Related products carousel ref
   const relatedScrollRef = useRef<HTMLDivElement>(null);
 
+<<<<<<< HEAD
   // Pincode setup
   const getInitialPincode = () => {
     const local = localStorage.getItem("user_pincode");
@@ -120,10 +140,21 @@ const ProductDetail: React.FC = () => {
   const cleanAreaText = (val: string) => {
     if (!val || /idhe/i.test(val)) return "Vijayawada, Andhra Pradesh";
     return val;
+=======
+  // Helper to read initial pincode from account addresses or explicitly saved pincode
+  const getInitialPincode = () => {
+    const local = localStorage.getItem("user_pincode");
+    // Ensure we do not use legacy hardcoded default "520008"
+    if (local && /^\d{6}$/.test(local) && local !== "520008") return local;
+    return "";
+>>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
   };
 
   const getInitialArea = () => {
+    const localPin = localStorage.getItem("user_pincode");
+    if (!localPin || localPin === "520008") return "";
     const localArea = localStorage.getItem("user_area");
+<<<<<<< HEAD
     if (localArea && !/idhe/i.test(localArea)) return localArea;
     try {
       const stored = localStorage.getItem("user_shipping_address");
@@ -134,17 +165,25 @@ const ProductDetail: React.FC = () => {
       }
     } catch {}
     return "Vijayawada, Andhra Pradesh";
+=======
+    if (localArea && localArea !== "Vijayawada, Andhra Pradesh") return localArea;
+    return "";
+>>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
   };
 
   const [pincode, setPincode] = useState<string>(getInitialPincode);
   const [savedArea, setSavedArea] = useState<string>(getInitialArea);
-  const [deliveryFee, setDeliveryFee] = useState<number | null>(99);
+  const [deliveryFee, setDeliveryFee] = useState<number | null>(() => {
+    const initialPin = getInitialPincode();
+    return initialPin ? (/^5[0-3]/.test(initialPin) ? 99 : 149) : null;
+  });
   const [isCheckingPincode, setIsCheckingPincode] = useState(false);
   const [isEditingPincode, setIsEditingPincode] = useState(false);
-  const [pincodeInput, setPincodeInput] = useState(pincode);
+  const [pincodeInput, setPincodeInput] = useState(getInitialPincode);
 
-  // Automatically sync pincode and area from user's account shipping address
+  // Automatically sync pincode and area only if the user is authenticated and has an address
   useEffect(() => {
+    if (!user) return;
     let activeAddr: any = null;
 
     if (user?.addresses && user.addresses.length > 0) {
@@ -155,13 +194,6 @@ const ProductDetail: React.FC = () => {
       try {
         const stored = localStorage.getItem(`shipping_address_${user.email}`);
         if (stored) activeAddr = JSON.parse(stored);
-      } catch {}
-    }
-
-    if (!activeAddr) {
-      try {
-        const storedGlobal = localStorage.getItem("user_shipping_address");
-        if (storedGlobal) activeAddr = JSON.parse(storedGlobal);
       } catch {}
     }
 
@@ -232,6 +264,7 @@ const ProductDetail: React.FC = () => {
   };
 
   const handleIncreaseQuantity = () => {
+    if (isOutOfStock || isComingSoon) return;
     if (product?.stock !== undefined && quantity >= product.stock) {
       toast.error(`Only ${product.stock} items left in stock`);
       return;
@@ -266,6 +299,7 @@ const ProductDetail: React.FC = () => {
     }
   };
 
+<<<<<<< HEAD
   // Product gallery: Extract REAL images for this product (NO hardcoded fake banners)
   const productImages = useMemo(() => {
     if (!product) return [];
@@ -291,6 +325,9 @@ const ProductDetail: React.FC = () => {
   const handleNextImage = () => {
     setActiveImageIndex((prev) => (prev < productImages.length - 1 ? prev + 1 : 0));
   };
+=======
+
+>>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
 
   // Review Form States
   const [formName, setFormName] = useState("");
@@ -440,6 +477,22 @@ const ProductDetail: React.FC = () => {
 
   const handleAddToCart = () => {
     if (!product) return;
+<<<<<<< HEAD
+=======
+    if (isOutOfStock) {
+      toast.error("This product is currently out of stock.");
+      return;
+    }
+    if (isComingSoon) {
+      toast("This product is coming soon!");
+      return;
+    }
+    const catDisc = Number(product.categoryDiscountPercentage || product.discountPercentage || 0);
+    const actP = Number(product.actualPrice !== undefined ? product.actualPrice : (product.price || 0)) || 0;
+    const discP = Number(product.discountedPrice !== undefined ? product.discountedPrice : (catDisc > 0 ? Math.round((actP - (actP * (catDisc / 100))) * 100) / 100 : actP));
+    const effectivePrice = Number(product.finalPrice !== undefined ? product.finalPrice : (catDisc > 0 ? discP : actP));
+
+>>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
     addToCart({
       id: product.id || product._id,
       name: cleanTitle,
@@ -484,7 +537,13 @@ const ProductDetail: React.FC = () => {
         subCategory: product.subCategory
       },
       quantity: quantity,
+<<<<<<< HEAD
       unitPrice: finalPrice
+=======
+      unitPrice: product.price,
+      selectedSize: undefined,
+      selectedColor: undefined
+>>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
     });
     openWhatsAppOrderUrl(msg);
   };
@@ -550,6 +609,7 @@ const ProductDetail: React.FC = () => {
   }
 
   return (
+<<<<<<< HEAD
     <div className="min-h-screen bg-[#FAF7F2] font-poppins text-[#181513] pb-24 md:pb-20 selection:bg-[#8E3F24] selection:text-white antialiased">
       
       {/* ── Sticky Mobile CTA Bar ───────────────────────────────────────────── */}
@@ -820,10 +880,122 @@ const ProductDetail: React.FC = () => {
                 </span>
                 {strikePrice > finalPrice && (
                   <span className="text-sm text-[#8C827A] line-through font-normal">
+=======
+    <div className="min-h-screen bg-[#FAF7F2] pb-24 font-sans text-gray-900 selection:bg-[#C57053] selection:text-white antialiased">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 relative z-10">
+        
+        {/* Breadcrumb */}
+        <nav className="flex items-center space-x-2 text-xs text-stone-500 mb-6 font-normal">
+          <button onClick={() => navigate("/")} className="hover:text-stone-900 transition cursor-pointer">Home</button>
+          <span className="text-stone-300">/</span>
+          <button onClick={() => navigate(state?.isReturnGift ? "/return-gifts" : "/products")} className="hover:text-stone-900 transition cursor-pointer">
+            {state?.isReturnGift ? "Return Gifts" : "Shop"}
+          </button>
+          <span className="text-stone-300">/</span>
+          <button onClick={() => navigate(state?.isReturnGift ? `/return-gifts?category=${product.category}` : `/products?category=${product.category}`)} className="hover:text-stone-900 transition cursor-pointer">
+            {product.category || "General"}
+          </button>
+          <span className="text-stone-300">/</span>
+          <span className="text-stone-900 truncate max-w-[280px]">{product.title || product.name}</span>
+        </nav>
+
+        {/* 2-Column Product Showcase Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-start mb-16">
+          
+          {/* Left Column: Clean Image Showcase */}
+          <div className="lg:col-span-7">
+            <div 
+              className="w-full relative overflow-hidden rounded-2xl bg-white aspect-square border border-[#E8E2D8]/70 flex items-center justify-center p-8 sm:p-14 select-none group shadow-[0_2px_12px_rgba(0,0,0,0.02)]"
+              onMouseMove={handleMouseMove}
+              onMouseEnter={() => setIsZooming(true)}
+              onMouseLeave={() => setIsZooming(false)}
+            >
+              {/* Wishlist Button top-right */}
+              <button 
+                onClick={() => {
+                  if (product) toggleWishlist(product);
+                }}
+                className={`absolute top-4 right-4 z-20 p-2.5 rounded-full border transition-all cursor-pointer ${
+                  isWishlisted ? 'bg-rose-50 text-rose-600 border-rose-200' : 'bg-white/90 hover:bg-white text-stone-400 hover:text-rose-600 border-[#E8E2D8]'
+                }`}
+                title="Wishlist"
+              >
+                <Heart size={16} className={isWishlisted ? 'fill-current' : ''} />
+              </button>
+
+              {/* Main Media Content */}
+              <div 
+                className="w-full h-full flex items-center justify-center relative cursor-zoom-in"
+                onClick={() => setActiveLightboxImage(product.image)}
+              >
+                <div 
+                  className="absolute bottom-4 left-1/2 -translate-x-1/2 w-3/5 h-4 rounded-full bg-black/[0.03] blur-[8px] pointer-events-none" 
+                  aria-hidden="true" 
+                />
+
+                <StudioImage
+                  src={product.image}
+                  alt={product.title || product.name}
+                  loading="eager"
+                  className="max-w-full max-h-full object-contain transition-transform duration-200"
+                  style={isZooming ? {
+                    transformOrigin: `${zoomPos.x}% ${zoomPos.y}%`,
+                    transform: 'scale(1.5)'
+                  } : {}}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: Clean Editorial Product Info & CTAs */}
+          <div className="lg:col-span-5 flex flex-col justify-between">
+            <div>
+              {/* Category Eyebrow & Status */}
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-[11px] font-semibold tracking-[0.24em] text-[#C86B4C] uppercase font-sans">
+                  {product.category || "General"}
+                </span>
+                {isOutOfStock ? (
+                  <span className="text-[11px] text-rose-700 font-medium px-2 py-0.5 bg-rose-50 border border-rose-200 rounded-md">
+                    Out of Stock
+                  </span>
+                ) : isComingSoon ? (
+                  <span className="text-[11px] text-amber-800 font-medium px-2 py-0.5 bg-amber-50 border border-amber-300 rounded-md">
+                    Coming Soon
+                  </span>
+                ) : null}
+              </div>
+
+              {/* Title */}
+              <h1 className="font-poppins text-2xl sm:text-3xl font-light text-gray-950 tracking-tight leading-snug mb-2.5">
+                {product.title?.replace(/_/g, " ") || product.name?.replace(/_/g, " ")}
+              </h1>
+
+              {/* Rating */}
+              <div className="flex items-center gap-1.5 mb-4 text-xs">
+                <div className="flex items-center text-[#F4B740]">
+                  <Star size={13} className="fill-current" />
+                </div>
+                <span className="font-medium text-gray-900">{avgRating ? avgRating.toFixed(1) : "4.5"}</span>
+                <span className="text-stone-300">·</span>
+                <span className="text-stone-500 font-light">
+                  {reviews.length > 0 ? `${reviews.length} reviews` : "18 verified reviews"}
+                </span>
+              </div>
+
+              {/* Pricing */}
+              <div className="flex items-baseline gap-3 mb-5">
+                <span className="font-poppins text-2xl sm:text-3xl font-light text-gray-950">
+                  ₹{finalPrice.toLocaleString("en-IN")}
+                </span>
+                {strikePrice > finalPrice && (
+                  <span className="text-sm text-stone-400 line-through font-light" title="MRP">
+>>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
                     ₹{strikePrice.toLocaleString("en-IN")}
                   </span>
                 )}
                 {displayDiscountBadge && (
+<<<<<<< HEAD
                   <span className="text-[11px] font-medium text-[#7D3219] bg-[#F7EBE4] border border-[#D9B4A4] px-2 py-0.5 rounded-full">
                     {displayDiscountBadge}
                   </span>
@@ -856,14 +1028,57 @@ const ProductDetail: React.FC = () => {
                     <input
                       type="text"
                       placeholder="6-digit Pincode"
+=======
+                  <span className="text-xs font-medium text-[#7D3219] bg-[#F7EBE4] border border-[#D9B4A4]/80 px-2.5 py-0.5 rounded-full">
+                    {displayDiscountBadge}
+                  </span>
+                )}
+              </div>
+
+              {/* Concise Description */}
+              {product.description && (
+                <p className="text-xs sm:text-sm text-stone-600 font-light leading-relaxed mb-6 pt-3 border-t border-[#F0EAE1]">
+                  {product.description}
+                </p>
+              )}
+
+              {/* Minimal Delivery Checker */}
+              <div className="mb-6 pt-3 border-t border-[#F0EAE1]">
+                <div className="flex items-center justify-between text-xs mb-2">
+                  <span className="text-[11px] uppercase tracking-wider text-stone-500 font-medium">Delivery</span>
+                  {pincode && !isEditingPincode && (
+                    <button 
+                      onClick={() => setIsEditingPincode(true)}
+                      className="text-[11px] text-[#7D3219] hover:underline cursor-pointer"
+                    >
+                      Change pincode
+                    </button>
+                  )}
+                </div>
+
+                {isEditingPincode || !pincode ? (
+                  <div className="flex items-center gap-2">
+                    <input 
+                      type="text" 
+                      placeholder="Enter 6-digit Pincode" 
+>>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
                       value={pincodeInput}
-                      onChange={(e) => setPincodeInput(e.target.value)}
+                      onChange={(e) => setPincodeInput(e.target.value.replace(/\D/g, "").slice(0, 6))}
                       maxLength={6}
+<<<<<<< HEAD
                       className="flex-1 px-2.5 py-1 text-xs border border-[#E8E2D8] rounded-lg bg-[#FAF7F2] focus:ring-1 focus:ring-[#8E3F24] outline-none"
+=======
+                      className="w-48 px-3 py-1.5 text-xs bg-white border border-[#E8E2D8] rounded-md focus:border-[#C86B4C] outline-none"
+                      disabled={isCheckingPincode}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") checkPincode();
+                      }}
+>>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
                     />
                     <button
                       type="button"
                       onClick={checkPincode}
+<<<<<<< HEAD
                       className="px-3 py-1 bg-[#8E3F24] text-white text-xs font-medium rounded-lg hover:bg-[#742F19] cursor-pointer"
                     >
                       Apply
@@ -877,9 +1092,34 @@ const ProductDetail: React.FC = () => {
                   </span>
                   <span>Est. <strong className="text-[#181513]">{deliveryDateString}</strong></span>
                 </div>
+=======
+                      disabled={isCheckingPincode || pincodeInput.length !== 6}
+                      className="px-3.5 py-1.5 bg-[#F7EBE4] hover:bg-[#EFE0D7] text-[#7D3219] border border-[#D9B4A4] text-xs font-medium rounded-md transition disabled:opacity-50 cursor-pointer"
+                    >
+                      {isCheckingPincode ? "Checking..." : "Check"}
+                    </button>
+                    {pincode && (
+                      <button 
+                        onClick={() => setIsEditingPincode(false)}
+                        className="text-xs text-stone-400 hover:text-stone-600 px-1 cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 text-xs text-stone-600 flex-wrap">
+                    <Truck size={14} className="text-[#C86B4C] shrink-0" />
+                    <span>Deliver to <strong className="font-medium text-stone-900">{pincode}</strong> ({savedArea})</span>
+                    <span className="text-stone-300">·</span>
+                    <span>Standard ₹{deliveryFee} (by {deliveryDateString})</span>
+                  </div>
+                )}
+>>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
               </div>
             </div>
 
+<<<<<<< HEAD
             {/* Quantity & CTA Action Row */}
             <div className="space-y-2 pt-0.5">
               <div className="flex items-center gap-2.5">
@@ -1237,10 +1477,151 @@ const ProductDetail: React.FC = () => {
                   </div>
                 )}
               </div>
+=======
+              {/* Purchase Actions */}
+              <div className="space-y-3 pt-1">
+                <div className="flex items-center gap-3">
+                  {/* Quantity Stepper */}
+                  {!isOutOfStock && !isComingSoon && quantityInCart === 0 && (
+                    <div className="flex items-center border border-[#E8E2D8] bg-white rounded-md h-[42px] px-1">
+                      <button
+                        type="button"
+                        onClick={handleDecreaseQuantity}
+                        className="w-7 h-7 flex items-center justify-center text-stone-500 hover:text-stone-900 rounded transition cursor-pointer"
+                        aria-label="Decrease quantity"
+                      >
+                        <Minus size={12} />
+                      </button>
+                      <span className="w-8 text-center text-xs font-medium text-stone-900 select-none">
+                        {quantity}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={handleIncreaseQuantity}
+                        className="w-7 h-7 flex items-center justify-center text-stone-500 hover:text-stone-900 rounded transition cursor-pointer"
+                        aria-label="Increase quantity"
+                      >
+                        <Plus size={12} />
+                      </button>
+                    </div>
+                  )}
+
+                  {isOutOfStock ? (
+                    <button
+                      disabled
+                      className="flex-1 h-[42px] px-4 bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium rounded-md flex items-center justify-center cursor-not-allowed"
+                    >
+                      Out of Stock
+                    </button>
+                  ) : isComingSoon ? (
+                    <button
+                      disabled
+                      className="flex-1 h-[42px] px-4 bg-amber-50 border border-amber-300 text-amber-800 text-xs font-medium rounded-md flex items-center justify-center cursor-not-allowed"
+                    >
+                      Coming Soon
+                    </button>
+                  ) : quantityInCart > 0 ? (
+                    <div className="flex-1 h-[42px] border border-[#E8E2D8] bg-white rounded-md flex items-center justify-between px-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (quantityInCart > 1) {
+                            updateQuantity(cartItemForProduct!.id, quantityInCart - 1);
+                          } else {
+                            removeFromCart(cartItemForProduct!.id);
+                            toast.success(`Removed from cart`);
+                          }
+                        }}
+                        className="w-7 h-7 flex items-center justify-center hover:bg-stone-100 rounded text-stone-700 transition cursor-pointer"
+                        aria-label="Decrease cart quantity"
+                      >
+                        <Minus size={12} />
+                      </button>
+                      <span className="text-xs font-medium text-stone-900 select-none">
+                        {quantityInCart} in Cart
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => updateQuantity(cartItemForProduct!.id, quantityInCart + 1)}
+                        className="w-7 h-7 flex items-center justify-center hover:bg-stone-100 rounded text-stone-700 transition cursor-pointer"
+                        aria-label="Increase cart quantity"
+                      >
+                        <Plus size={12} />
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={handleAddToCart}
+                      className="flex-1 h-[42px] px-4 bg-white hover:bg-[#FAF7F2] text-gray-900 border border-[#E8E2D8] hover:border-stone-400 rounded-md font-normal text-xs sm:text-[13px] flex items-center justify-center gap-2 transition cursor-pointer"
+                    >
+                      <ShoppingCart size={14} className="text-stone-600" />
+                      <span>Add to Cart</span>
+                    </button>
+                  )}
+
+                  {!isOutOfStock && !isComingSoon && (
+                    <button
+                      onClick={handleBuyNow}
+                      className="flex-1 h-[42px] px-4 bg-[#F7EBE4] hover:bg-[#EFE0D7] text-[#7D3219] border border-[#D9B4A4] hover:border-[#7D3219] rounded-md font-medium text-xs sm:text-[13px] flex items-center justify-center gap-1.5 transition cursor-pointer shadow-2xs"
+                    >
+                      <Zap size={14} className="fill-[#7D3219]" />
+                      <span>Buy Now</span>
+                    </button>
+                  )}
+                </div>
+
+                {/* Subtle Secondary Help Row */}
+                <div className="flex items-center justify-center gap-4 pt-2 text-[11px] text-stone-500 font-light">
+                  <button
+                    type="button"
+                    onClick={handleWhatsAppOrderProduct}
+                    className="inline-flex items-center gap-1.5 text-[#1E7E34] hover:underline cursor-pointer"
+                  >
+                    <MessageCircle size={13} />
+                    <span>Order via WhatsApp</span>
+                  </button>
+                  <span className="text-stone-300">·</span>
+                  <a
+                    href="tel:+919492664870"
+                    className="inline-flex items-center gap-1.5 text-stone-600 hover:text-stone-900 transition cursor-pointer"
+                  >
+                    <Phone size={12} />
+                    <span>Call Support</span>
+                  </a>
+                  <span className="text-stone-300">·</span>
+                  <button
+                    type="button"
+                    onClick={handleShare}
+                    className="inline-flex items-center gap-1 text-stone-600 hover:text-stone-900 transition cursor-pointer"
+                  >
+                    <Share2 size={12} />
+                    <span>Share</span>
+                  </button>
+                </div>
+
+                {/* Clean Inline Highlights */}
+                <div className="pt-4 border-t border-[#F0EAE1] grid grid-cols-3 gap-2 text-center text-[11px] text-stone-500 font-light">
+                  <div className="flex items-center justify-center gap-1.5">
+                    <Award size={13} className="text-[#C86B4C]" />
+                    <span>100% Certified</span>
+                  </div>
+                  <div className="flex items-center justify-center gap-1.5">
+                    <Truck size={13} className="text-[#C86B4C]" />
+                    <span>Pan India Delivery</span>
+                  </div>
+                  <div className="flex items-center justify-center gap-1.5">
+                    <Lock size={13} className="text-[#C86B4C]" />
+                    <span>Secure Checkout</span>
+                  </div>
+                </div>
+              </div>
+
+>>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
             </div>
           </div>
         )}
 
+<<<<<<< HEAD
         {/* ── Related Products Carousel ───────────────────────────────────────── */}
         {relatedProducts.length > 0 && (
           <div className="py-12 border-t border-[#E8E2D8]">
@@ -1258,21 +1639,90 @@ const ProductDetail: React.FC = () => {
                   type="button"
                   onClick={() => scrollRelated("left")}
                   className="w-9 h-9 rounded-full bg-white hover:bg-[#FAF7F2] border border-[#E8E2D8] shadow-2xs flex items-center justify-center text-[#4A433D] hover:text-black transition cursor-pointer"
+=======
+        {/* Customer Reviews Section */}
+        <div className="pt-10 border-t border-[#E8E2D8] mb-14">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-lg sm:text-xl font-poppins font-normal text-gray-900">
+                Customer Reviews
+              </h2>
+              <p className="text-xs text-stone-500 font-light mt-0.5">
+                {avgRating > 0 ? `${avgRating.toFixed(1)} out of 5 (${reviews.length} reviews)` : "Verified customer feedback"}
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                if (!isAuthenticated) {
+                  toast.error("Please sign in to write a review");
+                  navigate('/login', { state: { from: location } });
+                } else {
+                  setIsReviewModalOpen(true);
+                }
+              }}
+              className="px-4 py-2 bg-white hover:bg-[#FAF7F2] text-stone-800 border border-[#E8E2D8] hover:border-stone-400 rounded-md font-normal text-xs transition cursor-pointer"
+            >
+              Write a Review
+            </button>
+          </div>
+
+          {reviews.length === 0 ? (
+            <div className="py-8 text-center bg-white rounded-xl border border-[#E8E2D8]/60 p-6">
+              <p className="text-xs text-stone-500 font-light">No reviews yet for this product. Be the first to review!</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {reviews.map((rev) => (
+                <div key={rev.id} className="p-4 bg-white rounded-xl border border-[#E8E2D8]/60 space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-gray-900">{rev.name}</span>
+                    <span className="text-[10px] text-stone-400 font-light">{rev.date}</span>
+                  </div>
+                  <div className="flex items-center text-[#F4B740]">
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <Star key={s} size={11} className={s <= rev.rating ? "fill-current" : "text-stone-200"} />
+                    ))}
+                  </div>
+                  <p className="text-xs text-stone-600 font-light leading-relaxed">{rev.comment}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Related Products Carousel */}
+        {relatedProducts.length > 0 && (
+          <div className="pt-8 border-t border-[#E8E2D8] mb-12">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg sm:text-xl font-poppins font-normal text-gray-900">
+                You May Also Like
+              </h2>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => scrollRelated("left")}
+                  className="w-8 h-8 rounded-full bg-white hover:bg-stone-50 border border-[#E8E2D8] flex items-center justify-center text-stone-600 transition cursor-pointer"
+>>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
                   title="Previous"
                 >
-                  <ChevronLeft size={16} />
+                  <ChevronLeft size={15} />
                 </button>
                 <button
                   type="button"
                   onClick={() => scrollRelated("right")}
+<<<<<<< HEAD
                   className="w-9 h-9 rounded-full bg-white hover:bg-[#FAF7F2] border border-[#E8E2D8] shadow-2xs flex items-center justify-center text-[#4A433D] hover:text-black transition cursor-pointer"
+=======
+                  className="w-8 h-8 rounded-full bg-white hover:bg-stone-50 border border-[#E8E2D8] flex items-center justify-center text-stone-600 transition cursor-pointer"
+>>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
                   title="Next"
                 >
-                  <ChevronRight size={16} />
+                  <ChevronRight size={15} />
                 </button>
               </div>
             </div>
 
+<<<<<<< HEAD
             {/* Render with the site's official ProductCard component */}
             <div 
               ref={relatedScrollRef}
@@ -1287,6 +1737,15 @@ const ProductDetail: React.FC = () => {
                   key={relProduct.id || idx} 
                   className="w-full sm:w-[calc((100%-16px)/2)] md:w-[calc((100%-32px)/3)] lg:w-[calc((100%-48px)/4)] xl:w-[calc((100%-64px)/5)] shrink-0 snap-start"
                 >
+=======
+            {/* Horizontal Scrollable Carousel using canonical ProductCard */}
+            <div 
+              ref={relatedScrollRef}
+              className="flex gap-4 sm:gap-6 overflow-x-auto pb-4 no-scrollbar scroll-smooth"
+            >
+              {relatedProducts.map((relProduct, idx) => (
+                <div key={relProduct.id || idx} className="w-[220px] sm:w-[250px] shrink-0">
+>>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
                   <ProductCard product={relProduct} index={idx} />
                 </div>
               ))}
@@ -1299,39 +1758,67 @@ const ProductDetail: React.FC = () => {
       {/* ── Review Form Modal ─────────────────────────────────────────────────── */}
       <AnimatePresence>
         {isReviewModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
+<<<<<<< HEAD
               className="bg-white rounded-2xl p-6 sm:p-7 max-w-md w-full shadow-2xl relative font-poppins border border-[#E8E2D8]"
+=======
+              className="bg-white rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative border border-[#E8E2D8]"
+>>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
             >
               <button
                 type="button"
                 onClick={() => setIsReviewModalOpen(false)}
+<<<<<<< HEAD
                 className="absolute top-5 right-5 text-[#8C827A] hover:text-black p-1 rounded-full cursor-pointer"
+=======
+                className="absolute top-5 right-5 text-stone-400 hover:text-stone-700 p-1.5 rounded-full hover:bg-stone-100 transition cursor-pointer"
+>>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
               >
                 <X size={18} />
               </button>
 
+<<<<<<< HEAD
               <h3 className="text-lg font-medium text-[#181513] mb-1">Write Your Review</h3>
               <p className="text-xs text-[#8C827A] mb-4">{cleanTitle}</p>
 
               <form onSubmit={handleReviewSubmit} className="space-y-4">
                 <div>
                   <label className="block text-xs font-medium text-[#181513] mb-1">Your Name</label>
+=======
+              <span className="text-[11px] font-semibold tracking-[0.2em] text-[#C86B4C] uppercase block mb-1">
+                Feedback
+              </span>
+              <h3 className="text-lg font-poppins font-normal text-gray-950 mb-1">Write your Review</h3>
+              <p className="text-xs text-stone-500 mb-5 font-light">{product.title || product.name}</p>
+
+              <form onSubmit={handleReviewSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Your Name</label>
+>>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
                   <input
                     type="text"
                     required
                     value={formName}
                     onChange={(e) => setFormName(e.target.value)}
                     placeholder="Enter your name"
+<<<<<<< HEAD
                     className="w-full px-3.5 py-2.5 border border-[#E8E2D8] rounded-xl text-xs bg-[#FAF7F2] focus:ring-1 focus:ring-[#8E3F24] outline-none"
+=======
+                    className="w-full px-3.5 py-2.5 border border-[#E8E2D8] rounded-lg text-xs focus:ring-1 focus:ring-[#C86B4C] focus:border-[#C86B4C] outline-none transition bg-[#FAF7F2]"
+>>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
                   />
                 </div>
 
                 <div>
+<<<<<<< HEAD
                   <label className="block text-xs font-medium text-[#181513] mb-1">Your Rating</label>
+=======
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Your Rating</label>
+>>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
                   <div className="flex items-center gap-1.5 py-1">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button
@@ -1342,7 +1829,11 @@ const ProductDetail: React.FC = () => {
                       >
                         <Star
                           size={24}
+<<<<<<< HEAD
                           className={star <= formRating ? "fill-[#F4B740]" : "text-[#E8E2D8]"}
+=======
+                          className={star <= formRating ? "fill-[#F4B740] text-[#F4B740]" : "text-stone-300"}
+>>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
                         />
                       </button>
                     ))}
@@ -1350,38 +1841,63 @@ const ProductDetail: React.FC = () => {
                 </div>
 
                 <div>
+<<<<<<< HEAD
                   <label className="block text-xs font-medium text-[#181513] mb-1">Review Comments</label>
+=======
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Review Comments</label>
+>>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
                   <textarea
                     required
                     rows={3}
                     value={formComment}
                     onChange={(e) => setFormComment(e.target.value)}
                     placeholder="Describe your experience with this product..."
+<<<<<<< HEAD
                     className="w-full px-3.5 py-2.5 border border-[#E8E2D8] rounded-xl text-xs bg-[#FAF7F2] focus:ring-1 focus:ring-[#8E3F24] outline-none resize-none"
+=======
+                    className="w-full px-3.5 py-2.5 border border-[#E8E2D8] rounded-lg text-xs focus:ring-1 focus:ring-[#C86B4C] focus:border-[#C86B4C] outline-none transition bg-[#FAF7F2]"
+>>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
                   />
                 </div>
 
                 <div>
+<<<<<<< HEAD
                   <label className="block text-xs font-medium text-[#181513] mb-1">Add Photo (Optional)</label>
                   <div className="mt-1 flex flex-col items-center justify-center border border-dashed border-[#E8E2D8] rounded-xl p-3 bg-[#FAF7F2] relative cursor-pointer hover:bg-[#F0EAE1] transition">
                     {imagePreview ? (
                       <div className="relative w-full h-24 flex items-center justify-center">
                         <img src={imagePreview} alt="Preview" className="max-h-full max-w-full object-contain rounded-lg shadow-xs" />
+=======
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Add Photo (Optional)</label>
+                  <div className="mt-1 flex flex-col items-center justify-center border border-dashed border-[#D9B4A4] rounded-xl p-3 bg-[#FAF7F2] relative cursor-pointer hover:bg-white transition">
+                    {imagePreview ? (
+                      <div className="relative w-full h-24 flex items-center justify-center">
+                        <img src={imagePreview} alt="Preview" className="max-h-full max-w-full object-contain rounded-lg shadow-sm" />
+>>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
                         <button
                           type="button"
                           onClick={() => {
                             setImagePreview("");
                             setFormImage("");
                           }}
+<<<<<<< HEAD
                           className="absolute top-0 right-0 bg-[#8E3F24] text-white rounded-full p-1 shadow cursor-pointer"
+=======
+                          className="absolute top-0 right-0 bg-[#7D3219] text-white rounded-full p-1 shadow hover:bg-black transition cursor-pointer"
+>>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
                         >
                           <X size={12} />
                         </button>
                       </div>
                     ) : (
                       <>
+<<<<<<< HEAD
                         <Camera className="w-5 h-5 text-[#8C827A] mb-1" />
                         <span className="text-[10px] text-[#8C827A]">Select a photo</span>
+=======
+                        <Camera className="w-5 h-5 text-stone-400 mb-1" />
+                        <span className="text-[11px] text-stone-500 font-medium">Select photo</span>
+>>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
                         <input
                           type="file"
                           accept="image/*"
@@ -1395,7 +1911,11 @@ const ProductDetail: React.FC = () => {
 
                 <button
                   type="submit"
+<<<<<<< HEAD
                   className="w-full py-3 bg-[#8E3F24] hover:bg-[#742F19] text-white font-medium rounded-xl text-xs uppercase tracking-wider shadow-xs transition cursor-pointer"
+=======
+                  className="w-full py-2.5 bg-[#F7EBE4] hover:bg-[#EFE0D7] text-[#7D3219] border border-[#D9B4A4] hover:border-[#7D3219] font-medium rounded-md text-xs sm:text-[13px] tracking-wide transition shadow-xs cursor-pointer"
+>>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
                 >
                   Submit Verified Review
                 </button>
@@ -1412,7 +1932,11 @@ const ProductDetail: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+<<<<<<< HEAD
             className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4 cursor-zoom-out"
+=======
+            className="fixed inset-0 bg-black/90 backdrop-blur-xs z-50 flex items-center justify-center p-4 cursor-zoom-out"
+>>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
             onClick={() => setActiveLightboxImage(null)}
           >
             <button
@@ -1426,7 +1950,11 @@ const ProductDetail: React.FC = () => {
               animate={{ scale: 1 }}
               exit={{ scale: 0.95 }}
               src={activeLightboxImage}
+<<<<<<< HEAD
               alt="Expanded View"
+=======
+              alt="Full scale view"
+>>>>>>> 3be82bf43ae58d7f600af8b6960d78b1c0591220
               className="max-w-full max-h-[85vh] object-contain rounded-xl shadow-2xl"
             />
           </motion.div>
