@@ -72,49 +72,9 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ initialTab = "priv
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF7F2] text-[#181513] font-sans pb-20">
-      {/* 1. Hero Header (Matching Website Luxury Dark Theme) */}
-      <section className="relative bg-gradient-to-b from-[#1C1714] via-[#261E1A] to-[#1C1714] text-white pt-20 pb-20 sm:pt-24 sm:pb-24 px-4 sm:px-6 lg:px-8 overflow-hidden text-center">
-        {/* Subtle decorative dot pattern */}
-        <div
-          className="absolute inset-0 opacity-10 pointer-events-none"
-          style={{
-            backgroundImage: `radial-gradient(#FAF7F2 1px, transparent 1px)`,
-            backgroundSize: "24px 24px",
-          }}
-        />
-        <div className="absolute -top-32 -right-32 w-96 h-96 bg-[#C86B4C]/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-[#7D3219]/25 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="max-w-4xl mx-auto relative z-10">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FAF7F2]/10 backdrop-blur-md border border-[#FAF7F2]/15 text-[#E6AF9A] text-xs font-medium uppercase tracking-wider mb-5">
-            <ShieldCheck className="w-3.5 h-3.5 text-[#C86B4C]" />
-            <span>Ghar Sansar Trust &amp; Transparency Center</span>
-          </div>
-
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold tracking-tight text-[#FAF7F2] mb-4">
-            Legal &amp; Privacy Policies
-          </h1>
-          <p className="text-sm sm:text-base md:text-lg text-[#C8BFB6] max-w-2xl mx-auto leading-relaxed">
-            We value your trust and are committed to safeguarding your personal data, ensuring transparent commercial
-            terms, and providing dependable support for all our decor and interior design solutions.
-          </p>
-
-          <div className="flex flex-wrap items-center justify-center gap-2 text-xs text-[#A69E96] mt-6">
-            <Clock className="w-3.5 h-3.5 text-[#C86B4C]" />
-            <span>Last Updated: November 2026</span>
-            <span>•</span>
-            <span>Governed by the Laws of India</span>
-            <span>•</span>
-            <Link to="/faq" className="text-[#E6AF9A] hover:text-white underline transition-colors">
-              Read FAQs
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* 2. Main Content Container */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-20">
+    <div className="min-h-screen bg-[#FAF7F2] text-[#181513] font-sans pb-20 pt-8 sm:pt-12">
+      {/* Main Content Container */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
         {/* Navigation Tabs (Terracotta active style) */}
         <div className="bg-white rounded-2xl shadow-lg shadow-black/5 border border-[#E8E2D8] p-2 flex flex-wrap gap-2 justify-center mb-8">
           {tabConfigs.map((tab) => {

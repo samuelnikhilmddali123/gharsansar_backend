@@ -58,7 +58,7 @@ const Home: React.FC = () => {
 
         "Transform your space into a story of comfort, elegance, and timeless design with bespoke décor collections and award-winning interior design services.",
 
-      image: "/images/design/exact_hero_vibrant_clean.jpg",
+      image: "/images/design/exact_hero_vibrant_clean.webp",
 
       primaryCta: "Explore Our Designs",
 
@@ -86,7 +86,7 @@ const Home: React.FC = () => {
 
         "Premium 3D wall panels, architectural lighting, vinyl flooring, and custom furniture crafted to perfection for your dream space.",
 
-      image: "/images/design/exact_hero_vibrant_clean.jpg",
+      image: "/images/design/exact_hero_vibrant_clean.webp",
 
       primaryCta: "Our Interior Works",
 
@@ -114,7 +114,7 @@ const Home: React.FC = () => {
 
         "From initial inspiration to final on-site installation, our dedicated design team handles every detail with craftsmanship and care.",
 
-      image: "/images/design/exact_hero_vibrant_clean.jpg",
+      image: "/images/design/exact_hero_vibrant_clean.webp",
 
       primaryCta: "Book Consultation",
 
@@ -138,7 +138,7 @@ const Home: React.FC = () => {
 
       count: "120+ Designs",
 
-      image: "/images/design/cat_wallpaper.jpg",
+      image: "/images/design/cat_wallpaper.webp",
 
       link: "/interior-design?category=Wallpaper%20Rolls",
 
@@ -150,7 +150,7 @@ const Home: React.FC = () => {
 
       count: "85+ Designs",
 
-      image: "/images/design/cat_wallart.jpg",
+      image: "/images/design/cat_wallart.webp",
 
       link: "/interior-design?category=Wall%20Art%20Effect",
 
@@ -162,7 +162,7 @@ const Home: React.FC = () => {
 
       count: "90+ Designs",
 
-      image: "/images/design/cat_vinyl.jpg",
+      image: "/images/design/cat_vinyl.webp",
 
       link: "/interior-design?category=Vinyl%20Flooring",
 
@@ -174,7 +174,7 @@ const Home: React.FC = () => {
 
       count: "100+ Designs",
 
-      image: "/images/design/cat_3d.jpg",
+      image: "/images/design/cat_3d.webp",
 
       link: "/interior-design?category=3d%20Wallpapers",
 
@@ -186,7 +186,7 @@ const Home: React.FC = () => {
 
       count: "60+ Designs",
 
-      image: "/images/design/cat_garden.jpg",
+      image: "/images/design/cat_garden.webp",
 
       link: "/interior-design?category=Natural%20Vertical%20Garden",
 
@@ -198,7 +198,7 @@ const Home: React.FC = () => {
 
       count: "250+ Products",
 
-      image: "/images/design/cat_decor.jpg",
+      image: "/images/design/cat_decor.webp",
 
       link: "/products",
 
@@ -210,7 +210,7 @@ const Home: React.FC = () => {
 
       count: "150+ Gifts",
 
-      image: "/images/design/cat_gifts.jpg",
+      image: "/images/design/cat_gifts.webp",
 
       link: "/return-gifts",
 
@@ -230,7 +230,7 @@ const Home: React.FC = () => {
 
       description: "Tell us your style, space and requirements.",
 
-      image: "/images/design/step_1_ideas.jpg",
+      image: "/images/design/step_1_ideas.webp",
 
     },
 
@@ -242,7 +242,7 @@ const Home: React.FC = () => {
 
       description: "Our designers create personalized plans.",
 
-      image: "/images/design/step_2_guidance.jpg",
+      image: "/images/design/step_2_guidance.webp",
 
     },
 
@@ -254,7 +254,7 @@ const Home: React.FC = () => {
 
       description: "From products to installation, we handle it all.",
 
-      image: "/images/design/step_3_deliver.jpg",
+      image: "/images/design/step_3_deliver.webp",
 
     },
 
@@ -268,7 +268,7 @@ const Home: React.FC = () => {
 
       title: "Wallpaper Rolls",
 
-      image: "/images/design/work_wallpaper_exact.jpg",
+      image: "/images/design/work_wallpaper_exact.webp",
 
       link: "/interior-design?category=Wallpaper%20Rolls",
 
@@ -278,7 +278,7 @@ const Home: React.FC = () => {
 
       title: "3D Wallpapers",
 
-      image: "/images/design/work_3d_exact.jpg",
+      image: "/images/design/work_3d_exact.webp",
 
       link: "/interior-design?category=3d%20Wallpapers",
 
@@ -288,7 +288,7 @@ const Home: React.FC = () => {
 
       title: "Wall Art Effects",
 
-      image: "/images/design/work_wallart_exact.jpg",
+      image: "/images/design/work_wallart_exact.webp",
 
       link: "/interior-design?category=Wall%20Art%20Effect",
 
@@ -298,7 +298,7 @@ const Home: React.FC = () => {
 
       title: "Vinyl Flooring",
 
-      image: "/images/design/work_vinyl_exact.jpg",
+      image: "/images/design/work_vinyl_exact.webp",
 
       link: "/interior-design?category=Vinyl%20Flooring",
 
@@ -308,7 +308,7 @@ const Home: React.FC = () => {
 
       title: "Natural Vertical Garden",
 
-      image: "/images/design/work_garden_exact.jpg",
+      image: "/images/design/work_garden_exact.webp",
 
       link: "/interior-design?category=Natural%20Vertical%20Garden",
 
@@ -318,7 +318,7 @@ const Home: React.FC = () => {
 
       title: "Interior Decor",
 
-      image: "/images/design/work_decor_exact.jpg",
+      image: "/images/design/work_decor_exact.webp",
 
       link: "/products",
 
@@ -336,7 +336,7 @@ const Home: React.FC = () => {
 
       count: "120+ Designs",
 
-      image: "/images/design/cat_wallpaper.jpg",
+      image: "/images/design/cat_wallpaper.webp",
 
       link: "/interior-design?category=Wallpaper%20Rolls",
 
@@ -348,7 +348,7 @@ const Home: React.FC = () => {
 
       count: "80+ Designs",
 
-      image: "/images/design/cat_vinyl.jpg",
+      image: "/images/design/cat_vinyl.webp",
 
       link: "/interior-design?category=Vinyl%20Flooring",
 
@@ -360,7 +360,7 @@ const Home: React.FC = () => {
 
       count: "100+ Designs",
 
-      image: "/images/design/cat_3d.jpg",
+      image: "/images/design/cat_3d.webp",
 
       link: "/interior-design?category=3d%20Wallpapers",
 
@@ -372,7 +372,7 @@ const Home: React.FC = () => {
 
       count: "500+ Products",
 
-      image: "/images/design/cat_decor.jpg",
+      image: "/images/design/cat_decor.webp",
 
       link: "/products",
 
@@ -384,7 +384,7 @@ const Home: React.FC = () => {
 
       count: "80+ Designs",
 
-      image: "/images/design/cat_garden.jpg",
+      image: "/images/design/cat_garden.webp",
 
       link: "/interior-design?category=Natural%20Vertical%20Garden",
 
@@ -402,7 +402,7 @@ const Home: React.FC = () => {
 
       location: "Governorpet, Vijayawada",
 
-      image: "/images/design/gallery_1_hd.jpg",
+      image: "/images/design/gallery_1_hd.webp",
 
       type: "Residential Interior",
 
@@ -414,7 +414,7 @@ const Home: React.FC = () => {
 
       location: "Benz Circle, Vijayawada",
 
-      image: "/images/design/gallery_2_hd.jpg",
+      image: "/images/design/gallery_2_hd.webp",
 
       type: "Master Bedroom",
 
@@ -426,7 +426,7 @@ const Home: React.FC = () => {
 
       location: "Guntur",
 
-      image: "/images/design/gallery_3_hd.jpg",
+      image: "/images/design/gallery_3_hd.webp",
 
       type: "Family Dining",
 
@@ -438,7 +438,7 @@ const Home: React.FC = () => {
 
       location: "Hyderabad",
 
-      image: "/images/design/gallery_4_hd.jpg",
+      image: "/images/design/gallery_4_hd.webp",
 
       type: "Living Wall Art",
 
@@ -1093,7 +1093,7 @@ const Home: React.FC = () => {
             {/* Integrated Right Architectural Lounge Photo with Smooth Gradient Blend (Desktop only: hidden on mobile) */}
             <div className="hidden sm:block absolute right-0 top-0 bottom-0 sm:w-[48%] lg:w-[42%] overflow-hidden pointer-events-none select-none">
               <img
-                src="/images/design/consultation_lounge_right.jpg"
+                src="/images/design/consultation_lounge_right.webp"
                 alt="Interior Consultation Studio Lounge"
                 className="w-full h-full object-cover object-center"
               />
