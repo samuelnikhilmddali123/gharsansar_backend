@@ -3906,71 +3906,6 @@ const getReviews = () => {
 };
 const saveReviews = (data) => writeJsonFile(REVIEWS_FILE, data);
 
-// Seeding standard review data for products to maintain realistic lookups
-const seedReviewsIfNeeded = () => {
-  try {
-    const reviewsData = getReviews();
-    if (Object.keys(reviewsData).length === 0) {
-      console.log("Seeding default reviews database...");
-      const seeded = {};
-      const defaultReviews = [
-        {
-          id: "dummy-1",
-          name: "Aravind K.",
-          rating: 5,
-          comment: "Absolutely premium quality product. The build quality feels extremely premium. Worth every rupee.",
-          date: "May 12, 2026",
-          image: "",
-          verified: true
-        },
-        {
-          id: "dummy-2",
-          name: "Meera Sen",
-          rating: 4,
-          comment: "Very elegant design, fits snugly. Solid weight and professional finish.",
-          date: "May 08, 2026",
-          image: "",
-          verified: true
-        },
-        {
-          id: "dummy-3",
-          name: "Rajesh Prasad",
-          rating: 5,
-          comment: "Excellent value for money. Highly durable and looks gorgeous in home.",
-          date: "April 29, 2026",
-          image: "",
-          verified: true
-        }
-      ];
-      
-      const rawCatalog = readJsonFile("products.json", []);
-      if (rawCatalog && rawCatalog.length > 0) {
-        rawCatalog.forEach(cat => {
-          (cat.subcategories || []).forEach(sub => {
-            const itemKey = sub.images ? "images" : sub.products ? "products" : "services";
-            const items = sub[itemKey] || [];
-            items.forEach(item => {
-              const prodId = item.id || item.prod_id || item.name;
-              if (prodId) {
-                seeded[prodId] = defaultReviews.map((r, idx) => ({
-                  ...r,
-                  id: `dummy-${prodId}-${idx}`
-                }));
-              }
-            });
-          });
-        });
-      }
-      saveReviews(seeded);
-      console.log("Reviews database seeded successfully.");
-    }
-  } catch (err) {
-    console.error("Failed to seed reviews:", err);
-  }
-};
-
-seedReviewsIfNeeded();
-
 // GET reviews for a product
 app.get("/api/reviews/:productId", (req, res) => {
   try {
@@ -4037,6 +3972,40 @@ app.post("/api/reviews/:productId", (req, res) => {
       rating_count,
       reviews: allReviews[productId],
       newReview
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE review for a product
+app.delete("/api/reviews/:productId/:reviewId?", (req, res) => {
+  try {
+    const { productId, reviewId } = req.params;
+    const allReviews = getReviews();
+    if (allReviews[productId]) {
+      if (reviewId) {
+        allReviews[productId] = allReviews[productId].filter(
+          (r) => r.id !== reviewId && r.comment !== reviewId
+        );
+      } else {
+        allReviews[productId] = [];
+      }
+      saveReviews(allReviews);
+    }
+
+    const remaining = allReviews[productId] || [];
+    const rating_count = remaining.length;
+    const rating_average = rating_count > 0
+      ? Math.round((remaining.reduce((acc, r) => acc + r.rating, 0) / rating_count) * 10) / 10
+      : 0;
+
+    res.json({
+      success: true,
+      message: "Review deleted successfully",
+      rating_average,
+      rating_count,
+      reviews: remaining
     });
   } catch (err) {
     res.status(500).json({ error: err.message });

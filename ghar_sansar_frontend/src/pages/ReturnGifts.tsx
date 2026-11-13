@@ -38,22 +38,6 @@ const priceRanges = [
   { key: 'above-500', label: 'Above ₹500', min: 500 },
 ];
 
-// Deterministic rating helper
-function getGiftRating(id: string): { rating: string; count: number } {
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) {
-    hash = (hash << 5) - hash + id.charCodeAt(i);
-    hash |= 0;
-  }
-  const abs = Math.abs(hash);
-  const ratingVal = 4.3 + (abs % 7) * 0.1;
-  const count = 35 + (abs % 160);
-  return {
-    rating: ratingVal.toFixed(1),
-    count,
-  };
-}
-
 // ---------------------------------------------------------
 // Fallback Studio Image Component
 // ---------------------------------------------------------

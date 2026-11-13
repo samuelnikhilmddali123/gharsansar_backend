@@ -32,7 +32,8 @@ import {
   ExternalLink,
   Plus,
   Minus,
-  Sparkles
+  Sparkles,
+  Trash2
 } from "lucide-react";
 import { useProducts, Product } from "../context/ProductContext";
 import { useCart } from "../context/CartContext";
@@ -264,12 +265,50 @@ const ProductDetail: React.FC = () => {
     return saved ? JSON.parse(saved) : [];
   });
 
+  // Fetch reviews from server and merge with localStorage
+  useEffect(() => {
+    if (!product?.id) return;
+    fetch(`/api/reviews/${product.id}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.success && Array.isArray(data.reviews)) {
+          const saved = localStorage.getItem(`product_reviews_${product.id}`);
+          const localList: Review[] = saved ? JSON.parse(saved) : [];
+          const map = new Map<string, Review>();
+          localList.forEach((r) => map.set(r.id || r.comment, r));
+          data.reviews.forEach((r: Review) => map.set(r.id || r.comment, r));
+          const merged = Array.from(map.values());
+          setReviews(merged);
+          localStorage.setItem(`product_reviews_${product.id}`, JSON.stringify(merged));
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to fetch product reviews:", err);
+      });
+  }, [product?.id]);
+
   // Sync reviews to localStorage
   useEffect(() => {
     if (product) {
       localStorage.setItem(`product_reviews_${product.id}`, JSON.stringify(reviews));
     }
   }, [reviews, product]);
+
+  // Delete Review
+  const handleDeleteReview = async (reviewId: string, idx?: number) => {
+    if (!window.confirm("Are you sure you want to delete this review?")) return;
+    const updated = reviews.filter((r, i) => (r.id ? r.id !== reviewId : i !== idx));
+    setReviews(updated);
+    if (product) {
+      localStorage.setItem(`product_reviews_${product.id}`, JSON.stringify(updated));
+      try {
+        await fetch(`/api/reviews/${product.id}/${reviewId}`, { method: "DELETE" });
+      } catch (err) {
+        console.error("Failed to delete review on server:", err);
+      }
+    }
+    toast.success("Review deleted successfully");
+  };
 
   // Check if customer has bought this product
   const hasBoughtProduct = useMemo(() => {
@@ -324,7 +363,7 @@ const ProductDetail: React.FC = () => {
   };
 
   // Submit Review
-  const handleReviewSubmit = (e: React.FormEvent) => {
+  const handleReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formName.trim() || !formComment.trim()) {
       toast.error("Please fill in all fields.");
@@ -344,7 +383,25 @@ const ProductDetail: React.FC = () => {
       image: formImage
     };
 
-    setReviews([newRev, ...reviews]);
+    const updated = [newRev, ...reviews];
+    setReviews(updated);
+    if (product) {
+      localStorage.setItem(`product_reviews_${product.id}`, JSON.stringify(updated));
+      try {
+        await fetch(`/api/reviews/${product.id}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: newRev.name,
+            rating: newRev.rating,
+            comment: newRev.comment,
+            image: newRev.image
+          })
+        });
+      } catch (err) {
+        console.error("Failed to post review to backend:", err);
+      }
+    }
     toast.success("Review submitted successfully!");
     setIsReviewModalOpen(false);
 
@@ -884,11 +941,22 @@ const ProductDetail: React.FC = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {reviews.map((rev) => (
-                <div key={rev.id} className="p-4 bg-white rounded-xl border border-[#E8E2D8]/60 space-y-1.5">
+              {reviews.map((rev, idx) => (
+                <div key={rev.id || idx} className="p-4 bg-white rounded-xl border border-[#E8E2D8]/60 space-y-1.5 relative group">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-medium text-gray-900">{rev.name}</span>
-                    <span className="text-[10px] text-stone-400 font-light">{rev.date}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] text-stone-400 font-light">{rev.date}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteReview(rev.id, idx)}
+                        className="text-stone-400 hover:text-red-600 hover:bg-red-50 p-1 rounded-md transition cursor-pointer"
+                        title="Delete Review"
+                        aria-label="Delete Review"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
                   </div>
                   <div className="flex items-center text-[#F4B740]">
                     {[1, 2, 3, 4, 5].map((s) => (
@@ -896,6 +964,15 @@ const ProductDetail: React.FC = () => {
                     ))}
                   </div>
                   <p className="text-xs text-stone-600 font-light leading-relaxed">{rev.comment}</p>
+                  {rev.image && (
+                    <div className="pt-1.5">
+                      <img
+                        src={rev.image}
+                        alt="Review attachment"
+                        className="h-16 w-16 object-cover rounded-lg border border-[#E8E2D8]"
+                      />
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
