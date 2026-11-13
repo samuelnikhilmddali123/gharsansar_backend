@@ -7,8 +7,9 @@ const __dirname = path.dirname(__filename);
 
 const publicDir = path.resolve(__dirname, 'public');
 const distDir = path.resolve(__dirname, 'dist');
+const backendPublicDir = path.resolve(__dirname, '..', 'backend', 'public');
 
-console.log('[sync_dist] Synchronizing public assets to dist...');
+console.log('[sync_dist] Synchronizing static assets across frontend dist and backend public...');
 
 function copyRecursive(src, dest) {
   if (!fs.existsSync(src)) return;
@@ -29,20 +30,27 @@ function copyRecursive(src, dest) {
     }
   } else {
     try {
-      // Avoid overwriting newer bundled assets
       if (!fs.existsSync(dest) || fs.statSync(dest).size !== stat.size) {
         fs.copyFileSync(src, dest);
       }
     } catch (err) {
-      // Gracefully log long path or permission issues without halting the entire sync
       console.warn(`[sync_dist] Skip file: ${src} (${err.message})`);
     }
   }
 }
 
 try {
+  // 1. Sync to frontend dist
   copyRecursive(publicDir, distDir);
-  console.log('[sync_dist] Successfully synchronized all static assets to dist!');
+  console.log('[sync_dist] Synchronized to frontend dist successfully.');
+
+  // 2. Sync full public directory to backend public
+  if (fs.existsSync(backendPublicDir)) {
+    copyRecursive(publicDir, backendPublicDir);
+    console.log('[sync_dist] Synchronized full public directory to backend public successfully.');
+  }
+
+  console.log('[sync_dist] Complete!');
 } catch (err) {
-  console.error('[sync_dist] Fatal copy error:', err);
+  console.error('[sync_dist] Sync error:', err);
 }
