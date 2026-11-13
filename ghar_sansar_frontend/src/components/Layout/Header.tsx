@@ -202,15 +202,12 @@ const Header: React.FC = () => {
 
   // Flatten interactive suggestions for seamless Arrow Key navigation
   const flatSuggestions = useMemo(() => {
-    const list: { type: "didYouMean" | "interior" | "keyword" | "product"; value: any }[] = [];
-    if (didYouMean && didYouMean.isCorrected) {
-      list.push({ type: "didYouMean", value: didYouMean.corrected });
-    }
+    const list: { type: "interior" | "keyword" | "product"; value: any }[] = [];
     interiorMatches.forEach((im) => list.push({ type: "interior", value: im.category }));
     keywordSuggestions.forEach((kw) => list.push({ type: "keyword", value: kw }));
     matchedProducts.forEach((p) => list.push({ type: "product", value: p }));
     return list;
-  }, [didYouMean, interiorMatches, keywordSuggestions, matchedProducts]);
+  }, [interiorMatches, keywordSuggestions, matchedProducts]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "ArrowDown") {
@@ -396,39 +393,6 @@ const Header: React.FC = () => {
                           {/* Case A: User has typed a keyword (Active Autocomplete) */}
                           {searchTerm.trim().length > 0 ? (
                             <>
-                              {/* Did You Mean Auto-Correction Banner */}
-                              {didYouMean && didYouMean.isCorrected && (
-                                <div className="p-3 bg-[#F7EBE4] border-b border-[#E8D0C5] flex items-center justify-between gap-2.5">
-                                  <div className="flex items-center gap-2 min-w-0">
-                                    <Sparkles size={15} className="text-[#C86B4C] shrink-0" />
-                                    <span className="text-xs text-gray-800 truncate">
-                                      Did you mean:{" "}
-                                      <button
-                                        type="button"
-                                        onClick={() => {
-                                          setSearchTerm(didYouMean.corrected);
-                                          executeSearch(didYouMean.corrected);
-                                        }}
-                                        className="font-semibold text-[#7D3219] hover:underline cursor-pointer"
-                                      >
-                                        {didYouMean.corrected}
-                                      </button>
-                                      ?
-                                    </span>
-                                  </div>
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      setSearchTerm(didYouMean.corrected);
-                                      executeSearch(didYouMean.corrected);
-                                    }}
-                                    className="shrink-0 px-2.5 py-1 rounded-md bg-[#7D3219] hover:bg-[#652814] text-white text-[11px] font-medium transition-colors shadow-2xs cursor-pointer"
-                                  >
-                                    Search {didYouMean.corrected}
-                                  </button>
-                                </div>
-                              )}
-
                               {/* 0. Interior Design & Service Matches */}
                               {interiorMatches && interiorMatches.length > 0 && (
                                 <div className="p-2 space-y-1 bg-[#FAF2ED]">

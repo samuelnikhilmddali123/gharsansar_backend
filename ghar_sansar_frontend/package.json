@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node sync_dist.js",
     "lint": "eslint .",
     "preview": "vite preview --host 0.0.0.0 --port 5173",
     "tunnel": "\"C:\\Program Files (x86)\\cloudflared\\cloudflared.exe\" tunnel --url http://localhost:5173",

@@ -13,6 +13,7 @@ if exist "dist\index.html" (
     echo    Starting Optimized Production Server on Port 5173
     echo    (Bundled and code-split for sub-second page loads over tunnel)
     echo ================================================================
+    call node sync_dist.js
     call npm run preview
 ) else (
     echo ================================================================

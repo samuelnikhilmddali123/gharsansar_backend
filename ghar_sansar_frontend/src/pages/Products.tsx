@@ -983,33 +983,6 @@ const ProductsPage: React.FC = () => {
 
           {/* Right Area: 4-Column Product Grid & Pagination */}
           <main className="flex-1 min-w-0 w-full flex flex-col">
-            {/* Did You Mean Auto-Correction Banner */}
-            {search && didYouMean && didYouMean.isCorrected && (
-              <div className="mb-4 p-3 sm:p-3.5 rounded-xl bg-[#F7EBE4] border border-[#D9B4A4] flex items-center justify-between gap-3 text-xs sm:text-[13px] text-gray-800 shadow-2xs">
-                <div className="flex items-center gap-2 min-w-0">
-                  <Sparkles size={16} className="text-[#C86B4C] shrink-0" />
-                  <span className="truncate">
-                    Showing results for <span className="text-gray-500 font-normal">"{search}"</span>. Did you mean:{" "}
-                    <button
-                      type="button"
-                      onClick={() => updateQuery({ search: didYouMean.corrected, page: 1 })}
-                      className="font-semibold text-[#7D3219] hover:underline cursor-pointer inline-flex items-center"
-                    >
-                      "{didYouMean.corrected}"
-                    </button>
-                    ?
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => updateQuery({ search: didYouMean.corrected, page: 1 })}
-                  className="shrink-0 px-3 py-1 rounded-lg bg-white border border-[#D9B4A4] hover:bg-[#F6F1E8] text-[#7D3219] font-medium text-xs transition-colors cursor-pointer shadow-2xs"
-                >
-                  Search {didYouMean.corrected}
-                </button>
-              </div>
-            )}
-
             {loading ? (
               <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3.5 sm:gap-4 lg:gap-5">
                 {[...Array(12)].map((_, i) => (
