@@ -1822,7 +1822,7 @@ app.get("/api/storage/upload/products", async (req, res) => {
 });
 
 // Admin: Add new product or interior work (Multer upload)
-app.post("/api/storage/upload", productUpload.single("image"), (req, res) => {
+app.post("/api/storage/upload", productUpload.single("image"), async (req, res) => {
   try {
     const { category_type } = req.body;
 
@@ -2147,7 +2147,7 @@ app.put("/api/storage/upload/products", productUpload.single("image"), async (re
 });
 
 // Admin: Delete product
-app.delete("/api/storage/uploads/products", (req, res) => {
+app.delete("/api/storage/uploads/products", async (req, res) => {
   try {
     const { id } = req.query;
     const productsPath = path.join(__dirname, "public", "products.json");
