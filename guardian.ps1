@@ -110,13 +110,16 @@ while ($true) {
             }
         }
 
-        # 3. Check Cloudflare Tunnel (cloudflared.exe)
-        $cfProc = Get-Process -Name "cloudflared" -ErrorAction SilentlyContinue
+        # 3. Check Cloudflare Tunnel (cloudflared.exe specifically for Ghar Sansar)
+        $cfProc = Get-CimInstance Win32_Process -Filter "Name='cloudflared.exe'" -ErrorAction SilentlyContinue | Where-Object {
+            $_.CommandLine -like "*eyJhIjoiZDllNmQ4MTYzNWUyMzA0NTk2NWYwNTAyYjU2ODhlMzMi*" -or
+            $_.CommandLine -like "*1ae0eab3-de49-415c-bd88-dd0c936fc589*"
+        }
         if (-not $cfProc) {
             if (($now - $lastTunnelStart).TotalSeconds -ge 10) {
                 $lastTunnelStart = $now
-                Log-Message "Cloudflare Tunnel is down. Restarting tunnel..."
-                Start-Process -FilePath "cmd.exe" -ArgumentList "/c `"$tunnelBat`"" -WorkingDirectory $rootDir
+                Log-Message "Ghar Sansar Cloudflare Tunnel is down. Restarting tunnel..."
+                Start-Process -FilePath "cmd.exe" -ArgumentList "/k `"$tunnelBat`"" -WorkingDirectory $rootDir
             }
         }
     } catch {
