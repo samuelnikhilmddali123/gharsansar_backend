@@ -327,13 +327,25 @@ const Header: React.FC = () => {
                     <Search className="w-[18px] h-[18px]" />
                   </button>
                 ) : (
-                  <form
+                  <>
+                    {/* Mobile Backdrop Overlay when Search is Active */}
+                    {isSearchOpen && (
+                      <div
+                        className="sm:hidden fixed inset-0 bg-black/25 backdrop-blur-[2px] z-40 transition-opacity"
+                        onClick={() => {
+                          setIsSearchOpen(false);
+                          setShowSuggestions(false);
+                        }}
+                      />
+                    )}
+
+                    <form
                     ref={desktopSearchRef}
                     onSubmit={onSearchSubmit}
-                    className="flex items-center relative transition-all duration-300"
+                    className="flex items-center transition-all duration-300 max-sm:fixed max-sm:top-2 max-sm:left-1/2 max-sm:-translate-x-1/2 max-sm:z-50 max-sm:w-[92vw] max-sm:max-w-[420px] sm:relative"
                   >
-                    {/* Search Input Container without any blue outline box */}
-                    <div className="flex items-center w-56 sm:w-64 md:w-80 h-[34px] rounded-full px-3 bg-white text-gray-800 border border-[#D9B4A4] shadow-2xs focus-within:border-[#7D3219] focus-within:ring-2 focus-within:ring-[#7D3219]/20 transition-all duration-200">
+                    {/* Search Input Container: Centered on mobile & refined subtle transparency */}
+                    <div className="flex items-center w-full sm:w-64 md:w-80 h-[36px] sm:h-[34px] rounded-full px-3.5 bg-white/80 sm:bg-white/90 backdrop-blur-md text-gray-800 border border-[#D9B4A4]/80 shadow-xs focus-within:bg-white focus-within:border-[#7D3219] focus-within:ring-2 focus-within:ring-[#7D3219]/20 transition-all duration-200">
                       <Search className="w-3.5 h-3.5 text-[#8C827A] shrink-0 mr-1.5" />
                       <input
                         ref={searchInputRef}
@@ -388,7 +400,7 @@ const Header: React.FC = () => {
                           animate={{ opacity: 1, y: 0, scale: 1 }}
                           exit={{ opacity: 0, y: 4, scale: 0.98 }}
                           transition={{ duration: 0.15 }}
-                          className="absolute top-full right-0 mt-2.5 w-[330px] sm:w-[400px] md:w-[460px] max-w-[92vw] bg-[#FAF7F2] border border-[#E8E2D8] rounded-2xl shadow-2xl overflow-hidden z-50 divide-y divide-[#F0EAE1]"
+                          className="max-sm:fixed max-sm:top-12 max-sm:left-1/2 max-sm:-translate-x-1/2 max-sm:w-[92vw] max-sm:max-w-[420px] max-sm:max-h-[75vh] max-sm:overflow-y-auto sm:absolute sm:top-full sm:right-0 sm:left-auto sm:translate-x-0 sm:mt-2.5 sm:w-[400px] md:w-[460px] bg-[#FAF7F2]/90 backdrop-blur-xl border border-[#D9B4A4]/60 rounded-2xl shadow-2xl overflow-hidden z-50 divide-y divide-[#F0EAE1]/80"
                         >
                           {/* Case A: User has typed a keyword (Active Autocomplete) */}
                           {searchTerm.trim().length > 0 ? (
@@ -640,6 +652,7 @@ const Header: React.FC = () => {
                       )}
                     </AnimatePresence>
                   </form>
+                  </>
                 )}
               </div>
 

@@ -621,17 +621,16 @@ const ProductDetail: React.FC = () => {
                 {product.title?.replace(/_/g, " ") || product.name?.replace(/_/g, " ")}
               </h1>
 
-              {/* Rating */}
-              <div className="flex items-center gap-1.5 mb-4 text-xs">
-                <div className="flex items-center text-[#F4B740]">
-                  <Star size={13} className="fill-current" />
+              {reviews.length > 0 && (
+                <div className="flex items-center gap-1.5 mb-4 text-xs">
+                  <div className="flex items-center text-[#F4B740]">
+                    <Star size={13} className="fill-current" />
+                  </div>
+                  <span className="font-medium text-gray-900">{avgRating.toFixed(1)}</span>
+                  <span className="text-stone-300">·</span>
+                  <span className="text-stone-500 font-light">{reviews.length} {reviews.length === 1 ? 'review' : 'reviews'}</span>
                 </div>
-                <span className="font-medium text-gray-900">{avgRating ? avgRating.toFixed(1) : "4.5"}</span>
-                <span className="text-stone-300">·</span>
-                <span className="text-stone-500 font-light">
-                  {reviews.length > 0 ? `${reviews.length} reviews` : "18 verified reviews"}
-                </span>
-              </div>
+              )}
 
               {/* Pricing */}
               <div className="flex items-baseline gap-3 mb-5">

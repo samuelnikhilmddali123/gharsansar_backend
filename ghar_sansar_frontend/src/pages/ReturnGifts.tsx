@@ -874,8 +874,6 @@ function CatalogCard({ product, index = 0 }: { product: any; index?: number }) {
       ? product.description.trim().replace(/^[-—·•\s]+/, '')
       : `Curated ${title.toLowerCase()} perfect for wedding celebrations and special festive occasions.`;
 
-  const { rating, count } = getGiftRating(targetId);
-
   const price = Number(product.price);
   const actualPrice = product.actualPrice ? Number(product.actualPrice) : 0;
   const discountPercent =
@@ -986,13 +984,6 @@ function CatalogCard({ product, index = 0 }: { product: any; index?: number }) {
         <h3 className="font-poppins text-[15px] sm:text-base font-normal text-gray-950 leading-snug line-clamp-2 min-h-[44px] h-[44px] mb-1.5 group-hover:text-[#7D3219] transition-colors">
           {title}
         </h3>
-
-        {/* Rating row: ★ 4.5 (191) */}
-        <div className="flex items-center gap-1.5 text-xs mb-2">
-          <Star size={13} className="fill-[#F4B740] text-[#F4B740] shrink-0" />
-          <span className="font-semibold text-[#171717] text-xs">{rating}</span>
-          <span className="text-[#6B7280] text-xs font-normal">({count})</span>
-        </div>
 
         {/* Product Description */}
         <p className="font-poppins text-xs text-[#6B7280] leading-[18px] line-clamp-2 min-h-[36px] h-[36px] mb-3 font-normal">

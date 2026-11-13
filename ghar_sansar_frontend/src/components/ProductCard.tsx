@@ -38,21 +38,7 @@ function getProductDescription(product: Product): string {
   return `Quality ${cleanTitle.toLowerCase()} crafted for durable everyday use and reliable dining.`;
 }
 
-// Deterministic ratings based on product id
-function getProductRating(id: string): { rating: string; count: number } {
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) {
-    hash = (hash << 5) - hash + id.charCodeAt(i);
-    hash |= 0;
-  }
-  const abs = Math.abs(hash);
-  const ratingVal = 4.2 + (abs % 8) * 0.1; // 4.2 - 4.9
-  const count = 40 + (abs % 180);
-  return {
-    rating: ratingVal.toFixed(1),
-    count,
-  };
-}
+
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
   const navigate = useNavigate();
@@ -195,7 +181,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
   };
 
   const description = getProductDescription(product);
-  const { rating, count } = getProductRating(product.id || product.title);
 
   return (
     <motion.div
@@ -262,13 +247,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
         <h3 className="font-poppins text-[15px] sm:text-base font-normal text-[#181513] leading-[22px] line-clamp-2 min-h-[44px] h-[44px] mb-1.5">
           {product.title?.replace(/_/g, " ")}
         </h3>
-
-        {/* Rating row: ★ 4.5 (191) with warm gold star */}
-        <div className="flex items-center gap-1.5 text-xs mb-2">
-          <Star size={13} className="fill-[#F4B740] text-[#F4B740] shrink-0" />
-          <span className="font-semibold text-[#171717] text-xs">{rating}</span>
-          <span className="text-[#6B7280] text-xs font-normal">({count})</span>
-        </div>
 
         {/* Product Description (Strict 2-line clamp with fixed height for row alignment) */}
         <p className="text-[13px] sm:text-sm text-[#6B7280] leading-[20px] line-clamp-2 min-h-[40px] h-[40px] mb-3.5 font-normal">

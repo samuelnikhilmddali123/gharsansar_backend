@@ -40,8 +40,6 @@ import ChatsAdmin from "./pages/admin/ChatsAdmin";
 import ReturnGiftsAdmin from "./pages/admin/ReturnGiftsAdmin";
 import DiscountAdmin from "./pages/admin/DiscountAdmin";
 
-import ChatBot from "./components/ChatBot/ChatBot";
-
 // ✅ Updated product pages
 import ProductsPage from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
@@ -196,7 +194,6 @@ const AppLayout = () => {
         </Routes>
       </main>
       {!isLoginPage && <Footer />}
-      {!isLoginPage && <ChatBot />}
     </div>
   );
 };
