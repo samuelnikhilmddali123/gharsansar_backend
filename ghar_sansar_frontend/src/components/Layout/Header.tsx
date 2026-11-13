@@ -1,13 +1,30 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useMemo } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Menu, X, Search, ShoppingCart, User, LogOut, Heart, ChevronRight, MessageCircle } from "lucide-react";
+import {
+  Menu,
+  X,
+  Search,
+  ShoppingCart,
+  User,
+  LogOut,
+  Heart,
+  ChevronRight,
+  MessageCircle,
+  Clock,
+  TrendingUp,
+  ArrowRight,
+  ArrowUpLeft,
+  Sparkles,
+  ShoppingBag
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
+import { useProducts, Product } from "../../context/ProductContext";
 import GharSansarLogo from "./GharSansarLogo";
 
-const searchList = [
+const interiorServiceKeywords = [
   "Wallpaper Rolls",
   "Wallpapers",
   "3D Wallpapers",
@@ -24,42 +41,88 @@ const searchList = [
   "Wooden Flooring",
   "Curtains",
   "Interior Decor",
-  "Festive Gifts",
-  "Return Gifts",
   "Pooja Decor",
   "Designer Sofa",
   "Luxury Table",
 ];
 
+const defaultTrendingSearches = [
+  "Sonu Eliza Pot 14cm 1000ml",
+  "Stainless Steel Cookware",
+  "Festive Return Gifts",
+  "3D Wallpapers",
+  "Wallpaper Rolls",
+  "Wooden Flooring"
+];
+
+const RECENT_SEARCHES_KEY = "gharsansar_recent_searches";
+
 const Header: React.FC = () => {
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [isUserMenuOpen, setUserMenuOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const searchInputRef = useRef<HTMLInputElement>(null);
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isVisible, setIsVisible] = useState(true);
-  const lastScrollY = useRef(0);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [selectedIndex, setSelectedIndex] = useState<number>(-1);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const desktopSearchRef = useRef<HTMLFormElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   const { user, logout } = useAuth();
   const { totalItems } = useCart();
   const { wishlist } = useWishlist();
+  const { products } = useProducts();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const desktopSearchRef = useRef<HTMLFormElement>(null);
-  const userMenuRef = useRef<HTMLDivElement>(null);
+  // Load recent searches from localStorage
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(RECENT_SEARCHES_KEY);
+      if (stored) {
+        setRecentSearches(JSON.parse(stored).slice(0, 5));
+      }
+    } catch {
+      // Ignore localStorage errors
+    }
+  }, []);
 
+  const saveRecentSearch = (term: string) => {
+    const clean = term.trim();
+    if (!clean) return;
+    try {
+      const updated = [clean, ...recentSearches.filter((s) => s.toLowerCase() !== clean.toLowerCase())].slice(0, 5);
+      setRecentSearches(updated);
+      localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updated));
+    } catch {
+      // Ignore localStorage errors
+    }
+  };
+
+  const removeRecentSearch = (e: React.MouseEvent, term: string) => {
+    e.stopPropagation();
+    try {
+      const updated = recentSearches.filter((s) => s.toLowerCase() !== term.toLowerCase());
+      setRecentSearches(updated);
+      localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updated));
+    } catch {
+      // Ignore
+    }
+  };
+
+  const clearAllRecent = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setRecentSearches([]);
+    try {
+      localStorage.removeItem(RECENT_SEARCHES_KEY);
+    } catch {
+      // Ignore
+    }
+  };
+
+  // Close menus on navigation
   useEffect(() => {
     setMenuOpen(false);
     setUserMenuOpen(false);
@@ -67,6 +130,7 @@ const Header: React.FC = () => {
     setIsSearchOpen(false);
   }, [location.pathname]);
 
+  // Click outside listener
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -87,7 +151,7 @@ const Header: React.FC = () => {
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  }, [searchTerm]);
 
   const isActive = (path: string) => {
     if (path === "/") {
@@ -96,34 +160,168 @@ const Header: React.FC = () => {
     return location.pathname.startsWith(path);
   };
 
-  const updateSearchTerm = (value: string) => {
-    setSearchTerm(value);
-    if (!value.trim()) {
-      setSuggestions([]);
-      setShowSuggestions(false);
-      return;
+  // Google / Flipkart / Amazon style prefix-matching recommendation algorithm
+  const { keywordSuggestions, matchedProducts } = useMemo(() => {
+    const clean = searchTerm.trim().toLowerCase();
+    if (!clean) {
+      return { keywordSuggestions: [], matchedProducts: [] };
     }
-    const filtered = searchList.filter((item) =>
-      item.toLowerCase().includes(value.toLowerCase())
-    );
-    setSuggestions(filtered);
-    setShowSuggestions(filtered.length > 0);
-  };
 
-  const onSuggestionSelect = (value: string) => {
-    setSearchTerm(value);
+    // 1. Collect all searchable keywords from database products & categories
+    const candidateKeywords = new Set<string>();
+
+    // Add product titles and variants
+    products.forEach((p) => {
+      if (p.title) {
+        const cleanTitle = p.title.replace(/_/g, " ").trim();
+        candidateKeywords.add(cleanTitle);
+
+        // Substrings / common product keyword phrases (e.g., "Sonu Cookware", "Eliza Pot 14cm")
+        const words = cleanTitle.split(/\s+/);
+        if (words.length > 2) {
+          candidateKeywords.add(words.slice(0, 3).join(" "));
+        }
+      }
+      if (p.category && p.category !== "General") {
+        candidateKeywords.add(p.category.trim());
+      }
+      if (p.subCategory) {
+        candidateKeywords.add(p.subCategory.trim());
+      }
+    });
+
+    // Add interior decor keywords
+    interiorServiceKeywords.forEach((kw) => candidateKeywords.add(kw));
+
+    // Common e-commerce search keywords
+    ["Cookware", "Steel Utensils", "Pressure Cooker", "Festive Gifts", "Return Gifts"].forEach((k) =>
+      candidateKeywords.add(k)
+    );
+
+    // 2. Score and rank keywords (Starts-with gets highest priority)
+    const scoredKeywords: { text: string; score: number }[] = [];
+    candidateKeywords.forEach((kw) => {
+      const kwLower = kw.toLowerCase();
+      let score = 0;
+
+      if (kwLower === clean) {
+        score = 120; // Exact match
+      } else if (kwLower.startsWith(clean)) {
+        score = 100; // Prefix match (Google / Amazon priority)
+      } else {
+        const words = kwLower.split(/\s+/);
+        if (words.some((w) => w.startsWith(clean))) {
+          score = 80; // Word-boundary prefix match (e.g. "pot" -> "Sonu Eliza Pot")
+        } else if (kwLower.includes(clean)) {
+          score = 40; // Substring match
+        }
+      }
+
+      if (score > 0) {
+        scoredKeywords.push({ text: kw, score });
+      }
+    });
+
+    scoredKeywords.sort((a, b) => b.score - a.score || a.text.length - b.text.length);
+    const topKeywords = scoredKeywords.slice(0, 5).map((k) => k.text);
+
+    // 3. Match and rank actual products (Flipkart style product card previews)
+    const scoredProds: { prod: Product; score: number }[] = [];
+    products.forEach((prod) => {
+      const titleLower = (prod.title || "").replace(/_/g, " ").toLowerCase();
+      const catLower = (prod.category || "").toLowerCase();
+      const descLower = (prod.description || "").toLowerCase();
+
+      let score = 0;
+      if (titleLower.startsWith(clean)) {
+        score = 100;
+      } else if (titleLower.split(/\s+/).some((w) => w.startsWith(clean))) {
+        score = 85;
+      } else if (titleLower.includes(clean)) {
+        score = 65;
+      } else if (catLower.startsWith(clean) || catLower.includes(clean)) {
+        score = 50;
+      } else if (descLower.includes(clean)) {
+        score = 30;
+      }
+
+      if (score > 0) {
+        scoredProds.push({ prod, score });
+      }
+    });
+
+    scoredProds.sort((a, b) => b.score - a.score);
+    const topProducts = scoredProds.slice(0, 4).map((item) => item.prod);
+
+    return { keywordSuggestions: topKeywords, matchedProducts: topProducts };
+  }, [searchTerm, products]);
+
+  // Execute a search query and navigate to appropriate page
+  const executeSearch = (query: string) => {
+    const clean = query.trim();
+    if (!clean) return;
+
+    saveRecentSearch(clean);
     setShowSuggestions(false);
     setIsSearchOpen(false);
-    navigate(`/interior-design?category=${encodeURIComponent(value)}`);
+    setSearchTerm("");
+
+    // Check if the query specifically targets interior services
+    const isInteriorMatch = interiorServiceKeywords.some(
+      (kw) => kw.toLowerCase() === clean.toLowerCase()
+    );
+
+    if (isInteriorMatch) {
+      navigate(`/interior-design?category=${encodeURIComponent(clean)}`);
+    } else if (clean.toLowerCase().includes("return gift") || clean.toLowerCase().includes("festive gift")) {
+      navigate(`/return-gifts`);
+    } else {
+      navigate(`/products?search=${encodeURIComponent(clean)}`);
+    }
   };
 
   const onSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!searchTerm.trim()) return;
-    navigate(`/interior-design?category=${encodeURIComponent(searchTerm.trim())}`);
-    setSearchTerm("");
+    executeSearch(searchTerm);
+  };
+
+  const onProductSelect = (product: Product) => {
+    saveRecentSearch(product.title?.replace(/_/g, " ") || "");
     setShowSuggestions(false);
     setIsSearchOpen(false);
+    setSearchTerm("");
+    navigate(`/products/${encodeURIComponent(product.id)}`, { state: product });
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Escape") {
+      setShowSuggestions(false);
+      setIsSearchOpen(false);
+    }
+  };
+
+  // Google/Amazon style character highlight helper
+  const highlightMatch = (text: string, query: string) => {
+    if (!query.trim()) return <span>{text}</span>;
+    const q = query.trim();
+    const regex = new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi");
+    const parts = text.split(regex);
+    return (
+      <span>
+        {parts.map((part, i) =>
+          part.toLowerCase() === q.toLowerCase() ? (
+            <strong key={i} className="font-semibold text-[#7D3219]">
+              {part}
+            </strong>
+          ) : (
+            <span key={i} className="text-gray-700">
+              {part}
+            </span>
+          )
+        )}
+      </span>
+    );
   };
 
   const navLinks = [
@@ -135,14 +333,10 @@ const Header: React.FC = () => {
     { path: "/blog", label: "Blog" },
   ];
 
-  const isHomeTop = false; // Navbar is white everywhere, non-transparent
-
   return (
     <>
       <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
-        <div
-          className="w-full transition-all duration-300 bg-[#F6F1E8]/95 backdrop-blur-md"
-        >
+        <div className="w-full transition-all duration-300 bg-[#F6F1E8]/95 backdrop-blur-md">
           <div className="relative w-full max-w-[1720px] mx-auto px-3.5 sm:px-8 lg:px-10 xl:px-12 h-12 flex items-center justify-between">
             {/* 1. Left: Brand Logo */}
             <div className="flex items-center shrink-0 z-10">
@@ -185,6 +379,7 @@ const Header: React.FC = () => {
                     aria-label="Open search"
                     onClick={() => {
                       setIsSearchOpen(true);
+                      setShowSuggestions(true);
                       setTimeout(() => searchInputRef.current?.focus(), 60);
                     }}
                     className="w-8 h-8 rounded-full flex items-center justify-center text-gray-700 hover:text-[#C86B4C] hover:bg-[#F6F1E8] transition-colors cursor-pointer"
@@ -197,60 +392,272 @@ const Header: React.FC = () => {
                     onSubmit={onSearchSubmit}
                     className="flex items-center relative transition-all duration-300"
                   >
-                    <div className="flex items-center w-48 sm:w-52 h-[32px] rounded-full px-3 bg-[#F6F1E8] text-gray-800 border border-[#E2DDD5] shadow-xs">
+                    {/* Search Input Container without any blue outline box */}
+                    <div className="flex items-center w-56 sm:w-64 md:w-80 h-[34px] rounded-full px-3 bg-white text-gray-800 border border-[#D9B4A4] shadow-2xs focus-within:border-[#7D3219] focus-within:ring-2 focus-within:ring-[#7D3219]/20 transition-all duration-200">
+                      <Search className="w-3.5 h-3.5 text-[#8C827A] shrink-0 mr-1.5" />
                       <input
                         ref={searchInputRef}
-                        type="search"
-                        placeholder="Search products..."
+                        type="text"
+                        autoComplete="off"
+                        autoCorrect="off"
+                        spellCheck="false"
+                        placeholder="Search products, cookware, gifts..."
                         value={searchTerm}
-                        onChange={(e) => updateSearchTerm(e.target.value)}
-                        onFocus={() => {
-                          if (suggestions.length > 0) setShowSuggestions(true);
+                        onChange={(e) => {
+                          setSearchTerm(e.target.value);
+                          setShowSuggestions(true);
                         }}
-                        onKeyDown={(e) => {
-                          if (e.key === "Escape") {
+                        onFocus={() => setShowSuggestions(true)}
+                        onKeyDown={handleKeyDown}
+                        className="w-full bg-transparent text-xs font-normal text-gray-900 placeholder:text-stone-400 border-none outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 shadow-none p-0"
+                        style={{ outline: "none", boxShadow: "none", border: "none" }}
+                      />
+                      {searchTerm ? (
+                        <button
+                          type="button"
+                          aria-label="Clear search"
+                          onClick={() => {
+                            setSearchTerm("");
+                            searchInputRef.current?.focus();
+                          }}
+                          className="w-4 h-4 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-700 ml-1 shrink-0 cursor-pointer transition-colors"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          aria-label="Close search"
+                          onClick={() => {
                             setIsSearchOpen(false);
                             setShowSuggestions(false);
-                          }
-                        }}
-                        className="w-full bg-transparent text-xs font-normal text-gray-800 placeholder:text-gray-400 focus:outline-none"
-                      />
-                      <button
-                        type="submit"
-                        aria-label="Submit search"
-                        className="text-gray-500 hover:text-[#C86B4C] ml-1 cursor-pointer transition-colors"
-                      >
-                        <Search className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        aria-label="Close search"
-                        onClick={() => {
-                          setIsSearchOpen(false);
-                          setShowSuggestions(false);
-                          setSearchTerm("");
-                        }}
-                        className="text-gray-400 hover:text-gray-700 ml-1.5 cursor-pointer transition-colors"
-                      >
-                        <X className="w-3.5 h-3.5" />
-                      </button>
+                            setSearchTerm("");
+                          }}
+                          className="w-4 h-4 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-700 ml-1 shrink-0 cursor-pointer transition-colors"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      )}
                     </div>
 
-                    {/* Suggestions dropdown */}
-                    {showSuggestions && suggestions.length > 0 && (
-                      <div className="absolute top-full right-0 mt-2 w-56 bg-[#F6F1E8] border border-[#E8E2D5] rounded-xl shadow-xl py-2 z-50 overflow-hidden">
-                        {suggestions.map((s, idx) => (
-                          <button
-                            key={idx}
-                            type="button"
-                            className="w-full text-left px-4 py-1.5 text-xs font-medium text-gray-700 hover:bg-[#F6F1E8] hover:text-[#C86B4C] transition-colors cursor-pointer"
-                            onClick={() => onSuggestionSelect(s)}
-                          >
-                            {s}
-                          </button>
-                        ))}
-                      </div>
-                    )}
+                    {/* Google, Flipkart & Amazon Style Search Recommendations Dropdown */}
+                    <AnimatePresence>
+                      {showSuggestions && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 6, scale: 0.98 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: 4, scale: 0.98 }}
+                          transition={{ duration: 0.15 }}
+                          className="absolute top-full right-0 mt-2.5 w-[330px] sm:w-[400px] md:w-[460px] max-w-[92vw] bg-[#FAF7F2] border border-[#E8E2D8] rounded-2xl shadow-2xl overflow-hidden z-50 divide-y divide-[#F0EAE1]"
+                        >
+                          {/* Case A: User has typed a keyword (Active Autocomplete) */}
+                          {searchTerm.trim().length > 0 ? (
+                            <>
+                              {/* 1. Keyword Recommendations (Google / Amazon style) */}
+                              {keywordSuggestions.length > 0 && (
+                                <div className="p-2 space-y-0.5">
+                                  <div className="px-3 pt-1 pb-1.5 flex items-center justify-between text-[10px] font-semibold tracking-wider uppercase text-[#8C827A]">
+                                    <span>Suggestions</span>
+                                    <Sparkles size={11} className="text-[#C86B4C]" />
+                                  </div>
+                                  {keywordSuggestions.map((kw, idx) => (
+                                    <div
+                                      key={idx}
+                                      className="group flex items-center justify-between px-3 py-1.5 rounded-xl hover:bg-white transition-colors cursor-pointer"
+                                      onClick={() => executeSearch(kw)}
+                                    >
+                                      <div className="flex items-center gap-2.5 min-w-0">
+                                        <Search className="w-3.5 h-3.5 text-stone-400 group-hover:text-[#C86B4C] shrink-0 transition-colors" />
+                                        <span className="text-xs truncate">
+                                          {highlightMatch(kw, searchTerm)}
+                                        </span>
+                                      </div>
+                                      <button
+                                        type="button"
+                                        aria-label="Insert keyword"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setSearchTerm(kw);
+                                          searchInputRef.current?.focus();
+                                        }}
+                                        className="opacity-0 group-hover:opacity-100 text-stone-400 hover:text-stone-700 p-1 rounded-md transition-opacity"
+                                        title="Fill into search bar"
+                                      >
+                                        <ArrowUpLeft size={13} />
+                                      </button>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+
+                              {/* 2. Matching Product Cards (Flipkart / Amazon style visual preview) */}
+                              {matchedProducts.length > 0 && (
+                                <div className="p-2.5 bg-white/60">
+                                  <div className="px-2 pb-2 text-[10px] font-semibold tracking-wider uppercase text-[#8C827A] flex items-center justify-between">
+                                    <span>Products</span>
+                                    <span className="text-[10px] lowercase font-normal text-stone-400">
+                                      {matchedProducts.length} matches
+                                    </span>
+                                  </div>
+                                  <div className="space-y-1">
+                                    {matchedProducts.map((p) => {
+                                      const price = p.finalPrice || p.actualPrice || 0;
+                                      const strike = p.strikePrice || p.actualPrice || 0;
+                                      const isOutOfStock =
+                                        p.status === "out_of_stock" || (p.stock !== undefined && Number(p.stock) <= 0);
+
+                                      return (
+                                        <div
+                                          key={p.id}
+                                          onClick={() => onProductSelect(p)}
+                                          className="flex items-center justify-between p-2 rounded-xl bg-white hover:bg-[#FAF7F2] border border-[#F0EAE1] hover:border-[#D9B4A4] shadow-2xs hover:shadow-xs transition-all cursor-pointer group"
+                                        >
+                                          <div className="flex items-center gap-3 min-w-0">
+                                            {/* Thumbnail */}
+                                            <div className="w-10 h-10 rounded-lg bg-[#FAF7F2] border border-[#E8E2D8] flex items-center justify-center p-1 shrink-0 overflow-hidden">
+                                              {p.image ? (
+                                                <img
+                                                  src={p.image}
+                                                  alt={p.title}
+                                                  className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform"
+                                                />
+                                              ) : (
+                                                <ShoppingBag size={14} className="text-stone-400" />
+                                              )}
+                                            </div>
+
+                                            {/* Details */}
+                                            <div className="min-w-0">
+                                              <p className="text-xs font-medium text-gray-900 truncate">
+                                                {highlightMatch(p.title?.replace(/_/g, " ") || "", searchTerm)}
+                                              </p>
+                                              <div className="flex items-center gap-2 mt-0.5">
+                                                {p.category && (
+                                                  <span className="text-[9.5px] uppercase font-semibold text-[#8C827A] bg-[#F6F1E8] px-1.5 py-0.5 rounded">
+                                                    {p.category}
+                                                  </span>
+                                                )}
+                                                {isOutOfStock ? (
+                                                  <span className="text-[9.5px] font-medium text-rose-600">
+                                                    Out of Stock
+                                                  </span>
+                                                ) : (
+                                                  <span className="text-[9.5px] font-medium text-emerald-700">
+                                                    In Stock
+                                                  </span>
+                                                )}
+                                              </div>
+                                            </div>
+                                          </div>
+
+                                          {/* Price */}
+                                          <div className="text-right shrink-0 pl-2">
+                                            <span className="text-xs font-semibold text-gray-950 block">
+                                              ₹{Number(price).toLocaleString("en-IN")}
+                                            </span>
+                                            {strike > price && (
+                                              <span className="text-[10px] text-gray-400 line-through block">
+                                                ₹{Number(strike).toLocaleString("en-IN")}
+                                              </span>
+                                            )}
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* No match fallback */}
+                              {keywordSuggestions.length === 0 && matchedProducts.length === 0 && (
+                                <div className="p-5 text-center">
+                                  <p className="text-xs text-stone-500 font-normal">
+                                    No exact match found for <strong className="text-gray-900">"{searchTerm}"</strong>
+                                  </p>
+                                  <p className="text-[11px] text-stone-400 mt-1">
+                                    Press Enter to search all store catalog
+                                  </p>
+                                </div>
+                              )}
+
+                              {/* Footer Action */}
+                              <button
+                                type="button"
+                                onClick={() => executeSearch(searchTerm)}
+                                className="w-full py-2.5 px-4 bg-[#F6F1E8] hover:bg-[#EFE0D7] text-[#7D3219] text-xs font-medium flex items-center justify-between transition-colors cursor-pointer"
+                              >
+                                <span>View all results for "{searchTerm}"</span>
+                                <ArrowRight size={13} />
+                              </button>
+                            </>
+                          ) : (
+                            /* Case B: Input is empty (Recent & Trending Searches) */
+                            <div className="p-3 space-y-3">
+                              {/* Recent Searches */}
+                              {recentSearches.length > 0 && (
+                                <div>
+                                  <div className="flex items-center justify-between px-2 pb-1.5 text-[10px] font-semibold tracking-wider uppercase text-[#8C827A]">
+                                    <span className="flex items-center gap-1.5">
+                                      <Clock size={11} />
+                                      <span>Recent Searches</span>
+                                    </span>
+                                    <button
+                                      type="button"
+                                      onClick={clearAllRecent}
+                                      className="text-[10px] font-normal text-stone-400 hover:text-rose-600 transition-colors cursor-pointer"
+                                    >
+                                      Clear all
+                                    </button>
+                                  </div>
+                                  <div className="space-y-0.5">
+                                    {recentSearches.map((term, idx) => (
+                                      <div
+                                        key={idx}
+                                        onClick={() => executeSearch(term)}
+                                        className="group flex items-center justify-between px-3 py-1.5 rounded-xl hover:bg-white transition-colors cursor-pointer"
+                                      >
+                                        <div className="flex items-center gap-2.5 min-w-0">
+                                          <Clock className="w-3.5 h-3.5 text-stone-400 group-hover:text-[#C86B4C] shrink-0 transition-colors" />
+                                          <span className="text-xs text-gray-800 truncate">{term}</span>
+                                        </div>
+                                        <button
+                                          type="button"
+                                          aria-label="Remove recent item"
+                                          onClick={(e) => removeRecentSearch(e, term)}
+                                          className="opacity-0 group-hover:opacity-100 text-stone-400 hover:text-rose-500 p-1 rounded-md transition-opacity"
+                                        >
+                                          <X size={12} />
+                                        </button>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Popular / Trending Searches */}
+                              <div>
+                                <div className="px-2 pb-1.5 text-[10px] font-semibold tracking-wider uppercase text-[#8C827A] flex items-center gap-1.5">
+                                  <TrendingUp size={11} className="text-[#C86B4C]" />
+                                  <span>Popular Recommendations</span>
+                                </div>
+                                <div className="flex flex-wrap gap-1.5 px-1 pt-1">
+                                  {defaultTrendingSearches.map((trend, idx) => (
+                                    <button
+                                      key={idx}
+                                      type="button"
+                                      onClick={() => executeSearch(trend)}
+                                      className="px-2.5 py-1 rounded-lg bg-white hover:bg-[#F6F1E8] border border-[#E8E2D8] hover:border-[#D9B4A4] text-xs font-normal text-gray-800 transition-all shadow-2xs cursor-pointer"
+                                    >
+                                      {trend}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </form>
                 )}
               </div>
@@ -280,20 +687,20 @@ const Header: React.FC = () => {
                     </div>
                     <Link
                       to="/profile"
-                      className="block px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-[#F6F1E8] hover:text-[#C86B4C] rounded-lg transition-colors"
                       onClick={() => setUserMenuOpen(false)}
+                      className="block px-3 py-1.5 text-xs text-gray-700 hover:bg-[#FAF7F2] rounded-md transition-colors"
                     >
-                      Profile
+                      My Profile
                     </Link>
                     <button
                       onClick={() => {
                         logout();
-                        navigate("/");
+                        setUserMenuOpen(false);
                       }}
-                      className="w-full flex items-center px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors mt-1 cursor-pointer"
+                      className="w-full text-left px-3 py-1.5 text-xs text-rose-600 hover:bg-rose-50 rounded-md transition-colors flex items-center gap-1.5 mt-1 cursor-pointer"
                     >
-                      <LogOut className="mr-2 w-3.5 h-3.5" />
-                      Logout
+                      <LogOut size={13} />
+                      <span>Sign Out</span>
                     </button>
                   </div>
                 </div>
