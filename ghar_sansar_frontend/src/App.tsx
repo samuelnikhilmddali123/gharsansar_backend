@@ -45,6 +45,7 @@ import ProductsPage from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
 import ReturnGifts from "./pages/ReturnGifts";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import FAQ from "./pages/FAQ";
 import MobileAuth from "./pages/MobileAuth";
 import DeleteAccount from "./pages/DeleteAccount";
 
@@ -70,6 +71,7 @@ const AppLayout = () => {
   const isLoginPage = location.pathname.startsWith("/login") || location.pathname.startsWith("/register");
   const isCartPage = location.pathname.startsWith("/cart");
   const isWishlistPage = location.pathname.startsWith("/wishlist");
+  const isFAQPage = location.pathname.startsWith("/faq");
 
   // Dedicated Mobile Auth Bridge view (clean, focused, standalone)
   if (isMobileAuthRoute) {
@@ -115,7 +117,7 @@ const AppLayout = () => {
   return (
     <div className="min-h-screen bg-[#FAF7F2]">
       <Header />
-      <main className={isHomePage || isInteriorPage || isProductsPage || isGiftsPage || isServicesPage || isBlogPage || isLoginPage || isCartPage || isWishlistPage ? "" : "pt-14"}>
+      <main className={isHomePage || isInteriorPage || isProductsPage || isGiftsPage || isServicesPage || isBlogPage || isLoginPage || isCartPage || isWishlistPage || isFAQPage ? "" : "pt-14"}>
         <Routes>
           {/* ---------- Public customer routes ---------- */}
           <Route path="/" element={<Home />} />
@@ -129,6 +131,10 @@ const AppLayout = () => {
           <Route path="/register" element={<Login initialIsRegister={true} />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/wishlist" element={<Wishlist />} />
+
+          {/* FAQ pages */}
+          <Route path="/faq" element={<FAQ />} />
+          <Route path="/faqs" element={<FAQ />} />
 
           {/* Public Interior Design page */}
           <Route path="/interior-design" element={<InteriorDesignPage />} />

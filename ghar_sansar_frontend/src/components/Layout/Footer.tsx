@@ -133,6 +133,11 @@ const Footer: React.FC = () => {
                 </Link>
               </li>
               <li>
+                <Link to="/faq" className="hover:text-[#C86B4C] transition-colors">
+                  Frequently Asked Questions (FAQ)
+                </Link>
+              </li>
+              <li>
                 <Link to="/privacy-policy" className="hover:text-[#C86B4C] transition-colors">
                   Returns &amp; Refunds
                 </Link>
