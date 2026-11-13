@@ -32,22 +32,6 @@ import { motion, AnimatePresence } from "framer-motion";
 
 import toast from "react-hot-toast";
 
-const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-  const target = e.currentTarget;
-  if (!target.dataset.fallback) {
-    target.dataset.fallback = "1";
-    if (target.src.endsWith(".webp")) {
-      target.src = target.src.replace(/\.webp$/, ".jpg");
-      return;
-    }
-    if (target.src.includes("_exact.jpg")) {
-      target.src = target.src.replace(/_exact\.jpg$/, ".jpg");
-      return;
-    }
-    target.src = "/images/design/cat_wallpaper_exact.webp";
-  }
-};
-
 const Home: React.FC = () => {
 
   const navigate = useNavigate();
@@ -74,7 +58,7 @@ const Home: React.FC = () => {
 
         "Transform your space into a story of comfort, elegance, and timeless design with bespoke décor collections and award-winning interior design services.",
 
-      image: "/images/design/exact_hero_vibrant_clean.webp",
+      image: "/images/design/exact_hero_vibrant_clean.jpg",
 
       primaryCta: "Explore Our Designs",
 
@@ -102,7 +86,7 @@ const Home: React.FC = () => {
 
         "Premium 3D wall panels, architectural lighting, vinyl flooring, and custom furniture crafted to perfection for your dream space.",
 
-      image: "/images/design/exact_hero_vibrant_clean.webp",
+      image: "/images/design/exact_hero_vibrant_clean.jpg",
 
       primaryCta: "Our Interior Works",
 
@@ -130,7 +114,7 @@ const Home: React.FC = () => {
 
         "From initial inspiration to final on-site installation, our dedicated design team handles every detail with craftsmanship and care.",
 
-      image: "/images/design/exact_hero_vibrant_clean.webp",
+      image: "/images/design/exact_hero_vibrant_clean.jpg",
 
       primaryCta: "Book Consultation",
 
@@ -154,7 +138,7 @@ const Home: React.FC = () => {
 
       count: "120+ Designs",
 
-      image: "/images/design/cat_wallpaper_exact.webp",
+      image: "/images/design/cat_wallpaper.jpg",
 
       link: "/interior-design?category=Wallpaper%20Rolls",
 
@@ -166,7 +150,7 @@ const Home: React.FC = () => {
 
       count: "85+ Designs",
 
-      image: "/images/design/cat_wallart_exact.webp",
+      image: "/images/design/cat_wallart.jpg",
 
       link: "/interior-design?category=Wall%20Art%20Effect",
 
@@ -178,7 +162,7 @@ const Home: React.FC = () => {
 
       count: "90+ Designs",
 
-      image: "/images/design/cat_vinyl_exact.webp",
+      image: "/images/design/cat_vinyl.jpg",
 
       link: "/interior-design?category=Vinyl%20Flooring",
 
@@ -190,7 +174,7 @@ const Home: React.FC = () => {
 
       count: "100+ Designs",
 
-      image: "/images/design/cat_3d_exact.webp",
+      image: "/images/design/cat_3d.jpg",
 
       link: "/interior-design?category=3d%20Wallpapers",
 
@@ -202,7 +186,7 @@ const Home: React.FC = () => {
 
       count: "60+ Designs",
 
-      image: "/images/design/cat_garden_exact.webp",
+      image: "/images/design/cat_garden.jpg",
 
       link: "/interior-design?category=Natural%20Vertical%20Garden",
 
@@ -214,7 +198,7 @@ const Home: React.FC = () => {
 
       count: "250+ Products",
 
-      image: "/images/design/cat_decor_exact.webp",
+      image: "/images/design/cat_decor.jpg",
 
       link: "/products",
 
@@ -226,7 +210,7 @@ const Home: React.FC = () => {
 
       count: "150+ Gifts",
 
-      image: "/images/design/cat_gifts_exact.webp",
+      image: "/images/design/cat_gifts.jpg",
 
       link: "/return-gifts",
 
@@ -246,7 +230,7 @@ const Home: React.FC = () => {
 
       description: "Tell us your style, space and requirements.",
 
-      image: "/images/design/step_1_ideas.webp",
+      image: "/images/design/step_1_ideas.jpg",
 
     },
 
@@ -258,7 +242,7 @@ const Home: React.FC = () => {
 
       description: "Our designers create personalized plans.",
 
-      image: "/images/design/step_2_guidance.webp",
+      image: "/images/design/step_2_guidance.jpg",
 
     },
 
@@ -270,7 +254,7 @@ const Home: React.FC = () => {
 
       description: "From products to installation, we handle it all.",
 
-      image: "/images/design/step_3_deliver.webp",
+      image: "/images/design/step_3_deliver.jpg",
 
     },
 
@@ -284,7 +268,7 @@ const Home: React.FC = () => {
 
       title: "Wallpaper Rolls",
 
-      image: "/images/design/work_wallpaper_exact.webp",
+      image: "/images/design/work_wallpaper_exact.jpg",
 
       link: "/interior-design?category=Wallpaper%20Rolls",
 
@@ -294,7 +278,7 @@ const Home: React.FC = () => {
 
       title: "3D Wallpapers",
 
-      image: "/images/design/work_3d_exact.webp",
+      image: "/images/design/work_3d_exact.jpg",
 
       link: "/interior-design?category=3d%20Wallpapers",
 
@@ -304,7 +288,7 @@ const Home: React.FC = () => {
 
       title: "Wall Art Effects",
 
-      image: "/images/design/work_wallart_exact.webp",
+      image: "/images/design/work_wallart_exact.jpg",
 
       link: "/interior-design?category=Wall%20Art%20Effect",
 
@@ -314,7 +298,7 @@ const Home: React.FC = () => {
 
       title: "Vinyl Flooring",
 
-      image: "/images/design/work_vinyl_exact.webp",
+      image: "/images/design/work_vinyl_exact.jpg",
 
       link: "/interior-design?category=Vinyl%20Flooring",
 
@@ -324,7 +308,7 @@ const Home: React.FC = () => {
 
       title: "Natural Vertical Garden",
 
-      image: "/images/design/work_garden_exact.webp",
+      image: "/images/design/work_garden_exact.jpg",
 
       link: "/interior-design?category=Natural%20Vertical%20Garden",
 
@@ -334,7 +318,7 @@ const Home: React.FC = () => {
 
       title: "Interior Decor",
 
-      image: "/images/design/work_decor_exact.webp",
+      image: "/images/design/work_decor_exact.jpg",
 
       link: "/products",
 
@@ -352,7 +336,7 @@ const Home: React.FC = () => {
 
       count: "120+ Designs",
 
-      image: "/images/design/cat_wallpaper_exact.webp",
+      image: "/images/design/cat_wallpaper.jpg",
 
       link: "/interior-design?category=Wallpaper%20Rolls",
 
@@ -364,7 +348,7 @@ const Home: React.FC = () => {
 
       count: "80+ Designs",
 
-      image: "/images/design/cat_vinyl_exact.webp",
+      image: "/images/design/cat_vinyl.jpg",
 
       link: "/interior-design?category=Vinyl%20Flooring",
 
@@ -376,7 +360,7 @@ const Home: React.FC = () => {
 
       count: "100+ Designs",
 
-      image: "/images/design/cat_3d_exact.webp",
+      image: "/images/design/cat_3d.jpg",
 
       link: "/interior-design?category=3d%20Wallpapers",
 
@@ -388,7 +372,7 @@ const Home: React.FC = () => {
 
       count: "500+ Products",
 
-      image: "/images/design/cat_decor_exact.webp",
+      image: "/images/design/cat_decor.jpg",
 
       link: "/products",
 
@@ -400,7 +384,7 @@ const Home: React.FC = () => {
 
       count: "80+ Designs",
 
-      image: "/images/design/cat_garden_exact.webp",
+      image: "/images/design/cat_garden.jpg",
 
       link: "/interior-design?category=Natural%20Vertical%20Garden",
 
@@ -418,7 +402,7 @@ const Home: React.FC = () => {
 
       location: "Governorpet, Vijayawada",
 
-      image: "/images/design/gallery_1_hd.webp",
+      image: "/images/design/gallery_1_hd.jpg",
 
       type: "Residential Interior",
 
@@ -430,7 +414,7 @@ const Home: React.FC = () => {
 
       location: "Benz Circle, Vijayawada",
 
-      image: "/images/design/gallery_2_hd.webp",
+      image: "/images/design/gallery_2_hd.jpg",
 
       type: "Master Bedroom",
 
@@ -442,7 +426,7 @@ const Home: React.FC = () => {
 
       location: "Guntur",
 
-      image: "/images/design/gallery_3_hd.webp",
+      image: "/images/design/gallery_3_hd.jpg",
 
       type: "Family Dining",
 
@@ -454,7 +438,7 @@ const Home: React.FC = () => {
 
       location: "Hyderabad",
 
-      image: "/images/design/gallery_4_hd.webp",
+      image: "/images/design/gallery_4_hd.jpg",
 
       type: "Living Wall Art",
 
@@ -570,7 +554,7 @@ const Home: React.FC = () => {
 
             transition={{ duration: 0.8 }}
 
-            src={heroSlides[currentSlide].image} onError={handleImageError}
+            src={heroSlides[currentSlide].image}
 
             alt="Best Interior Designers in Andhra Pradesh & Telangana"
 
@@ -796,7 +780,11 @@ const Home: React.FC = () => {
 
                 <div className="w-full aspect-[1.1/1] rounded-xl overflow-hidden bg-stone-100 shadow-2xs">
 
-                  <img src={cat.image} alt={cat.title} loading="lazy" decoding="async" onError={handleImageError}
+                  <img
+
+                    src={cat.image}
+
+                    alt={cat.title}
 
                     className="w-full h-full object-cover group-hover:scale-106 transition-transform duration-500"
 
@@ -894,7 +882,11 @@ const Home: React.FC = () => {
 
                   <div className="w-full aspect-[1.25/1] rounded-2xl overflow-hidden bg-stone-100 shadow-xs border border-[#E8E2D8]/80 mb-3">
 
-                    <img src={step.image} alt={step.title} loading="lazy" decoding="async" onError={handleImageError}
+                    <img
+
+                      src={step.image}
+
+                      alt={step.title}
 
                       className="w-full h-full object-cover group-hover:scale-104 transition-transform duration-500"
 
@@ -1048,7 +1040,11 @@ const Home: React.FC = () => {
 
                 <div className="w-full aspect-[1.3/1] rounded-xl sm:rounded-2xl overflow-hidden bg-stone-100 shadow-xs border border-[#E8E2D8] relative mb-1.5">
 
-                  <img src={cat.image} alt={cat.title} loading="lazy" decoding="async" onError={handleImageError}
+                  <img
+
+                    src={cat.image}
+
+                    alt={cat.title}
 
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
 
@@ -1097,8 +1093,8 @@ const Home: React.FC = () => {
             {/* Integrated Right Architectural Lounge Photo with Smooth Gradient Blend (Desktop only: hidden on mobile) */}
             <div className="hidden sm:block absolute right-0 top-0 bottom-0 sm:w-[48%] lg:w-[42%] overflow-hidden pointer-events-none select-none">
               <img
-                src="/images/design/consultation_lounge_right.webp"
-                alt="Interior Consultation Studio Lounge" loading="lazy" decoding="async" onError={handleImageError}
+                src="/images/design/consultation_lounge_right.jpg"
+                alt="Interior Consultation Studio Lounge"
                 className="w-full h-full object-cover object-center"
               />
               {/* Desktop horizontal blend */}
@@ -1335,7 +1331,9 @@ const Home: React.FC = () => {
               >
                 {/* Image Frame */}
                 <div className="w-full aspect-[16/11] sm:aspect-[16/10] rounded-xl sm:rounded-2xl overflow-hidden shadow-xs border border-[#E8E2D8] bg-stone-900 relative">
-                  <img src={item.image} alt={item.title} loading="lazy" decoding="async" onError={handleImageError}
+                  <img
+                    src={item.image}
+                    alt={item.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-600"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
