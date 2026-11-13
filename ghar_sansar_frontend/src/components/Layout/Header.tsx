@@ -578,11 +578,18 @@ const Header: React.FC = () => {
                                 </div>
                               )}
 
+                              {/* No products matched state */}
+                              {matchedProducts.length === 0 && (keywordSuggestions.length > 0 || (interiorMatches && interiorMatches.length > 0)) && (
+                                <div className="px-4 py-2.5 bg-white/40 border-t border-[#E8E2D8] text-center">
+                                  <p className="text-[11.5px] text-stone-500 font-normal">No matching products found</p>
+                                </div>
+                              )}
+
                               {/* No match fallback */}
                               {keywordSuggestions.length === 0 && matchedProducts.length === 0 && (!interiorMatches || interiorMatches.length === 0) && (
                                 <div className="p-5 text-center">
                                   <p className="text-xs text-stone-500 font-normal">
-                                    No exact match found for <strong className="text-gray-900">"{searchTerm}"</strong>
+                                    No matching products found for <strong className="text-gray-900">"{searchTerm}"</strong>
                                   </p>
                                   <p className="text-[11px] text-stone-400 mt-1">
                                     Press Enter to search all store catalog

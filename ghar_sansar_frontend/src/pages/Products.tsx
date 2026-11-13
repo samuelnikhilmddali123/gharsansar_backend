@@ -381,6 +381,10 @@ const ProductsPage: React.FC = () => {
     return getSpellingCorrection(search, products);
   }, [search, products]);
 
+  const effectiveSearch = useMemo(() => {
+    return didYouMean && didYouMean.isCorrected ? didYouMean.corrected : search;
+  }, [didYouMean, search]);
+
   const priceRanges = useMemo(
     () => [
       { key: "All", label: "All Prices" },
@@ -396,7 +400,7 @@ const ProductsPage: React.FC = () => {
   const filtered = useMemo(() => {
     let result = products.filter((p) => {
       // Search with multi-field semantic & intent matching
-      if (search && !matchesProductSearch(p, search).match) {
+      if (search && !matchesProductSearch(p, search, effectiveSearch).match) {
         return false;
       }
       // Category
@@ -439,8 +443,8 @@ const ProductsPage: React.FC = () => {
         result.sort((a, b) => (b.price || 0) - (a.price || 0));
       } else {
         result.sort((a, b) => {
-          const scoreA = matchesProductSearch(a, search).score;
-          const scoreB = matchesProductSearch(b, search).score;
+          const scoreA = matchesProductSearch(a, search, effectiveSearch).score;
+          const scoreB = matchesProductSearch(b, search, effectiveSearch).score;
           if (scoreB !== scoreA) return scoreB - scoreA;
           return (a.price || 0) - (b.price || 0);
         });

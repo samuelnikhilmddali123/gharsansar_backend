@@ -537,7 +537,7 @@ export function getInteriorCategoryMatch(query: string): string | null {
 /**
  * Categories that MUST NEVER be returned when searching for cookware or kitchenware.
  */
-const NON_COOKWARE_CATEGORIES = new Set([
+export const NON_COOKWARE_CATEGORIES = new Set([
   "garden tools & compost",
   "harshdeep planters",
   "ceramic pots",
@@ -550,8 +550,61 @@ const NON_COOKWARE_CATEGORIES = new Set([
   "garlands",
   "wallpaper rolls",
   "multiple purpose mats",
-  "pen stands"
+  "pen stands",
+  "milton water bottles",
+  "water bottles & jars"
 ]);
+
+/**
+ * Categories that MUST NEVER be returned when searching for water bottles, flasks, or jars.
+ */
+export const NON_BOTTLE_CATEGORIES = new Set([
+  "garden tools & compost",
+  "harshdeep planters",
+  "ceramic pots",
+  "aquarium & accessories",
+  "birds_and_accessories",
+  "wall clocks",
+  "water fountains",
+  "god idols",
+  "traditional rajasthan idols",
+  "garlands",
+  "wallpaper rolls",
+  "multiple purpose mats",
+  "pen stands",
+  "sonu_steel_products"
+]);
+
+/**
+ * Checks if a user's query is targeted at water bottles, flasks, or jars.
+ */
+export function isBottleSearch(query: string): boolean {
+  if (!query) return false;
+  const clean = query.trim().toLowerCase();
+  return /^bottles?$|^water\s*bottles?$|^steel\s*(water\s*)?bottles?$|^milton\s*(water\s*)?bottles?$|^asian\s*(water\s*)?bottles?$/i.test(
+    clean
+  );
+}
+
+/**
+ * Checks if a user's query is targeted at cookers, pressure cookers, or multi cookers.
+ */
+export function isCookerSearch(query: string): boolean {
+  if (!query) return false;
+  const clean = query.trim().toLowerCase();
+  return /^cook(er|ers|ing|ware)?$|^pressure\s*cookers?$|^multi\s*cookers?$/i.test(
+    clean
+  );
+}
+
+/**
+ * Checks if a user's query is targeted at wallpapers or contact papers.
+ */
+export function isWallpaperSearch(query: string): boolean {
+  if (!query) return false;
+  const clean = query.trim().toLowerCase();
+  return /^wallpapers?$|^wallpaper\s*rolls?$|^3d\s*wallpapers?$/i.test(clean);
+}
 
 /**
  * Checks if a user's query is targeted at cookware, kitchen utensils, or Sonu steel cooking items.
@@ -582,7 +635,8 @@ const semanticIntentRules: {
   {
     regex: /^bottles?$|^flasks?$|^jars?$|^thermos?$/i,
     categoryBoost: ["milton water bottles", "water bottles & jars", "cello"],
-    keywords: ["bottle", "flask", "jar", "milton", "thermosteel", "asian"]
+    keywords: ["bottle", "flask", "jar", "milton", "thermosteel", "asian"],
+    excludeCategories: Array.from(NON_BOTTLE_CATEGORIES)
   },
   {
     regex: /^pooja$|^puja$|^idols?$|^gods?$|^mandir$|^diyas?$/i,
@@ -607,15 +661,17 @@ const semanticIntentRules: {
 ];
 
 export const staticCuratedKeywords = [
+  "Bottle",
+  "Bottles",
+  "Water Bottle",
+  "Steel Water Bottle",
+  "Milton Water Bottles",
   "Sonu Cookware",
-  "Sonu Eliza Pot 14cm 1000ml",
   "Pressure Cookers & Multi-Cookers",
   "Stockpots & Saucepan Pots",
   "Frypans, Kadais & Tawas",
   "Cook & Serve Sets",
   "Cello Kitchenware & Dinnerware",
-  "Milton Water Bottles",
-  "Cello Bottles & Flasks",
   "German Silver & More",
   "Festive Return Gifts",
   "Kondapalli Toys",
@@ -638,7 +694,10 @@ export const CORE_SEARCH_DICTIONARY = [
   "bottles",
   "water bottle",
   "water bottles",
+  "steel water bottle",
   "milton water bottle",
+  "milton water bottles",
+  "asian bottle",
   "cooker",
   "cookers",
   "pressure cooker",
@@ -650,10 +709,13 @@ export const CORE_SEARCH_DICTIONARY = [
   "dinner sets",
   "dinnerware",
   "crockery",
+  "serving bowl",
+  "mixing bowl",
   "wallpaper",
   "wallpapers",
   "3d wallpapers",
   "wallpaper rolls",
+  "contact paper",
   "sofa cover",
   "sofa covers",
   "curtain",
@@ -722,7 +784,6 @@ export function getSpellingCorrection(
 
   // Multi-word phrase tokenization
   const tokens = query.split(/\s+/).filter(Boolean);
-  let wordsChanged = false;
   const singleWords = new Set<string>();
   dictionaryList.forEach((item) => {
     item.split(/\s+/).forEach((w) => {
@@ -730,35 +791,13 @@ export function getSpellingCorrection(
     });
   });
 
-  const correctedTokens = tokens.map((token) => {
-    if (token.length < 3 || singleWords.has(token)) return token;
-
-    let best = token;
-    let minD = 99;
-    const maxAllowed = token.length <= 4 ? 1 : token.length <= 8 ? 2 : 3;
-
-    for (const w of singleWords) {
-      const d = getEditDistance(token, w);
-      if (d <= maxAllowed && d < minD) {
-        minD = d;
-        best = w;
-      }
-    }
-
-    if (best !== token) {
-      wordsChanged = true;
-      return best;
-    }
-    return token;
-  });
-
-  // Whole phrase match against dictionary
+  // Check whole phrase match against dictionary
   let bestPhrase: string | null = null;
   let minPhraseDist = 99;
-  const phraseMax = query.length <= 4 ? 1 : query.length <= 8 ? 2 : 3;
+  const phraseMax = query.length <= 5 ? 1 : query.length <= 8 ? 2 : 3;
 
   for (const entry of dictionaryList) {
-    if (Math.abs(entry.length - query.length) > 3) continue;
+    if (Math.abs(entry.length - query.length) > 2) continue;
     const d = getEditDistance(query, entry);
     if (d <= phraseMax && d < minPhraseDist) {
       minPhraseDist = d;
@@ -774,6 +813,31 @@ export function getSpellingCorrection(
       isCorrected: true
     };
   }
+
+  let wordsChanged = false;
+  const correctedTokens = tokens.map((token) => {
+    if (token.length < 3 || singleWords.has(token)) return token;
+
+    let best = token;
+    let minD = 99;
+    const maxAllowed = token.length <= 6 ? 1 : 2;
+
+    for (const w of singleWords) {
+      if (Math.abs(token.length - w.length) > 1) continue;
+      if (token[0] !== w[0]) continue;
+      const d = getEditDistance(token, w);
+      if (d <= maxAllowed && d < minD) {
+        minD = d;
+        best = w;
+      }
+    }
+
+    if (best !== token) {
+      wordsChanged = true;
+      return best;
+    }
+    return token;
+  });
 
   if (wordsChanged) {
     const joined = correctedTokens.join(" ");
@@ -792,15 +856,20 @@ export function getSpellingCorrection(
 
 /**
  * Checks if a product matches a user query using multi-field text matching,
- * token intersection, semantic e-commerce intent expansion, and fuzzy typo tolerance.
+ * token intersection, semantic e-commerce intent expansion, and controlled fuzzy typo tolerance.
+ * Accepts optional correctedQuery (from getSpellingCorrection) to ensure normalized product retrieval.
  */
-export function matchesProductSearch(product: Product, query: string): SearchMatchResult {
+export function matchesProductSearch(
+  product: Product,
+  query: string,
+  correctedQuery?: string
+): SearchMatchResult {
   if (!query || !query.trim()) {
     return { match: true, score: 0 };
   }
 
-  const cleanQ = query.trim().toLowerCase();
-  const tokens = cleanQ.split(/\s+/).filter(Boolean);
+  const targetQuery = (correctedQuery || query).trim().toLowerCase();
+  const cleanRaw = query.trim().toLowerCase();
 
   const title = (product.title || product.name || "").toLowerCase().replace(/_/g, " ");
   const cat = (product.category || "").toLowerCase().replace(/_/g, " ");
@@ -808,28 +877,61 @@ export function matchesProductSearch(product: Product, query: string): SearchMat
   const desc = (product.description || "").toLowerCase();
   const fullText = `${title} ${cat} ${sub} ${desc}`;
 
-  // 1. Strict Cookware Protection
-  if (isCookwareSearch(cleanQ)) {
+  // 1. Strict Bottle Intent Protection
+  if (isBottleSearch(targetQuery) || isBottleSearch(cleanRaw)) {
+    if (NON_BOTTLE_CATEGORIES.has(cat)) {
+      return { match: false, score: 0 };
+    }
+
+    // Bowls, dinnerware, crockery, and cookware MUST NEVER match bottle searches
+    if (/bowl|dinnerware|crockery|frypan|kadai|tawa|saucepan|stockpot|cookware|mats|curtain/i.test(`${title} ${sub}`)) {
+      return { match: false, score: 0 };
+    }
+
+    if (cat.includes("milton water bottle") || cat.includes("water bottles & jars")) {
+      let bScore = 280;
+      if (title.includes("bottle") || title.includes("flask")) bScore += 50;
+      return { match: true, score: bScore };
+    }
+
+    if (title.includes("bottle") || title.includes("flask")) {
+      return { match: true, score: 260 };
+    }
+
+    return { match: false, score: 0 };
+  }
+
+  // 2. Strict Cooker / Cookware Protection
+  if (isCookerSearch(targetQuery) || isCookerSearch(cleanRaw)) {
     if (NON_COOKWARE_CATEGORIES.has(cat)) {
+      return { match: false, score: 0 };
+    }
+
+    // User specifically wants cooker products
+    if (/cooker|pressure cooker|multi cooker/i.test(targetQuery) || /cooker|pressure cooker/i.test(cleanRaw)) {
+      if (sub.includes("pressure cookers & multi-cookers") || /cooker/i.test(title)) {
+        return { match: true, score: 320 };
+      }
+      if (cat === "sonu_steel_products" || cat.includes("sonu")) {
+        return { match: true, score: 220 };
+      }
       return { match: false, score: 0 };
     }
 
     if (cat === "sonu_steel_products" || cat.includes("sonu")) {
       let cookwareScore = 300;
-      if (title.includes(cleanQ)) cookwareScore += 100;
-      if (sub.includes(cleanQ)) cookwareScore += 80;
+      if (title.includes(targetQuery)) cookwareScore += 100;
+      if (sub.includes(targetQuery)) cookwareScore += 80;
       return { match: true, score: cookwareScore };
     }
 
-    // Cello kitchenware, opalware & dinnerware also included in Cookware catalog
     if (cat === "cello" || cat.includes("cello")) {
       let celloScore = 200;
-      if (title.includes(cleanQ)) celloScore += 100;
-      if (sub.includes(cleanQ)) celloScore += 80;
+      if (title.includes(targetQuery)) celloScore += 100;
+      if (sub.includes(targetQuery)) celloScore += 80;
       return { match: true, score: celloScore };
     }
 
-    // Matching cooking utensils in other categories
     const isKitchenUtensil = /cooker|steamer|kadai|tawa|frypan|saucepan|stockpot|cook\s*&\s*serve/i.test(
       `${title} ${sub}`
     );
@@ -840,46 +942,52 @@ export function matchesProductSearch(product: Product, query: string): SearchMat
     return { match: false, score: 0 };
   }
 
+  // 3. Strict Wallpaper Protection
+  if (isWallpaperSearch(targetQuery) || isWallpaperSearch(cleanRaw)) {
+    if (cat.includes("wallpaper") || title.includes("wallpaper")) {
+      return { match: true, score: 300 };
+    }
+    return { match: false, score: 0 };
+  }
+
+  // 4. Standard multi-field relevance scoring using targetQuery (the corrected or original query)
+  const qToUse = targetQuery;
+  const tokens = qToUse.split(/\s+/).filter(Boolean);
   let score = 0;
 
-  // 2. Exact or Prefix Title Matches (Highest E-Commerce Relevance)
-  if (title === cleanQ) {
+  if (title === qToUse) {
     score += 260;
-  } else if (title.startsWith(cleanQ)) {
+  } else if (title.startsWith(qToUse)) {
     score += 190;
-  } else if (title.split(/\s+/).some((w) => w.startsWith(cleanQ))) {
+  } else if (title.split(/\s+/).some((w) => w.startsWith(qToUse))) {
     score += 140;
-  } else if (title.includes(cleanQ)) {
+  } else if (title.includes(qToUse)) {
     score += 110;
   } else if (tokens.length > 1 && tokens.every((t) => title.includes(t))) {
     score += 95;
   }
 
-  // 3. Subcategory Match
-  if (sub.includes(cleanQ)) {
+  if (sub.includes(qToUse)) {
     score += 85;
   } else if (tokens.length > 1 && tokens.every((t) => sub.includes(t))) {
     score += 75;
   }
 
-  // 4. Category Match
-  if (cat.includes(cleanQ)) {
+  if (cat.includes(qToUse)) {
     score += 70;
   }
 
-  // 5. Description Match
-  if (desc.includes(cleanQ)) {
+  if (desc.includes(qToUse)) {
     score += 35;
   }
 
-  // 6. Multi-token intersection across fullText
   if (tokens.length > 1 && tokens.every((t) => fullText.includes(t))) {
     score += 80;
   }
 
-  // 7. Semantic Intent Rules
+  // 5. Semantic Intent Rules
   for (const rule of semanticIntentRules) {
-    if (rule.regex.test(cleanQ) || tokens.some((t) => rule.regex.test(t))) {
+    if (rule.regex.test(qToUse) || tokens.some((t) => rule.regex.test(t))) {
       if (rule.excludeCategories && rule.excludeCategories.includes(cat)) {
         continue;
       }
@@ -897,21 +1005,23 @@ export function matchesProductSearch(product: Product, query: string): SearchMat
     }
   }
 
-  // 8. Fuzzy Typo & Distance Matching (e.g. "bottlo" -> "bottle", "cookar" -> "cooker", "walpapper" -> "wallpaper")
-  if (score === 0) {
+  // 6. Strict Controlled Fuzzy Matching:
+  // Requires minimum length 4, matching first character, length diff <= 1, max distance <= 1 (or 2 for len 7+)
+  if (score === 0 && tokens.length > 0) {
     const titleWords = title.split(/\s+/).filter((w) => w.length >= 3);
     const fuzzyMatchedTokens = tokens.filter((token) => {
-      if (token.length < 3) return false;
-      const maxAllowed = token.length <= 4 ? 1 : token.length <= 8 ? 2 : 3;
-      return titleWords.some((tw) => getEditDistance(token, tw) <= maxAllowed);
+      if (token.length < 4) return false;
+      const maxAllowed = token.length <= 6 ? 1 : 2;
+      return titleWords.some((tw) => {
+        if (Math.abs(token.length - tw.length) > 1) return false;
+        if (token[0] !== tw[0]) return false;
+        const dist = getEditDistance(token, tw);
+        return dist <= maxAllowed && dist / Math.max(token.length, tw.length) <= 0.25;
+      });
     });
 
-    if (fuzzyMatchedTokens.length > 0) {
-      if (fuzzyMatchedTokens.length === tokens.length) {
-        score += 130;
-      } else {
-        score += Math.round((fuzzyMatchedTokens.length / tokens.length) * 100);
-      }
+    if (fuzzyMatchedTokens.length === tokens.length) {
+      score += 70;
     }
   }
 
@@ -933,6 +1043,11 @@ export function getLiveRecommendations(
 
   // 1. Intelligent Spelling Correction / Did You Mean
   const didYouMean = getSpellingCorrection(clean, products);
+  const effectiveQuery = (didYouMean && didYouMean.isCorrected) ? didYouMean.corrected.toLowerCase() : clean;
+
+  const isBottle = isBottleSearch(effectiveQuery) || isBottleSearch(clean);
+  const isCooker = isCookerSearch(effectiveQuery) || isCookerSearch(clean);
+  const isWallpaper = isWallpaperSearch(effectiveQuery) || isWallpaperSearch(clean);
 
   // 2. Check for matching Interior Design categories
   const interiorMatches: { title: string; category: string }[] = [];
@@ -941,7 +1056,8 @@ export function getLiveRecommendations(
     const isDirectMatch =
       canonicalLower.includes(clean) ||
       clean.includes(canonicalLower) ||
-      item.synonyms.some((syn) => syn.startsWith(clean) || clean.startsWith(syn));
+      canonicalLower.includes(effectiveQuery) ||
+      item.synonyms.some((syn) => syn.startsWith(clean) || clean.startsWith(syn) || syn.startsWith(effectiveQuery));
 
     const isFuzzyInterior =
       !isDirectMatch &&
@@ -1001,20 +1117,37 @@ export function getLiveRecommendations(
     const kwLower = kw.toLowerCase();
     let score = 0;
 
-    if (didYouMean && didYouMean.isCorrected && kw.toLowerCase() === didYouMean.corrected.toLowerCase()) {
-      score = 250;
-    } else if (kwLower === clean) {
-      score = 220;
-    } else if (kwLower.startsWith(clean)) {
-      score = 170; // Google / Amazon prefix priority
-    } else if (kwLower.split(/\s+/).some((w) => w.startsWith(clean))) {
+    // Reject conflicting categories when intent is specific
+    if (isBottle) {
+      if (/bowl|cookware|dinnerware|plate|planter|mat|clock|wallpaper/i.test(kwLower)) {
+        return;
+      }
+    } else if (isCooker) {
+      if (/bottle|planter|mat|clock|wallpaper|garland/i.test(kwLower)) {
+        return;
+      }
+    } else if (isWallpaper) {
+      if (/bottle|cookware|bowl|dinnerware|planter|mat|clock|garland/i.test(kwLower)) {
+        return;
+      }
+    }
+
+    if (didYouMean && didYouMean.isCorrected && kwLower === didYouMean.corrected.toLowerCase()) {
+      score = 300;
+    } else if (kwLower === effectiveQuery || kwLower === clean) {
+      score = 280;
+    } else if (kwLower.startsWith(effectiveQuery) || kwLower.startsWith(clean)) {
+      score = 220; // Google / Amazon prefix priority
+    } else if (kwLower.split(/\s+/).some((w) => w.startsWith(effectiveQuery) || w.startsWith(clean))) {
+      score = 180;
+    } else if (kwLower.includes(effectiveQuery) || kwLower.includes(clean)) {
+      score = 140;
+    } else if (isBottle && /bottle|flask/i.test(kwLower)) {
       score = 120;
-    } else if (kwLower.includes(clean)) {
-      score = 60;
-    } else if (clean.length >= 4 && getEditDistance(clean, kwLower.slice(0, clean.length)) <= (clean.length <= 5 ? 1 : 2)) {
-      score = 90; // Fuzzy keyword suggestion
-    } else if (isCookwareSearch(clean) && /sonu|cello|cook|steamer|pot|kadai|tawa/i.test(kwLower)) {
-      score = 80;
+    } else if (isCooker && /cooker|steamer|kadai|tawa/i.test(kwLower)) {
+      score = 120;
+    } else if (isWallpaper && /wallpaper/i.test(kwLower)) {
+      score = 120;
     }
 
     if (score > 0) {
@@ -1023,12 +1156,23 @@ export function getLiveRecommendations(
   });
 
   scoredKeywords.sort((a, b) => b.score - a.score || a.text.length - b.text.length);
-  const keywordSuggestions = scoredKeywords.slice(0, 5).map((k) => k.text);
 
-  // 4. Rank live products matching query (including fuzzy matches)
+  // Deduplicate case-insensitively
+  const seenKw = new Set<string>();
+  const keywordSuggestions: string[] = [];
+  for (const item of scoredKeywords) {
+    const lower = item.text.toLowerCase();
+    if (!seenKw.has(lower)) {
+      seenKw.add(lower);
+      keywordSuggestions.push(item.text);
+      if (keywordSuggestions.length >= 5) break;
+    }
+  }
+
+  // 4. Rank live products matching query (using normalized effectiveQuery for accurate retrieval)
   const scoredProds: { prod: Product; score: number }[] = [];
   products.forEach((p) => {
-    const res = matchesProductSearch(p, clean);
+    const res = matchesProductSearch(p, clean, effectiveQuery);
     if (res.match) {
       scoredProds.push({ prod: p, score: res.score });
     }
