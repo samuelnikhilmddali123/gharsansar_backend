@@ -53,6 +53,8 @@ const Header: React.FC = () => {
 
   const searchInputRef = useRef<HTMLInputElement>(null);
   const desktopSearchRef = useRef<HTMLFormElement>(null);
+  const mobileSearchInputRef = useRef<HTMLInputElement>(null);
+  const mobileSearchRef = useRef<HTMLFormElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   const { user, logout } = useAuth();
@@ -118,10 +120,11 @@ const Header: React.FC = () => {
   // Click outside listener
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        desktopSearchRef.current &&
-        !desktopSearchRef.current.contains(event.target as Node)
-      ) {
+      const targetNode = event.target as Node;
+      const isInsideDesktop = desktopSearchRef.current?.contains(targetNode);
+      const isInsideMobile = mobileSearchRef.current?.contains(targetNode);
+
+      if (!isInsideDesktop && !isInsideMobile) {
         setShowSuggestions(false);
         if (!searchTerm.trim()) {
           setIsSearchOpen(false);
@@ -129,7 +132,7 @@ const Header: React.FC = () => {
       }
       if (
         userMenuRef.current &&
-        !userMenuRef.current.contains(event.target as Node)
+        !userMenuRef.current.contains(targetNode)
       ) {
         setUserMenuOpen(false);
       }
@@ -230,6 +233,268 @@ const Header: React.FC = () => {
     { path: "/blog", label: "Blog" },
   ];
 
+  const renderSuggestionsDropdown = (isMobile: boolean = false) => (
+    <AnimatePresence>
+      {showSuggestions && (
+        <motion.div
+          initial={{ opacity: 0, y: 6, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 4, scale: 0.98 }}
+          transition={{ duration: 0.15 }}
+          className={
+            isMobile
+              ? "fixed left-2.5 right-2.5 top-[50px] max-h-[75vh] overflow-y-auto bg-[#FAF7F2] border border-[#E8E2D8] rounded-2xl shadow-2xl z-50 divide-y divide-[#F0EAE1]"
+              : "absolute top-full right-0 mt-2.5 w-[330px] sm:w-[400px] md:w-[460px] max-w-[92vw] bg-[#FAF7F2] border border-[#E8E2D8] rounded-2xl shadow-2xl overflow-hidden z-50 divide-y divide-[#F0EAE1]"
+          }
+        >
+          {/* Case A: User has typed a keyword (Active Autocomplete) */}
+          {searchTerm.trim().length > 0 ? (
+            <>
+              {/* 0. Interior Design & Service Matches */}
+              {interiorMatches && interiorMatches.length > 0 && (
+                <div className="p-2 space-y-1 bg-[#FAF2ED]">
+                  <div className="px-3 pt-1 pb-1 flex items-center justify-between text-[10px] font-semibold tracking-wider uppercase text-[#7D3219]">
+                    <span>Interior Design & Home Solutions</span>
+                    <span className="text-[9px] font-semibold bg-[#F7EBE4] border border-[#D9B4A4] px-1.5 py-0.5 rounded text-[#7D3219]">
+                      Bespoke Service
+                    </span>
+                  </div>
+                  {interiorMatches.map((im, idx) => (
+                    <div
+                      key={idx}
+                      onClick={() => executeSearch(im.category)}
+                      className="group flex items-center justify-between px-3 py-2 rounded-xl bg-white hover:bg-[#F7EBE4] border border-[#E8E2D8] hover:border-[#D9B4A4] transition-all cursor-pointer shadow-2xs"
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="w-6 h-6 rounded-md bg-[#F7EBE4] text-[#7D3219] flex items-center justify-center shrink-0">
+                          <Sparkles size={12} />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs font-semibold text-gray-900 group-hover:text-[#7D3219] truncate">
+                            {im.title}
+                          </p>
+                          <p className="text-[10.5px] text-gray-500 truncate">
+                            Explore portfolio, designs & custom tailoring
+                          </p>
+                        </div>
+                      </div>
+                      <ArrowRight size={13} className="text-[#7D3219] shrink-0 ml-2 group-hover:translate-x-0.5 transition-transform" />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* 1. Keyword Recommendations (Google / Amazon style) */}
+              {keywordSuggestions.length > 0 && (
+                <div className="p-2 space-y-0.5">
+                  <div className="px-3 pt-1 pb-1.5 flex items-center justify-between text-[10px] font-semibold tracking-wider uppercase text-[#8C827A]">
+                    <span>Suggestions</span>
+                    <Sparkles size={11} className="text-[#C86B4C]" />
+                  </div>
+                  {keywordSuggestions.map((kw, idx) => (
+                    <div
+                      key={idx}
+                      className="group flex items-center justify-between px-3 py-1.5 rounded-xl hover:bg-white transition-colors cursor-pointer"
+                      onClick={() => executeSearch(kw)}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <Search className="w-3.5 h-3.5 text-stone-400 group-hover:text-[#C86B4C] shrink-0 transition-colors" />
+                        <span className="text-xs truncate">
+                          {highlightSearchMatch(kw, searchTerm)}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        aria-label="Insert keyword"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSearchTerm(kw);
+                          if (isMobile) {
+                            mobileSearchInputRef.current?.focus();
+                          } else {
+                            searchInputRef.current?.focus();
+                          }
+                        }}
+                        className="opacity-0 group-hover:opacity-100 text-stone-400 hover:text-stone-700 p-1 rounded-md transition-opacity"
+                        title="Fill into search bar"
+                      >
+                        <ArrowUpLeft size={13} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* 2. Matching Product Cards (Flipkart / Amazon style visual preview) */}
+              {matchedProducts.length > 0 && (
+                <div className="p-2.5 bg-white/60">
+                  <div className="px-2 pb-2 text-[10px] font-semibold tracking-wider uppercase text-[#8C827A] flex items-center justify-between">
+                    <span>Products</span>
+                    <span className="text-[10px] lowercase font-normal text-stone-400">
+                      {matchedProducts.length} matches
+                    </span>
+                  </div>
+                  <div className="space-y-1">
+                    {matchedProducts.map((p) => {
+                      const price = p.finalPrice || p.actualPrice || 0;
+                      const strike = p.strikePrice || p.actualPrice || 0;
+                      const isOutOfStock =
+                        p.status === "out_of_stock" || (p.stock !== undefined && Number(p.stock) <= 0);
+
+                      return (
+                        <div
+                          key={p.id}
+                          onClick={() => onProductSelect(p)}
+                          className="flex items-center justify-between p-2 rounded-xl bg-white hover:bg-[#FAF7F2] border border-[#F0EAE1] hover:border-[#D9B4A4] shadow-2xs hover:shadow-xs transition-all cursor-pointer group"
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            {/* Thumbnail */}
+                            <div className="w-10 h-10 rounded-lg bg-[#FAF7F2] border border-[#E8E2D8] flex items-center justify-center p-1 shrink-0 overflow-hidden">
+                              {p.image ? (
+                                <img
+                                  src={p.image}
+                                  alt={p.title}
+                                  className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform"
+                                />
+                              ) : (
+                                <ShoppingBag size={14} className="text-stone-400" />
+                              )}
+                            </div>
+
+                            {/* Details */}
+                            <div className="min-w-0">
+                              <p className="text-xs font-medium text-gray-900 truncate">
+                                {highlightSearchMatch(p.title?.replace(/_/g, " ") || "", searchTerm)}
+                              </p>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                {p.category && (
+                                  <span className="text-[9.5px] uppercase font-semibold text-[#8C827A] bg-[#F6F1E8] px-1.5 py-0.5 rounded">
+                                    {p.category}
+                                  </span>
+                                )}
+                                {isOutOfStock ? (
+                                  <span className="text-[9.5px] font-medium text-rose-600">
+                                    Out of Stock
+                                  </span>
+                                ) : (
+                                  <span className="text-[9.5px] font-medium text-emerald-700">
+                                    In Stock
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Price */}
+                          <div className="text-right shrink-0 pl-2">
+                            <span className="text-xs font-semibold text-gray-950 block">
+                              ₹{Number(price).toLocaleString("en-IN")}
+                            </span>
+                            {strike > price && (
+                              <span className="text-[10px] text-gray-400 line-through block">
+                                ₹{Number(strike).toLocaleString("en-IN")}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* No match fallback */}
+              {keywordSuggestions.length === 0 && matchedProducts.length === 0 && (!interiorMatches || interiorMatches.length === 0) && (
+                <div className="p-5 text-center">
+                  <p className="text-xs text-stone-500 font-normal">
+                    No exact match found for <strong className="text-gray-900">"{searchTerm}"</strong>
+                  </p>
+                  <p className="text-[11px] text-stone-400 mt-1">
+                    Press Enter to search all store catalog
+                  </p>
+                </div>
+              )}
+
+              {/* Footer Action */}
+              <button
+                type="button"
+                onClick={() => executeSearch(searchTerm)}
+                className="w-full py-2.5 px-4 bg-[#F6F1E8] hover:bg-[#EFE0D7] text-[#7D3219] text-xs font-medium flex items-center justify-between transition-colors cursor-pointer"
+              >
+                <span>View all results for "{searchTerm}"</span>
+                <ArrowRight size={13} />
+              </button>
+            </>
+          ) : (
+            /* Case B: Input is empty (Recent & Trending Searches) */
+            <div className="p-3 space-y-3">
+              {/* Recent Searches */}
+              {recentSearches.length > 0 && (
+                <div>
+                  <div className="flex items-center justify-between px-2 pb-1.5 text-[10px] font-semibold tracking-wider uppercase text-[#8C827A]">
+                    <span className="flex items-center gap-1.5">
+                      <Clock size={11} />
+                      <span>Recent Searches</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={clearAllRecent}
+                      className="text-[10px] font-normal text-stone-400 hover:text-rose-600 transition-colors cursor-pointer"
+                    >
+                      Clear all
+                    </button>
+                  </div>
+                  <div className="space-y-0.5">
+                    {recentSearches.map((term, idx) => (
+                      <div
+                        key={idx}
+                        onClick={() => executeSearch(term)}
+                        className="group flex items-center justify-between px-3 py-1.5 rounded-xl hover:bg-white transition-colors cursor-pointer"
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <Clock className="w-3.5 h-3.5 text-stone-400 group-hover:text-[#C86B4C] shrink-0 transition-colors" />
+                          <span className="text-xs text-gray-800 truncate">{term}</span>
+                        </div>
+                        <button
+                          type="button"
+                          aria-label="Remove recent item"
+                          onClick={(e) => removeRecentSearch(e, term)}
+                          className="opacity-0 group-hover:opacity-100 text-stone-400 hover:text-rose-500 p-1 rounded-md transition-opacity"
+                        >
+                          <X size={12} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Popular / Trending Searches */}
+              <div>
+                <div className="px-2 pb-1.5 text-[10px] font-semibold tracking-wider uppercase text-[#8C827A] flex items-center gap-1.5">
+                  <TrendingUp size={11} className="text-[#C86B4C]" />
+                  <span>Popular Recommendations</span>
+                </div>
+                <div className="flex flex-wrap gap-1.5 px-1 pt-1">
+                  {defaultTrendingSearches.map((trend, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => executeSearch(trend)}
+                      className="px-2.5 py-1 rounded-lg bg-white hover:bg-[#F6F1E8] border border-[#E8E2D8] hover:border-[#D9B4A4] text-xs font-normal text-gray-800 transition-all shadow-2xs cursor-pointer"
+                    >
+                      {trend}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+
   return (
     <>
       <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
@@ -240,7 +505,50 @@ const Header: React.FC = () => {
               <GharSansarLogo variant="dark" />
             </div>
 
-            {/* 2. Center: True Mathematical Center Navigation */}
+            {/* 2. Mobile Static Search Section: professionally centered between logo and action icons */}
+            <form
+              ref={mobileSearchRef}
+              onSubmit={onSearchSubmit}
+              className="flex md:hidden flex-1 items-center min-w-0 ml-3.5 sm:ml-4 mr-1.5 sm:mr-2 z-10 relative"
+            >
+              <div className="flex items-center w-full h-[34px] rounded-full px-2.5 sm:px-3 bg-white text-gray-800 border border-[#D9B4A4] shadow-2xs focus-within:border-[#7D3219] focus-within:ring-2 focus-within:ring-[#7D3219]/20 transition-all duration-200">
+                <Search className="w-3.5 h-3.5 text-[#8C827A] shrink-0 mr-1.5" />
+                <input
+                  ref={mobileSearchInputRef}
+                  type="text"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  spellCheck="false"
+                  placeholder="Search products, cookware..."
+                  value={searchTerm}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setShowSuggestions(true);
+                  }}
+                  onFocus={() => setShowSuggestions(true)}
+                  onKeyDown={handleKeyDown}
+                  className="w-full bg-transparent text-xs font-normal text-gray-900 placeholder:text-stone-400 border-none outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 shadow-none p-0 truncate"
+                  style={{ outline: "none", boxShadow: "none", border: "none" }}
+                />
+                {searchTerm ? (
+                  <button
+                    type="button"
+                    aria-label="Clear search"
+                    onClick={() => {
+                      setSearchTerm("");
+                      mobileSearchInputRef.current?.focus();
+                    }}
+                    className="w-4 h-4 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-700 ml-1 shrink-0 cursor-pointer transition-colors"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                ) : null}
+              </div>
+
+              {renderSuggestionsDropdown(true)}
+            </form>
+
+            {/* 3. Center: True Mathematical Center Navigation */}
             <nav
               className="hidden lg:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center space-x-6 xl:space-x-8 font-poppins text-[12px] xl:text-[12.5px] font-medium tracking-[0.14em] uppercase"
               role="navigation"
@@ -266,10 +574,10 @@ const Header: React.FC = () => {
               })}
             </nav>
 
-            {/* 3. Right: Refined Search & Action Icons */}
+            {/* 4. Right: Refined Search & Action Icons */}
             <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0 z-10">
-              {/* Expandable Search Bar on Symbol Click */}
-              <div className="relative flex items-center">
+              {/* Expandable Search Bar on Symbol Click (Desktop only) */}
+              <div className="relative hidden md:flex items-center">
                 {!isSearchOpen ? (
                   <button
                     type="button"
@@ -337,258 +645,7 @@ const Header: React.FC = () => {
                       )}
                     </div>
 
-                    {/* Google, Flipkart & Amazon Style Search Recommendations Dropdown */}
-                    <AnimatePresence>
-                      {showSuggestions && (
-                        <motion.div
-                          initial={{ opacity: 0, y: 6, scale: 0.98 }}
-                          animate={{ opacity: 1, y: 0, scale: 1 }}
-                          exit={{ opacity: 0, y: 4, scale: 0.98 }}
-                          transition={{ duration: 0.15 }}
-                          className="absolute top-full right-0 mt-2.5 w-[330px] sm:w-[400px] md:w-[460px] max-w-[92vw] bg-[#FAF7F2] border border-[#E8E2D8] rounded-2xl shadow-2xl overflow-hidden z-50 divide-y divide-[#F0EAE1]"
-                        >
-                          {/* Case A: User has typed a keyword (Active Autocomplete) */}
-                          {searchTerm.trim().length > 0 ? (
-                            <>
-                              {/* 0. Interior Design & Service Matches */}
-                              {interiorMatches && interiorMatches.length > 0 && (
-                                <div className="p-2 space-y-1 bg-[#FAF2ED]">
-                                  <div className="px-3 pt-1 pb-1 flex items-center justify-between text-[10px] font-semibold tracking-wider uppercase text-[#7D3219]">
-                                    <span>Interior Design & Home Solutions</span>
-                                    <span className="text-[9px] font-semibold bg-[#F7EBE4] border border-[#D9B4A4] px-1.5 py-0.5 rounded text-[#7D3219]">
-                                      Bespoke Service
-                                    </span>
-                                  </div>
-                                  {interiorMatches.map((im, idx) => (
-                                    <div
-                                      key={idx}
-                                      onClick={() => executeSearch(im.category)}
-                                      className="group flex items-center justify-between px-3 py-2 rounded-xl bg-white hover:bg-[#F7EBE4] border border-[#E8E2D8] hover:border-[#D9B4A4] transition-all cursor-pointer shadow-2xs"
-                                    >
-                                      <div className="flex items-center gap-2.5 min-w-0">
-                                        <div className="w-6 h-6 rounded-md bg-[#F7EBE4] text-[#7D3219] flex items-center justify-center shrink-0">
-                                          <Sparkles size={12} />
-                                        </div>
-                                        <div className="min-w-0">
-                                          <p className="text-xs font-semibold text-gray-900 group-hover:text-[#7D3219] truncate">
-                                            {im.title}
-                                          </p>
-                                          <p className="text-[10.5px] text-gray-500 truncate">
-                                            Explore portfolio, designs & custom tailoring
-                                          </p>
-                                        </div>
-                                      </div>
-                                      <ArrowRight size={13} className="text-[#7D3219] shrink-0 ml-2 group-hover:translate-x-0.5 transition-transform" />
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-
-                              {/* 1. Keyword Recommendations (Google / Amazon style) */}
-                              {keywordSuggestions.length > 0 && (
-                                <div className="p-2 space-y-0.5">
-                                  <div className="px-3 pt-1 pb-1.5 flex items-center justify-between text-[10px] font-semibold tracking-wider uppercase text-[#8C827A]">
-                                    <span>Suggestions</span>
-                                    <Sparkles size={11} className="text-[#C86B4C]" />
-                                  </div>
-                                  {keywordSuggestions.map((kw, idx) => (
-                                    <div
-                                      key={idx}
-                                      className="group flex items-center justify-between px-3 py-1.5 rounded-xl hover:bg-white transition-colors cursor-pointer"
-                                      onClick={() => executeSearch(kw)}
-                                    >
-                                      <div className="flex items-center gap-2.5 min-w-0">
-                                        <Search className="w-3.5 h-3.5 text-stone-400 group-hover:text-[#C86B4C] shrink-0 transition-colors" />
-                                        <span className="text-xs truncate">
-                                          {highlightSearchMatch(kw, searchTerm)}
-                                        </span>
-                                      </div>
-                                      <button
-                                        type="button"
-                                        aria-label="Insert keyword"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          setSearchTerm(kw);
-                                          searchInputRef.current?.focus();
-                                        }}
-                                        className="opacity-0 group-hover:opacity-100 text-stone-400 hover:text-stone-700 p-1 rounded-md transition-opacity"
-                                        title="Fill into search bar"
-                                      >
-                                        <ArrowUpLeft size={13} />
-                                      </button>
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-
-                              {/* 2. Matching Product Cards (Flipkart / Amazon style visual preview) */}
-                              {matchedProducts.length > 0 && (
-                                <div className="p-2.5 bg-white/60">
-                                  <div className="px-2 pb-2 text-[10px] font-semibold tracking-wider uppercase text-[#8C827A] flex items-center justify-between">
-                                    <span>Products</span>
-                                    <span className="text-[10px] lowercase font-normal text-stone-400">
-                                      {matchedProducts.length} matches
-                                    </span>
-                                  </div>
-                                  <div className="space-y-1">
-                                    {matchedProducts.map((p) => {
-                                      const price = p.finalPrice || p.actualPrice || 0;
-                                      const strike = p.strikePrice || p.actualPrice || 0;
-                                      const isOutOfStock =
-                                        p.status === "out_of_stock" || (p.stock !== undefined && Number(p.stock) <= 0);
-
-                                      return (
-                                        <div
-                                          key={p.id}
-                                          onClick={() => onProductSelect(p)}
-                                          className="flex items-center justify-between p-2 rounded-xl bg-white hover:bg-[#FAF7F2] border border-[#F0EAE1] hover:border-[#D9B4A4] shadow-2xs hover:shadow-xs transition-all cursor-pointer group"
-                                        >
-                                          <div className="flex items-center gap-3 min-w-0">
-                                            {/* Thumbnail */}
-                                            <div className="w-10 h-10 rounded-lg bg-[#FAF7F2] border border-[#E8E2D8] flex items-center justify-center p-1 shrink-0 overflow-hidden">
-                                              {p.image ? (
-                                                <img
-                                                  src={p.image}
-                                                  alt={p.title}
-                                                  className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform"
-                                                />
-                                              ) : (
-                                                <ShoppingBag size={14} className="text-stone-400" />
-                                              )}
-                                            </div>
-
-                                            {/* Details */}
-                                            <div className="min-w-0">
-                                              <p className="text-xs font-medium text-gray-900 truncate">
-                                                {highlightSearchMatch(p.title?.replace(/_/g, " ") || "", searchTerm)}
-                                              </p>
-                                              <div className="flex items-center gap-2 mt-0.5">
-                                                {p.category && (
-                                                  <span className="text-[9.5px] uppercase font-semibold text-[#8C827A] bg-[#F6F1E8] px-1.5 py-0.5 rounded">
-                                                    {p.category}
-                                                  </span>
-                                                )}
-                                                {isOutOfStock ? (
-                                                  <span className="text-[9.5px] font-medium text-rose-600">
-                                                    Out of Stock
-                                                  </span>
-                                                ) : (
-                                                  <span className="text-[9.5px] font-medium text-emerald-700">
-                                                    In Stock
-                                                  </span>
-                                                )}
-                                              </div>
-                                            </div>
-                                          </div>
-
-                                          {/* Price */}
-                                          <div className="text-right shrink-0 pl-2">
-                                            <span className="text-xs font-semibold text-gray-950 block">
-                                              ₹{Number(price).toLocaleString("en-IN")}
-                                            </span>
-                                            {strike > price && (
-                                              <span className="text-[10px] text-gray-400 line-through block">
-                                                ₹{Number(strike).toLocaleString("en-IN")}
-                                              </span>
-                                            )}
-                                          </div>
-                                        </div>
-                                      );
-                                    })}
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* No match fallback */}
-                              {keywordSuggestions.length === 0 && matchedProducts.length === 0 && (!interiorMatches || interiorMatches.length === 0) && (
-                                <div className="p-5 text-center">
-                                  <p className="text-xs text-stone-500 font-normal">
-                                    No exact match found for <strong className="text-gray-900">"{searchTerm}"</strong>
-                                  </p>
-                                  <p className="text-[11px] text-stone-400 mt-1">
-                                    Press Enter to search all store catalog
-                                  </p>
-                                </div>
-                              )}
-
-                              {/* Footer Action */}
-                              <button
-                                type="button"
-                                onClick={() => executeSearch(searchTerm)}
-                                className="w-full py-2.5 px-4 bg-[#F6F1E8] hover:bg-[#EFE0D7] text-[#7D3219] text-xs font-medium flex items-center justify-between transition-colors cursor-pointer"
-                              >
-                                <span>View all results for "{searchTerm}"</span>
-                                <ArrowRight size={13} />
-                              </button>
-                            </>
-                          ) : (
-                            /* Case B: Input is empty (Recent & Trending Searches) */
-                            <div className="p-3 space-y-3">
-                              {/* Recent Searches */}
-                              {recentSearches.length > 0 && (
-                                <div>
-                                  <div className="flex items-center justify-between px-2 pb-1.5 text-[10px] font-semibold tracking-wider uppercase text-[#8C827A]">
-                                    <span className="flex items-center gap-1.5">
-                                      <Clock size={11} />
-                                      <span>Recent Searches</span>
-                                    </span>
-                                    <button
-                                      type="button"
-                                      onClick={clearAllRecent}
-                                      className="text-[10px] font-normal text-stone-400 hover:text-rose-600 transition-colors cursor-pointer"
-                                    >
-                                      Clear all
-                                    </button>
-                                  </div>
-                                  <div className="space-y-0.5">
-                                    {recentSearches.map((term, idx) => (
-                                      <div
-                                        key={idx}
-                                        onClick={() => executeSearch(term)}
-                                        className="group flex items-center justify-between px-3 py-1.5 rounded-xl hover:bg-white transition-colors cursor-pointer"
-                                      >
-                                        <div className="flex items-center gap-2.5 min-w-0">
-                                          <Clock className="w-3.5 h-3.5 text-stone-400 group-hover:text-[#C86B4C] shrink-0 transition-colors" />
-                                          <span className="text-xs text-gray-800 truncate">{term}</span>
-                                        </div>
-                                        <button
-                                          type="button"
-                                          aria-label="Remove recent item"
-                                          onClick={(e) => removeRecentSearch(e, term)}
-                                          className="opacity-0 group-hover:opacity-100 text-stone-400 hover:text-rose-500 p-1 rounded-md transition-opacity"
-                                        >
-                                          <X size={12} />
-                                        </button>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* Popular / Trending Searches */}
-                              <div>
-                                <div className="px-2 pb-1.5 text-[10px] font-semibold tracking-wider uppercase text-[#8C827A] flex items-center gap-1.5">
-                                  <TrendingUp size={11} className="text-[#C86B4C]" />
-                                  <span>Popular Recommendations</span>
-                                </div>
-                                <div className="flex flex-wrap gap-1.5 px-1 pt-1">
-                                  {defaultTrendingSearches.map((trend, idx) => (
-                                    <button
-                                      key={idx}
-                                      type="button"
-                                      onClick={() => executeSearch(trend)}
-                                      className="px-2.5 py-1 rounded-lg bg-white hover:bg-[#F6F1E8] border border-[#E8E2D8] hover:border-[#D9B4A4] text-xs font-normal text-gray-800 transition-all shadow-2xs cursor-pointer"
-                                    >
-                                      {trend}
-                                    </button>
-                                  ))}
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                    {renderSuggestionsDropdown(false)}
                   </form>
                 )}
               </div>
