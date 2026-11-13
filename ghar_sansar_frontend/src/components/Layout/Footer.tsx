@@ -128,11 +128,6 @@ const Footer: React.FC = () => {
             </h4>
             <ul className="space-y-1.5 sm:space-y-1 text-xs sm:text-[13px] text-gray-650 font-normal flex flex-col items-center sm:items-start text-center sm:text-left">
               <li>
-                <Link to="/my-orders" className="hover:text-[#C86B4C] transition-colors">
-                  Track Order
-                </Link>
-              </li>
-              <li>
                 <Link to="/faq" className="hover:text-[#C86B4C] transition-colors">
                   Frequently Asked Questions (FAQ)
                 </Link>
