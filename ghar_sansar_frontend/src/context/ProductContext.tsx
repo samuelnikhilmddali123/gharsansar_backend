@@ -84,9 +84,18 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
     try {
       setLoading(true);
       setError(null);
-      console.log("Fetching products from local backend:", `${BACKEND_URL}/products`);
+      console.log("Fetching products from backend:", `${BACKEND_URL}/api/products`);
 
-      const res = await axios.get(`${BACKEND_URL}/products`);
+      let res;
+      try {
+        res = await axios.get(`${BACKEND_URL}/api/products`);
+      } catch (e1) {
+        try {
+          res = await axios.get(`${BACKEND_URL}/products`);
+        } catch (e2) {
+          res = await axios.get("/products.json");
+        }
+      }
 
       const data = res.data;
       const allProducts: Product[] = [];

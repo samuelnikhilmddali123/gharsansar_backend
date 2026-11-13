@@ -117,6 +117,22 @@ async function initDatabase() {
     }
   }
 
+  // Seed product_catalog cache from public/products.json if empty
+  if (!Array.isArray(atlasCache["product_catalog"]) || atlasCache["product_catalog"].length === 0) {
+    const prodFile = path.join(__dirname, "public", "products.json");
+    if (fs.existsSync(prodFile)) {
+      try {
+        const seeded = JSON.parse(fs.readFileSync(prodFile, "utf-8"));
+        if (Array.isArray(seeded) && seeded.length > 0) {
+          atlasCache["product_catalog"] = seeded;
+          console.log(`[MongoDB Atlas] Loaded ${seeded.length} category trees from public/products.json`);
+        }
+      } catch (e) {
+        console.warn("[MongoDB Atlas] Could not seed product_catalog:", e.message);
+      }
+    }
+  }
+
   // Ensure unique indexes on users collection for email and phone
   try {
     const usersCol = dbInstance.collection("users");
@@ -160,17 +176,30 @@ async function initDatabase() {
 
 function readData(filePath, defaultData = []) {
   const colName = resolveCollectionName(filePath);
-  if (atlasCache[colName] !== undefined) {
+  if (atlasCache[colName] !== undefined && (!Array.isArray(atlasCache[colName]) || atlasCache[colName].length > 0)) {
     return atlasCache[colName];
   }
-  if (fs.existsSync(filePath)) {
-    try {
-      const fileData = JSON.parse(fs.readFileSync(filePath, "utf8"));
-      atlasCache[colName] = fileData;
-      return fileData;
-    } catch (e) {}
+
+  // Look on disk in multiple candidate locations
+  const candidates = [
+    filePath,
+    path.join(__dirname, filePath),
+    path.join(__dirname, "public", filePath),
+    path.join(__dirname, "public", path.basename(filePath)),
+  ];
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) {
+      try {
+        const fileData = JSON.parse(fs.readFileSync(candidate, "utf8"));
+        if (fileData && (!Array.isArray(fileData) || fileData.length > 0)) {
+          atlasCache[colName] = fileData;
+          return fileData;
+        }
+      } catch (e) {}
+    }
   }
-  return defaultData;
+
+  return atlasCache[colName] !== undefined ? atlasCache[colName] : defaultData;
 }
 
 function writeData(filePath, data) {

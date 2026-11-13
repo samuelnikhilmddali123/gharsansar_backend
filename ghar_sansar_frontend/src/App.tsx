@@ -72,6 +72,11 @@ const AppLayout = () => {
   const isCartPage = location.pathname.startsWith("/cart");
   const isWishlistPage = location.pathname.startsWith("/wishlist");
   const isFAQPage = location.pathname.startsWith("/faq");
+  const isPrivacyPage =
+    location.pathname.startsWith("/privacy") ||
+    location.pathname.startsWith("/terms") ||
+    location.pathname.startsWith("/shipping-policy") ||
+    location.pathname.startsWith("/return-policy");
 
   // Dedicated Mobile Auth Bridge view (clean, focused, standalone)
   if (isMobileAuthRoute) {
@@ -117,7 +122,7 @@ const AppLayout = () => {
   return (
     <div className="min-h-screen bg-[#FAF7F2]">
       <Header />
-      <main className={isHomePage || isInteriorPage || isProductsPage || isGiftsPage || isServicesPage || isBlogPage || isLoginPage || isCartPage || isWishlistPage || isFAQPage ? "" : "pt-14"}>
+      <main className={isHomePage || isInteriorPage || isProductsPage || isGiftsPage || isServicesPage || isBlogPage || isLoginPage || isCartPage || isWishlistPage || isFAQPage || isPrivacyPage ? "" : "pt-14"}>
         <Routes>
           {/* ---------- Public customer routes ---------- */}
           <Route path="/" element={<Home />} />

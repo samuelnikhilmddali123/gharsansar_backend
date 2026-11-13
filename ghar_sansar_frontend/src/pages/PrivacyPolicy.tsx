@@ -16,7 +16,10 @@ import {
   Clock,
   ArrowRight,
   Eye,
+  MessageCircle,
+  HelpCircle,
 } from "lucide-react";
+import { getAdminWhatsAppNumber } from "../config/whatsappConfig";
 
 export type LegalTab = "privacy" | "terms" | "shipping" | "returns";
 
@@ -36,7 +39,12 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ initialTab = "priv
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<LegalTab>(initialTab);
 
-  // Sync tab with pathname or search params
+  const adminWhatsApp = getAdminWhatsAppNumber();
+  const whatsappUrl = `https://wa.me/${adminWhatsApp}?text=${encodeURIComponent(
+    "Hello Ghar Sansar! I have a question regarding your terms, privacy, or store policies."
+  )}`;
+
+  // Sync tab with pathname or initialTab
   useEffect(() => {
     if (location.pathname.includes("terms")) {
       setActiveTab("terms");
@@ -51,6 +59,10 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ initialTab = "priv
     }
   }, [location.pathname, initialTab]);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [activeTab]);
+
   const handleTabChange = (tab: LegalTab) => {
     setActiveTab(tab);
     if (tab === "privacy") navigate("/privacy-policy");
@@ -60,37 +72,51 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ initialTab = "priv
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] text-gray-800 pb-20">
-      {/* Hero Header */}
-      <div className="bg-[#00281b] text-white pt-12 pb-16 sm:pb-20 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(#ffffff0a_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none opacity-40"></div>
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-          <div className="inline-flex items-center space-x-2 bg-white/10 px-3 py-1.5 rounded-full text-xs font-medium text-emerald-200 mb-4 backdrop-blur-sm">
-            <ShieldCheck className="w-4 h-4 text-emerald-400" />
-            <span>Ghar Sansar Trust & Transparency Center</span>
+    <div className="min-h-screen bg-[#FAF7F2] text-[#181513] font-sans pb-20">
+      {/* 1. Hero Header (Matching Website Luxury Dark Theme) */}
+      <section className="relative bg-gradient-to-b from-[#1C1714] via-[#261E1A] to-[#1C1714] text-white pt-20 pb-20 sm:pt-24 sm:pb-24 px-4 sm:px-6 lg:px-8 overflow-hidden text-center">
+        {/* Subtle decorative dot pattern */}
+        <div
+          className="absolute inset-0 opacity-10 pointer-events-none"
+          style={{
+            backgroundImage: `radial-gradient(#FAF7F2 1px, transparent 1px)`,
+            backgroundSize: "24px 24px",
+          }}
+        />
+        <div className="absolute -top-32 -right-32 w-96 h-96 bg-[#C86B4C]/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-[#7D3219]/25 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="max-w-4xl mx-auto relative z-10">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FAF7F2]/10 backdrop-blur-md border border-[#FAF7F2]/15 text-[#E6AF9A] text-xs font-medium uppercase tracking-wider mb-5">
+            <ShieldCheck className="w-3.5 h-3.5 text-[#C86B4C]" />
+            <span>Ghar Sansar Trust &amp; Transparency Center</span>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold tracking-tight mb-4 text-white">
-            Legal & Privacy Policies
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold tracking-tight text-[#FAF7F2] mb-4">
+            Legal &amp; Privacy Policies
           </h1>
-          <p className="text-gray-300 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed">
-            We value your trust and are committed to safeguarding your personal data, ensuring clear commercial terms,
-            and providing dependable customer support for all our decor and interior design solutions.
+          <p className="text-sm sm:text-base md:text-lg text-[#C8BFB6] max-w-2xl mx-auto leading-relaxed">
+            We value your trust and are committed to safeguarding your personal data, ensuring transparent commercial
+            terms, and providing dependable support for all our decor and interior design solutions.
           </p>
 
-          <div className="flex items-center justify-center space-x-2 text-xs text-gray-400 mt-6">
-            <Clock className="w-3.5 h-3.5 text-gray-400" />
-            <span>Last Updated: October 2026</span>
+          <div className="flex flex-wrap items-center justify-center gap-2 text-xs text-[#A69E96] mt-6">
+            <Clock className="w-3.5 h-3.5 text-[#C86B4C]" />
+            <span>Last Updated: November 2026</span>
             <span>•</span>
             <span>Governed by the Laws of India</span>
+            <span>•</span>
+            <Link to="/faq" className="text-[#E6AF9A] hover:text-white underline transition-colors">
+              Read FAQs
+            </Link>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Main Container */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-20">
-        {/* Navigation Tabs */}
-        <div className="bg-white rounded-2xl shadow-sm border border-[#E8E5DC] p-2 flex flex-wrap gap-2 justify-center mb-8">
+      {/* 2. Main Content Container */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-20">
+        {/* Navigation Tabs (Terracotta active style) */}
+        <div className="bg-white rounded-2xl shadow-lg shadow-black/5 border border-[#E8E2D8] p-2 flex flex-wrap gap-2 justify-center mb-8">
           {tabConfigs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -100,20 +126,21 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ initialTab = "priv
                 onClick={() => handleTabChange(tab.id)}
                 className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all duration-200 cursor-pointer ${
                   isActive
-                    ? "bg-[#00281b] text-white shadow-md scale-[1.02]"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                    ? "bg-[#C86B4C] text-white shadow-md shadow-[#C86B4C]/25 scale-[1.02] border border-[#C86B4C]"
+                    : "text-[#736B63] hover:text-[#181513] hover:bg-[#FAF7F2] border border-transparent"
                 }`}
               >
-                <Icon className={`w-4 h-4 ${isActive ? "text-emerald-300" : "text-gray-400"}`} />
+                <Icon className={`w-4 h-4 ${isActive ? "text-white" : "text-[#8C827A]"}`} />
                 <span>{tab.label}</span>
               </button>
             );
           })}
         </div>
 
-        {/* Tab Content Display */}
-        <div className="bg-white rounded-3xl shadow-sm border border-[#E8E5DC] p-6 sm:p-10 lg:p-12">
+        {/* Tab Content Display Card */}
+        <div className="bg-white rounded-3xl shadow-sm border border-[#E8E2D8] p-6 sm:p-10 lg:p-12">
           <AnimatePresence mode="wait">
+            {/* TAB 1: PRIVACY POLICY */}
             {activeTab === "privacy" && (
               <motion.div
                 key="privacy"
@@ -123,14 +150,14 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ initialTab = "priv
                 transition={{ duration: 0.3 }}
                 className="space-y-8"
               >
-                <div className="border-b border-gray-100 pb-6">
+                <div className="border-b border-[#F2ECE4] pb-6">
                   <div className="flex items-center space-x-3 mb-2">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-800 flex items-center justify-center font-bold">
-                      <ShieldCheck className="w-5 h-5 text-emerald-700" />
+                    <div className="w-11 h-11 rounded-xl bg-[#F7EBE4] text-[#C86B4C] flex items-center justify-center font-bold">
+                      <ShieldCheck className="w-6 h-6 text-[#C86B4C]" />
                     </div>
                     <div>
-                      <h2 className="text-2xl font-serif font-bold text-gray-900">Privacy Policy</h2>
-                      <p className="text-xs sm:text-sm text-gray-500">
+                      <h2 className="text-2xl font-serif font-bold text-[#181513]">Privacy Policy</h2>
+                      <p className="text-xs sm:text-sm text-[#736B63]">
                         How Ghar Sansar collects, protects, and manages your personal information.
                       </p>
                     </div>
@@ -139,191 +166,226 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ initialTab = "priv
 
                 {/* 1. Introduction */}
                 <section className="space-y-3">
-                  <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-gray-100 text-gray-700 text-xs flex items-center justify-center font-semibold">1</span>
-                    Introduction & Scope
+                  <h3 className="text-lg font-serif font-bold text-[#181513] flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-[#F7EBE4] text-[#7D3219] text-xs flex items-center justify-center font-semibold">
+                      1
+                    </span>
+                    Introduction &amp; Scope
                   </h3>
-                  <p className="text-sm leading-relaxed text-gray-600">
-                    Welcome to <strong>Ghar Sansar</strong> (“we,” “our,” or “us”). Ghar Sansar operates the online portal,
-                    e-commerce store, and custom interior design consultation platform located at{" "}
-                    <span className="font-medium text-emerald-800">gharsansar.website</span> and our physical storefront
-                    at Governorpet, Vijayawada, India.
-                  </p>
-                  <p className="text-sm leading-relaxed text-gray-600">
-                    This Privacy Policy outlines our standards and practices regarding the collection, handling, storage,
-                    and protection of your data when you visit our website, register an account, order home decor items or return gifts,
-                    or submit requests for custom interior works (such as ICU Flooring, Wallpapers, Bubble Fountains, and Gym Flooring).
+                  <p className="text-sm text-[#4A433D] leading-relaxed">
+                    At <strong>Ghar Sansar</strong> (referred to as &ldquo;we&rdquo;, &ldquo;our&rdquo;, or &ldquo;us&rdquo;),
+                    we are committed to protecting the privacy, confidentiality, and security of our customers, website
+                    visitors, and interior design clients. This Privacy Policy details how we collect, use, store, and
+                    disclose your personal information when you visit{" "}
+                    <span className="font-medium text-[#C86B4C]">gharsansar.website</span>, purchase home decor products,
+                    request custom wallpaper estimates, book interior consultations, or visit our physical studio in
+                    Governorpet, Vijayawada.
                   </p>
                 </section>
 
                 {/* 2. Information We Collect */}
-                <section className="space-y-4">
-                  <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-gray-100 text-gray-700 text-xs flex items-center justify-center font-semibold">2</span>
+                <section className="space-y-3">
+                  <h3 className="text-lg font-serif font-bold text-[#181513] flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-[#F7EBE4] text-[#7D3219] text-xs flex items-center justify-center font-semibold">
+                      2
+                    </span>
                     Information We Collect
                   </h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">
-                    To deliver our products, complete transactions, and provide bespoke interior design consultations, we may collect the following details:
+                  <p className="text-sm text-[#4A433D] leading-relaxed">
+                    We collect information strictly necessary to provide seamless shopping experiences, fulfill retail
+                    orders, and coordinate customized interior installations:
                   </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="p-4 rounded-2xl bg-gray-50 border border-gray-100">
-                      <h4 className="font-semibold text-sm text-gray-800 mb-1 flex items-center gap-2">
-                        <Eye className="w-4 h-4 text-emerald-600" /> Personal Identity & Contact Data
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                    <div className="bg-[#FAF7F2] p-4 rounded-2xl border border-[#E8E2D8]">
+                      <h4 className="font-semibold text-sm text-[#181513] flex items-center gap-2 mb-1.5">
+                        <Eye className="w-4 h-4 text-[#C86B4C]" /> Personal Identity &amp; Contact Data
                       </h4>
-                      <p className="text-xs text-gray-600 leading-relaxed">
-                        Full name, mobile phone number, email address, and profile login credentials. Mobile numbers are verified via secure OTPs.
+                      <p className="text-xs text-[#736B63] leading-relaxed">
+                        Full name, email address, mobile phone number, and optional WhatsApp contact information provided
+                        during account registration, guest checkout, or inquiries.
                       </p>
                     </div>
-                    <div className="p-4 rounded-2xl bg-gray-50 border border-gray-100">
-                      <h4 className="font-semibold text-sm text-gray-800 mb-1 flex items-center gap-2">
-                        <Truck className="w-4 h-4 text-emerald-600" /> Delivery & Billing Addresses
+
+                    <div className="bg-[#FAF7F2] p-4 rounded-2xl border border-[#E8E2D8]">
+                      <h4 className="font-semibold text-sm text-[#181513] flex items-center gap-2 mb-1.5">
+                        <Truck className="w-4 h-4 text-[#C86B4C]" /> Delivery &amp; Billing Addresses
                       </h4>
-                      <p className="text-xs text-gray-600 leading-relaxed">
-                        Street address, apartment or flat details, city, state, postal PIN code, and recipient contact info required for shipment fulfillment.
+                      <p className="text-xs text-[#736B63] leading-relaxed">
+                        Shipping address, apartment/house number, city, state, and postal PIN code required for physical
+                        package dispatch and logistics partners.
                       </p>
                     </div>
-                    <div className="p-4 rounded-2xl bg-gray-50 border border-gray-100">
-                      <h4 className="font-semibold text-sm text-gray-800 mb-1 flex items-center gap-2">
-                        <CreditCard className="w-4 h-4 text-emerald-600" /> Payment & Transaction Identifiers
+
+                    <div className="bg-[#FAF7F2] p-4 rounded-2xl border border-[#E8E2D8]">
+                      <h4 className="font-semibold text-sm text-[#181513] flex items-center gap-2 mb-1.5">
+                        <CreditCard className="w-4 h-4 text-[#C86B4C]" /> Payment &amp; Transaction Identifiers
                       </h4>
-                      <p className="text-xs text-gray-600 leading-relaxed">
-                        Transaction reference IDs, order totals, and Razorpay payment receipts. <em>Note:</em> We do <strong>not</strong> store your credit/debit card numbers or CVVs on our servers.
+                      <p className="text-xs text-[#736B63] leading-relaxed">
+                        Order IDs, payment status tokens, and timestamps returned by authorized RBI-compliant payment
+                        gateways (Razorpay). We never view or store card numbers or banking PINs.
                       </p>
                     </div>
-                    <div className="p-4 rounded-2xl bg-gray-50 border border-gray-100">
-                      <h4 className="font-semibold text-sm text-gray-800 mb-1 flex items-center gap-2">
-                        <FileText className="w-4 h-4 text-emerald-600" /> Design Consultation & Custom Requests
+
+                    <div className="bg-[#FAF7F2] p-4 rounded-2xl border border-[#E8E2D8]">
+                      <h4 className="font-semibold text-sm text-[#181513] flex items-center gap-2 mb-1.5">
+                        <FileText className="w-4 h-4 text-[#C86B4C]" /> Design Consultation &amp; Custom Requests
                       </h4>
-                      <p className="text-xs text-gray-600 leading-relaxed">
-                        Measurements, project specifications, custom return gift notes, and interior design consultation inquiries submitted via our web forms.
+                      <p className="text-xs text-[#736B63] leading-relaxed">
+                        Wall measurements, floor plan blueprints, preferred textures, color selections, and design notes
+                        shared during consultation bookings or WhatsApp chats.
                       </p>
                     </div>
                   </div>
                 </section>
 
-                {/* 3. How We Use Your Information */}
+                {/* 3. How We Use Your Data */}
                 <section className="space-y-3">
-                  <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-gray-100 text-gray-700 text-xs flex items-center justify-center font-semibold">3</span>
+                  <h3 className="text-lg font-serif font-bold text-[#181513] flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-[#F7EBE4] text-[#7D3219] text-xs flex items-center justify-center font-semibold">
+                      3
+                    </span>
                     How We Use Your Information
                   </h3>
-                  <div className="space-y-2 text-sm text-gray-600">
-                    <div className="flex items-start gap-2.5">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                      <span><strong>Order Fulfillment:</strong> Processing payments, packaging items, calculating applicable discounts, and dispatching your orders through reliable courier partners.</span>
-                    </div>
-                    <div className="flex items-start gap-2.5">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                      <span><strong>Interior Consultations:</strong> Reviewing measurements, scheduling site visits, and preparing quotations for customized interior works.</span>
-                    </div>
-                    <div className="flex items-start gap-2.5">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                      <span><strong>Communication & Updates:</strong> Sending order confirmations, shipping tracking links, invoice copies, and responding to your support queries via email or WhatsApp/SMS.</span>
-                    </div>
-                    <div className="flex items-start gap-2.5">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                      <span><strong>Security & Fraud Prevention:</strong> Authenticating user accounts, preventing fraudulent orders, and complying with Indian taxation and accounting requirements.</span>
-                    </div>
-                  </div>
+                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-[#4A433D]">
+                    <li className="flex items-start gap-2 bg-[#FAF7F2] p-3 rounded-xl border border-[#E8E2D8]">
+                      <CheckCircle2 className="w-4 h-4 text-[#C86B4C] shrink-0 mt-0.5" />
+                      <span>Order fulfillment, secure packing, and doorstep delivery across India.</span>
+                    </li>
+                    <li className="flex items-start gap-2 bg-[#FAF7F2] p-3 rounded-xl border border-[#E8E2D8]">
+                      <CheckCircle2 className="w-4 h-4 text-[#C86B4C] shrink-0 mt-0.5" />
+                      <span>Order updates, shipping tracking links, and customer support via WhatsApp/SMS.</span>
+                    </li>
+                    <li className="flex items-start gap-2 bg-[#FAF7F2] p-3 rounded-xl border border-[#E8E2D8]">
+                      <CheckCircle2 className="w-4 h-4 text-[#C86B4C] shrink-0 mt-0.5" />
+                      <span>Scheduling 2D/3D design layouts and interior site visits.</span>
+                    </li>
+                    <li className="flex items-start gap-2 bg-[#FAF7F2] p-3 rounded-xl border border-[#E8E2D8]">
+                      <CheckCircle2 className="w-4 h-4 text-[#C86B4C] shrink-0 mt-0.5" />
+                      <span>Legal tax invoicing and compliance with statutory Indian commercial regulations.</span>
+                    </li>
+                  </ul>
                 </section>
 
                 {/* 4. Payment Security */}
                 <section className="space-y-3">
-                  <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-gray-100 text-gray-700 text-xs flex items-center justify-center font-semibold">4</span>
-                    Payment Processing & Financial Security
+                  <h3 className="text-lg font-serif font-bold text-[#181513] flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-[#F7EBE4] text-[#7D3219] text-xs flex items-center justify-center font-semibold">
+                      4
+                    </span>
+                    Payment Processing &amp; Financial Security
                   </h3>
-                  <div className="bg-emerald-50/50 border border-emerald-100 rounded-2xl p-5 text-sm text-gray-700 leading-relaxed space-y-2">
-                    <div className="flex items-center gap-2 text-emerald-800 font-semibold">
-                      <Lock className="w-4 h-4 text-emerald-700" />
+                  <div className="bg-[#FAF7F2] border border-[#D9B4A4]/70 rounded-2xl p-5 text-sm text-[#4A433D] leading-relaxed space-y-2">
+                    <div className="flex items-center gap-2 text-[#7D3219] font-semibold">
+                      <Lock className="w-4 h-4 text-[#C86B4C]" />
                       PCI-DSS Compliant Payment Handling via Razorpay
                     </div>
                     <p>
-                      All online payments on Ghar Sansar are processed via <strong>Razorpay</strong>, India’s leading RBI-authorized
-                      and PCI-DSS Level 1 compliant payment gateway. Your payment information (such as credit/debit card numbers, UPI PINs,
-                      or Net Banking credentials) is encrypted and processed directly on Razorpay’s secure infrastructure.
-                      Ghar Sansar never accesses or stores your banking credentials or card security codes.
+                      All online payments on Ghar Sansar are processed via <strong>Razorpay</strong>, India’s leading
+                      RBI-authorized and PCI-DSS Level 1 compliant payment gateway. Your financial information (such as
+                      credit/debit card numbers, UPI credentials, or Net Banking logins) is 256-bit encrypted and processed
+                      directly on Razorpay’s secure infrastructure. Ghar Sansar never accesses or stores your banking
+                      credentials.
                     </p>
                   </div>
                 </section>
 
                 {/* 5. Sharing & Disclosure */}
                 <section className="space-y-3">
-                  <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-gray-100 text-gray-700 text-xs flex items-center justify-center font-semibold">5</span>
-                    Data Sharing & Third Parties
+                  <h3 className="text-lg font-serif font-bold text-[#181513] flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-[#F7EBE4] text-[#7D3219] text-xs flex items-center justify-center font-semibold">
+                      5
+                    </span>
+                    Data Sharing &amp; Third Parties
                   </h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">
-                    <strong>We do NOT sell, rent, or trade your personal information.</strong> We only share relevant details with trusted third parties under strict confidentiality:
+                  <p className="text-sm text-[#4A433D] leading-relaxed">
+                    <strong>We do NOT sell, rent, or trade your personal information.</strong> We only share relevant
+                    details with trusted service providers under strict confidentiality:
                   </p>
-                  <ul className="list-disc pl-5 text-sm text-gray-600 space-y-1.5">
-                    <li><strong>Logistics Partners:</strong> We share your name, phone number, and delivery address with trusted courier services to deliver physical packages to your doorstep.</li>
-                    <li><strong>Payment Gateways:</strong> Necessary transaction tokens are passed to Razorpay for authorized billing and settlement.</li>
-                    <li><strong>Statutory Authorities:</strong> When required by Indian law, court order, or governmental audit regulations.</li>
+                  <ul className="list-disc pl-5 text-sm text-[#4A433D] space-y-1.5">
+                    <li>
+                      <strong>Logistics Partners:</strong> Your recipient name, phone number, and delivery address are
+                      shared with reputable couriers (e.g., Delhivery, BlueDart, DTDC) to deliver packages.
+                    </li>
+                    <li>
+                      <strong>Payment Gateways:</strong> Necessary transaction tokens are passed to Razorpay for
+                      authorized settlement.
+                    </li>
+                    <li>
+                      <strong>Statutory Authorities:</strong> Only when required by Indian law, court order, or official
+                      tax audit regulations.
+                    </li>
                   </ul>
                 </section>
 
                 {/* 6. Cookies & Local Storage */}
                 <section className="space-y-3">
-                  <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-gray-100 text-gray-700 text-xs flex items-center justify-center font-semibold">6</span>
-                    Cookies & Browser Storage
+                  <h3 className="text-lg font-serif font-bold text-[#181513] flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-[#F7EBE4] text-[#7D3219] text-xs flex items-center justify-center font-semibold">
+                      6
+                    </span>
+                    Cookies &amp; Browser Storage
                   </h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">
-                    Our platform uses browser local storage and essential cookies to maintain your login session, persist your shopping cart items,
-                    and save wishlist selections across visits. You can adjust your browser settings to decline cookies, although some interactive
-                    features of the store may not function optimally without them.
+                  <p className="text-sm text-[#4A433D] leading-relaxed">
+                    Our platform uses browser local storage and essential cookies to maintain your login session, persist
+                    your shopping cart items, and save wishlist selections across visits. You can adjust your browser
+                    settings to decline cookies, although interactive features of the store may not function optimally
+                    without them.
                   </p>
                 </section>
 
                 {/* 7. User Rights */}
                 <section className="space-y-3">
-                  <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-gray-100 text-gray-700 text-xs flex items-center justify-center font-semibold">7</span>
-                    Your Rights & Control
+                  <h3 className="text-lg font-serif font-bold text-[#181513] flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-[#F7EBE4] text-[#7D3219] text-xs flex items-center justify-center font-semibold">
+                      7
+                    </span>
+                    Your Rights &amp; Control
                   </h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">
-                    As a Ghar Sansar user, you have the right to access and update your profile information, manage saved addresses,
-                    or request the closure of your account and deletion of non-statutory data. You can exercise these rights by
-                    logging into your profile or writing directly to our grievance desk.
+                  <p className="text-sm text-[#4A433D] leading-relaxed">
+                    As a Ghar Sansar customer, you have the right to access and update your profile information, manage
+                    saved delivery addresses, or request the closure of your account and deletion of non-statutory data.
+                    You can exercise these rights by logging into your profile or writing directly to our grievance desk.
                   </p>
                 </section>
 
                 {/* 8. Contact & Grievance Officer */}
-                <section className="border-t border-gray-100 pt-6 space-y-3">
-                  <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-gray-100 text-gray-700 text-xs flex items-center justify-center font-semibold">8</span>
-                    Grievance Officer & Contact Details
+                <section className="border-t border-[#F2ECE4] pt-6 space-y-3">
+                  <h3 className="text-lg font-serif font-bold text-[#181513] flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-[#F7EBE4] text-[#7D3219] text-xs flex items-center justify-center font-semibold">
+                      8
+                    </span>
+                    Grievance Officer &amp; Contact Details
                   </h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">
+                  <p className="text-sm text-[#4A433D] leading-relaxed">
                     In compliance with the Information Technology Act 2000 and the Digital Personal Data Protection Act,
-                    the contact details of our Grievance Desk are provided below:
+                    our store and customer grievance details are provided below:
                   </p>
-                  <div className="bg-[#FAF8F5] p-5 rounded-2xl border border-[#E8E5DC] grid grid-cols-1 md:grid-cols-3 gap-4 text-xs sm:text-sm">
+                  <div className="bg-[#FAF7F2] p-5 rounded-2xl border border-[#E8E2D8] grid grid-cols-1 md:grid-cols-3 gap-4 text-xs sm:text-sm">
                     <div className="flex items-start gap-3">
-                      <MapPin className="w-4 h-4 text-[#a855f7] shrink-0 mt-0.5" />
+                      <MapPin className="w-4 h-4 text-[#C86B4C] shrink-0 mt-0.5" />
                       <div>
-                        <strong className="block text-gray-900 mb-0.5">Physical Store Address</strong>
-                        <span className="text-gray-600 leading-relaxed">
-                          D.No: 27-14-60, Near Buckingham Post Office, Rajagopalachari Street, Governorpet, Vijayawada - 520002, Andhra Pradesh, India.
+                        <strong className="block text-[#181513] mb-0.5">Physical Studio Address</strong>
+                        <span className="text-[#736B63] leading-relaxed">
+                          D.No. 27-3-68, Near Buckingham Post Office, Rajulakshmi School, Governorpet-520002,
+                          Vijayawada, Andhra Pradesh, India.
                         </span>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <Mail className="w-4 h-4 text-[#a855f7] shrink-0 mt-0.5" />
+                      <Mail className="w-4 h-4 text-[#C86B4C] shrink-0 mt-0.5" />
                       <div>
-                        <strong className="block text-gray-900 mb-0.5">Email Inquiries</strong>
-                        <a href="mailto:gharsansarshop@gmail.com" className="text-emerald-700 hover:underline">
-                          gharsansarshop@gmail.com
+                        <strong className="block text-[#181513] mb-0.5">Official Email</strong>
+                        <a href="mailto:gharsansarvj@gmail.com" className="text-[#C86B4C] hover:underline font-medium">
+                          gharsansarvj@gmail.com
                         </a>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <Phone className="w-4 h-4 text-[#a855f7] shrink-0 mt-0.5" />
+                      <Phone className="w-4 h-4 text-[#C86B4C] shrink-0 mt-0.5" />
                       <div>
-                        <strong className="block text-gray-900 mb-0.5">Customer Helpline</strong>
-                        <a href="tel:+918121135980" className="text-emerald-700 hover:underline">
-                          +91-8121135980
+                        <strong className="block text-[#181513] mb-0.5">Customer Helpline</strong>
+                        <a href="tel:+919701990090" className="text-[#C86B4C] hover:underline font-medium">
+                          +91 9701990090
                         </a>
                       </div>
                     </div>
@@ -332,6 +394,7 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ initialTab = "priv
               </motion.div>
             )}
 
+            {/* TAB 2: TERMS & CONDITIONS */}
             {activeTab === "terms" && (
               <motion.div
                 key="terms"
@@ -341,68 +404,98 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ initialTab = "priv
                 transition={{ duration: 0.3 }}
                 className="space-y-8"
               >
-                <div className="border-b border-gray-100 pb-6">
+                <div className="border-b border-[#F2ECE4] pb-6">
                   <div className="flex items-center space-x-3 mb-2">
-                    <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-800 flex items-center justify-center font-bold">
-                      <FileText className="w-5 h-5 text-[#a855f7]" />
+                    <div className="w-11 h-11 rounded-xl bg-[#F7EBE4] text-[#C86B4C] flex items-center justify-center font-bold">
+                      <FileText className="w-6 h-6 text-[#C86B4C]" />
                     </div>
                     <div>
-                      <h2 className="text-2xl font-serif font-bold text-gray-900">Terms & Conditions</h2>
-                      <p className="text-xs sm:text-sm text-gray-500">
-                        Terms governing purchases, services, and platform usage at Ghar Sansar.
+                      <h2 className="text-2xl font-serif font-bold text-[#181513]">Terms &amp; Conditions</h2>
+                      <p className="text-xs sm:text-sm text-[#736B63]">
+                        Terms governing purchases, custom orders, design consultations, and platform usage.
                       </p>
                     </div>
                   </div>
                 </div>
 
                 <section className="space-y-3">
-                  <h3 className="text-lg font-bold text-gray-900">1. Acceptance of Terms</h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">
-                    By accessing our website, placing an order, or booking interior services with Ghar Sansar, you agree to
-                    be bound by these Terms and Conditions and our Privacy Policy. If you do not agree with any part of these terms,
-                    please discontinue using our platform.
+                  <h3 className="text-lg font-serif font-bold text-[#181513] flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-[#F7EBE4] text-[#7D3219] text-xs flex items-center justify-center font-semibold">
+                      1
+                    </span>
+                    Acceptance of Terms
+                  </h3>
+                  <p className="text-sm text-[#4A433D] leading-relaxed">
+                    By browsing our website, placing an order (as a registered user or guest), or booking interior design
+                    services with Ghar Sansar, you acknowledge and agree to be bound by these Terms and Conditions and our
+                    Privacy Policy. If you disagree with any part of these terms, please discontinue using our platform.
                   </p>
                 </section>
 
                 <section className="space-y-3">
-                  <h3 className="text-lg font-bold text-gray-900">2. Products & Pricing</h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">
-                    We make every effort to display accurate dimensions, colors, and descriptions of our home decor, return gifts,
-                    and interior finishes. However, due to screen calibration differences, natural material textures, and handcrafted
-                    nuances, slight variations may exist. All prices are listed in Indian Rupees (INR) and are inclusive of applicable
-                    taxes unless explicitly stated. Ghar Sansar reserves the right to modify prices or correct typographical errors at any time.
+                  <h3 className="text-lg font-serif font-bold text-[#181513] flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-[#F7EBE4] text-[#7D3219] text-xs flex items-center justify-center font-semibold">
+                      2
+                    </span>
+                    Products, Materials &amp; Pricing
+                  </h3>
+                  <p className="text-sm text-[#4A433D] leading-relaxed">
+                    We make every effort to display accurate dimensions, high-resolution imagery, and descriptions for our
+                    wallpaper rolls, 3D wall coverings, vinyl flooring, wall art panels, and festive return gifts.
+                    However, due to individual display color calibration, physical texture variations, and natural lighting
+                    differences, slight visual variations may occur. All prices are listed in Indian Rupees (INR) and are
+                    inclusive of applicable GST unless explicitly stated otherwise.
                   </p>
                 </section>
 
                 <section className="space-y-3">
-                  <h3 className="text-lg font-bold text-gray-900">3. Interior Design Works & Quotes</h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">
-                    Estimates provided for specialized works (such as ICU Flooring, Wallpapers, Bubble Fountains, and Custom Blinds)
-                    are preliminary until an on-site physical measurement or site readiness inspection is verified. Work schedules
-                    and delivery timelines for custom architectural projects are mutually agreed upon during project confirmation.
+                  <h3 className="text-lg font-serif font-bold text-[#181513] flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-[#F7EBE4] text-[#7D3219] text-xs flex items-center justify-center font-semibold">
+                      3
+                    </span>
+                    Interior Design Works &amp; On-Site Quotes
+                  </h3>
+                  <p className="text-sm text-[#4A433D] leading-relaxed">
+                    Preliminary estimates provided for customized turnkey projects (including wallpaper installations,
+                    flooring, vertical gardens, and lighting) are subject to revision until an on-site physical measurement
+                    and site readiness check are completed. Work schedules, installation dates, and material deliveries are
+                    mutually confirmed upon project agreement.
                   </p>
                 </section>
 
                 <section className="space-y-3">
-                  <h3 className="text-lg font-bold text-gray-900">4. Order Confirmation & Payment</h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">
-                    Receipt of an electronic order confirmation does not signify our final acceptance of your order. Ghar Sansar
-                    reserves the right at any time after receipt of your order to accept or decline it for reasons such as stock availability,
-                    unserviceable delivery pin codes, or unauthorized pricing glitches.
+                  <h3 className="text-lg font-serif font-bold text-[#181513] flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-[#F7EBE4] text-[#7D3219] text-xs flex items-center justify-center font-semibold">
+                      4
+                    </span>
+                    Order Confirmation &amp; Cancellations
+                  </h3>
+                  <p className="text-sm text-[#4A433D] leading-relaxed">
+                    Receipt of an electronic order confirmation verifies that our system has received your request. Ghar
+                    Sansar reserves the right at any point prior to dispatch to cancel orders due to unforeseen stock
+                    unavailability, unserviceable delivery locations, or rare technological pricing errors. In such events,
+                    a 100% full refund will be immediately issued to the original payment method.
                   </p>
                 </section>
 
                 <section className="space-y-3">
-                  <h3 className="text-lg font-bold text-gray-900">5. Governing Law & Jurisdiction</h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">
-                    These Terms shall be governed by and construed in accordance with the laws of India. Any legal dispute or claim
-                    arising out of or in connection with the platform or products shall be subject to the exclusive jurisdiction of the
-                    competent courts in <strong>Vijayawada, Andhra Pradesh</strong>.
+                  <h3 className="text-lg font-serif font-bold text-[#181513] flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-[#F7EBE4] text-[#7D3219] text-xs flex items-center justify-center font-semibold">
+                      5
+                    </span>
+                    Governing Law &amp; Jurisdiction
+                  </h3>
+                  <p className="text-sm text-[#4A433D] leading-relaxed">
+                    These Terms shall be governed by and construed in accordance with the laws of India. Any legal dispute
+                    or claim arising out of or in connection with the platform, retail orders, or interior design contracts
+                    shall be subject to the exclusive jurisdiction of the competent courts in{" "}
+                    <strong>Vijayawada, Andhra Pradesh</strong>.
                   </p>
                 </section>
               </motion.div>
             )}
 
+            {/* TAB 3: SHIPPING POLICY */}
             {activeTab === "shipping" && (
               <motion.div
                 key="shipping"
@@ -412,65 +505,85 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ initialTab = "priv
                 transition={{ duration: 0.3 }}
                 className="space-y-8"
               >
-                <div className="border-b border-gray-100 pb-6">
+                <div className="border-b border-[#F2ECE4] pb-6">
                   <div className="flex items-center space-x-3 mb-2">
-                    <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-800 flex items-center justify-center font-bold">
-                      <Truck className="w-5 h-5 text-blue-600" />
+                    <div className="w-11 h-11 rounded-xl bg-[#F7EBE4] text-[#C86B4C] flex items-center justify-center font-bold">
+                      <Truck className="w-6 h-6 text-[#C86B4C]" />
                     </div>
                     <div>
-                      <h2 className="text-2xl font-serif font-bold text-gray-900">Shipping & Delivery Policy</h2>
-                      <p className="text-xs sm:text-sm text-gray-500">
-                        Delivery coverage, timelines, and tracking details for retail purchases.
+                      <h2 className="text-2xl font-serif font-bold text-[#181513]">Shipping &amp; Delivery Policy</h2>
+                      <p className="text-xs sm:text-sm text-[#736B63]">
+                        Coverage, transit periods, safe packaging, and tracking details.
                       </p>
                     </div>
                   </div>
                 </div>
 
+                {/* Shipping highlights grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="p-4 rounded-2xl bg-gray-50 border border-gray-100 text-center">
-                    <Clock className="w-6 h-6 text-blue-600 mx-auto mb-2" />
-                    <h4 className="font-semibold text-sm text-gray-900">Dispatch Time</h4>
-                    <p className="text-xs text-gray-600 mt-1">1 - 2 Business Days for standard decor items</p>
+                  <div className="p-4 rounded-2xl bg-[#FAF7F2] border border-[#E8E2D8] text-center">
+                    <Clock className="w-6 h-6 text-[#C86B4C] mx-auto mb-2" />
+                    <h4 className="font-semibold text-sm text-[#181513]">Dispatch Time</h4>
+                    <p className="text-xs text-[#736B63] mt-1">1 - 2 Business Days for standard decor &amp; wallpapers</p>
                   </div>
-                  <div className="p-4 rounded-2xl bg-gray-50 border border-gray-100 text-center">
-                    <Truck className="w-6 h-6 text-blue-600 mx-auto mb-2" />
-                    <h4 className="font-semibold text-sm text-gray-900">Transit Period</h4>
-                    <p className="text-xs text-gray-600 mt-1">3 - 7 Business Days depending on destination PIN code</p>
+                  <div className="p-4 rounded-2xl bg-[#FAF7F2] border border-[#E8E2D8] text-center">
+                    <Truck className="w-6 h-6 text-[#C86B4C] mx-auto mb-2" />
+                    <h4 className="font-semibold text-sm text-[#181513]">Transit Period</h4>
+                    <p className="text-xs text-[#736B63] mt-1">3 - 7 Business Days depending on destination PIN code</p>
                   </div>
-                  <div className="p-4 rounded-2xl bg-gray-50 border border-gray-100 text-center">
-                    <ShieldCheck className="w-6 h-6 text-blue-600 mx-auto mb-2" />
-                    <h4 className="font-semibold text-sm text-gray-900">Safe Packaging</h4>
-                    <p className="text-xs text-gray-600 mt-1">Multi-layer reinforced packaging for fragile decor & gifts</p>
+                  <div className="p-4 rounded-2xl bg-[#FAF7F2] border border-[#E8E2D8] text-center">
+                    <ShieldCheck className="w-6 h-6 text-[#C86B4C] mx-auto mb-2" />
+                    <h4 className="font-semibold text-sm text-[#181513]">Safe Packaging</h4>
+                    <p className="text-xs text-[#736B63] mt-1">Rigid protective tubes and reinforced bubble-wrap cushioning</p>
                   </div>
                 </div>
 
                 <section className="space-y-3">
-                  <h3 className="text-lg font-bold text-gray-900">1. Pan-India Delivery Network</h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">
-                    Ghar Sansar delivers retail home decor products and return gifts to serviceable postal codes across India
-                    via reputed courier and logistics providers (e.g., Delhivery, BlueDart, DTDC, India Post).
+                  <h3 className="text-lg font-serif font-bold text-[#181513] flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-[#F7EBE4] text-[#7D3219] text-xs flex items-center justify-center font-semibold">
+                      1
+                    </span>
+                    Pan-India Delivery Network
+                  </h3>
+                  <p className="text-sm text-[#4A433D] leading-relaxed">
+                    Ghar Sansar delivers retail home decor products, wallpaper rolls, vinyl planks, and festive return
+                    gifts to serviceable postal codes across Andhra Pradesh, Telangana, and pan-India through reputable
+                    national logistics partners (such as Delhivery, BlueDart, DTDC, and India Post).
                   </p>
                 </section>
 
                 <section className="space-y-3">
-                  <h3 className="text-lg font-bold text-gray-900">2. Tracking Your Consignment</h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">
-                    Once your order is packed and dispatched from our Vijayawada facility, you will receive an email and SMS
-                    containing the consignment AWB tracking number and carrier link to track delivery status in real time.
+                  <h3 className="text-lg font-serif font-bold text-[#181513] flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-[#F7EBE4] text-[#7D3219] text-xs flex items-center justify-center font-semibold">
+                      2
+                    </span>
+                    Consignment Tracking (Logged-in &amp; Guest Orders)
+                  </h3>
+                  <p className="text-sm text-[#4A433D] leading-relaxed">
+                    Once your order is safely packed and dispatched from our Vijayawada facility, you will receive an
+                    instant SMS and WhatsApp notification containing your airway bill (AWB) number and direct courier
+                    tracking link. Logged-in customers can also view live delivery milestones directly under their account
+                    dashboard.
                   </p>
                 </section>
 
                 <section className="space-y-3">
-                  <h3 className="text-lg font-bold text-gray-900">3. Bulky Goods & Customized Installations</h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">
-                    Oversized or heavy products (such as large water bubble fountains, roll bulk orders, and commercial flooring materials)
-                    are shipped via dedicated surface transport or door-to-door cargo logistics. Delivery schedules for such shipments
-                    are coordinated directly with the client by our operations team.
+                  <h3 className="text-lg font-serif font-bold text-[#181513] flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-[#F7EBE4] text-[#7D3219] text-xs flex items-center justify-center font-semibold">
+                      3
+                    </span>
+                    Bulky Goods &amp; Customized Architectural Materials
+                  </h3>
+                  <p className="text-sm text-[#4A433D] leading-relaxed">
+                    Heavy or oversized consignments (such as commercial vinyl flooring pallets, large vertical garden
+                    panels, and water features) are dispatched via dedicated surface transport or door-to-door cargo
+                    logistics. Delivery timings and site unloading are coordinated directly with you by our operations team.
                   </p>
                 </section>
               </motion.div>
             )}
 
+            {/* TAB 4: RETURNS & REFUNDS */}
             {activeTab === "returns" && (
               <motion.div
                 key="returns"
@@ -480,59 +593,79 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ initialTab = "priv
                 transition={{ duration: 0.3 }}
                 className="space-y-8"
               >
-                <div className="border-b border-gray-100 pb-6">
+                <div className="border-b border-[#F2ECE4] pb-6">
                   <div className="flex items-center space-x-3 mb-2">
-                    <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-800 flex items-center justify-center font-bold">
-                      <RotateCcw className="w-5 h-5 text-amber-600" />
+                    <div className="w-11 h-11 rounded-xl bg-[#F7EBE4] text-[#C86B4C] flex items-center justify-center font-bold">
+                      <RotateCcw className="w-6 h-6 text-[#C86B4C]" />
                     </div>
                     <div>
-                      <h2 className="text-2xl font-serif font-bold text-gray-900">Cancellation & Refund Policy</h2>
-                      <p className="text-xs sm:text-sm text-gray-500">
-                        Guidelines on return eligibility, replacement requests, and refund timelines.
+                      <h2 className="text-2xl font-serif font-bold text-[#181513]">Return &amp; Refund Policy</h2>
+                      <p className="text-xs sm:text-sm text-[#736B63]">
+                        Eligibility criteria, transit damage reporting, and refund timelines.
                       </p>
                     </div>
                   </div>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-amber-50/60 border border-amber-200/80 flex items-start gap-3">
-                  <AlertCircle className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
-                  <div className="text-xs sm:text-sm text-amber-900 leading-relaxed">
-                    <strong>Transit Damage Notice:</strong> We take utmost care in packaging fragile items. If your package arrives
-                    visibly crushed or broken, please take photographs/video during unboxing and notify us within <strong>48 hours</strong>
-                    of receipt for expedited replacement or refund.
+                {/* Transit damage notice card */}
+                <div className="p-4 rounded-2xl bg-[#F7EBE4] border border-[#D9B4A4] flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-[#C86B4C] shrink-0 mt-0.5" />
+                  <div className="text-xs sm:text-sm text-[#7D3219] leading-relaxed">
+                    <strong>Transit Damage Notice:</strong> We take utmost care in packaging delicate wallpapers and decor
+                    items. If your shipment arrives visibly crushed, opened, or damaged, please take clear photos or unboxing
+                    video clips and notify our support desk within <strong>48 hours</strong> of delivery for an immediate,
+                    hassle-free replacement or refund.
                   </div>
                 </div>
 
                 <section className="space-y-3">
-                  <h3 className="text-lg font-bold text-gray-900">1. Return Eligibility</h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">
-                    Items are eligible for return or replacement if:
+                  <h3 className="text-lg font-serif font-bold text-[#181513] flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-[#F7EBE4] text-[#7D3219] text-xs flex items-center justify-center font-semibold">
+                      1
+                    </span>
+                    Return &amp; Replacement Eligibility
+                  </h3>
+                  <p className="text-sm text-[#4A433D] leading-relaxed">
+                    Standard retail home decor products and standard wallpaper rolls are eligible for return or replacement if:
                   </p>
-                  <ul className="list-disc pl-5 text-sm text-gray-600 space-y-1.5">
-                    <li>The item delivered is physically damaged, defective, or fundamentally different from the ordered product.</li>
-                    <li>The item is returned in its original condition with all product tags, user manuals, and packaging intact.</li>
-                    <li>The return request is raised within <strong>48 to 72 hours</strong> of verified delivery.</li>
+                  <ul className="list-disc pl-5 text-sm text-[#4A433D] space-y-1.5">
+                    <li>The product arrived physically damaged or defective.</li>
+                    <li>The delivered item is fundamentally different from the design or color roll ordered.</li>
+                    <li>The product is unused, unpasted, and returned in its original protective packaging with all tags intact.</li>
+                    <li>The replacement request is submitted within <strong>48 to 72 hours</strong> of verified delivery.</li>
                   </ul>
                 </section>
 
                 <section className="space-y-3">
-                  <h3 className="text-lg font-bold text-gray-900">2. Non-Returnable Products</h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">
-                    To maintain hygiene and fair trade practices, the following categories cannot be returned once delivered:
+                  <h3 className="text-lg font-serif font-bold text-[#181513] flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-[#F7EBE4] text-[#7D3219] text-xs flex items-center justify-center font-semibold">
+                      2
+                    </span>
+                    Non-Returnable Products
+                  </h3>
+                  <p className="text-sm text-[#4A433D] leading-relaxed">
+                    To maintain standard quality and hygienic trade practices, the following customized items cannot be
+                    returned for change of mind:
                   </p>
-                  <ul className="list-disc pl-5 text-sm text-gray-600 space-y-1.5">
-                    <li>Customized or personalized return gifts with names, logos, or bespoke packaging.</li>
-                    <li>Cut-to-size rolls, tailored window blinds, and installed commercial floorings.</li>
-                    <li>Products marked as clearance or final sale.</li>
+                  <ul className="list-disc pl-5 text-sm text-[#4A433D] space-y-1.5">
+                    <li>Custom-printed 3D wallpapers tailored to your specific wall dimensions.</li>
+                    <li>Cut-to-size vinyl flooring sheets and customized window coverings.</li>
+                    <li>Personalized festive or wedding return gifts featuring custom names or logos.</li>
+                    <li>Items marked as final clearance or sample sale.</li>
                   </ul>
                 </section>
 
                 <section className="space-y-3">
-                  <h3 className="text-lg font-bold text-gray-900">3. Refund Processing Timelines</h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">
-                    Once the returned item is received at our Vijayawada facility and passes quality inspection, the approved refund
-                    will be initiated through Razorpay to your original mode of payment (bank account, credit/debit card, or UPI)
-                    within <strong>5 to 7 business days</strong>.
+                  <h3 className="text-lg font-serif font-bold text-[#181513] flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-[#F7EBE4] text-[#7D3219] text-xs flex items-center justify-center font-semibold">
+                      3
+                    </span>
+                    Refund Processing &amp; Timelines
+                  </h3>
+                  <p className="text-sm text-[#4A433D] leading-relaxed">
+                    Once the returned item is received at our Vijayawada studio and passes basic verification, your approved
+                    refund is initiated through Razorpay back to your original payment method (bank account, UPI, credit or
+                    debit card) within <strong>5 to 7 business days</strong>.
                   </p>
                 </section>
               </motion.div>
@@ -540,28 +673,32 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ initialTab = "priv
           </AnimatePresence>
         </div>
 
-        {/* Support Banner Card */}
-        <div className="mt-8 rounded-3xl bg-gradient-to-r from-[#00281b] to-[#04402d] text-white p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
+        {/* 3. Bottom Support Banner Card (Exact Theme Harmony with FAQ & Footer) */}
+        <div className="mt-8 rounded-3xl bg-gradient-to-br from-[#1C1714] to-[#2B221D] text-white p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm border border-[#3A2F29]">
           <div>
-            <h3 className="text-lg sm:text-xl font-serif font-bold mb-1">Have questions about our policies?</h3>
-            <p className="text-xs sm:text-sm text-emerald-200/90 font-light">
-              Our team is here to assist you with order inquiries, return processing, and interior solutions.
+            <h3 className="text-lg sm:text-xl font-serif font-bold mb-1 text-[#FAF7F2]">
+              Have questions about our policies?
+            </h3>
+            <p className="text-xs sm:text-sm text-[#C8BFB6] font-light">
+              Our Vijayawada support team is here to assist you with order inquiries, measurements, and returns.
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
             <a
-              href="mailto:gharsansarshop@gmail.com"
-              className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-white text-gray-900 font-medium text-xs hover:bg-gray-100 transition shadow-sm"
+              href="mailto:gharsansarvj@gmail.com"
+              className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-[#C86B4C] hover:bg-[#B05B3C] text-white font-medium text-xs transition shadow-lg shadow-[#C86B4C]/25"
             >
-              <Mail className="w-4 h-4 text-emerald-700" />
+              <Mail className="w-4 h-4" />
               <span>Email Support</span>
             </a>
             <a
-              href="tel:+918121135980"
-              className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs transition shadow-sm"
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-[#25D366] hover:bg-[#1EBE5D] text-white font-medium text-xs transition shadow-lg shadow-black/20"
             >
-              <Phone className="w-4 h-4" />
-              <span>Call +91-8121135980</span>
+              <MessageCircle className="w-4 h-4" />
+              <span>Chat on WhatsApp</span>
             </a>
           </div>
         </div>
@@ -571,4 +708,3 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ initialTab = "priv
 };
 
 export default PrivacyPolicy;
-
