@@ -21,7 +21,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command "try { $r = Invoke-RestMe
 if errorlevel 1 set "ERR_BACKEND=1"
 
 :: 3. Check MongoDB Atlas connection through backend
-powershell -NoProfile -ExecutionPolicy Bypass -Command "try { $p = Invoke-RestMethod -Uri 'http://localhost:5001/api/storage/upload/products' -TimeoutSec 5 -ErrorAction Stop; $cnt = $p.data.Count; Write-Host \"[PASS] MongoDB Atlas is CONNECTED ($cnt products loaded)\" -ForegroundColor Green } catch { Write-Host \"[WARN] MongoDB products endpoint did not return data\" -ForegroundColor Yellow }"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "try { $p = Invoke-RestMethod -Uri 'http://localhost:5001/api/products' -TimeoutSec 6 -ErrorAction Stop; $cnt = if ($p.Count) { $p.Count } else { $p.data.Count }; Write-Host \"[PASS] MongoDB Atlas is CONNECTED ($cnt categories loaded)\" -ForegroundColor Green } catch { Write-Host \"[WARN] MongoDB products endpoint did not return data\" -ForegroundColor Yellow }"
 
 :: 4. Check Local Frontend (Port 5173)
 powershell -NoProfile -ExecutionPolicy Bypass -Command "try { $f = Invoke-WebRequest -Uri 'http://localhost:5173' -TimeoutSec 3 -UseBasicParsing -ErrorAction Stop; Write-Host \"[PASS] Frontend Server is RUNNING on port 5173 (HTTP $($f.StatusCode))\" -ForegroundColor Green } catch { Write-Host \"[FAIL] Frontend Server is NOT responding on http://localhost:5173\" -ForegroundColor Red; exit 1 }"
