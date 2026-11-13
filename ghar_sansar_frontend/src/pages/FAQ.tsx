@@ -336,7 +336,6 @@ const FAQ_DATA: FAQItem[] = [
 
 export const FAQ: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<FAQCategory>("all");
-  const [searchQuery, setSearchQuery] = useState<string>("");
   const [openId, setOpenId] = useState<string | null>("gen-1"); // Open first item by default
 
   const adminWhatsApp = getAdminWhatsAppNumber();
@@ -345,106 +344,34 @@ export const FAQ: React.FC = () => {
   )}`;
 
   useEffect(() => {
-    document.title = "Frequently Asked Questions (FAQ) | Ghar Sansar";
+    document.title = "FAQ | Ghar Sansar";
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
-  // Filter items based on active category and search query
+  // Filter items based on active category
   const filteredItems = useMemo(() => {
-    const trimmed = searchQuery.trim().toLowerCase();
-    return FAQ_DATA.filter((item) => {
-      // Category match
-      const matchesCategory = activeCategory === "all" || item.category === activeCategory;
-      if (!matchesCategory) return false;
-
-      // Search match
-      if (!trimmed) return true;
-      const questionMatch = item.question.toLowerCase().includes(trimmed);
-      const answerMatch = typeof item.answer === "string" ? item.answer.toLowerCase().includes(trimmed) : false;
-      const tagMatch = item.tags ? item.tags.some((t) => t.toLowerCase().includes(trimmed)) : false;
-      const categoryMatch = item.categoryLabel.toLowerCase().includes(trimmed);
-
-      return questionMatch || answerMatch || tagMatch || categoryMatch;
-    });
-  }, [activeCategory, searchQuery]);
+    if (activeCategory === "all") return FAQ_DATA;
+    return FAQ_DATA.filter((item) => item.category === activeCategory);
+  }, [activeCategory]);
 
   const handleToggle = (id: string) => {
     setOpenId((prev) => (prev === id ? null : id));
   };
 
-  const handleResetSearch = () => {
-    setSearchQuery("");
-    setActiveCategory("all");
-  };
-
-  // Helper to highlight searched term in text
-  const highlightMatch = (text: string, query: string) => {
-    if (!query.trim()) return text;
-    const parts = text.split(new RegExp(`(${query.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&")})`, "gi"));
-    return parts.map((part, i) =>
-      part.toLowerCase() === query.toLowerCase() ? (
-        <mark key={i} className="bg-amber-100 text-[#7D3219] font-medium px-1 rounded">
-          {part}
-        </mark>
-      ) : (
-        part
-      )
-    );
-  };
-
   return (
-    <div className="min-h-screen bg-[#FAF7F2] text-[#181513] font-sans selection:bg-[#C86B4C] selection:text-white">
-      {/* 1. Minimal Header (No dark banner) */}
-      <section className="pt-10 pb-6 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto text-center">
+    <div className="min-h-screen bg-[#FAF7F2] text-[#181513] font-sans selection:bg-[#C86B4C] selection:text-white pb-20">
+      {/* 1. Minimal Header (Spacious clearance below navbar, no search bar) */}
+      <section className="pt-24 sm:pt-28 pb-10 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto text-center">
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold tracking-tight text-[#181513] mb-3">
           FAQ
         </h1>
-        <p className="text-sm sm:text-base text-[#736B63] max-w-xl mx-auto leading-relaxed mb-8">
+        <p className="text-sm sm:text-base text-[#736B63] max-w-xl mx-auto leading-relaxed">
           Everything you need to know about shopping with Gharsansar.
         </p>
-
-        {/* Dynamic Live Search Bar */}
-        <div className="max-w-2xl mx-auto relative mb-4">
-          <div className="relative flex items-center bg-white rounded-2xl shadow-xs border border-[#E8E2D8] transition-all focus-within:ring-2 focus-within:ring-[#C86B4C] focus-within:border-transparent">
-            <Search className="w-5 h-5 text-[#8C827A] ml-4 shrink-0" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search for questions..."
-              className="w-full py-3.5 pl-3 pr-10 text-sm sm:text-base text-[#181513] placeholder-[#8C827A] bg-transparent rounded-2xl focus:outline-none"
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery("")}
-                className="p-2 mr-2 text-[#8C827A] hover:text-[#181513] transition-colors rounded-full"
-                title="Clear search"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            )}
-          </div>
-
-          {searchQuery && (
-            <div className="mt-2.5 flex items-center justify-between text-xs text-[#736B63] px-2">
-              <span>
-                Found <strong className="text-[#181513] font-semibold">{filteredItems.length}</strong> matching{" "}
-                {filteredItems.length === 1 ? "question" : "questions"}
-              </span>
-              <button
-                onClick={handleResetSearch}
-                className="underline hover:text-[#C86B4C] transition-colors"
-              >
-                Clear search
-              </button>
-            </div>
-          )}
-        </div>
       </section>
 
       {/* 2. Three Customer Shopping Experiences Highlight Cards */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-20">
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mb-12 relative z-20">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {/* Journey 1: Shopping With Login */}
           <div className="bg-white rounded-2xl p-6 shadow-lg shadow-black/5 border border-[#E8E2D8] hover:border-[#C86B4C]/40 transition-all duration-300 flex flex-col justify-between group">
@@ -632,100 +559,64 @@ export const FAQ: React.FC = () => {
 
       {/* 4. Accordion Section */}
       <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 pb-20">
-        {filteredItems.length === 0 ? (
-          /* Empty Search State */
-          <div className="bg-white rounded-2xl p-10 text-center border border-[#E8E2D8] shadow-sm my-8">
-            <div className="w-14 h-14 rounded-full bg-[#FAF7F2] text-[#8C827A] flex items-center justify-center mx-auto mb-4">
-              <Search className="w-6 h-6" />
-            </div>
-            <h3 className="text-lg font-serif font-bold text-[#181513] mb-2">
-              No matching questions found
-            </h3>
-            <p className="text-xs sm:text-sm text-[#736B63] max-w-md mx-auto mb-5 leading-relaxed">
-              We couldn&apos;t find any answers matching &ldquo;{searchQuery}&rdquo;. Try using different keywords, or
-              reach out to our friendly support team directly.
-            </p>
-            <div className="flex flex-wrap justify-center gap-3">
-              <button
-                onClick={handleResetSearch}
-                className="px-4 py-2 rounded-xl bg-[#FAF7F2] border border-[#E8E2D8] text-xs font-semibold text-[#181513] hover:border-[#C86B4C] transition-colors"
-              >
-                Reset Search Filters
-              </button>
-              <a
-                href={whatsappUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 rounded-xl bg-[#1E7E34] text-white text-xs font-semibold hover:bg-[#155D27] transition-colors inline-flex items-center gap-1.5"
-              >
-                <MessageCircle className="w-3.5 h-3.5" />
-                <span>Ask on WhatsApp</span>
-              </a>
-            </div>
-          </div>
-        ) : (
-          /* FAQ Accordion List */
-          <div className="space-y-3">
-            {filteredItems.map((item, idx) => {
-              const isOpen = openId === item.id;
+        <div className="space-y-3">
+          {filteredItems.map((item, idx) => {
+            const isOpen = openId === item.id;
 
-              return (
-                <div
-                  key={item.id}
-                  className={`bg-white rounded-2xl border transition-all duration-200 overflow-hidden ${
-                    isOpen
-                      ? "border-[#C86B4C]/50 shadow-md shadow-[#C86B4C]/5"
-                      : "border-[#E8E2D8] hover:border-[#D9B4A4]"
-                  }`}
+            return (
+              <div
+                key={item.id}
+                className={`bg-white rounded-2xl border transition-all duration-200 overflow-hidden ${
+                  isOpen
+                    ? "border-[#C86B4C]/50 shadow-md shadow-[#C86B4C]/5"
+                    : "border-[#E8E2D8] hover:border-[#D9B4A4]"
+                }`}
+              >
+                <button
+                  type="button"
+                  onClick={() => handleToggle(item.id)}
+                  className="w-full text-left p-5 sm:p-6 flex items-start justify-between gap-4 cursor-pointer focus:outline-none"
+                  aria-expanded={isOpen}
                 >
-                  <button
-                    type="button"
-                    onClick={() => handleToggle(item.id)}
-                    className="w-full text-left p-5 sm:p-6 flex items-start justify-between gap-4 cursor-pointer focus:outline-none"
-                    aria-expanded={isOpen}
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-[#C86B4C] bg-[#F7EBE4] px-2 py-0.5 rounded-full">
+                        {item.categoryLabel}
+                      </span>
+                      <span className="text-[11px] text-[#A69E96]">Q{idx + 1}</span>
+                    </div>
+                    <h3 className="text-sm sm:text-base font-serif font-bold text-[#181513] leading-snug">
+                      {item.question}
+                    </h3>
+                  </div>
+
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300 ${
+                      isOpen ? "bg-[#C86B4C] text-white rotate-180" : "bg-[#FAF7F2] text-[#8C827A]"
+                    }`}
                   >
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1.5">
-                        <span className="text-[10px] font-semibold uppercase tracking-wider text-[#C86B4C] bg-[#F7EBE4] px-2 py-0.5 rounded-full">
-                          {item.categoryLabel}
-                        </span>
-                        <span className="text-[11px] text-[#A69E96]">Q{idx + 1}</span>
-                      </div>
-                      <h3 className="text-sm sm:text-base font-serif font-bold text-[#181513] leading-snug">
-                        {highlightMatch(item.question, searchQuery)}
-                      </h3>
-                    </div>
+                    <ChevronDown className="w-4 h-4" />
+                  </div>
+                </button>
 
-                    <div
-                      className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300 ${
-                        isOpen ? "bg-[#C86B4C] text-white rotate-180" : "bg-[#FAF7F2] text-[#8C827A]"
-                      }`}
+                <AnimatePresence initial={false}>
+                  {isOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.25, ease: "easeInOut" }}
                     >
-                      <ChevronDown className="w-4 h-4" />
-                    </div>
-                  </button>
-
-                  <AnimatePresence initial={false}>
-                    {isOpen && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.25, ease: "easeInOut" }}
-                      >
-                        <div className="px-5 sm:px-6 pb-6 pt-1 text-xs sm:text-sm text-[#4A433D] leading-relaxed border-t border-[#F5F0E8] whitespace-pre-line">
-                          {typeof item.answer === "string"
-                            ? highlightMatch(item.answer, searchQuery)
-                            : item.answer}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              );
-            })}
-          </div>
-        )}
+                      <div className="px-5 sm:px-6 pb-6 pt-1 text-xs sm:text-sm text-[#4A433D] leading-relaxed border-t border-[#F5F0E8] whitespace-pre-line">
+                        {item.answer}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            );
+          })}
+        </div>
       </section>
 
       {/* 5. Customer Support Section (Clean & Minimal) */}

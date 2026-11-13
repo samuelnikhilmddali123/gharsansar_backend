@@ -117,7 +117,7 @@ const AppLayout = () => {
   return (
     <div className="min-h-screen bg-[#FAF7F2]">
       <Header />
-      <main className={isHomePage || isInteriorPage || isProductsPage || isGiftsPage || isServicesPage || isBlogPage || isLoginPage || isCartPage || isWishlistPage || isFAQPage ? "" : "pt-14"}>
+      <main className={isHomePage || isInteriorPage || isProductsPage || isGiftsPage || isServicesPage || isBlogPage || isLoginPage || isCartPage || isWishlistPage ? "" : "pt-14"}>
         <Routes>
           {/* ---------- Public customer routes ---------- */}
           <Route path="/" element={<Home />} />
