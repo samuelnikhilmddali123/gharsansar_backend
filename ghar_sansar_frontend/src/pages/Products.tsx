@@ -18,6 +18,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { useProducts, Product } from "../context/ProductContext";
 import ProductCard from "../components/ProductCard";
+import { matchesProductSearch } from "../utils/searchEngine";
 
 // Helper for query params
 function useQuery() {
@@ -335,8 +336,8 @@ const ProductsPage: React.FC = () => {
   // Full filtering and sorting
   const filtered = useMemo(() => {
     let result = products.filter((p) => {
-      // Search
-      if (search && !p.title.toLowerCase().includes(search.toLowerCase())) {
+      // Search with multi-field semantic & intent matching
+      if (search && !matchesProductSearch(p, search).match) {
         return false;
       }
       // Category
@@ -372,6 +373,23 @@ const ProductsPage: React.FC = () => {
 
       return true;
     });
+
+    // When search is active, sort by search relevance
+    if (search) {
+      if (sortOrder === "price-low") {
+        result.sort((a, b) => (a.price || 0) - (b.price || 0));
+      } else if (sortOrder === "price-high") {
+        result.sort((a, b) => (b.price || 0) - (a.price || 0));
+      } else {
+        result.sort((a, b) => {
+          const scoreA = matchesProductSearch(a, search).score;
+          const scoreB = matchesProductSearch(b, search).score;
+          if (scoreB !== scoreA) return scoreB - scoreA;
+          return (a.price || 0) - (b.price || 0);
+        });
+      }
+      return result;
+    }
 
     // Sorting & Category Distribution
     if (sortOrder === "price-low") {

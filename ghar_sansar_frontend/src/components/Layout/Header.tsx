@@ -23,6 +23,7 @@ import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
 import { useProducts, Product } from "../../context/ProductContext";
 import GharSansarLogo from "./GharSansarLogo";
+import { getLiveRecommendations, highlightSearchMatch } from "../../utils/searchEngine";
 
 const interiorServiceKeywords = [
   "Wallpaper Rolls",
@@ -160,100 +161,9 @@ const Header: React.FC = () => {
     return location.pathname.startsWith(path);
   };
 
-  // Google / Flipkart / Amazon style prefix-matching recommendation algorithm
+  // Synchronized with live database catalog & semantic search engine
   const { keywordSuggestions, matchedProducts } = useMemo(() => {
-    const clean = searchTerm.trim().toLowerCase();
-    if (!clean) {
-      return { keywordSuggestions: [], matchedProducts: [] };
-    }
-
-    // 1. Collect all searchable keywords from database products & categories
-    const candidateKeywords = new Set<string>();
-
-    // Add product titles and variants
-    products.forEach((p) => {
-      if (p.title) {
-        const cleanTitle = p.title.replace(/_/g, " ").trim();
-        candidateKeywords.add(cleanTitle);
-
-        // Substrings / common product keyword phrases (e.g., "Sonu Cookware", "Eliza Pot 14cm")
-        const words = cleanTitle.split(/\s+/);
-        if (words.length > 2) {
-          candidateKeywords.add(words.slice(0, 3).join(" "));
-        }
-      }
-      if (p.category && p.category !== "General") {
-        candidateKeywords.add(p.category.trim());
-      }
-      if (p.subCategory) {
-        candidateKeywords.add(p.subCategory.trim());
-      }
-    });
-
-    // Add interior decor keywords
-    interiorServiceKeywords.forEach((kw) => candidateKeywords.add(kw));
-
-    // Common e-commerce search keywords
-    ["Cookware", "Steel Utensils", "Pressure Cooker", "Festive Gifts", "Return Gifts"].forEach((k) =>
-      candidateKeywords.add(k)
-    );
-
-    // 2. Score and rank keywords (Starts-with gets highest priority)
-    const scoredKeywords: { text: string; score: number }[] = [];
-    candidateKeywords.forEach((kw) => {
-      const kwLower = kw.toLowerCase();
-      let score = 0;
-
-      if (kwLower === clean) {
-        score = 120; // Exact match
-      } else if (kwLower.startsWith(clean)) {
-        score = 100; // Prefix match (Google / Amazon priority)
-      } else {
-        const words = kwLower.split(/\s+/);
-        if (words.some((w) => w.startsWith(clean))) {
-          score = 80; // Word-boundary prefix match (e.g. "pot" -> "Sonu Eliza Pot")
-        } else if (kwLower.includes(clean)) {
-          score = 40; // Substring match
-        }
-      }
-
-      if (score > 0) {
-        scoredKeywords.push({ text: kw, score });
-      }
-    });
-
-    scoredKeywords.sort((a, b) => b.score - a.score || a.text.length - b.text.length);
-    const topKeywords = scoredKeywords.slice(0, 5).map((k) => k.text);
-
-    // 3. Match and rank actual products (Flipkart style product card previews)
-    const scoredProds: { prod: Product; score: number }[] = [];
-    products.forEach((prod) => {
-      const titleLower = (prod.title || "").replace(/_/g, " ").toLowerCase();
-      const catLower = (prod.category || "").toLowerCase();
-      const descLower = (prod.description || "").toLowerCase();
-
-      let score = 0;
-      if (titleLower.startsWith(clean)) {
-        score = 100;
-      } else if (titleLower.split(/\s+/).some((w) => w.startsWith(clean))) {
-        score = 85;
-      } else if (titleLower.includes(clean)) {
-        score = 65;
-      } else if (catLower.startsWith(clean) || catLower.includes(clean)) {
-        score = 50;
-      } else if (descLower.includes(clean)) {
-        score = 30;
-      }
-
-      if (score > 0) {
-        scoredProds.push({ prod, score });
-      }
-    });
-
-    scoredProds.sort((a, b) => b.score - a.score);
-    const topProducts = scoredProds.slice(0, 4).map((item) => item.prod);
-
-    return { keywordSuggestions: topKeywords, matchedProducts: topProducts };
+    return getLiveRecommendations(products, searchTerm);
   }, [searchTerm, products]);
 
   // Execute a search query and navigate to appropriate page
@@ -469,7 +379,7 @@ const Header: React.FC = () => {
                                       <div className="flex items-center gap-2.5 min-w-0">
                                         <Search className="w-3.5 h-3.5 text-stone-400 group-hover:text-[#C86B4C] shrink-0 transition-colors" />
                                         <span className="text-xs truncate">
-                                          {highlightMatch(kw, searchTerm)}
+                                          {highlightSearchMatch(kw, searchTerm)}
                                         </span>
                                       </div>
                                       <button
@@ -529,7 +439,7 @@ const Header: React.FC = () => {
                                             {/* Details */}
                                             <div className="min-w-0">
                                               <p className="text-xs font-medium text-gray-900 truncate">
-                                                {highlightMatch(p.title?.replace(/_/g, " ") || "", searchTerm)}
+                                                {highlightSearchMatch(p.title?.replace(/_/g, " ") || "", searchTerm)}
                                               </p>
                                               <div className="flex items-center gap-2 mt-0.5">
                                                 {p.category && (
