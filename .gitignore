@@ -57,5 +57,6 @@ bin/
 convert_all_to_webp.js
 backend/chats.json
 
-# Agent specific instructions (local only)
+# Agent instructions
+AGENT.md
 AGENTS.md
