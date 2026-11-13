@@ -686,10 +686,12 @@ const Profile: React.FC = () => {
                                       <span>Shipping Charge:</span>
                                       <span className="font-semibold text-gray-900">{order.shipping === 0 ? 'FREE' : `₹${order.shipping}`}</span>
                                     </div>
-                                    <div className="flex justify-between text-xs text-gray-600">
-                                      <span>GST Tax (18%):</span>
-                                      <span className="font-semibold text-gray-900">₹{order.tax.toLocaleString()}</span>
-                                    </div>
+                                    {order.tax > 0 && (
+                                      <div className="flex justify-between text-xs text-gray-600">
+                                        <span>GST Tax (18%):</span>
+                                        <span className="font-semibold text-gray-900">₹{order.tax.toLocaleString()}</span>
+                                      </div>
+                                    )}
                                     <div className="border-t border-gray-200 pt-2 flex justify-between font-bold text-sm text-gray-950">
                                       <span>Paid Total:</span>
                                       <span className="text-blue-600">₹{order.total.toLocaleString()}</span>

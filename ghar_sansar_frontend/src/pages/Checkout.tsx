@@ -166,8 +166,8 @@ const Checkout: React.FC = () => {
     return 149;
   }, [serviceability]);
 
-  const tax = totalPrice * 0.18; // 18% GST
-  const grandTotal = totalPrice + calculatedShippingFee + tax;
+  const tax = 0; // All prices are inclusive of all taxes (GST)
+  const grandTotal = totalPrice + calculatedShippingFee;
 
   if (items.length === 0 && !orderComplete) {
     return <Navigate to="/cart" replace />;
@@ -672,12 +672,12 @@ const Checkout: React.FC = () => {
                     )}
                   </span>
                 </div>
-                <div className="flex justify-between text-[#736B63] font-normal">
-                  <span>Taxes (18% GST)</span>
-                  <span className="text-gray-950">₹{tax.toFixed(2)}</span>
-                </div>
+                
                 <div className="border-t border-[#E8E2D8] pt-2.5 flex justify-between items-baseline">
-                  <span className="font-normal text-xs sm:text-sm text-gray-950">Total Amount</span>
+                  <div>
+                    <span className="font-normal text-xs sm:text-sm text-gray-950 block">Total Amount</span>
+                    <span className="text-[10px] text-[#736B63]">Inclusive of all taxes</span>
+                  </div>
                   <span className="font-poppins font-normal text-base sm:text-lg text-[#7D3219]">
                     ₹{grandTotal.toFixed(2)}
                   </span>

@@ -2308,7 +2308,7 @@ app.post(["/api/orders", "/orders"], (req, res) => {
     // Respect custom shipping charge and total sent from frontend if present, else calculate
     const calculatedSubtotal = parseFloat(subtotal) || 0;
     const calculatedShipping = req.body.shipping !== undefined ? parseFloat(req.body.shipping) : (calculatedSubtotal > 1000 ? 0 : 99);
-    const calculatedTax = parseFloat(tax) || (calculatedSubtotal * 0.18);
+    const calculatedTax = (tax !== undefined && tax !== null) ? (parseFloat(tax) || 0) : 0;
     const grandTotal = req.body.total !== undefined ? parseFloat(req.body.total) : (calculatedSubtotal + calculatedShipping + calculatedTax);
 
     const newOrder = {

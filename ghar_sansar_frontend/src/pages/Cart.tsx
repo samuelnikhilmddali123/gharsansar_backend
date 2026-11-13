@@ -103,8 +103,8 @@ const Cart: React.FC = () => {
     );
   }
 
-  const taxAmount = totalPrice * 0.18;
-  const grandTotal = totalPrice + taxAmount;
+  // Prices are inclusive of all taxes
+  const grandTotal = totalPrice;
 
   return (
     <div className="bg-[#FAF7F2] min-h-screen font-poppins pt-14 pb-16 sm:pb-20 flex flex-col selection:bg-[#F7EBE4] selection:text-[#7D3219] antialiased">
@@ -271,15 +271,13 @@ const Cart: React.FC = () => {
                   </span>
                 </div>
 
-                <div className="flex justify-between text-[#736B63] font-normal">
-                  <span>GST (18%)</span>
-                  <span className="text-gray-950 font-normal">
-                    ₹{Number(taxAmount).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
-                  </span>
-                </div>
+                
 
                 <div className="pt-3 border-t border-[#E8E2D8] flex justify-between items-baseline">
-                  <span className="text-sm font-normal text-gray-950">Grand Total</span>
+                  <div>
+                    <span className="text-sm font-normal text-gray-950 block">Grand Total</span>
+                    <span className="text-[11px] text-[#736B63] font-normal">Inclusive of all taxes</span>
+                  </div>
                   <span className="text-lg font-poppins font-normal text-gray-950">
                     ₹{Number(grandTotal).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
                   </span>

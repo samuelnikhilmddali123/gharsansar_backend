@@ -177,7 +177,7 @@ router.post("/", optionalAuth, async (req, res) => {
 
     const calculatedSubtotal = verifiedItems.reduce((acc, itm) => acc + (itm.price * itm.quantity), 0);
     const calculatedShipping = shipping !== undefined ? parseFloat(shipping) : (calculatedSubtotal > 1000 ? 0 : 99);
-    const calculatedTax = tax !== undefined ? parseFloat(tax) : Math.round(calculatedSubtotal * 0.18);
+    const calculatedTax = (tax !== undefined && tax !== null) ? parseFloat(tax) : 0;
     const calculatedDiscount = parseFloat(discount) || 0;
     const grandTotal = Math.max(0, calculatedSubtotal + calculatedShipping + calculatedTax - calculatedDiscount);
 
