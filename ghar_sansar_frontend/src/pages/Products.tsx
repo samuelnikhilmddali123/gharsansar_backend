@@ -636,7 +636,8 @@ const ProductsPage: React.FC = () => {
                 <img
                   src={bannerSlides[currentSlideIndex].image}
                   alt={bannerSlides[currentSlideIndex].alt}
-                  className="w-full h-full object-fill sm:object-cover object-center block mx-auto select-none"
+                  className="w-full h-full object-cover object-center block mx-auto select-none"
+                  style={{ imageRendering: "-webkit-optimize-contrast" }}
                 />
               </motion.div>
             </AnimatePresence>

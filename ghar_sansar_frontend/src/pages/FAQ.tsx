@@ -34,7 +34,6 @@ export type FAQCategory =
   | "products-pricing"
   | "orders-payments"
   | "shipping-delivery"
-  | "returns-refunds"
   | "whatsapp"
   | "support";
 
@@ -54,7 +53,6 @@ const CATEGORIES: { id: FAQCategory; label: string; icon: React.ComponentType<{ 
   { id: "products-pricing", label: "Products & Pricing", icon: Sparkles },
   { id: "orders-payments", label: "Orders & Payments", icon: CreditCard },
   { id: "shipping-delivery", label: "Shipping & Delivery", icon: Truck },
-  { id: "returns-refunds", label: "Returns & Refunds", icon: RotateCcw },
   { id: "whatsapp", label: "WhatsApp Enquiries", icon: MessageCircle },
   { id: "support", label: "Customer Support", icon: Headphones },
 ];
@@ -268,36 +266,7 @@ const FAQ_DATA: FAQItem[] = [
     tags: ["change address", "edit address", "update shipping", "delivery address"],
   },
 
-  // 6. Returns & Refunds
-  {
-    id: "ret-1",
-    category: "returns-refunds",
-    categoryLabel: "Returns & Refunds",
-    question: "Can I return or exchange a product?",
-    answer:
-      "We want you to be completely delighted with your purchase. If a product arrives damaged in transit, is defective, or differs significantly from the ordered item, you are eligible for an immediate replacement or refund. Please notify our customer support team within 48 hours of delivery with photos or video of the package and item.",
-    tags: ["return", "exchange", "refund", "damaged product", "replacement"],
-  },
-  {
-    id: "ret-2",
-    category: "returns-refunds",
-    categoryLabel: "Returns & Refunds",
-    question: "Can custom-printed 3D wallpapers or custom-cut flooring be returned?",
-    answer:
-      "Because custom 3D wallpapers and tailor-cut vinyl rolls are custom-printed and cut specifically to your unique wall and room dimensions, they cannot be returned or exchanged for change-of-mind reasons. However, if there is a verified manufacturing defect or printing discrepancy, we will promptly replace it at zero cost to you.",
-    tags: ["custom return", "customized wallpaper", "flooring return", "policy"],
-  },
-  {
-    id: "ret-3",
-    category: "returns-refunds",
-    categoryLabel: "Returns & Refunds",
-    question: "How do refunds work and how long do they take?",
-    answer:
-      "Once an approved returned product is received and inspected at our hub, your refund is initiated immediately. For online payments, the funds will be credited back to your original payment method (bank account, UPI, credit/debit card) within standard banking processing timelines (typically 5 to 7 business days).",
-    tags: ["refund time", "refund process", "bank credit", "reversal"],
-  },
-
-  // 7. WhatsApp Enquiries
+  // 6. WhatsApp Enquiries
   {
     id: "wa-1",
     category: "whatsapp",
@@ -424,93 +393,53 @@ export const FAQ: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF7F2] text-[#181513] font-sans">
-      {/* 1. Hero Header */}
-      <section className="relative bg-gradient-to-b from-[#1C1714] via-[#261E1A] to-[#1C1714] text-white pt-20 pb-20 sm:pt-24 sm:pb-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
-        {/* Subtle decorative background texture */}
-        <div
-          className="absolute inset-0 opacity-10 pointer-events-none"
-          style={{
-            backgroundImage: `radial-gradient(#FAF7F2 1px, transparent 1px)`,
-            backgroundSize: "24px 24px",
-          }}
-        />
-        <div className="absolute -top-32 -right-32 w-96 h-96 bg-[#C86B4C]/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-[#7D3219]/25 rounded-full blur-3xl pointer-events-none" />
+    <div className="min-h-screen bg-[#FAF7F2] text-[#181513] font-sans selection:bg-[#C86B4C] selection:text-white">
+      {/* 1. Minimal Header (No dark banner) */}
+      <section className="pt-10 pb-6 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto text-center">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold tracking-tight text-[#181513] mb-3">
+          FAQ
+        </h1>
+        <p className="text-sm sm:text-base text-[#736B63] max-w-xl mx-auto leading-relaxed mb-8">
+          Everything you need to know about shopping with Gharsansar.
+        </p>
 
-        <div className="max-w-4xl mx-auto text-center relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FAF7F2]/10 backdrop-blur-md border border-[#FAF7F2]/15 text-[#E6AF9A] text-xs font-medium uppercase tracking-wider mb-5"
-          >
-            <HelpCircle className="w-3.5 h-3.5" />
-            <span>Help &amp; Customer Information</span>
-          </motion.div>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold tracking-tight text-[#FAF7F2] mb-4"
-          >
-            Frequently Asked Questions
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-sm sm:text-base md:text-lg text-[#C8BFB6] max-w-2xl mx-auto leading-relaxed mb-8"
-          >
-            Everything you need to know about shopping, guest orders, custom wallpapers, and interior consultations with
-            Ghar Sansar.
-          </motion.p>
-
-          {/* Dynamic Live Search Bar */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="max-w-2xl mx-auto relative"
-          >
-            <div className="relative flex items-center bg-white rounded-2xl shadow-xl shadow-black/20 border border-[#E8E2D8] transition-all focus-within:ring-2 focus-within:ring-[#C86B4C] focus-within:border-transparent">
-              <Search className="w-5 h-5 text-[#8C827A] ml-4 shrink-0" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search for questions (e.g. guest checkout, wallpapers, tracking, returns)..."
-                className="w-full py-4 pl-3 pr-10 text-sm sm:text-base text-[#181513] placeholder-[#8C827A] bg-transparent rounded-2xl focus:outline-none"
-              />
-              {searchQuery && (
-                <button
-                  type="button"
-                  onClick={() => setSearchQuery("")}
-                  className="p-2 mr-2 text-[#8C827A] hover:text-[#181513] transition-colors rounded-full"
-                  title="Clear search"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-
+        {/* Dynamic Live Search Bar */}
+        <div className="max-w-2xl mx-auto relative mb-4">
+          <div className="relative flex items-center bg-white rounded-2xl shadow-xs border border-[#E8E2D8] transition-all focus-within:ring-2 focus-within:ring-[#C86B4C] focus-within:border-transparent">
+            <Search className="w-5 h-5 text-[#8C827A] ml-4 shrink-0" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search for questions..."
+              className="w-full py-3.5 pl-3 pr-10 text-sm sm:text-base text-[#181513] placeholder-[#8C827A] bg-transparent rounded-2xl focus:outline-none"
+            />
             {searchQuery && (
-              <div className="mt-2.5 flex items-center justify-between text-xs text-[#E6AF9A] px-2">
-                <span>
-                  Found <strong className="text-white font-semibold">{filteredItems.length}</strong> matching{" "}
-                  {filteredItems.length === 1 ? "question" : "questions"}
-                </span>
-                <button
-                  onClick={handleResetSearch}
-                  className="underline hover:text-white transition-colors"
-                >
-                  Clear search
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="p-2 mr-2 text-[#8C827A] hover:text-[#181513] transition-colors rounded-full"
+                title="Clear search"
+              >
+                <X className="w-4 h-4" />
+              </button>
             )}
-          </motion.div>
+          </div>
+
+          {searchQuery && (
+            <div className="mt-2.5 flex items-center justify-between text-xs text-[#736B63] px-2">
+              <span>
+                Found <strong className="text-[#181513] font-semibold">{filteredItems.length}</strong> matching{" "}
+                {filteredItems.length === 1 ? "question" : "questions"}
+              </span>
+              <button
+                onClick={handleResetSearch}
+                className="underline hover:text-[#C86B4C] transition-colors"
+              >
+                Clear search
+              </button>
+            </div>
+          )}
         </div>
       </section>
 
@@ -799,27 +728,22 @@ export const FAQ: React.FC = () => {
         )}
       </section>
 
-      {/* 5. Customer Support Section (Bottom Callout) */}
-      <section className="bg-gradient-to-br from-[#1C1714] to-[#2B221D] text-white py-16 px-4 sm:px-6 lg:px-8 border-t border-[#3A2F29]">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="w-12 h-12 rounded-2xl bg-[#C86B4C]/20 border border-[#C86B4C]/30 text-[#E6AF9A] flex items-center justify-center mx-auto mb-4">
-            <Headphones className="w-6 h-6" />
-          </div>
-
-          <h2 className="text-2xl sm:text-3xl font-serif font-bold text-[#FAF7F2] mb-3">
+      {/* 5. Customer Support Section (Clean & Minimal) */}
+      <section className="py-12 px-4 sm:px-6 lg:px-8 border-t border-[#E8E2D8] mt-10">
+        <div className="max-w-2xl mx-auto text-center">
+          <h2 className="text-xl sm:text-2xl font-serif font-bold text-[#181513] mb-2">
             Still have questions?
           </h2>
 
-          <p className="text-xs sm:text-sm md:text-base text-[#C8BFB6] max-w-xl mx-auto leading-relaxed mb-8">
-            Our team is here to help. Contact us directly for assistance with products, custom measurements, order
-            status, and interior enquiries.
+          <p className="text-xs sm:text-sm text-[#736B63] max-w-lg mx-auto leading-relaxed mb-6">
+            Our team is here to help. Contact us directly for assistance with products, orders and enquiries.
           </p>
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
+          <div className="flex flex-wrap items-center justify-center gap-3 mb-8">
             <Link
               to="/services"
-              className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-[#C86B4C] hover:bg-[#B05B3C] text-white text-xs sm:text-sm font-semibold tracking-wide shadow-lg shadow-[#C86B4C]/25 transition-all inline-flex items-center justify-center gap-2"
+              className="px-5 py-2.5 rounded-xl bg-[#C86B4C] hover:bg-[#B05B3C] text-white text-xs sm:text-sm font-medium shadow-xs transition-all inline-flex items-center gap-2"
             >
               <Mail className="w-4 h-4" />
               <span>Contact Us</span>
@@ -829,7 +753,7 @@ export const FAQ: React.FC = () => {
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-[#25D366] hover:bg-[#1EBE5D] text-white text-xs sm:text-sm font-semibold tracking-wide shadow-lg shadow-black/20 transition-all inline-flex items-center justify-center gap-2"
+              className="px-5 py-2.5 rounded-xl bg-[#25D366] hover:bg-[#1EBE5D] text-white text-xs sm:text-sm font-medium shadow-xs transition-all inline-flex items-center gap-2"
             >
               <MessageCircle className="w-4 h-4" />
               <span>Chat on WhatsApp</span>
@@ -837,22 +761,22 @@ export const FAQ: React.FC = () => {
           </div>
 
           {/* Quick Contact Details Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-8 border-t border-white/10 text-xs text-[#C8BFB6]">
-            <div className="flex items-center justify-center gap-2">
+          <div className="flex flex-wrap items-center justify-center gap-6 text-xs text-[#736B63]">
+            <div className="flex items-center gap-1.5">
               <Phone className="w-3.5 h-3.5 text-[#C86B4C]" />
-              <a href="tel:+919701990090" className="hover:text-white transition-colors">
+              <a href="tel:+919701990090" className="hover:text-[#C86B4C] transition-colors">
                 +91 9701990090
               </a>
             </div>
 
-            <div className="flex items-center justify-center gap-2">
+            <div className="flex items-center gap-1.5">
               <Mail className="w-3.5 h-3.5 text-[#C86B4C]" />
-              <a href="mailto:gharsansarvj@gmail.com" className="hover:text-white transition-colors">
+              <a href="mailto:gharsansarvj@gmail.com" className="hover:text-[#C86B4C] transition-colors">
                 gharsansarvj@gmail.com
               </a>
             </div>
 
-            <div className="flex items-center justify-center gap-2">
+            <div className="flex items-center gap-1.5">
               <MapPin className="w-3.5 h-3.5 text-[#C86B4C]" />
               <span>Governorpet, Vijayawada</span>
             </div>

@@ -147,7 +147,7 @@ const AppLayout = () => {
           <Route path="/privacy" element={<PrivacyPolicy initialTab="privacy" />} />
           <Route path="/terms" element={<PrivacyPolicy initialTab="terms" />} />
           <Route path="/shipping-policy" element={<PrivacyPolicy initialTab="shipping" />} />
-          <Route path="/return-policy" element={<PrivacyPolicy initialTab="returns" />} />
+          <Route path="/return-policy" element={<Navigate to="/privacy-policy" replace />} />
           <Route path="/delete-account" element={<DeleteAccount />} />
           <Route path="/account-deletion" element={<DeleteAccount />} />
 

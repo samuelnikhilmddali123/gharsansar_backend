@@ -133,17 +133,12 @@ const Footer: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/privacy-policy" className="hover:text-[#C86B4C] transition-colors">
-                  Returns &amp; Refunds
-                </Link>
-              </li>
-              <li>
-                <Link to="/privacy-policy" className="hover:text-[#C86B4C] transition-colors">
+                <Link to="/shipping-policy" className="hover:text-[#C86B4C] transition-colors">
                   Shipping Policy
                 </Link>
               </li>
               <li>
-                <Link to="/privacy-policy" className="hover:text-[#C86B4C] transition-colors">
+                <Link to="/terms" className="hover:text-[#C86B4C] transition-colors">
                   Terms &amp; Conditions
                 </Link>
               </li>
@@ -236,11 +231,11 @@ const Footer: React.FC = () => {
               Privacy Policy
             </Link>
             <span>|</span>
-            <Link to="/privacy-policy" className="hover:text-[#C86B4C] transition-colors">
+            <Link to="/terms" className="hover:text-[#C86B4C] transition-colors">
               Terms &amp; Conditions
             </Link>
             <span>|</span>
-            <Link to="/privacy-policy" className="hover:text-[#C86B4C] transition-colors">
+            <Link to="/shipping-policy" className="hover:text-[#C86B4C] transition-colors">
               Shipping Policy
             </Link>
           </div>
