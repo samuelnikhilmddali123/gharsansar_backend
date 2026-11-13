@@ -360,8 +360,8 @@ export const FAQ: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#FAF7F2] text-[#181513] font-sans selection:bg-[#C86B4C] selection:text-white pb-20">
-      {/* 1. Minimal Header (Spacious clearance below navbar, no search bar) */}
-      <section className="pt-24 sm:pt-28 pb-10 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto text-center">
+      {/* 1. Minimal Header (Equal spacing above and below FAQ) */}
+      <section className="py-10 sm:py-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto text-center">
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold tracking-tight text-[#181513] mb-3">
           FAQ
         </h1>
