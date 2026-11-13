@@ -512,8 +512,8 @@ const semanticIntentRules: {
 }[] = [
   {
     regex: /^cook(war[es]?|ing)?$|^kitchen(ware)?$|^utensils?$|^steamer$|^kadai$|^tawa$|^frypan$|^saucepan$|^stockpot$/i,
-    categoryBoost: ["sonu_steel_products"],
-    keywords: ["sonu", "steamer", "cooker", "kadai", "tawa", "frypan", "saucepan", "stockpot", "gravy pot", "cook & serve"],
+    categoryBoost: ["sonu_steel_products", "cello"],
+    keywords: ["sonu", "cello", "steamer", "cooker", "kadai", "tawa", "frypan", "saucepan", "stockpot", "gravy pot", "cook & serve", "dinnerware", "opalware"],
     excludeCategories: Array.from(NON_COOKWARE_CATEGORIES)
   },
   {
@@ -590,6 +590,14 @@ export function matchesProductSearch(product: Product, query: string): SearchMat
       if (title.includes(cleanQ)) cookwareScore += 100;
       if (sub.includes(cleanQ)) cookwareScore += 80;
       return { match: true, score: cookwareScore };
+    }
+
+    // Cello kitchenware, opalware & dinnerware also included in Cookware catalog
+    if (cat === "cello" || cat.includes("cello")) {
+      let celloScore = 200;
+      if (title.includes(cleanQ)) celloScore += 100;
+      if (sub.includes(cleanQ)) celloScore += 80;
+      return { match: true, score: celloScore };
     }
 
     // Matching cooking utensils in other categories

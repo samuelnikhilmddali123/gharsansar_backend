@@ -294,7 +294,7 @@ const ProductsPage: React.FC = () => {
         label: "Cookware",
         matcher: (p: Product) => {
           const cat = (p.category || "").toLowerCase();
-          if (cat === "sonu_steel_products") return true;
+          if (cat === "sonu_steel_products" || cat === "cello") return true;
           if (NON_COOKWARE_CATS.includes(cat)) return false;
           return /cook|steamer|kadai|tawa|frypan|saucepan|stockpot|pressure/i.test(
             (p.title || "") + " " + (p.subCategory || "")
