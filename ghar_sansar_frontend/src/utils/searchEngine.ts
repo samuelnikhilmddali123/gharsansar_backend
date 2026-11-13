@@ -11,10 +11,63 @@ export interface InteriorCategoryMapping {
   synonyms: string[];
 }
 
+export interface SpellingCorrectionResult {
+  original: string;
+  corrected: string;
+  isCorrected: boolean;
+}
+
+export interface RecommendationResult {
+  keywordSuggestions: string[];
+  matchedProducts: Product[];
+  interiorMatches: { title: string; category: string }[];
+  didYouMean: SpellingCorrectionResult | null;
+}
+
+/**
+ * Fast Damerau-Levenshtein Distance calculation with 2-row memory buffer.
+ * Supports insertions, deletions, substitutions, and character transpositions.
+ */
+export function getEditDistance(a: string, b: string): number {
+  if (a === b) return 0;
+  if (!a.length) return b.length;
+  if (!b.length) return a.length;
+
+  const al = a.length;
+  const bl = b.length;
+  let prevRow = new Array(bl + 1);
+  let currRow = new Array(bl + 1);
+
+  for (let j = 0; j <= bl; j++) prevRow[j] = j;
+
+  for (let i = 1; i <= al; i++) {
+    currRow[0] = i;
+    for (let j = 1; j <= bl; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      let min = Math.min(
+        currRow[j - 1] + 1,      // insertion
+        prevRow[j] + 1,          // deletion
+        prevRow[j - 1] + cost    // substitution
+      );
+
+      // Damerau transposition check
+      if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) {
+        min = Math.min(min, prevRow[j - 2] + 1);
+      }
+
+      currRow[j] = min;
+    }
+
+    const temp = prevRow;
+    prevRow = currRow;
+    currRow = temp;
+  }
+
+  return prevRow[bl];
+}
+
 /**
  * Complete, authoritative registry of all Ghar Sansar Interior Design categories and their synonyms.
- * Ensures queries like "sofa covers", "sofa cover", "couch covers", "wallpapers", "curtains",
- * "blinds", "wooden flooring" route directly to the Interior Design page with the exact category.
  */
 export const INTERIOR_CATEGORIES: InteriorCategoryMapping[] = [
   {
@@ -426,7 +479,6 @@ export const INTERIOR_CATEGORIES: InteriorCategoryMapping[] = [
 
 /**
  * Checks if a search term matches any interior design category or service.
- * Returns the canonical category name (e.g. "Sofa Cover") or null if it is a store product query.
  */
 export function getInteriorCategoryMatch(query: string): string | null {
   if (!query || !query.trim()) return null;
@@ -467,12 +519,23 @@ export function getInteriorCategoryMatch(query: string): string | null {
     }
   }
 
+  // 4. Fuzzy typo match for interior services (e.g. "walpapper" -> "Wallpapers", "sofacover" -> "Sofa Cover")
+  for (const item of INTERIOR_CATEGORIES) {
+    for (const syn of item.synonyms) {
+      if (Math.abs(syn.length - clean.length) <= 2) {
+        const maxDist = clean.length <= 5 ? 1 : 2;
+        if (getEditDistance(clean, syn) <= maxDist) {
+          return item.canonical;
+        }
+      }
+    }
+  }
+
   return null;
 }
 
 /**
  * Categories that MUST NEVER be returned when searching for cookware or kitchenware.
- * Prevents sickle, garden trowels, hose nozzles, planters, and ceramic pots from appearing.
  */
 const NON_COOKWARE_CATEGORIES = new Set([
   "garden tools & compost",
@@ -550,6 +613,7 @@ export const staticCuratedKeywords = [
   "Stockpots & Saucepan Pots",
   "Frypans, Kadais & Tawas",
   "Cook & Serve Sets",
+  "Cello Kitchenware & Dinnerware",
   "Milton Water Bottles",
   "Cello Bottles & Flasks",
   "German Silver & More",
@@ -557,12 +621,178 @@ export const staticCuratedKeywords = [
   "Kondapalli Toys",
   "Water Fountains",
   "Wall Clocks",
-  "Traditional Rajasthan Idols"
+  "Traditional Rajasthan Idols",
+  "Wallpaper Rolls",
+  "3D Wallpapers",
+  "Sofa Cover",
+  "Curtains",
+  "Blinds",
+  "Wooden Flooring"
 ];
 
 /**
+ * Common high-frequency search dictionary for smart auto-correction and "Did You Mean"
+ */
+export const CORE_SEARCH_DICTIONARY = [
+  "bottle",
+  "bottles",
+  "water bottle",
+  "water bottles",
+  "milton water bottle",
+  "cooker",
+  "cookers",
+  "pressure cooker",
+  "multi cooker",
+  "cookware",
+  "sonu cookware",
+  "cello",
+  "dinner set",
+  "dinner sets",
+  "dinnerware",
+  "crockery",
+  "wallpaper",
+  "wallpapers",
+  "3d wallpapers",
+  "wallpaper rolls",
+  "sofa cover",
+  "sofa covers",
+  "curtain",
+  "curtains",
+  "blind",
+  "blinds",
+  "steamer",
+  "kadai",
+  "tawa",
+  "frypan",
+  "saucepan",
+  "stockpot",
+  "gravy pot",
+  "flask",
+  "flasks",
+  "lunch box",
+  "lunch boxes",
+  "return gift",
+  "return gifts",
+  "festive gifts",
+  "god idols",
+  "brass idols",
+  "wooden flooring",
+  "vinyl flooring",
+  "pigeon net",
+  "mosquito net",
+  "pergola",
+  "fountain",
+  "water fountain",
+  "wall clock",
+  "clock",
+  "planter",
+  "ceramic pot"
+];
+
+/**
+ * Intelligent spelling correction with Damerau-Levenshtein distance.
+ * Detects missing, extra, swapped, or incorrect characters.
+ * E.g., "Bottlo" -> "Bottle", "Cookar" -> "Cooker", "Walpapper" -> "Wallpaper", "Diner Set" -> "Dinner Set"
+ */
+export function getSpellingCorrection(
+  rawQuery: string,
+  products: Product[] = []
+): SpellingCorrectionResult | null {
+  const query = rawQuery.trim().toLowerCase();
+  if (!query || query.length < 3) return null;
+
+  // Build dynamic searchable dictionary from products + core catalog
+  const dict = new Set<string>(CORE_SEARCH_DICTIONARY);
+  products.forEach((p) => {
+    if (p.title) {
+      const cleanT = p.title.replace(/_/g, " ").trim().toLowerCase();
+      dict.add(cleanT);
+      cleanT.split(/\s+/).forEach((w) => {
+        if (w.length >= 3) dict.add(w);
+      });
+    }
+    if (p.subCategory) dict.add(p.subCategory.trim().toLowerCase());
+    if (p.category && p.category !== "General") dict.add(p.category.trim().toLowerCase());
+  });
+
+  const dictionaryList = Array.from(dict);
+
+  // Exact match: user typed a known word perfectly, no correction needed
+  if (dictionaryList.includes(query)) return null;
+
+  // Multi-word phrase tokenization
+  const tokens = query.split(/\s+/).filter(Boolean);
+  let wordsChanged = false;
+  const singleWords = new Set<string>();
+  dictionaryList.forEach((item) => {
+    item.split(/\s+/).forEach((w) => {
+      if (w.length >= 3) singleWords.add(w);
+    });
+  });
+
+  const correctedTokens = tokens.map((token) => {
+    if (token.length < 3 || singleWords.has(token)) return token;
+
+    let best = token;
+    let minD = 99;
+    const maxAllowed = token.length <= 4 ? 1 : token.length <= 8 ? 2 : 3;
+
+    for (const w of singleWords) {
+      const d = getEditDistance(token, w);
+      if (d <= maxAllowed && d < minD) {
+        minD = d;
+        best = w;
+      }
+    }
+
+    if (best !== token) {
+      wordsChanged = true;
+      return best;
+    }
+    return token;
+  });
+
+  // Whole phrase match against dictionary
+  let bestPhrase: string | null = null;
+  let minPhraseDist = 99;
+  const phraseMax = query.length <= 4 ? 1 : query.length <= 8 ? 2 : 3;
+
+  for (const entry of dictionaryList) {
+    if (Math.abs(entry.length - query.length) > 3) continue;
+    const d = getEditDistance(query, entry);
+    if (d <= phraseMax && d < minPhraseDist) {
+      minPhraseDist = d;
+      bestPhrase = entry;
+    }
+  }
+
+  if (bestPhrase && minPhraseDist <= 2 && bestPhrase.toLowerCase() !== query) {
+    const formatted = bestPhrase.replace(/\b\w/g, (c) => c.toUpperCase());
+    return {
+      original: rawQuery,
+      corrected: formatted,
+      isCorrected: true
+    };
+  }
+
+  if (wordsChanged) {
+    const joined = correctedTokens.join(" ");
+    if (joined.toLowerCase() !== query) {
+      const formatted = joined.replace(/\b\w/g, (c) => c.toUpperCase());
+      return {
+        original: rawQuery,
+        corrected: formatted,
+        isCorrected: true
+      };
+    }
+  }
+
+  return null;
+}
+
+/**
  * Checks if a product matches a user query using multi-field text matching,
- * token intersection, and semantic e-commerce intent expansion.
+ * token intersection, semantic e-commerce intent expansion, and fuzzy typo tolerance.
  */
 export function matchesProductSearch(product: Product, query: string): SearchMatchResult {
   if (!query || !query.trim()) {
@@ -579,7 +809,6 @@ export function matchesProductSearch(product: Product, query: string): SearchMat
   const fullText = `${title} ${cat} ${sub} ${desc}`;
 
   // 1. Strict Cookware Protection
-  // If user searched for cookware, do not match sickle, planters, spray bottles or gardening tools
   if (isCookwareSearch(cleanQ)) {
     if (NON_COOKWARE_CATEGORIES.has(cat)) {
       return { match: false, score: 0 };
@@ -668,17 +897,29 @@ export function matchesProductSearch(product: Product, query: string): SearchMat
     }
   }
 
+  // 8. Fuzzy Typo & Distance Matching (e.g. "bottlo" -> "bottle", "cookar" -> "cooker", "walpapper" -> "wallpaper")
+  if (score === 0) {
+    const titleWords = title.split(/\s+/).filter((w) => w.length >= 3);
+    const fuzzyMatchedTokens = tokens.filter((token) => {
+      if (token.length < 3) return false;
+      const maxAllowed = token.length <= 4 ? 1 : token.length <= 8 ? 2 : 3;
+      return titleWords.some((tw) => getEditDistance(token, tw) <= maxAllowed);
+    });
+
+    if (fuzzyMatchedTokens.length > 0) {
+      if (fuzzyMatchedTokens.length === tokens.length) {
+        score += 130;
+      } else {
+        score += Math.round((fuzzyMatchedTokens.length / tokens.length) * 100);
+      }
+    }
+  }
+
   return { match: score > 0, score };
 }
 
-export interface RecommendationResult {
-  keywordSuggestions: string[];
-  matchedProducts: Product[];
-  interiorMatches: { title: string; category: string }[];
-}
-
 /**
- * Builds live autocomplete suggestions and matching product previews
+ * Builds live autocomplete suggestions, "Did You Mean" auto-correction, and matching product previews
  * synchronized with the live catalog and interior design database.
  */
 export function getLiveRecommendations(
@@ -687,10 +928,13 @@ export function getLiveRecommendations(
 ): RecommendationResult {
   const clean = searchTerm.trim().toLowerCase();
   if (!clean) {
-    return { keywordSuggestions: [], matchedProducts: [], interiorMatches: [] };
+    return { keywordSuggestions: [], matchedProducts: [], interiorMatches: [], didYouMean: null };
   }
 
-  // 1. Check for matching Interior Design categories
+  // 1. Intelligent Spelling Correction / Did You Mean
+  const didYouMean = getSpellingCorrection(clean, products);
+
+  // 2. Check for matching Interior Design categories
   const interiorMatches: { title: string; category: string }[] = [];
   INTERIOR_CATEGORIES.forEach((item) => {
     const canonicalLower = item.canonical.toLowerCase();
@@ -699,7 +943,18 @@ export function getLiveRecommendations(
       clean.includes(canonicalLower) ||
       item.synonyms.some((syn) => syn.startsWith(clean) || clean.startsWith(syn));
 
-    if (isDirectMatch) {
+    const isFuzzyInterior =
+      !isDirectMatch &&
+      clean.length >= 4 &&
+      item.synonyms.some((syn) => {
+        if (Math.abs(syn.length - clean.length) <= 2) {
+          const maxD = clean.length <= 5 ? 1 : 2;
+          return getEditDistance(clean, syn) <= maxD;
+        }
+        return false;
+      });
+
+    if (isDirectMatch || isFuzzyInterior) {
       interiorMatches.push({
         title: item.canonical,
         category: item.canonical
@@ -707,8 +962,13 @@ export function getLiveRecommendations(
     }
   });
 
-  // 2. Keyword candidates ranking
+  // 3. Keyword candidates ranking
   const keywordCandidates = new Set<string>();
+
+  // Add Did You Mean corrected keyword with top priority
+  if (didYouMean && didYouMean.isCorrected) {
+    keywordCandidates.add(didYouMean.corrected);
+  }
 
   // Add relevant interior design categories as keyword suggestions
   interiorMatches.forEach((im) => keywordCandidates.add(im.title));
@@ -741,7 +1001,9 @@ export function getLiveRecommendations(
     const kwLower = kw.toLowerCase();
     let score = 0;
 
-    if (kwLower === clean) {
+    if (didYouMean && didYouMean.isCorrected && kw.toLowerCase() === didYouMean.corrected.toLowerCase()) {
+      score = 250;
+    } else if (kwLower === clean) {
       score = 220;
     } else if (kwLower.startsWith(clean)) {
       score = 170; // Google / Amazon prefix priority
@@ -749,7 +1011,9 @@ export function getLiveRecommendations(
       score = 120;
     } else if (kwLower.includes(clean)) {
       score = 60;
-    } else if (isCookwareSearch(clean) && /sonu|cook|steamer|pot|kadai|tawa/i.test(kwLower)) {
+    } else if (clean.length >= 4 && getEditDistance(clean, kwLower.slice(0, clean.length)) <= (clean.length <= 5 ? 1 : 2)) {
+      score = 90; // Fuzzy keyword suggestion
+    } else if (isCookwareSearch(clean) && /sonu|cello|cook|steamer|pot|kadai|tawa/i.test(kwLower)) {
       score = 80;
     }
 
@@ -761,7 +1025,7 @@ export function getLiveRecommendations(
   scoredKeywords.sort((a, b) => b.score - a.score || a.text.length - b.text.length);
   const keywordSuggestions = scoredKeywords.slice(0, 5).map((k) => k.text);
 
-  // 3. Rank live products matching query
+  // 4. Rank live products matching query (including fuzzy matches)
   const scoredProds: { prod: Product; score: number }[] = [];
   products.forEach((p) => {
     const res = matchesProductSearch(p, clean);
@@ -773,7 +1037,7 @@ export function getLiveRecommendations(
   scoredProds.sort((a, b) => b.score - a.score);
   const matchedProducts = scoredProds.slice(0, 4).map((item) => item.prod);
 
-  return { keywordSuggestions, matchedProducts, interiorMatches: interiorMatches.slice(0, 2) };
+  return { keywordSuggestions, matchedProducts, interiorMatches: interiorMatches.slice(0, 2), didYouMean };
 }
 
 /**

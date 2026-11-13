@@ -46,10 +46,19 @@ const Header: React.FC = () => {
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [isUserMenuOpen, setUserMenuOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedTerm, setDebouncedTerm] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [selectedIndex, setSelectedIndex] = useState<number>(-1);
+
+  // 200ms debounce for high-speed fluid typing without search jitter
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedTerm(searchTerm);
+    }, 200);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
 
   const searchInputRef = useRef<HTMLInputElement>(null);
   const desktopSearchRef = useRef<HTMLFormElement>(null);
@@ -145,10 +154,10 @@ const Header: React.FC = () => {
     return location.pathname.startsWith(path);
   };
 
-  // Synchronized with live database catalog & semantic search engine
-  const { keywordSuggestions, matchedProducts, interiorMatches } = useMemo(() => {
-    return getLiveRecommendations(products, searchTerm);
-  }, [searchTerm, products]);
+  // Synchronized with live database catalog, fuzzy spelling correction & semantic search engine
+  const { keywordSuggestions, matchedProducts, interiorMatches, didYouMean } = useMemo(() => {
+    return getLiveRecommendations(products, debouncedTerm || searchTerm);
+  }, [debouncedTerm, searchTerm, products]);
 
   // Execute a search query and navigate to appropriate page
   const executeSearch = (query: string) => {
@@ -191,12 +200,49 @@ const Header: React.FC = () => {
     navigate(`/products/${encodeURIComponent(product.id)}`, { state: product });
   };
 
+  // Flatten interactive suggestions for seamless Arrow Key navigation
+  const flatSuggestions = useMemo(() => {
+    const list: { type: "didYouMean" | "interior" | "keyword" | "product"; value: any }[] = [];
+    if (didYouMean && didYouMean.isCorrected) {
+      list.push({ type: "didYouMean", value: didYouMean.corrected });
+    }
+    interiorMatches.forEach((im) => list.push({ type: "interior", value: im.category }));
+    keywordSuggestions.forEach((kw) => list.push({ type: "keyword", value: kw }));
+    matchedProducts.forEach((p) => list.push({ type: "product", value: p }));
+    return list;
+  }, [didYouMean, interiorMatches, keywordSuggestions, matchedProducts]);
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Escape") {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      if (!showSuggestions) {
+        setShowSuggestions(true);
+        return;
+      }
+      setSelectedIndex((prev) => (prev < flatSuggestions.length - 1 ? prev + 1 : 0));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setSelectedIndex((prev) => (prev > 0 ? prev - 1 : flatSuggestions.length - 1));
+    } else if (e.key === "Enter") {
+      if (selectedIndex >= 0 && selectedIndex < flatSuggestions.length) {
+        e.preventDefault();
+        const selected = flatSuggestions[selectedIndex];
+        if (selected.type === "product") {
+          onProductSelect(selected.value);
+        } else {
+          executeSearch(selected.value);
+        }
+      }
+    } else if (e.key === "Escape") {
       setShowSuggestions(false);
       setIsSearchOpen(false);
+      setSelectedIndex(-1);
     }
   };
+
+  useEffect(() => {
+    setSelectedIndex(-1);
+  }, [searchTerm]);
 
   // Google/Amazon style character highlight helper
   const highlightMatch = (text: string, query: string) => {
@@ -350,6 +396,39 @@ const Header: React.FC = () => {
                           {/* Case A: User has typed a keyword (Active Autocomplete) */}
                           {searchTerm.trim().length > 0 ? (
                             <>
+                              {/* Did You Mean Auto-Correction Banner */}
+                              {didYouMean && didYouMean.isCorrected && (
+                                <div className="p-3 bg-[#F7EBE4] border-b border-[#E8D0C5] flex items-center justify-between gap-2.5">
+                                  <div className="flex items-center gap-2 min-w-0">
+                                    <Sparkles size={15} className="text-[#C86B4C] shrink-0" />
+                                    <span className="text-xs text-gray-800 truncate">
+                                      Did you mean:{" "}
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setSearchTerm(didYouMean.corrected);
+                                          executeSearch(didYouMean.corrected);
+                                        }}
+                                        className="font-semibold text-[#7D3219] hover:underline cursor-pointer"
+                                      >
+                                        {didYouMean.corrected}
+                                      </button>
+                                      ?
+                                    </span>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setSearchTerm(didYouMean.corrected);
+                                      executeSearch(didYouMean.corrected);
+                                    }}
+                                    className="shrink-0 px-2.5 py-1 rounded-md bg-[#7D3219] hover:bg-[#652814] text-white text-[11px] font-medium transition-colors shadow-2xs cursor-pointer"
+                                  >
+                                    Search {didYouMean.corrected}
+                                  </button>
+                                </div>
+                              )}
+
                               {/* 0. Interior Design & Service Matches */}
                               {interiorMatches && interiorMatches.length > 0 && (
                                 <div className="p-2 space-y-1 bg-[#FAF2ED]">
