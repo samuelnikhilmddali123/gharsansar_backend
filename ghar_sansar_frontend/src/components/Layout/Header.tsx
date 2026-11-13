@@ -23,37 +23,21 @@ import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
 import { useProducts, Product } from "../../context/ProductContext";
 import GharSansarLogo from "./GharSansarLogo";
-import { getLiveRecommendations, highlightSearchMatch } from "../../utils/searchEngine";
-
-const interiorServiceKeywords = [
-  "Wallpaper Rolls",
-  "Wallpapers",
-  "3D Wallpapers",
-  "Wall Art Effect",
-  "Vinyl Flooring",
-  "Natural Vertical Garden",
-  "Blinds",
-  "Automation Motorised Blinds",
-  "Gym Flooring",
-  "Artificial Wall Garden",
-  "ICU Flooring",
-  "Sliding & Metal Door",
-  "Invisible Grill",
-  "Wooden Flooring",
-  "Curtains",
-  "Interior Decor",
-  "Pooja Decor",
-  "Designer Sofa",
-  "Luxury Table",
-];
+import {
+  getLiveRecommendations,
+  highlightSearchMatch,
+  getInteriorCategoryMatch
+} from "../../utils/searchEngine";
 
 const defaultTrendingSearches = [
+  "Sonu Cookware",
   "Sonu Eliza Pot 14cm 1000ml",
-  "Stainless Steel Cookware",
-  "Festive Return Gifts",
-  "3D Wallpapers",
+  "Sofa Cover",
+  "Curtains",
   "Wallpaper Rolls",
-  "Wooden Flooring"
+  "3D Wallpapers",
+  "Milton Water Bottles",
+  "Festive Return Gifts"
 ];
 
 const RECENT_SEARCHES_KEY = "gharsansar_recent_searches";
@@ -162,7 +146,7 @@ const Header: React.FC = () => {
   };
 
   // Synchronized with live database catalog & semantic search engine
-  const { keywordSuggestions, matchedProducts } = useMemo(() => {
+  const { keywordSuggestions, matchedProducts, interiorMatches } = useMemo(() => {
     return getLiveRecommendations(products, searchTerm);
   }, [searchTerm, products]);
 
@@ -176,18 +160,21 @@ const Header: React.FC = () => {
     setIsSearchOpen(false);
     setSearchTerm("");
 
-    // Check if the query specifically targets interior services
-    const isInteriorMatch = interiorServiceKeywords.some(
-      (kw) => kw.toLowerCase() === clean.toLowerCase()
-    );
-
-    if (isInteriorMatch) {
-      navigate(`/interior-design?category=${encodeURIComponent(clean)}`);
-    } else if (clean.toLowerCase().includes("return gift") || clean.toLowerCase().includes("festive gift")) {
-      navigate(`/return-gifts`);
-    } else {
-      navigate(`/products?search=${encodeURIComponent(clean)}`);
+    // 1. Check if the query specifically targets interior services (e.g. "sofa covers" -> "Sofa Cover")
+    const interiorCategory = getInteriorCategoryMatch(clean);
+    if (interiorCategory) {
+      navigate(`/interior-design?category=${encodeURIComponent(interiorCategory)}`);
+      return;
     }
+
+    // 2. Return gifts / festive gifts
+    if (clean.toLowerCase().includes("return gift") || clean.toLowerCase().includes("festive gift")) {
+      navigate(`/return-gifts`);
+      return;
+    }
+
+    // 3. Store products catalog
+    navigate(`/products?search=${encodeURIComponent(clean)}`);
   };
 
   const onSearchSubmit = (e: React.FormEvent) => {
@@ -363,6 +350,40 @@ const Header: React.FC = () => {
                           {/* Case A: User has typed a keyword (Active Autocomplete) */}
                           {searchTerm.trim().length > 0 ? (
                             <>
+                              {/* 0. Interior Design & Service Matches */}
+                              {interiorMatches && interiorMatches.length > 0 && (
+                                <div className="p-2 space-y-1 bg-[#FAF2ED]">
+                                  <div className="px-3 pt-1 pb-1 flex items-center justify-between text-[10px] font-semibold tracking-wider uppercase text-[#7D3219]">
+                                    <span>Interior Design & Home Solutions</span>
+                                    <span className="text-[9px] font-semibold bg-[#F7EBE4] border border-[#D9B4A4] px-1.5 py-0.5 rounded text-[#7D3219]">
+                                      Bespoke Service
+                                    </span>
+                                  </div>
+                                  {interiorMatches.map((im, idx) => (
+                                    <div
+                                      key={idx}
+                                      onClick={() => executeSearch(im.category)}
+                                      className="group flex items-center justify-between px-3 py-2 rounded-xl bg-white hover:bg-[#F7EBE4] border border-[#E8E2D8] hover:border-[#D9B4A4] transition-all cursor-pointer shadow-2xs"
+                                    >
+                                      <div className="flex items-center gap-2.5 min-w-0">
+                                        <div className="w-6 h-6 rounded-md bg-[#F7EBE4] text-[#7D3219] flex items-center justify-center shrink-0">
+                                          <Sparkles size={12} />
+                                        </div>
+                                        <div className="min-w-0">
+                                          <p className="text-xs font-semibold text-gray-900 group-hover:text-[#7D3219] truncate">
+                                            {im.title}
+                                          </p>
+                                          <p className="text-[10.5px] text-gray-500 truncate">
+                                            Explore portfolio, designs & custom tailoring
+                                          </p>
+                                        </div>
+                                      </div>
+                                      <ArrowRight size={13} className="text-[#7D3219] shrink-0 ml-2 group-hover:translate-x-0.5 transition-transform" />
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+
                               {/* 1. Keyword Recommendations (Google / Amazon style) */}
                               {keywordSuggestions.length > 0 && (
                                 <div className="p-2 space-y-0.5">
@@ -479,7 +500,7 @@ const Header: React.FC = () => {
                               )}
 
                               {/* No match fallback */}
-                              {keywordSuggestions.length === 0 && matchedProducts.length === 0 && (
+                              {keywordSuggestions.length === 0 && matchedProducts.length === 0 && (!interiorMatches || interiorMatches.length === 0) && (
                                 <div className="p-5 text-center">
                                   <p className="text-xs text-stone-500 font-normal">
                                     No exact match found for <strong className="text-gray-900">"{searchTerm}"</strong>

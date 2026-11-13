@@ -271,16 +271,79 @@ const ProductsPage: React.FC = () => {
     );
   }, [products, categoryFilter]);
 
+  const NON_COOKWARE_CATS = [
+    "garden tools & compost",
+    "harshdeep planters",
+    "ceramic pots",
+    "aquarium & accessories",
+    "birds_and_accessories",
+    "wall clocks",
+    "water fountains"
+  ];
+
   // Pill Subcategories and counts (matching the luxury catalog layout)
   const pillCategories = useMemo(() => {
     const list = [
-      { key: "All", label: "All" },
-      { key: "Cookware", label: "Cookware", regex: /cook|steamer|pot|pan|kadai|tawa|frypan/i },
-      { key: "Serveware", label: "Serveware", regex: /serve|bowl|tray|casserole|jug|glass/i },
-      { key: "Pooja Items", label: "Pooja Items", regex: /pooja|idol|diya|brass|kalash|aarti/i },
-      { key: "Home Décor", label: "Home Décor", regex: /decor|décor|clock|fountain|plant|toy/i },
-      { key: "Gift Sets", label: "Gift Sets", regex: /gift|set|box|pack/i },
-      { key: "Dinner Sets", label: "Dinner Sets", regex: /dinner|thali|crockery/i },
+      {
+        key: "All",
+        label: "All",
+        matcher: () => true
+      },
+      {
+        key: "Cookware",
+        label: "Cookware",
+        matcher: (p: Product) => {
+          const cat = (p.category || "").toLowerCase();
+          if (cat === "sonu_steel_products") return true;
+          if (NON_COOKWARE_CATS.includes(cat)) return false;
+          return /cook|steamer|kadai|tawa|frypan|saucepan|stockpot|pressure/i.test(
+            (p.title || "") + " " + (p.subCategory || "")
+          );
+        }
+      },
+      {
+        key: "Serveware",
+        label: "Serveware",
+        matcher: (p: Product) => {
+          const cat = (p.category || "").toLowerCase();
+          if (NON_COOKWARE_CATS.includes(cat)) return false;
+          return /serve|bowl|tray|casserole|jug|glass/i.test(
+            (p.title || "") + " " + (p.subCategory || "")
+          );
+        }
+      },
+      {
+        key: "Pooja Items",
+        label: "Pooja Items",
+        matcher: (p: Product) =>
+          /pooja|puja|idol|diya|brass|kalash|aarti/i.test(
+            (p.title || "") + " " + (p.subCategory || "") + " " + (p.category || "")
+          )
+      },
+      {
+        key: "Home Décor",
+        label: "Home Décor",
+        matcher: (p: Product) =>
+          /decor|décor|clock|fountain|plant|toy|handicraft/i.test(
+            (p.title || "") + " " + (p.subCategory || "") + " " + (p.category || "")
+          )
+      },
+      {
+        key: "Gift Sets",
+        label: "Gift Sets",
+        matcher: (p: Product) =>
+          /gift|return\s*gift|set|box|pack/i.test(
+            (p.title || "") + " " + (p.subCategory || "") + " " + (p.category || "")
+          )
+      },
+      {
+        key: "Dinner Sets",
+        label: "Dinner Sets",
+        matcher: (p: Product) =>
+          /dinner|dinnerware|thali|crockery/i.test(
+            (p.title || "") + " " + (p.subCategory || "") + " " + (p.category || "")
+          )
+      }
     ];
 
     // Compute dynamic count for each pill
@@ -289,18 +352,8 @@ const ProductsPage: React.FC = () => {
       if (item.key === "All") {
         count = baseCategoryProducts.length > 0 ? baseCategoryProducts.length : 53;
       } else {
-        const matching = baseCategoryProducts.filter((p) =>
-          item.regex?.test((p.title || "") + " " + (p.subCategory || "") + " " + (p.category || ""))
-        );
-        const defaultCounts: Record<string, number> = {
-          Cookware: 18,
-          Serveware: 12,
-          "Pooja Items": 8,
-          "Home Décor": 9,
-          "Gift Sets": 4,
-          "Dinner Sets": 2,
-        };
-        count = matching.length > 0 ? matching.length : defaultCounts[item.key] || 0;
+        const matching = baseCategoryProducts.filter(item.matcher);
+        count = matching.length;
       }
       return { ...item, count };
     });
@@ -352,10 +405,8 @@ const ProductsPage: React.FC = () => {
       // Subcategory / Pill filter
       if (subCategoryFilter !== "All") {
         const itemPill = pillCategories.find((pi) => pi.key === subCategoryFilter);
-        if (itemPill && itemPill.regex) {
-          const match = itemPill.regex.test(
-            (p.title || "") + " " + (p.subCategory || "") + " " + (p.category || "")
-          );
+        if (itemPill && itemPill.matcher) {
+          const match = itemPill.matcher(p);
           if (!match && p.subCategory !== subCategoryFilter) return false;
         } else if (p.subCategory !== subCategoryFilter) {
           return false;

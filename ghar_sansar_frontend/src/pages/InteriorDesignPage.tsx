@@ -310,17 +310,23 @@ const InteriorDesignPage: React.FC = () => {
     fetchCategories();
   }, []);
 
-  // Handle URL category param flexibly (e.g. wallpaper_rolls -> Wallpaper Rolls)
+  // Handle URL category param flexibly (e.g. Sofa Cover, sofa covers, wallpaper_rolls)
   useEffect(() => {
     if (urlCategory && categories.length) {
-      const cleanUrl = urlCategory.toLowerCase().replace(/_/g, " ").trim();
+      const cleanUrl = urlCategory.toLowerCase().replace(/[-_]/g, " ").trim();
+      const stemUrl = cleanUrl.replace(/s$/, "");
+
       const match = categories.find((c) => {
         const cLower = c.name.toLowerCase().trim();
+        const cStem = cLower.replace(/s$/, "");
         return (
           cLower === cleanUrl ||
-          cLower.replace(/_/g, " ") === cleanUrl ||
+          cLower.replace(/[-_]/g, " ") === cleanUrl ||
+          cStem === stemUrl ||
           cLower.includes(cleanUrl) ||
           cleanUrl.includes(cLower) ||
+          cStem.includes(stemUrl) ||
+          stemUrl.includes(cStem) ||
           (urlCategory.includes("wallpaper_roll") && cLower.includes("wallpaper roll")) ||
           (urlCategory.includes("3d") && cLower.includes("3d")) ||
           (urlCategory.includes("wallart") && cLower.includes("wall art")) ||
@@ -332,6 +338,9 @@ const InteriorDesignPage: React.FC = () => {
       if (match) {
         setSelectedCategory(match.name);
         setActiveCategory(match.name);
+        setTimeout(() => {
+          window.scrollTo({ top: 380, behavior: "smooth" });
+        }, 100);
       } else {
         setSelectedCategory("All Categories");
       }
