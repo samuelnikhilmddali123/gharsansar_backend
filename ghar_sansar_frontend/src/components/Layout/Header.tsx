@@ -15,7 +15,8 @@ import {
   ArrowRight,
   ArrowUpLeft,
   Sparkles,
-  ShoppingBag
+  ShoppingBag,
+  Package
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../context/AuthContext";
@@ -843,17 +844,15 @@ const Header: React.FC = () => {
                   </Link>
 
                   <Link
-                    to="/cart"
+                    to={user ? "/profile?tab=orders" : "/login"}
                     onClick={() => setMenuOpen(false)}
                     className="p-3 bg-white rounded-xl border border-[#E8E2D8] hover:border-[#D9B4A4] flex items-center justify-between text-xs text-gray-800 transition-colors shadow-2xs"
                   >
                     <div className="flex items-center gap-2">
-                      <ShoppingCart size={14} className="text-[#C26847]" />
-                      <span className="font-normal text-gray-900">Cart</span>
+                      <Package size={14} className="text-[#C26847]" />
+                      <span className="font-normal text-gray-900">Orders</span>
                     </div>
-                    <span className="px-1.5 py-0.5 rounded-full bg-[#C26847] text-white text-[10px] font-bold">
-                      {totalItems || 0}
-                    </span>
+                    <ChevronRight size={13} className="text-gray-400" />
                   </Link>
                 </div>
 

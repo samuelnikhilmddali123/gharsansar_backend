@@ -14,6 +14,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import ScrollToTop from "./components/ScrollToTop";
 import Header from "./components/Layout/Header";
 import Footer from "./components/Layout/Footer";
+import MobileBottomNav from "./components/Layout/MobileBottomNav";
 
 import Home from "./pages/Home";
 import Services from "./pages/Services";
@@ -200,6 +201,7 @@ const AppLayout = () => {
         </Routes>
       </main>
       {!isLoginPage && <Footer />}
+      <MobileBottomNav />
     </div>
   );
 };

@@ -772,11 +772,11 @@ const ProductDetail: React.FC = () => {
                 <div className="flex items-center gap-3">
                   {/* Quantity Stepper */}
                   {!isOutOfStock && !isComingSoon && quantityInCart === 0 && (
-                    <div className="flex items-center border border-[#E8E2D8] bg-white rounded-md h-[42px] px-1">
+                    <div className="flex items-center border border-[#E8E2D8] bg-white rounded-md h-[42px] px-1 shadow-2xs">
                       <button
                         type="button"
                         onClick={handleDecreaseQuantity}
-                        className="w-7 h-7 flex items-center justify-center text-stone-500 hover:text-stone-900 rounded transition cursor-pointer"
+                        className="w-7 h-7 flex items-center justify-center text-stone-500 hover:text-stone-900 active:scale-90 rounded transition cursor-pointer touch-manipulation"
                         aria-label="Decrease quantity"
                       >
                         <Minus size={12} />
@@ -787,7 +787,7 @@ const ProductDetail: React.FC = () => {
                       <button
                         type="button"
                         onClick={handleIncreaseQuantity}
-                        className="w-7 h-7 flex items-center justify-center text-stone-500 hover:text-stone-900 rounded transition cursor-pointer"
+                        className="w-7 h-7 flex items-center justify-center text-stone-500 hover:text-stone-900 active:scale-90 rounded transition cursor-pointer touch-manipulation"
                         aria-label="Increase quantity"
                       >
                         <Plus size={12} />
@@ -810,7 +810,7 @@ const ProductDetail: React.FC = () => {
                       Coming Soon
                     </button>
                   ) : quantityInCart > 0 ? (
-                    <div className="flex-1 h-[42px] border border-[#E8E2D8] bg-white rounded-md flex items-center justify-between px-3">
+                    <div className="flex-1 h-[42px] border border-[#E8E2D8] bg-white rounded-md flex items-center justify-between px-3 shadow-2xs">
                       <button
                         type="button"
                         onClick={() => {
@@ -821,7 +821,7 @@ const ProductDetail: React.FC = () => {
                             toast.success(`Removed from cart`);
                           }
                         }}
-                        className="w-7 h-7 flex items-center justify-center hover:bg-stone-100 rounded text-stone-700 transition cursor-pointer"
+                        className="w-7 h-7 flex items-center justify-center hover:bg-stone-100 active:scale-90 rounded text-stone-700 transition cursor-pointer touch-manipulation"
                         aria-label="Decrease cart quantity"
                       >
                         <Minus size={12} />
@@ -832,7 +832,7 @@ const ProductDetail: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => updateQuantity(cartItemForProduct!.id, quantityInCart + 1)}
-                        className="w-7 h-7 flex items-center justify-center hover:bg-stone-100 rounded text-stone-700 transition cursor-pointer"
+                        className="w-7 h-7 flex items-center justify-center hover:bg-stone-100 active:scale-90 rounded text-stone-700 transition cursor-pointer touch-manipulation"
                         aria-label="Increase cart quantity"
                       >
                         <Plus size={12} />
@@ -864,7 +864,7 @@ const ProductDetail: React.FC = () => {
                   <button
                     type="button"
                     onClick={handleWhatsAppOrderProduct}
-                    className="inline-flex items-center gap-1.5 text-[#1E7E34] hover:underline cursor-pointer"
+                    className="inline-flex items-center gap-1.5 text-[#C86B4C] hover:text-[#B35E42] hover:underline cursor-pointer"
                   >
                     <MessageCircle size={13} />
                     <span>Order via WhatsApp</span>

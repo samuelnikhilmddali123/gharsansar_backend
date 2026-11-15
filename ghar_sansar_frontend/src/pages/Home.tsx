@@ -1,6 +1,6 @@
 // src/pages/Home.tsx
 
-import React, { useState } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 
 import { Link, useNavigate } from "react-router-dom";
 
@@ -24,51 +24,241 @@ import {
   Phone,
   MessageCircle,
   CheckCircle2,
-
+  ShoppingBag,
+  Package,
+  Heart,
+  ChevronRight,
+  Flame,
 
 } from "lucide-react";
 
 import { motion, AnimatePresence } from "framer-motion";
 
 import toast from "react-hot-toast";
+import { useProducts, Product } from "../context/ProductContext";
+import ProductCard from "../components/ProductCard";
+
+// Quick Product Categories (Top 6 Selected Lines: Sonu, Cello, Milton, Kondapalli Toys, Harshdeep, German Silver)
+const quickProductCategories = [
+  {
+    title: "Sonu Cookware",
+    count: "17+ Triply Items",
+    image: "/products/sonu_steel_products/sonu_2_tier_steamer_with_glass_lid_20_cm.webp",
+    link: "/products?category=sonu_steel_products",
+  },
+  {
+    title: "Cello Collection",
+    count: "24+ Dining Sets",
+    image: "/products/cello/Complete Blue Floral Cello Dinnerware Set.webp",
+    link: "/products?category=Cello",
+  },
+  {
+    title: "Milton Bottles",
+    count: "160+ Thermosteel",
+    image: "/products/Milton Water Bottle/Milton Classic Thermosteel Bottle – Silver.webp",
+    link: "/products?category=Milton%20Water%20Bottles",
+  },
+  {
+    title: "Kondapalli Toys",
+    count: "33+ Heritage Toys",
+    image: "/products/kondapallibommalu/kondapalli_wooden_ambari_elephant_decorative_showpiece_with_glass_case.webp",
+    link: "/products?category=Kondapalli%20Toys",
+  },
+  {
+    title: "Harshdeep Planters",
+    count: "80+ Designer Pots",
+    image: "/products/harshdeep products/Harshdeep Bello Round Planter 30 (30x25 cm).webp",
+    link: "/products?category=Harshdeep%20Planters",
+  },
+  {
+    title: "German Silver",
+    count: "27+ Pooja & Gifts",
+    image: "/products/german_silver_and_more/250_ml_silver_glow_german_silver_serving_bowl_spoon_set.webp",
+    link: "/products?category=German%20Silver%20%26%20More",
+  },
+];
+
+// Quick Interior Categories (6 Balanced Categories)
+const quickInteriorCategories = [
+  {
+    title: "Wallpaper Rolls",
+    count: "120+ Designs",
+    image: "/images/design/cat_wallpaper.webp",
+    link: "/interior-design?category=Wallpaper%20Rolls",
+  },
+  {
+    title: "Wall Art Effects",
+    count: "85+ Designs",
+    image: "/images/design/cat_wallart.webp",
+    link: "/interior-design?category=Wall%20Art%20Effect",
+  },
+  {
+    title: "Vinyl Flooring",
+    count: "90+ Designs",
+    image: "/images/design/cat_vinyl.webp",
+    link: "/interior-design?category=Vinyl%20Flooring",
+  },
+  {
+    title: "3D Wallpapers",
+    count: "100+ Designs",
+    image: "/images/design/cat_3d.webp",
+    link: "/interior-design?category=3d%20Wallpapers",
+  },
+  {
+    title: "Vertical Garden",
+    count: "60+ Designs",
+    image: "/images/design/cat_garden.webp",
+    link: "/interior-design?category=Natural%20Vertical%20Garden",
+  },
+  {
+    title: "Return Gifts",
+    count: "150+ Gifts",
+    image: "/images/design/cat_gifts.webp",
+    link: "/return-gifts",
+  },
+];
+
+// Isolated & Memoized Category Strip to prevent parent re-renders on mobile
+const CategoryRotatingStrip: React.FC = React.memo(() => {
+  const categorySectionRef = useRef<HTMLElement>(null);
+  const [cardModes, setCardModes] = useState<Array<"interiors" | "products">>([
+    "interiors",
+    "interiors",
+    "interiors",
+    "interiors",
+    "interiors",
+    "interiors",
+  ]);
+  const [isSectionInView, setIsSectionInView] = useState(false);
+
+  useEffect(() => {
+    const el = categorySectionRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        setIsSectionInView(entry.isIntersecting);
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!isSectionInView) return;
+
+    setCardModes(["interiors", "interiors", "interiors", "interiors", "interiors", "interiors"]);
+
+    const timeouts: NodeJS.Timeout[] = [];
+    let isCancelled = false;
+
+    const flipCard = (index: number, mode: "interiors" | "products") => {
+      setCardModes((prev) => {
+        const next = [...prev];
+        next[index] = mode;
+        return next;
+      });
+    };
+
+    const STAGGER = 300;
+    const HOLD_TIME = 2000;
+
+    const scheduleWave = (targetMode: "interiors" | "products", startDelay: number) => {
+      if (isCancelled) return;
+
+      for (let i = 0; i < 6; i++) {
+        const t = setTimeout(() => {
+          if (!isCancelled) {
+            flipCard(i, targetMode);
+          }
+        }, startDelay + i * STAGGER);
+        timeouts.push(t);
+      }
+
+      const nextDelay = startDelay + 5 * STAGGER + HOLD_TIME;
+      const nextMode = targetMode === "interiors" ? "products" : "interiors";
+
+      const waveTimer = setTimeout(() => {
+        if (!isCancelled) {
+          scheduleWave(nextMode, 0);
+        }
+      }, nextDelay);
+      timeouts.push(waveTimer);
+    };
+
+    scheduleWave("products", 500);
+
+    return () => {
+      isCancelled = true;
+      timeouts.forEach((t) => clearTimeout(t));
+    };
+  }, [isSectionInView]);
+
+  return (
+    <section ref={categorySectionRef} className="w-full bg-[#FAF7F2] py-4 sm:py-6">
+      <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 sm:gap-3.5 lg:gap-4">
+          {[0, 1, 2, 3, 4, 5].map((index) => {
+            const mode = cardModes[index] || "interiors";
+            const item = mode === "products" ? quickProductCategories[index] : quickInteriorCategories[index];
+            if (!item) return null;
+
+            return (
+              <Link
+                key={index}
+                to={item.link}
+                className="group flex flex-col items-center cursor-pointer text-center bg-white hover:bg-white rounded-2xl p-2.5 sm:p-3 border border-[#E8E2D8] hover:border-[#C86B4C]/60 shadow-[0_4px_16px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_28px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 relative overflow-hidden"
+              >
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={item.title}
+                    initial={{ opacity: 0, scale: 0.92, y: 6 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.92, y: -6 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    className="w-full flex flex-col items-center"
+                  >
+                    <div className="w-full aspect-square rounded-xl overflow-hidden bg-white border border-[#F0EAE1] p-2 flex items-center justify-center shadow-2xs">
+                      <img
+                        src={item.image}
+                        alt={item.title}
+                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                        loading="lazy"
+                      />
+                    </div>
+                    <span className="font-poppins text-xs sm:text-[13px] font-semibold text-gray-900 mt-2.5 group-hover:text-[#C86B4C] transition-colors leading-tight truncate w-full px-1">
+                      {item.title}
+                    </span>
+                    <span className="font-poppins text-[10.5px] text-gray-500 font-normal mt-0.5">
+                      {item.count}
+                    </span>
+                  </motion.div>
+                </AnimatePresence>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+});
 
 const Home: React.FC = () => {
 
   const navigate = useNavigate();
+  const { products, loading: productsLoading } = useProducts();
 
   // Hero Carousel State
 
   const [currentSlide, setCurrentSlide] = useState(0);
 
+  // Featured Products Tab State
+  const [activeProductTab, setActiveProductTab] = useState<string>("all");
+
   const heroSlides = [
-
-    {
-
-      kicker: "BEAUTIFUL SPACES",
-
-      titleLine1: "Best Interior",
-
-      titleLine2: "Designers in",
-
-      highlightLine1: "Andhra Pradesh",
-
-      highlightLine2: "& Telangana",
-
-      description:
-
-        "Transform your space into a story of comfort, elegance, and timeless design with bespoke décor collections and award-winning interior design services.",
-
-      image: "/images/design/exact_hero_vibrant_clean.webp",
-
-      primaryCta: "Explore Our Designs",
-
-      primaryLink: "/interior-design",
-
-      secondaryCta: "Shop Now",
-
-      secondaryLink: "/products",
-
-    },
 
     {
 
@@ -78,9 +268,9 @@ const Home: React.FC = () => {
 
       titleLine2: "Tailored for",
 
-      highlightLine1: "Vijayawada &",
+      highlightLine1: "Andhra Pradesh",
 
-      highlightLine2: "Amaravati",
+      highlightLine2: "& Telangana",
 
       description:
 
@@ -92,7 +282,35 @@ const Home: React.FC = () => {
 
       primaryLink: "/interior-design",
 
-      secondaryCta: "View Catalog",
+      secondaryCta: "Shop Products",
+
+      secondaryLink: "/products",
+
+    },
+
+    {
+
+      kicker: "PREMIUM HOME STORE",
+
+      titleLine1: "650+ Handpicked",
+
+      titleLine2: "Home Essentials &",
+
+      highlightLine1: "Cookware, Décor",
+
+      highlightLine2: "& Planters",
+
+      description:
+
+        "Discover Sonu Triply Cookware, Cello dinnerware, Harshadeep designer planters, cascading water fountains, and authentic Kondapalli handcrafted toys.",
+
+      image: "/images/design/exact_hero_vibrant_clean.webp",
+
+      primaryCta: "Shop All Products",
+
+      primaryLink: "/products",
+
+      secondaryCta: "Explore Collections",
 
       secondaryLink: "/products",
 
@@ -128,95 +346,150 @@ const Home: React.FC = () => {
 
   ];
 
-  // Quick 7 Categories with 1264x848 ultra-high-definition studio images
 
-  const quickCategories = [
 
+  // Brand Spotlight Cards (Distinct Products Different from Top Category Strip)
+  const brandSpotlights = [
     {
-
-      title: "Wallpaper Rolls",
-
-      count: "120+ Designs",
-
-      image: "/images/design/cat_wallpaper.webp",
-
-      link: "/interior-design?category=Wallpaper%20Rolls",
-
+      title: "Sonu Triply Multi-Kadai",
+      tagline: "8-Piece Heavy Triply Kadai with Steamer",
+      count: "17+ Products",
+      image: "/products/sonu_steel_products/sonu_multi_kadai_8_pcs.webp",
+      link: "/products?category=sonu_steel_products",
+      badge: "Triply Multi-Kadai",
     },
-
     {
-
-      title: "Wall Art Effects",
-
-      count: "85+ Designs",
-
-      image: "/images/design/cat_wallart.webp",
-
-      link: "/interior-design?category=Wall%20Art%20Effect",
-
+      title: "Cello Porcelain Tea Set",
+      tagline: "Artisanal floral teapot, cups & saucer collection",
+      count: "24+ Products",
+      image: "/products/cello/Blue Floral Tea Set Display.webp",
+      link: "/products?category=Cello",
+      badge: "Tea & Drinkware",
     },
-
     {
-
-      title: "Vinyl Flooring",
-
-      count: "90+ Designs",
-
-      image: "/images/design/cat_vinyl.webp",
-
-      link: "/interior-design?category=Vinyl%20Flooring",
-
+      title: "Harshadeep Gold-Rim Planters",
+      tagline: "Modern ribbed indoor & balcony planter",
+      count: "80+ Designs",
+      image: "/products/Harshadeep pots/Modern ribbed planter with gold rim.webp",
+      link: "/products?category=Harshdeep%20Planters",
+      badge: "Gold Rim Pots",
     },
-
     {
-
-      title: "3D Wallpapers",
-
-      count: "100+ Designs",
-
-      image: "/images/design/cat_3d.webp",
-
-      link: "/interior-design?category=3d%20Wallpapers",
-
+      title: "Kondapalli Arjuna Chariot",
+      tagline: "Handcrafted mythological wooden sculpture",
+      count: "33+ Artworks",
+      image: "/products/kondapallibommalu/kondapalli_krishna_arjuna_chariot.webp",
+      link: "/products?category=Kondapalli%20Toys",
+      badge: "Heritage Chariot",
     },
-
-    {
-
-      title: "Vertical Garden",
-
-      count: "60+ Designs",
-
-      image: "/images/design/cat_garden.webp",
-
-      link: "/interior-design?category=Natural%20Vertical%20Garden",
-
-    },
-
-    {
-
-      title: "Interior Decor",
-
-      count: "250+ Products",
-
-      image: "/images/design/cat_decor.webp",
-
-      link: "/products",
-
-    },
-
-    {
-
-      title: "Return Gifts",
-
-      count: "150+ Gifts",
-
-      image: "/images/design/cat_gifts.webp",
-
-      link: "/return-gifts",
-
-    },
-
   ];
+
+  // Product Filter Tabs
+  const productFilterTabs = [
+    { id: "all", label: "🔥 All Bestsellers" },
+    { id: "cookware", label: "🍳 Cookware & Kitchen" },
+    { id: "planters", label: "🪴 Planters & Garden" },
+    { id: "fountains", label: "🌊 Fountains & Décor" },
+    { id: "pooja", label: "✨ Spiritual & Gifts" },
+  ];
+
+  // Filtered products list for homepage showcase
+  const featuredProductList = useMemo(() => {
+    if (!products || products.length === 0) return [];
+
+    if (activeProductTab === "cookware") {
+      return products
+        .filter((p) => {
+          const cat = (p.category || "").toLowerCase();
+          return (
+            cat.includes("sonu") ||
+            cat.includes("cello") ||
+            cat.includes("lunch") ||
+            cat.includes("bottle")
+          );
+        })
+        .slice(0, 8);
+    }
+
+    if (activeProductTab === "planters") {
+      return products
+        .filter((p) => {
+          const cat = (p.category || "").toLowerCase();
+          return (
+            cat.includes("harsh") ||
+            cat.includes("ceramic") ||
+            cat.includes("plant") ||
+            cat.includes("garden")
+          );
+        })
+        .slice(0, 8);
+    }
+
+    if (activeProductTab === "fountains") {
+      return products
+        .filter((p) => {
+          const cat = (p.category || "").toLowerCase();
+          return (
+            cat.includes("fountain") ||
+            cat.includes("clock") ||
+            cat.includes("aquarium") ||
+            cat.includes("decor")
+          );
+        })
+        .slice(0, 8);
+    }
+
+    if (activeProductTab === "pooja") {
+      return products
+        .filter((p) => {
+          const cat = (p.category || "").toLowerCase();
+          return (
+            cat.includes("silver") ||
+            cat.includes("kondapalli") ||
+            cat.includes("idol") ||
+            cat.includes("gift") ||
+            cat.includes("rajasthan")
+          );
+        })
+        .slice(0, 8);
+    }
+
+    // Default "all" bestsellers: pick 1 product from each major category to showcase broad variety
+    const sampleCategories = [
+      "sonu",
+      "cello",
+      "harsh",
+      "fountain",
+      "silver",
+      "kondapalli",
+      "ceramic",
+      "bottle",
+    ];
+    const picked: Product[] = [];
+    const usedIds = new Set<string>();
+
+    for (const key of sampleCategories) {
+      const match = products.find(
+        (p) => !usedIds.has(p.id) && (p.category || "").toLowerCase().includes(key)
+      );
+      if (match) {
+        picked.push(match);
+        usedIds.add(match.id);
+      }
+    }
+
+    for (const p of products) {
+      if (picked.length >= 8) break;
+      if (!usedIds.has(p.id)) {
+        picked.push(p);
+        usedIds.add(p.id);
+      }
+    }
+
+    return picked;
+  }, [products, activeProductTab]);
+
+
 
   // 3 Process Steps
 
@@ -606,16 +879,16 @@ const Home: React.FC = () => {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-xs sm:text-sm md:text-[14.5px] text-gray-200 font-normal leading-relaxed max-w-lg mb-8"
+              className="text-xs sm:text-sm md:text-[14.5px] text-gray-200 font-normal leading-relaxed max-w-lg mb-5 sm:mb-8 line-clamp-3 sm:line-clamp-none"
             >
               {heroSlides[currentSlide].description}
             </motion.p>
 
             {/* CTA Buttons */}
-            <div className="flex flex-wrap items-center gap-4 sm:gap-5">
+            <div className="flex flex-wrap items-center gap-3 sm:gap-4 pt-1 sm:pt-0">
               <Link
                 to={heroSlides[currentSlide].primaryLink}
-                className="bg-[#C86B4C] hover:bg-[#B35E42] text-white px-7 sm:px-8 py-3.5 rounded-full font-medium tracking-wider text-xs uppercase inline-flex items-center space-x-2.5 transition-all shadow-md hover:shadow-lg hover:scale-102"
+                className="bg-[#C86B4C] hover:bg-[#B35E42] text-white px-5 sm:px-8 py-2.5 sm:py-3.5 rounded-full font-medium tracking-wider text-[11px] sm:text-xs uppercase inline-flex items-center space-x-2 transition-all shadow-md hover:shadow-lg active:scale-95"
               >
                 <span>{heroSlides[currentSlide].primaryCta}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -623,196 +896,272 @@ const Home: React.FC = () => {
 
               <Link
                 to={heroSlides[currentSlide].secondaryLink}
-                className="border border-white/80 hover:border-white text-white hover:bg-white/10 px-7 sm:px-8 py-3.5 rounded-full font-medium tracking-wider text-xs uppercase inline-flex items-center transition-all"
+                className="border border-white/80 hover:border-white text-white hover:bg-white/10 px-5 sm:px-8 py-2.5 sm:py-3.5 rounded-full font-medium tracking-wider text-[11px] sm:text-xs uppercase inline-flex items-center transition-all active:scale-95"
               >
                 <span>{heroSlides[currentSlide].secondaryCta}</span>
               </Link>
             </div>
           </div>
 
-
           {/* Bottom Controls Bar: Left Slider Controls + Right Watermark */}
-
-          <div className="flex items-end justify-between pt-8">
-
+          <div className="flex items-end justify-between pt-6 sm:pt-8">
             {/* Slider Controls */}
-
             <div className="flex items-center space-x-4 text-white">
-
               <div className="flex items-center space-x-2.5 text-xs font-poppins font-bold">
-
                 {heroSlides.map((_, idx) => (
-
                   <button
-
                     key={idx}
-
                     onClick={() => setCurrentSlide(idx)}
-
-                    className={`transition-colors cursor-pointer ${idx === currentSlide
-
+                    className={`transition-colors cursor-pointer ${
+                      idx === currentSlide
                         ? "text-white font-bold"
-
                         : "text-white/40 hover:text-white/70 font-semibold"
-
-                      }`}
-
+                    }`}
                   >
-
                     0{idx + 1}
-
                   </button>
-
                 ))}
-
               </div>
 
               {/* Progress Line */}
-
               <div className="w-16 h-[2.5px] bg-white/20 rounded-full overflow-hidden">
-
                 <div
-
                   className="h-full bg-[#C86B4C] transition-all duration-500 rounded-full"
-
                   style={{
-
                     width: `${((currentSlide + 1) / heroSlides.length) * 100}%`,
-
                   }}
-
                 />
-
               </div>
 
               {/* Arrow Buttons */}
-
               <div className="flex items-center space-x-2 text-white/80">
-
                 <button
-
                   onClick={prevSlide}
-
                   aria-label="Previous slide"
-
                   className="w-7 h-7 rounded-full border border-white/30 hover:border-white text-white flex items-center justify-center transition-colors cursor-pointer"
-
                 >
-
                   <ArrowLeft className="w-3.5 h-3.5" />
-
                 </button>
-
                 <button
-
                   onClick={nextSlide}
-
                   aria-label="Next slide"
-
                   className="w-7 h-7 rounded-full border border-white/30 hover:border-white text-white flex items-center justify-center transition-colors cursor-pointer"
-
                 >
-
                   <ArrowRight className="w-3.5 h-3.5" />
-
                 </button>
-
               </div>
-
             </div>
 
             {/* Right Brand Watermark */}
-
             <div className="hidden sm:flex items-center space-x-3 text-right">
-
               <div className="w-[1.5px] h-11 bg-white/40" />
-
               <div className="font-sans text-[10px] tracking-[0.24em] text-white/90 uppercase font-light leading-tight text-left">
-
                 CRAFTING
-
                 <br />
-
                 HOMES
-
                 <br />
-
                 THAT FEEL
-
                 <br />
-
                 LIKE YOU
-
               </div>
-
             </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
+    {/* Mobile Quick Action Buttons ("Home Buttons" Bar for Phone Screens) */}
+    <div className="lg:hidden w-full px-3.5 pt-4 pb-2 bg-[#FAF7F2]">
+      <div className="grid grid-cols-2 gap-2.5">
+        <Link
+          to="/products"
+          className="flex items-center gap-2.5 p-3 rounded-2xl bg-white border border-[#E8E2D8] shadow-2xs hover:border-[#C86B4C] transition-all"
+        >
+          <div className="w-9 h-9 rounded-xl bg-[#FAF2ED] text-[#C86B4C] flex items-center justify-center shrink-0">
+            <ShoppingBag size={18} />
+          </div>
+          <div className="min-w-0 text-left">
+            <p className="text-xs font-semibold text-gray-900 leading-tight truncate">Shop Products</p>
+            <p className="text-[10px] text-[#C86B4C] font-medium leading-tight">650+ In Store</p>
+          </div>
+        </Link>
+
+        <Link
+          to="/interior-design"
+          className="flex items-center gap-2.5 p-3 rounded-2xl bg-white border border-[#E8E2D8] shadow-2xs hover:border-[#C86B4C] transition-all"
+        >
+          <div className="w-9 h-9 rounded-xl bg-[#FAF2ED] text-[#C86B4C] flex items-center justify-center shrink-0">
+            <Sparkles size={18} />
+          </div>
+          <div className="min-w-0 text-left">
+            <p className="text-xs font-semibold text-gray-900 leading-tight truncate">Interior Design</p>
+            <p className="text-[10px] text-[#C86B4C] font-medium leading-tight">Bespoke Works</p>
+          </div>
+        </Link>
+
+        <Link
+          to="/products?category=sonu_steel_products"
+          className="flex items-center gap-2.5 p-3 rounded-2xl bg-white border border-[#E8E2D8] shadow-2xs hover:border-[#C86B4C] transition-all"
+        >
+          <div className="w-9 h-9 rounded-xl bg-[#FAF2ED] text-[#C86B4C] flex items-center justify-center shrink-0">
+            <Package size={18} />
+          </div>
+          <div className="min-w-0 text-left">
+            <p className="text-xs font-semibold text-gray-900 leading-tight truncate">Sonu Cookware</p>
+            <p className="text-[10px] text-gray-500 font-normal leading-tight">Triply Steel</p>
+          </div>
+        </Link>
+
+        <Link
+          to="/return-gifts"
+          className="flex items-center gap-2.5 p-3 rounded-2xl bg-white border border-[#E8E2D8] shadow-2xs hover:border-[#C86B4C] transition-all"
+        >
+          <div className="w-9 h-9 rounded-xl bg-[#FAF2ED] text-[#C86B4C] flex items-center justify-center shrink-0">
+            <Heart size={18} />
+          </div>
+          <div className="min-w-0 text-left">
+            <p className="text-xs font-semibold text-gray-900 leading-tight truncate">Festive Gifts</p>
+            <p className="text-[10px] text-gray-500 font-normal leading-tight">Silver & Toys</p>
+          </div>
+        </Link>
+      </div>
+    </div>
+
+    {/* =========================================================================
+        2. DUAL CATEGORY STRIP (Auto-Rotating One-by-One: Products & Interiors)
+        ========================================================================= */}
+    <CategoryRotatingStrip />
+
+    {/* =========================================================================
+        FEATURED PRODUCTS SHOWCASE ("650+ Products for Every Indian Home")
+        ========================================================================= */}
+    <section className="w-full bg-[#FAF7F2] pt-6 pb-8 sm:pt-8 sm:pb-10 border-b border-[#E8E2D8]">
+      <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12">
+        {/* Section Header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6 sm:mb-8 pb-4 border-b border-[#E8E2D8]/70">
+          <div>
+            <span className="text-[11px] font-semibold tracking-[0.24em] text-[#C86B4C] uppercase block mb-1.5">
+              CURATED PRODUCTS &amp; HOME ESSENTIALS
+            </span>
+            <h2 className="font-poppins text-2xl sm:text-3xl lg:text-4xl text-gray-950 font-normal tracking-tight">
+              Over 650+ Products For Your Home
+            </h2>
+            <p className="text-xs sm:text-sm text-gray-600 mt-1 max-w-xl">
+              From premium Sonu Triply Cookware and Cello dining sets to Harshadeep architectural planters, serene water fountains, and GI-certified Kondapalli wooden art.
+            </p>
           </div>
 
+          <Link
+            to="/products"
+            className="inline-flex items-center gap-2 bg-[#C86B4C] hover:bg-[#B35E42] text-white px-5 py-2.5 rounded-full text-xs font-semibold tracking-wider uppercase transition-all shadow-xs self-start md:self-auto shrink-0"
+          >
+            <span>VIEW ALL 650+ PRODUCTS</span>
+            <ArrowRight size={14} />
+          </Link>
         </div>
 
-        </div>
-      </section>
-
-      {/* =========================================================================
-
-          2. CATEGORY STRIP (7 Cards Horizontal Row directly below hero)
-
-          ========================================================================= */}
-
-      <section className="w-full bg-[#FAF7F2] pt-6 pb-2 sm:pt-8 sm:pb-3">
-
-        <div className="w-full max-w-[1600px] mx-auto px-5 sm:px-8 lg:px-12">
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-3 sm:gap-3.5 lg:gap-4">
-
-            {quickCategories.map((cat) => (
-
-              <Link
-
-                key={cat.title}
-
-                to={cat.link}
-
-                className="group flex flex-col items-center cursor-pointer text-center bg-white hover:bg-white rounded-2xl p-2.5 sm:p-3 border border-[#E8E2D8] hover:border-[#C86B4C]/60 shadow-[0_4px_16px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_28px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300"
-
-              >
-
-                <div className="w-full aspect-[1.1/1] rounded-xl overflow-hidden bg-stone-100 shadow-2xs">
-
-                  <img
-
-                    src={cat.image}
-
-                    alt={cat.title}
-
-                    className="w-full h-full object-cover group-hover:scale-106 transition-transform duration-500"
-
-                  />
-
+        {/* Top Brand Spotlight Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 lg:gap-5 mb-8">
+          {brandSpotlights.map((brand) => (
+            <Link
+              key={brand.title}
+              to={brand.link}
+              className="group relative rounded-2xl overflow-hidden bg-white border border-[#E8E2D8] hover:border-[#C86B4C]/70 shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col"
+            >
+              <div className="w-full aspect-[16/11] overflow-hidden bg-white border-b border-[#F0EAE1] relative p-3 flex items-center justify-center">
+                <img
+                  src={brand.image}
+                  alt={brand.title}
+                  className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
+                />
+                <span className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-xs text-[10px] font-medium text-white">
+                  {brand.badge}
+                </span>
+              </div>
+              <div className="p-3 sm:p-3.5 flex flex-col justify-between flex-1">
+                <div>
+                  <h3 className="font-poppins text-xs sm:text-sm font-semibold text-gray-900 group-hover:text-[#C86B4C] transition-colors leading-snug">
+                    {brand.title}
+                  </h3>
+                  <p className="text-[11px] text-gray-500 mt-0.5 line-clamp-1">
+                    {brand.tagline}
+                  </p>
                 </div>
-
-                <span className="font-poppins text-xs sm:text-[13px] font-semibold text-gray-900 mt-2.5 group-hover:text-[#C86B4C] transition-colors leading-tight">
-
-                  {cat.title}
-
-                </span>
-
-                <span className="font-poppins text-[10.5px] text-gray-500 font-normal mt-0.5">
-
-                  {cat.count}
-
-                </span>
-
-              </Link>
-
-            ))}
-
-          </div>
-
+                <div className="flex items-center justify-between pt-2 mt-2 border-t border-[#F0EAE1] text-[11px]">
+                  <span className="text-[#C86B4C] font-semibold">{brand.count}</span>
+                  <span className="text-gray-400 group-hover:text-[#C86B4C] group-hover:translate-x-0.5 transition-all inline-flex items-center">
+                    Explore &rarr;
+                  </span>
+                </div>
+              </div>
+            </Link>
+          ))}
         </div>
 
-      </section>
+        {/* Interactive Filter Tabs for Featured Products */}
+        <div
+          className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-2 scrollbar-none no-scrollbar mb-6"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        >
+          {productFilterTabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveProductTab(tab.id)}
+              className={`px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-medium whitespace-nowrap transition-all cursor-pointer ${
+                activeProductTab === tab.id
+                  ? "bg-gray-950 text-white shadow-xs"
+                  : "bg-white text-gray-700 hover:bg-stone-100 border border-[#E8E2D8]"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Products Grid */}
+        {productsLoading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="animate-pulse bg-white rounded-2xl p-3 border border-[#E8E2D8] h-64 flex flex-col justify-between">
+                <div className="w-full h-36 bg-stone-200 rounded-xl" />
+                <div className="space-y-2 mt-3">
+                  <div className="h-3 bg-stone-200 rounded w-3/4" />
+                  <div className="h-3 bg-stone-200 rounded w-1/2" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : featuredProductList.length > 0 ? (
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
+            {featuredProductList.map((product, idx) => (
+              <ProductCard key={product.id || idx} product={product} index={idx} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-10 bg-white rounded-2xl border border-[#E8E2D8]">
+            <p className="text-sm text-gray-500">Products currently loading or updating...</p>
+          </div>
+        )}
+
+        {/* Bottom Banner */}
+        <div className="mt-8 p-4 sm:p-6 bg-gradient-to-r from-[#2A231F] to-[#1C1816] rounded-2xl text-white flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="text-center sm:text-left">
+            <p className="font-poppins text-sm sm:text-base font-semibold text-white">
+              Looking for wholesale, bulk orders or custom return gifting?
+            </p>
+            <p className="text-xs text-gray-300 mt-0.5">
+              Special wholesale pricing on Sonu Cookware, Cello and handcrafted Kondapalli toys with custom gift packing.
+            </p>
+          </div>
+          <Link
+            to="/return-gifts"
+            className="bg-[#C86B4C] hover:bg-[#B35E42] text-white px-5 py-2.5 rounded-full text-xs font-semibold tracking-wider uppercase whitespace-nowrap transition-all shrink-0"
+          >
+            Explore Return Gifts
+          </Link>
+        </div>
+      </div>
+    </section>
 
       {/* =========================================================================
 

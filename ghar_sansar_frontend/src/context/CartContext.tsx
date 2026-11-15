@@ -177,153 +177,127 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const token = getAuthToken();
     const qtyToAdd = item.quantity || (item.isReturnGift ? 50 : 1);
 
-    if (token) {
-      try {
-        const payload = {
-          productId: item.id,
-          id: item.id,
-          name: item.name,
-          price: item.price,
-          quantity: qtyToAdd,
-          image: item.image,
-          selectedSize: item.selectedSize,
-          selectedColor: item.selectedColor,
-          isReturnGift: item.isReturnGift,
-          stock: item.stock
-        };
-
-        const res = await axios.post(`${BACKEND_URL}/v1/cart/items`, payload, {
-          headers: getAuthHeaders()
-        });
-
-        if (res.data.success && res.data.cart) {
-          const updatedItems = (res.data.cart.items || []).map((i: any) => ({
-            id: i.productId || i.id,
-            productId: i.productId || i.id,
-            name: i.name,
-            price: i.price,
-            quantity: i.quantity,
-            image: i.image,
-            selectedSize: i.selectedSize,
-            selectedColor: i.selectedColor,
-            isReturnGift: i.isReturnGift,
-            stock: i.stock
-          }));
-          setItems(updatedItems);
-          return;
-        }
-      } catch (err) {
-        console.error("Failed to add to remote cart:", err);
-      }
-    }
-
-    // Guest fallback / optimistic state update
+    // 1. Instant Optimistic Local State Update (0ms UI feedback)
     setItems(prev => {
       const existing = prev.find(i => i.id === item.id);
+      let updated: CartItem[];
       if (existing) {
         let newQty = existing.quantity + qtyToAdd;
         if (existing.stock !== undefined && newQty > existing.stock) {
           newQty = existing.stock;
         }
-        return prev.map(i =>
+        updated = prev.map(i =>
           i.id === item.id ? { ...i, quantity: newQty } : i
         );
+      } else {
+        updated = [...prev, { ...item, quantity: qtyToAdd }];
       }
-      return [...prev, { ...item, quantity: qtyToAdd }];
+      try {
+        localStorage.setItem('cart', JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
     });
+
+    // 2. Background Asynchronous Sync to MongoDB Atlas (Non-blocking)
+    if (token) {
+      const payload = {
+        productId: item.id,
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        quantity: qtyToAdd,
+        image: item.image,
+        selectedSize: item.selectedSize,
+        selectedColor: item.selectedColor,
+        isReturnGift: item.isReturnGift,
+        stock: item.stock
+      };
+
+      axios.post(`${BACKEND_URL}/v1/cart/items`, payload, {
+        headers: getAuthHeaders()
+      }).catch(err => {
+        console.error("Background cart sync failed:", err);
+      });
+    }
   };
 
   const removeFromCart = async (id: string) => {
     const token = getAuthToken();
-    if (token) {
-      try {
-        const res = await axios.delete(`${BACKEND_URL}/v1/cart/items/${encodeURIComponent(id)}`, {
-          headers: getAuthHeaders()
-        });
-        if (res.data.success && res.data.cart) {
-          const updatedItems = (res.data.cart.items || []).map((i: any) => ({
-            id: i.productId || i.id,
-            productId: i.productId || i.id,
-            name: i.name,
-            price: i.price,
-            quantity: i.quantity,
-            image: i.image,
-            selectedSize: i.selectedSize,
-            selectedColor: i.selectedColor,
-            isReturnGift: i.isReturnGift,
-            stock: i.stock
-          }));
-          setItems(updatedItems);
-          return;
-        }
-      } catch (err) {
-        console.error("Failed to remove from remote cart:", err);
-      }
-    }
 
-    setItems(prev => prev.filter(i => i.id !== id));
+    // 1. Instant Optimistic Local State Update (0ms UI feedback)
+    setItems(prev => {
+      const updated = prev.filter(i => i.id !== id);
+      try {
+        localStorage.setItem('cart', JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+
+    // 2. Background Asynchronous Sync to MongoDB Atlas (Non-blocking)
+    if (token) {
+      axios.delete(`${BACKEND_URL}/v1/cart/items/${encodeURIComponent(id)}`, {
+        headers: getAuthHeaders()
+      }).catch(err => {
+        console.error("Background remove from cart sync failed:", err);
+      });
+    }
   };
 
   const updateQuantity = async (id: string, quantity: number) => {
     const token = getAuthToken();
-    if (token) {
-      try {
-        const res = await axios.put(
-          `${BACKEND_URL}/v1/cart/items/${encodeURIComponent(id)}`,
-          { quantity },
-          { headers: getAuthHeaders() }
-        );
-        if (res.data.success && res.data.cart) {
-          const updatedItems = (res.data.cart.items || []).map((i: any) => ({
-            id: i.productId || i.id,
-            productId: i.productId || i.id,
-            name: i.name,
-            price: i.price,
-            quantity: i.quantity,
-            image: i.image,
-            selectedSize: i.selectedSize,
-            selectedColor: i.selectedColor,
-            isReturnGift: i.isReturnGift,
-            stock: i.stock
-          }));
-          setItems(updatedItems);
-          return;
-        }
-      } catch (err) {
-        console.error("Failed to update remote cart quantity:", err);
-      }
-    }
 
-    setItems(prev =>
-      prev.map(i => {
-        if (i.id === id) {
-          let newQty = quantity;
-          if (i.isReturnGift && newQty < 50 && newQty > 0) {
-            newQty = 50;
+    // 1. Instant Optimistic Local State Update (0ms UI feedback)
+    setItems(prev => {
+      let updated: CartItem[];
+      if (quantity <= 0) {
+        updated = prev.filter(i => i.id !== id);
+      } else {
+        updated = prev.map(i => {
+          if (i.id === id) {
+            let newQty = quantity;
+            if (i.isReturnGift && newQty < 50 && newQty > 0) {
+              newQty = 50;
+            }
+            if (i.stock !== undefined && newQty > i.stock) {
+              newQty = i.stock;
+            }
+            return { ...i, quantity: newQty };
           }
-          if (i.stock !== undefined && newQty > i.stock) {
-            newQty = i.stock;
-          }
-          return { ...i, quantity: newQty };
-        }
-        return i;
-      })
-    );
+          return i;
+        });
+      }
+      try {
+        localStorage.setItem('cart', JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+
+    // 2. Background Asynchronous Sync to MongoDB Atlas (Non-blocking)
+    if (token) {
+      axios.put(
+        `${BACKEND_URL}/v1/cart/items/${encodeURIComponent(id)}`,
+        { quantity },
+        { headers: getAuthHeaders() }
+      ).catch(err => {
+        console.error("Background cart quantity sync failed:", err);
+      });
+    }
   };
 
   const clearCart = async () => {
     const token = getAuthToken();
-    if (token) {
-      try {
-        await axios.delete(`${BACKEND_URL}/v1/cart`, {
-          headers: getAuthHeaders()
-        });
-      } catch (err) {
-        console.error("Failed to clear remote cart:", err);
-      }
-    }
     setItems([]);
-    localStorage.removeItem('cart');
+    try {
+      localStorage.removeItem('cart');
+    } catch (e) {}
+
+    if (token) {
+      axios.delete(`${BACKEND_URL}/v1/cart`, {
+        headers: getAuthHeaders()
+      }).catch(err => {
+        console.error("Background clear cart sync failed:", err);
+      });
+    }
   };
 
   const totalItems = items.reduce((sum, item) => sum + (item.quantity || 0), 0);
