@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import toast from 'react-hot-toast';
 
 export interface WishlistItem {
   productId: string;
@@ -205,7 +204,6 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           setWishlist(res.data.wishlist || []);
           setItems(res.data.items || []);
           const wishlisted = Boolean(res.data.wishlisted);
-          toast.success(wishlisted ? "Saved to wishlist!" : "Removed from wishlist");
           return wishlisted;
         }
       } catch (err) {
@@ -219,12 +217,10 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       nextWishlisted = false;
       setWishlist(prev => prev.filter(id => id !== targetId));
       setItems(prev => prev.filter(it => it.productId !== targetId));
-      toast.success("Removed from wishlist");
     } else {
       nextWishlisted = true;
       setWishlist(prev => [...prev.filter(id => id !== targetId), targetId]);
       setItems(prev => [...prev.filter(it => it.productId !== targetId), itemObj]);
-      toast.success("Saved to wishlist!");
     }
 
     return nextWishlisted;
@@ -243,7 +239,6 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (res.data.success) {
           setWishlist(res.data.wishlist || []);
           setItems(res.data.items || []);
-          toast.success("Removed from wishlist");
           return;
         }
       } catch (err) {
@@ -253,7 +248,6 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     setWishlist(prev => prev.filter(id => id !== targetId));
     setItems(prev => prev.filter(it => it.productId !== targetId));
-    toast.success("Removed from wishlist");
   };
 
   return (

@@ -880,7 +880,6 @@ function CatalogCard({ product, index = 0 }: { product: any; index?: number }) {
     });
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 1200);
-    toast.success(`Added 50 x ${title} to cart!`);
   };
 
   const handleBuyNow = (e: React.MouseEvent) => {
@@ -915,7 +914,6 @@ function CatalogCard({ product, index = 0 }: { product: any; index?: number }) {
       updateQuantity(cartItem.id, quantityInCart - 10);
     } else {
       removeFromCart(cartItem.id);
-      toast.success(`Removed ${title} from cart`);
     }
   };
 

@@ -118,7 +118,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
     });
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 1200);
-    toast.success(`Added ${product.title?.replace(/_/g, " ")} to cart!`);
   };
 
   const handleIncrement = (e: React.MouseEvent) => {
@@ -144,7 +143,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
       updateQuantity(cartItem.id, quantityInCart - 1);
     } else {
       removeFromCart(cartItem.id);
-      toast.success(`Removed ${product.title?.replace(/_/g, " ")} from cart`);
     }
   };
 

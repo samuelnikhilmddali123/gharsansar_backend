@@ -41,7 +41,6 @@ const Cart: React.FC = () => {
 
   const handleRemove = (itemId: string, itemName: string) => {
     removeFromCart(itemId);
-    toast.success(`"${itemName.replace(/_/g, " ")}" removed from cart`);
   };
 
   const handleDecreaseQuantity = (itemId: string, currentQty: number, itemName: string, isReturnGift?: boolean) => {
@@ -52,7 +51,6 @@ const Cart: React.FC = () => {
     
     if (currentQty <= 1) {
       removeFromCart(itemId);
-      toast.success(`"${itemName.replace(/_/g, " ")}" removed from cart`);
     } else {
       updateQuantity(itemId, currentQty - 1);
     }

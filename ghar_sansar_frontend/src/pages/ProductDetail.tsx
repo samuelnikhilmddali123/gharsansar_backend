@@ -446,7 +446,6 @@ const ProductDetail: React.FC = () => {
       minQty: state?.isReturnGift ? 50 : 1,
       stock: product.stock
     });
-    toast.success(`Added ${quantity} ${quantity > 1 ? 'items' : 'item'} to your cart!`);
   };
 
   const handleBuyNow = () => {
@@ -818,7 +817,6 @@ const ProductDetail: React.FC = () => {
                             updateQuantity(cartItemForProduct!.id, quantityInCart - 1);
                           } else {
                             removeFromCart(cartItemForProduct!.id);
-                            toast.success(`Removed from cart`);
                           }
                         }}
                         className="w-7 h-7 flex items-center justify-center hover:bg-stone-100 active:scale-90 rounded text-stone-700 transition cursor-pointer touch-manipulation"

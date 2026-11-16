@@ -72,7 +72,6 @@ const Wishlist: React.FC = () => {
     setTimeout(() => {
       setAddedIds((prev) => ({ ...prev, [item.id]: false }));
     }, 1500);
-    toast.success(`"${cleanName}" added to cart!`);
   };
 
   const handleMoveAllToCart = async () => {
@@ -86,7 +85,6 @@ const Wishlist: React.FC = () => {
         stock: item.stock
       });
     }
-    toast.success("All items added to cart!");
   };
 
   if (loading && wishlist.length === 0) {
