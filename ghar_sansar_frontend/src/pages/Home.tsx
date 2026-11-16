@@ -322,11 +322,15 @@ const Home: React.FC = () => {
 
       titleLine1: "Everything your home needs",
 
-      titleLine2: "Available in one place",
+      titleLine2: "",
 
-      highlightLine1: "GHARSANSAR",
+      highlightLine1: "Available in one place",
 
-      highlightLine2: "",
+      highlight1Class: "text-[#C86B4C] italic font-serif",
+
+      highlightLine2: "GHARSANSAR",
+
+      highlight2Class: "text-[#C86B4C] font-semibold tracking-wider text-3xl sm:text-4xl lg:text-5xl uppercase",
 
       description:
 
@@ -870,7 +874,7 @@ const Home: React.FC = () => {
               {heroSlides[currentSlide].highlightLine1 && (
                 <>
                   <br />
-                  <span className="text-[#C86B4C]">
+                  <span className={heroSlides[currentSlide].highlight1Class || "text-[#C86B4C]"}>
                     {heroSlides[currentSlide].highlightLine1}
                   </span>
                 </>
@@ -878,7 +882,7 @@ const Home: React.FC = () => {
               {heroSlides[currentSlide].highlightLine2 && (
                 <>
                   <br />
-                  <span className="text-[#C86B4C]">
+                  <span className={heroSlides[currentSlide].highlight2Class || "text-[#C86B4C]"}>
                     {heroSlides[currentSlide].highlightLine2}
                   </span>
                 </>
