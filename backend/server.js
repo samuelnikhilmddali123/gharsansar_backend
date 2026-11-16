@@ -46,6 +46,15 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Universal URL sanitization: automatically rewrite duplicate /api/api/ prefixes to /api/
+app.use((req, res, next) => {
+  if (req.url && req.url.startsWith("/api/api/")) {
+    req.url = req.url.replace(/^\/api\/api\//, "/api/");
+  }
+  next();
+});
+
 // Handle malformed JSON body gracefully without uncaught SyntaxErrors
 app.use((err, req, res, next) => {
   if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {

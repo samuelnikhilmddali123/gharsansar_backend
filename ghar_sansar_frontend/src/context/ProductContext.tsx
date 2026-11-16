@@ -94,7 +94,7 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
         res = await axios.get(primaryUrl);
       } catch (e1) {
         try {
-          res = await axios.get(`${BACKEND_URL}/products`);
+          res = await axios.get("/api/products");
         } catch (e2) {
           res = await axios.get("/products.json");
         }
