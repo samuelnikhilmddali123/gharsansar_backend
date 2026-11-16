@@ -84,11 +84,14 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
     try {
       setLoading(true);
       setError(null);
-      console.log("Fetching products from backend:", `${BACKEND_URL}/api/products`);
+      // Clean base URL so we never produce duplicate /api/api/ paths
+      const cleanBase = (BACKEND_URL || "").replace(/\/api\/?$/, "");
+      const primaryUrl = cleanBase ? `${cleanBase}/api/products` : "/api/products";
+      console.log("Fetching products from backend:", primaryUrl);
 
       let res;
       try {
-        res = await axios.get(`${BACKEND_URL}/api/products`);
+        res = await axios.get(primaryUrl);
       } catch (e1) {
         try {
           res = await axios.get(`${BACKEND_URL}/products`);

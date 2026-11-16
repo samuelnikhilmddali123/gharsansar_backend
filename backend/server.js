@@ -415,7 +415,7 @@ let cachedProductsTimestamp = 0;
 const PRODUCTS_CACHE_TTL = 30000; // 30s cache TTL to avoid heavy re-computation on every page hit
 
 // 1. Get Products (serves rewritten data with backend image URLs, active category discounts & final prices)
-app.get(["/api/products", "/products"], async (req, res) => {
+app.get(["/api/products", "/products", "/api/api/products"], async (req, res) => {
   try {
     if (cachedProductsResponse && (Date.now() - cachedProductsTimestamp < PRODUCTS_CACHE_TTL)) {
       return res.json(cachedProductsResponse);
@@ -3420,7 +3420,7 @@ app.post("/api/flashsale", (req, res) => {
 });
 
 // Dynamic categories endpoint
-app.get("/api/products/categories", (req, res) => {
+app.get(["/api/products/categories", "/api/api/products/categories", "/products/categories"], (req, res) => {
   try {
     const flatProds = getFlattenedProducts(req);
     const categoriesMap = {};
@@ -3462,7 +3462,7 @@ app.get("/api/products/categories", (req, res) => {
 });
 
 // Dynamic paginated products endpoint
-app.get("/api/products/paginated", (req, res) => {
+app.get(["/api/products/paginated", "/api/api/products/paginated", "/products/paginated"], (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -3494,7 +3494,7 @@ app.get("/api/products/paginated", (req, res) => {
 });
 
 // Dynamic search suggestions endpoint
-app.get("/api/products/search", (req, res) => {
+app.get(["/api/products/search", "/api/api/products/search", "/products/search"], (req, res) => {
   try {
     const query = (req.query.q || "").trim().toLowerCase();
     const flatProds = getFlattenedProducts(req);
