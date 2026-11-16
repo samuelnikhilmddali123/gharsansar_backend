@@ -1144,9 +1144,17 @@ app.post(["/api/v1/auth/exchange-code", "/api/auth/exchange-code", "/auth/exchan
 });
 
 // Real-time verification of currently authenticated user session from MongoDB Atlas
-app.get(["/api/v1/auth/me", "/api/auth/me"], authenticate, (req, res) => {
+app.get(["/api/v1/auth/me", "/api/auth/me"], optionalAuth, (req, res) => {
+  if (!req.user) {
+    return res.json({
+      success: false,
+      authenticated: false,
+      user: null
+    });
+  }
   res.json({
     success: true,
+    authenticated: true,
     user: formatUserResponse(req.user)
   });
 });

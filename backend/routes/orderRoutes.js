@@ -15,9 +15,13 @@ const CUSTOMERS_FILE = path.join(__dirname, "..", "customers.json");
  * GET /api/v1/orders
  * Returns orders for the authenticated user (or all orders for admin) directly from MongoDB Atlas.
  */
-router.get("/", authenticate, async (req, res) => {
+router.get("/", optionalAuth, async (req, res) => {
   try {
     const user = req.user;
+    if (!user) {
+      return res.json({ success: true, orders: [], count: 0 });
+    }
+
     const isAdmin =
       (user.role && user.role.toUpperCase() === "ADMIN") ||
       (user.email && (user.email.toLowerCase() === "gharsansarshop@gmail.com" || user.email.toLowerCase() === "gharsansarwebsite@gmail.com"));

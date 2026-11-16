@@ -192,7 +192,7 @@ const Header: React.FC = () => {
     setShowSuggestions(false);
     setIsSearchOpen(false);
     setSearchTerm("");
-    navigate(`/products/${encodeURIComponent(product.id)}`, { state: product });
+    navigate(`/product/${encodeURIComponent(product.id)}`, { state: product });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {

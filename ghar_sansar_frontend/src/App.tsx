@@ -124,6 +124,7 @@ const AppLayout = () => {
           <Route path="/" element={<Home />} />
           <Route path="/products" element={<ProductsPage />} />
           <Route path="/product/:id" element={<ProductDetail />} />
+          <Route path="/products/:id" element={<ProductDetail />} />
           <Route path="/return-gifts" element={<ReturnGifts />} />
           <Route path="/services" element={<Services />} />
           <Route path="/blog" element={<Blog />} />

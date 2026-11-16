@@ -119,6 +119,8 @@ export const OrderProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     } catch (error: any) {
       if (error?.response?.status === 401 || error?.response?.status === 403) {
         setOrders([]);
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
       } else {
         console.warn("Could not fetch user orders:", error?.message);
       }

@@ -41,7 +41,7 @@ import ProductCard from "../components/ProductCard";
 // Quick Product Categories (Top 6 Selected Lines: Sonu, Cello, Milton, Kondapalli Toys, Harshdeep, German Silver)
 const quickProductCategories = [
   {
-    title: "Sonu Cookware",
+    title: "Cookware",
     count: "17+ Triply Items",
     image: "/products/sonu_steel_products/sonu_2_tier_steamer_with_glass_lid_20_cm.webp",
     link: "/products?category=sonu_steel_products",
@@ -1007,7 +1007,7 @@ const Home: React.FC = () => {
             <Package size={18} />
           </div>
           <div className="min-w-0 text-left">
-            <p className="text-xs font-semibold text-gray-900 leading-tight truncate">Sonu Cookware</p>
+            <p className="text-xs font-semibold text-gray-900 leading-tight truncate">Cookware</p>
             <p className="text-[10px] text-gray-500 font-normal leading-tight">Triply Steel</p>
           </div>
         </Link>

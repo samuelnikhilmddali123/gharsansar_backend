@@ -139,6 +139,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setIsAuthenticated(true);
             localStorage.setItem("user", JSON.stringify(res.data.user));
             syncUserShippingPincode(res.data.user);
+          } else {
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            delete axios.defaults.headers.common["Authorization"];
+            setUser(null);
+            setIsAuthenticated(false);
           }
         })
         .catch((err) => {
