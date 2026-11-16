@@ -326,11 +326,7 @@ const Home: React.FC = () => {
 
       highlightLine1: "Available in one place",
 
-      highlight1Class: "text-[#C86B4C] italic font-serif",
-
       highlightLine2: "GHARSANSAR",
-
-      highlight2Class: "text-[#C86B4C] font-semibold tracking-wider text-3xl sm:text-4xl lg:text-5xl uppercase",
 
       description:
 
@@ -848,7 +844,7 @@ const Home: React.FC = () => {
         {/* Content Container */}
         <div className="relative z-10 w-full max-w-[1600px] mx-auto px-5 sm:px-8 lg:px-12 py-6 sm:py-8 lg:py-10 flex flex-col justify-between h-full">
           {/* Main Editorial Text Area */}
-          <div className="my-auto max-w-xl">
+          <div className="my-auto max-w-2xl lg:max-w-3xl">
             {/* Eyebrow */}
             <div className="flex items-center space-x-2.5 mb-3.5">
               <span className="text-[11px] sm:text-xs font-semibold tracking-[0.28em] text-[#C86B4C] uppercase font-sans">
@@ -856,13 +852,13 @@ const Home: React.FC = () => {
               </span>
             </div>
 
-            {/* Editorial Heading: 4 Distinct Lines with Terracotta Accent */}
+            {/* Editorial Heading: Clean Distinct Lines with Terracotta Accent */}
             <motion.h1
               key={`hero-title-${currentSlide}`}
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="font-poppins text-4xl sm:text-5xl md:text-6xl lg:text-[62px] xl:text-[66px] leading-[1.08] font-normal text-white mb-5 tracking-tight"
+              className="font-poppins text-3xl sm:text-4xl md:text-5xl lg:text-[54px] xl:text-[58px] leading-[1.12] font-normal text-white mb-5 tracking-tight"
             >
               {heroSlides[currentSlide].titleLine1}
               {heroSlides[currentSlide].titleLine2 && (
@@ -874,7 +870,7 @@ const Home: React.FC = () => {
               {heroSlides[currentSlide].highlightLine1 && (
                 <>
                   <br />
-                  <span className={heroSlides[currentSlide].highlight1Class || "text-[#C86B4C]"}>
+                  <span className="text-[#C86B4C]">
                     {heroSlides[currentSlide].highlightLine1}
                   </span>
                 </>
@@ -882,7 +878,7 @@ const Home: React.FC = () => {
               {heroSlides[currentSlide].highlightLine2 && (
                 <>
                   <br />
-                  <span className={heroSlides[currentSlide].highlight2Class || "text-[#C86B4C]"}>
+                  <span className="text-[#C86B4C]">
                     {heroSlides[currentSlide].highlightLine2}
                   </span>
                 </>
