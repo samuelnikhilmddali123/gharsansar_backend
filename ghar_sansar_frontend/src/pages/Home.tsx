@@ -320,13 +320,13 @@ const Home: React.FC = () => {
 
       kicker: "TIMELESS ELEGANCE",
 
-      titleLine1: "Crafting Homes",
+      titleLine1: "Everything your home needs",
 
-      titleLine2: "That Truly",
+      titleLine2: "Available in one place",
 
-      highlightLine1: "Feel Like",
+      highlightLine1: "GHARSANSAR",
 
-      highlightLine2: "You",
+      highlightLine2: "",
 
       description:
 
@@ -861,16 +861,28 @@ const Home: React.FC = () => {
               className="font-poppins text-4xl sm:text-5xl md:text-6xl lg:text-[62px] xl:text-[66px] leading-[1.08] font-normal text-white mb-5 tracking-tight"
             >
               {heroSlides[currentSlide].titleLine1}
-              <br />
-              {heroSlides[currentSlide].titleLine2}
-              <br />
-              <span className="text-[#C86B4C]">
-                {heroSlides[currentSlide].highlightLine1}
-              </span>
-              <br />
-              <span className="text-[#C86B4C]">
-                {heroSlides[currentSlide].highlightLine2}
-              </span>
+              {heroSlides[currentSlide].titleLine2 && (
+                <>
+                  <br />
+                  {heroSlides[currentSlide].titleLine2}
+                </>
+              )}
+              {heroSlides[currentSlide].highlightLine1 && (
+                <>
+                  <br />
+                  <span className="text-[#C86B4C]">
+                    {heroSlides[currentSlide].highlightLine1}
+                  </span>
+                </>
+              )}
+              {heroSlides[currentSlide].highlightLine2 && (
+                <>
+                  <br />
+                  <span className="text-[#C86B4C]">
+                    {heroSlides[currentSlide].highlightLine2}
+                  </span>
+                </>
+              )}
             </motion.h1>
 
             {/* Narrative Paragraph */}
