@@ -37,6 +37,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import { useProducts, Product } from "../context/ProductContext";
 import ProductCard from "../components/ProductCard";
+import ValuableClientsMarquee from "../components/ValuableClientsMarquee";
 
 // Quick Product Categories (Top 6 Selected Lines: Sonu, Cello, Milton, Kondapalli Toys, Harshdeep, German Silver)
 const quickProductCategories = [
@@ -1043,6 +1044,11 @@ const Home: React.FC = () => {
         2. DUAL CATEGORY STRIP (Auto-Rotating One-by-One: Products & Interiors)
         ========================================================================= */}
     <CategoryRotatingStrip />
+
+    {/* =========================================================================
+        3. VALUABLE CUSTOMERS & PARTNERS MARQUEE (Right-to-Left Infinite Scroll)
+        ========================================================================= */}
+    <ValuableClientsMarquee />
 
     {/* =========================================================================
         FEATURED PRODUCTS SHOWCASE ("650+ Products for Every Indian Home")

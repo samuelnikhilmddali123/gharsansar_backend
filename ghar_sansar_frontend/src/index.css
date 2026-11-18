@@ -301,3 +301,35 @@ html {
 .related-products-scroll::-webkit-scrollbar-thumb:hover {
   background: #742F19;
 }
+
+/* =========================================================================
+   INFINITE RIGHT-TO-LEFT MARQUEE (GPU-Accelerated 60fps)
+   ========================================================================= */
+@keyframes marquee-rtl {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.animate-marquee-rtl-track1 {
+  display: flex;
+  width: max-content;
+  animation: marquee-rtl 42s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee-rtl-track2 {
+  display: flex;
+  width: max-content;
+  animation: marquee-rtl 48s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee-rtl-track1:hover,
+.animate-marquee-rtl-track2:hover {
+  animation-play-state: paused;
+}
+
